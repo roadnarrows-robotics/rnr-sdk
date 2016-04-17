@@ -1,0 +1,311 @@
+<?xml version="1.0"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+<xs:annotation>
+	<xs:documentation xml:lang="en">
+		  CoMedTec Wound Measurement Suite
+    	XML specification
+    	2011 RoadNarrows LLC
+    </xs:documentation>
+</xs:annotation>
+
+<xs:element name="wm" type="wmtype"/>
+
+
+<xs:complexType name="wmtype">
+  <xs:choice>
+    <!-- wmconf.xml - set WMROOT dir and other environment vars--> 
+    <xs:element name="environment"  type="environmenttype"/>
+
+    <!-- facilitylist.xml - list of facilities + info associated with device -->
+    <xs:element name="facilitylist" type="facilitylisttype"/>
+    
+    <!-- userlist.xml - list of users associated with device -->
+	  <xs:element name="userList" type="userlisttype"/>
+
+    <!-- patientlist.xml - list of patients associated with device -->
+    <xs:element name="patientList" type="patientlisttype"/>
+
+    <!--calib.xml - device specific calibration parameters --> 
+    <xs:element name="calib" type="calibtype"/>
+
+    <!-- active.xml - maintains a history of the 
+                      most recent user-patient records --> 
+		<xs:sequence>
+			<xs:element name="activeUser" type="activeusertype"/>
+			<xs:element name="activeFacility" type="activefacilitytype"/>
+			<xs:element name="activePat" type="activepattype"/>
+      <xs:element name="userHistory" type="userhistorytype"/>
+    </xs:sequence>
+
+    <!-- patid.xml - each patient has one file containing 
+                     all associated wound records         -->
+    <xs:element name="patientrecord" type="patientrecordtype"/>
+
+	</xs:choice>
+</xs:complexType>
+
+
+
+<!-- wmconf.xml --> 
+<xs:complexType name="environmenttype">
+	<xs:sequence>
+		<xs:element name="wmRoot" type="xs:string"/>
+		<xs:element name="userAddUser" type="Flag"/>
+		<xs:element name="userAddPatient" type="Flag"/>
+	</xs:sequence>
+</xs:complexType>
+
+
+
+<!-- facilitylist.xml -->
+<xs:complexType name="facilitylisttype">
+	<xs:sequence>
+		<xs:element name="facility" type="facilitytype" maxOccurs="unbounded"/>
+	</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="facilitytype">
+	<xs:sequence>
+		<xs:element name="name" type="xs:string"/>
+		<xs:element name="address" type="addresstype"/>
+		<xs:element name="phone" type="phonetype"/>
+		<xs:element name="url" type="xs:string"/>
+		<xs:element name="email" type="xs:string"/>
+	</xs:sequence>
+</xs:complexType>
+
+
+
+<!-- userlist.xml -->
+<xs:complexType name="userlisttype">
+	<xs:sequence>
+		<xs:element name="user" type="usertype" maxOccurs="unbounded"/>
+	</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="usertype">
+	<xs:sequence>
+		<xs:element name="name" type="xs:string"/>
+		<xs:element name="position" type="xs:string"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="8"/>
+			<xs:pattern value="[u][n][i][q][I][D][-][0-9]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+
+
+<!-- patientlist.xml --> 
+<xs:complexType name="patientlisttype">
+	<xs:sequence>
+    <xs:element name="patient" type="patientinfotype" 
+                               minOccurs="0" maxOccurs="unbounded"/>
+	</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="patientinfotype">
+	<xs:sequence>
+		<xs:element name="nameLast" type="xs:string"/>
+		<xs:element name="nameFirst" type="xs:string"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="4"/>
+			<xs:pattern value="[p][0-9][0-9][0-9]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+
+
+<!-- p[id].xml - individual patient record --> 
+<xs:complexType name="patientrecordtype">
+	<xs:sequence>
+    <xs:element name="wound" type="woundrecordtype" 
+                             minOccurs="0" maxOccurs="unbounded"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="4"/>
+			<xs:pattern value="[p][0-9][0-9][0-9]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+<xs:complexType name="woundrecordtype">
+	<xs:sequence>
+ 		<xs:element name="description" type="xs:string"/>
+		<xs:element name="measure" type="measuretype" maxOccurs="unbounded"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="3"/>
+			<xs:pattern value="[w][0-9][0-9]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+<xs:complexType name="measuretype">
+	<xs:sequence>
+		<xs:element name="img" type="xs:string"/>
+		<xs:element name="imgmeas" type="xs:string"/>
+		<xs:element name="unit" type="xs:string"/>
+		<xs:element name="bed" type="xs:string"/>
+		<xs:element name="cmmt">
+			<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:maxLength value="256"/>
+			</xs:restriction>
+			</xs:simpleType>
+		</xs:element>
+		<xs:element name="area" type="xs:decimal"/>
+		<xs:element name="length" type="xs:decimal"/>
+		<xs:element name="width" type="xs:decimal"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="3"/>
+			<xs:pattern value="[m][0-9][0-9]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+
+
+<!-- calib.xml --> 
+<xs:complexType name="calibtype">
+	<xs:sequence>
+    <!-- calib.xml supports calibration info for 4 or more lasers --> 
+    <!-- note: choose a better name? -->
+    <xs:element name="quadrant" type="quadranttype" 
+                                minOccurs="4" maxOccurs="unbounded"/>
+		<xs:element name="focalLength" type="xs:decimal"/>
+	</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="quadranttype">
+	<xs:sequence>
+		<xs:element name="Ax" type="xs:decimal"/>
+		<xs:element name="Ay" type="xs:decimal"/>
+		<xs:element name="Bx" type="xs:decimal"/>
+		<xs:element name="By" type="xs:decimal"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+			<xs:restriction base="xs:integer">
+				<xs:pattern value="[0-9]"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType> 
+
+
+		
+<!-- active.xml - user-patient history -->
+<xs:complexType name="activeusertype">
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="9"/>
+			<xs:pattern value=".*[0-9][0-9]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+<xs:complexType name="activepattype">
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="4"/>
+			<xs:pattern value="[p][0-9][0-9][0-9]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+<xs:complexType name="activefactype">
+	<xs:attribute name="id" use="required">
+		<xs:simpleType>
+		<xs:restriction base="xs:string">
+			<xs:length value="4"/>
+			<xs:pattern value="[a-z][a-z][a-z]"/>
+		</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+<xs:complextype name="userhistorytype">
+	<xs:sequence>
+		<xs:element name="patientHistory" type="patienthistorytype"/>
+	</xs:sequence>
+</xs:complextype>
+
+<xs:complextype name="patienthistorytype">
+	<xs:sequence>
+		<xs:element name="facility" type="facilitytype"/>
+		<xs:element name="unit" type="xs:string"/>
+		<xs:element name="bed" type="xs:string"/>
+	</xs:sequence>
+</xs:complextype>
+
+
+
+<!-- subtypes used above -->
+<xs:complexType name="addresstype">
+	<xs:sequence>
+		<xs:element name="street" type="xs:string"/>
+		<xs:element name="city" type="xs:string"/>
+		<xs:element name="region" type="regiontype"/>
+		<xs:element name="postalCode" type="postalcodetype"/>
+	</xs:sequence>
+</xs:complexType>
+
+<xs:simpleType name="regiontype">
+	<xs:restriction base="xs:string">
+		<xs:length value="2"/>
+		<xs:pattern value="[A-Z][A-Z]"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="postalcodetype">
+	<xs:restriction base="xs:string">
+		<xs:length value="5"/>
+		<xs:pattern value="[0-9][0-9][0-9][0-9][0-9]"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="phonetype">
+	<xs:restriction base="xs:string">
+		<xs:length value="10"/>
+		<xs:pattern value="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="Flag">
+	<xs:attribute name="state" use="required">
+		<xs:simpleType>
+			<xs:restriction base="xs:string">
+				<xs:enumeration value="enabled"/>
+				<xs:enumeration value="disabled"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:attribute>
+</xs:complexType>
+
+</xs:schema>

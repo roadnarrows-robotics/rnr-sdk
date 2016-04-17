@@ -1,0 +1,29 @@
+/*
+ *  File: cogniboost.css
+ *
+ *  RoadNarrows LLC: CogniBoost xml style sheet
+ *  (C) 2011
+ *
+ */
+
+cb
+{
+  background-color:#ffffff;
+  display: block;
+}
+
+cb:after
+{
+  content: "(C) 2011. RoadNarrows LLC";
+  position: relative;
+  top: 50px;
+  padding: 10px, 10px, 0px, 10px;
+  font-size: 80%;
+}
+
+cb:before
+{
+  content: "CogniBoost"
+  font-size: 100px;
+}
+

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CogniBoost
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://www.roadnarrows.com/xml/CogniBoost/1.0/CogniBoost.xsd"
+  href="http://www.roadnarrows.com/xml/CogniBoost/1.0/CogniBoost.css">
+
+  <!-- Identification -->
+  <identification>
+    <mfgName>RoadNarrows LLC</mfgName>
+    <prodName>CogniBoost</prodName>
+    <hwVer>1.0.0</hwVer>
+    <fwApp>RNCogniBoostStd</fwApp>
+    <fwVer>1.0.0</fwVer>
+    <libCogniBoostVer>1.0.1</libCogniBoostVer>
+  </identification>
+
+  <!-- Operational Parameters -->
+  <opParams>
+    <baudRate>1000000</baudRate>
+    <autoRestore>true</autoRestore>
+    <autoSleep>30</autoSleep>
+    <ledBling id="cm" msecPeriod="200" msecDwell="20"
+                      rgb1="0xff8800"  rgb2="0x00ff88" />
+  </opParams>
+
+  <!-- CogniMem Global Parameters -->
+  <cmParams>
+    <classifier>RBF</classifier>
+    <context>1</context>
+    <norm>Lsup</norm>
+    <minif>2</minif>
+    <maxif>16384</maxif>
+    <maxClassified>4</maxClassified>
+  </cmParams>
+
+  <!-- CogniMem Neural Netwaork Training Set -->
+  <nnTrainingSet>
+    <label>Cat Traning Set 1 - Feb 9 2012</label>
+    <nn id="n">
+      <context>1</context>
+      <norm>L1</norm>
+      <aif>8034</aif>
+      <category>1</category>
+      <pattern>
+        0xff 0xff 3 205 0x0c ...
+      </pattern>
+    </nn>
+    ...
+  </nnTrainingSet>
+</CogniBoost>

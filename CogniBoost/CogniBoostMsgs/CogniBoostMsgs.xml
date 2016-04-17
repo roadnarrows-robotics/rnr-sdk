@@ -1,0 +1,513 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE netmsgs PUBLIC "-//www.roadnarrows.com//DTD NETMSGS 1.0//EN"
+          "http://www.roadnarrows.com/xml/netmsgs/1.0/netmsgs.dtd">
+
+<!--
+ - Package: CogniBoost
+ - Module:  CogniBoost
+ - File:    CogniBoostMsgs.xml
+ -
+
+/*!
+ \file
+
+  $LastChangedDate: 2011-10-19 15:05:47 -0600 (Wed, 19 Oct 2011) $
+  $Rev: 1398 $
+
+  \brief CogniBoost device messages.
+  
+  \author Robin Knight   (robin.knight@roadnarrows.com)
+  \author Daniel Packard (daniel@roadnarrows.com)
+  \author Brent Wilkins  (brent@roadnarrows.com)
+  
+  
+  \par Copyright:
+  (C) 2011.  RoadNarrows LLC.
+  (http://www.roadnarrows.com)
+  \n All Rights Reserved
+*/
+
+ - Permission is hereby granted, without written agreement and without
+ - license or royalty fees, to use, copy, modify, and distribute this
+ - software and its documentation for any purpose, provided that
+ - (1) The above copyright notice and the following two paragraphs
+ - appear in all copies of the source code and (2) redistributions
+ - including binaries reproduces these notices in the supporting
+ - documentation.   Substantial modifications to this software may be
+ - copyrighted by their authors and need not follow the licensing terms
+ - described here, provided that the new terms are clearly indicated in
+ - all files where they apply.
+ -
+ - IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ - OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ - PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ - DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ - EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ - THE POSSIBILITY OF SUCH DAMAGE.
+ -
+ - THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ - INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ - FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ - "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ - PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ -
+-->
+
+<netmsgs encoding="itv" endian="big">
+
+  <!-- ........................................................................
+    - Meta Data to Tweak Source Generation
+    ....................................................................... -->
+  <meta>
+    <brief>
+CogniBoost host client - CogniBoost device server message set.
+    </brief>
+    <ns>cb</ns>
+    <prologue lang="h">
+#include "CogniBoost/CogniMem.h"
+#include "CogniBoost/CogniBoost.h"
+    </prologue>
+    <epilogue lang="h"></epilogue>
+    <prologue lang="c"></prologue>
+    <epilogue lang="c"></epilogue>
+    <prologue lang="python">
+    </prologue>
+    <epilogue lang="python"></epilogue>
+  </meta>
+
+
+  <!-- ........................................................................
+    - Extended Field Types
+    ....................................................................... -->
+  <field_types>
+
+    <ftypedef ftid="LedBlingParams" ftype="struct" >
+      <fielddef fname="id"          ftype="u8"
+                                    min="CB_PARAM_LED_BLING_ID_MIN"
+                                    max="CB_PARAM_LED_BLING_ID_MAX" />
+      <fielddef fname="msecPeriod"  ftype="u16" />
+      <fielddef fname="msecDwell"   ftype="u16" />
+      <fielddef fname="rgb1"        ftype="u32"
+                                    min="0x000000"
+                                    max="0x00ffffff" />
+      <fielddef fname="rgb2"        ftype="u32"
+                                    min="0x000000"
+                                    max="0x00ffffff" />
+    </ftypedef>
+
+    <ftypedef ftid="CogniBoostParams"   ftype="struct" >
+      <fielddef fname="opBaudRate"      ftype="u32"
+                                        min="CB_PARAM_BAUD_RATE_115200"
+                                        max="CB_PARAM_BAUD_RATE_4000000" />
+      <fielddef fname="opAutoRestore"   ftype="bool" />
+      <fielddef fname="opAutoSleep"     ftype="u16"
+                                        min="CB_PARAM_AUTO_SLEEP_SEC_MIN"
+                                        max="CB_PARAM_AUTO_SLEEP_SEC_MAX" />
+      <fielddef fname="opLedBling"      ftype="LedBlingParams" />
+      <fielddef fname="cmClassifier"    ftype="u8" />
+      <fielddef fname="cmContext"       ftype="u8"
+                                        min="CM_CONTEXT_MIN"
+                                        max="CM_CONTEXT_MAX" />
+      <fielddef fname="cmNorm"          ftype="u8" />
+      <fielddef fname="cmMinif"         ftype="u16" />
+      <fielddef fname="cmMaxif"         ftype="u16" />
+      <fielddef fname="cmMaxClassified" ftype="u16"
+                                        min="CB_PARAM_MAX_CLASSIFIED_MIN"
+                                        max="CB_PARAM_MAX_CLASSIFIED_MAX" />
+      <fielddef fname="nnLabel"         ftype="string"
+                                        size="CB_PARAM_NN_LABEL_LEN_MAX" />
+    </ftypedef>
+
+    <ftypedef ftid="Neuron" ftype="struct" >
+      <fielddef fname="neuronId"  ftype="u16"
+                                  min="CM_NID_MIN"
+                                  max="CM_NID_MAX_1_CM" />
+      <fielddef fname="context"   ftype="u8"
+                                  min="CM_CONTEXT_MIN"
+                                  max="CM_CONTEXT_MAX" />
+      <fielddef fname="norm"      ftype="u8" />
+      <fielddef fname="aif"       ftype="u16" />
+      <fielddef fname="category"  ftype="u16"
+                                  min="CM_CAT_MIN"
+                                  max="CM_CAT_MAX" />
+      <fielddef fname="pattern"   ftype="u8[]" size="CM_PATTERN_COMP_NUMOF" />
+    </ftypedef>
+
+    <ftypedef ftid="Classification" ftype="struct" >
+      <fielddef fname="category"  ftype="u16" />LCOMP
+      <fielddef fname="dist"      ftype="u16" />
+      <fielddef fname="nid"       ftype="u16" />
+    </ftypedef>
+
+  </field_types>
+
+
+  <!-- ........................................................................
+    - Message Definitions
+    ....................................................................... -->
+  <msg_types>
+
+    <!-- :::::::: Common Responses :::::::: -->
+
+    <!-- Common Ok Response -->
+    <msgdef msgid="RspOk" />
+  
+    <!-- Common Error Response -->
+    <msgdef msgid="RspErr">
+      <fielddef fname="ecode" ftype="u8" />
+      <fielddef fname="emsg"  ftype="string" />
+    </msgdef>
+  
+LCOMP
+    <!-- ::::::::
+         Identification, Test, and Control
+         ::::::: -->
+
+    <!-- Version Request -->
+    <msgdef msgid="ReqVersion" />
+  
+    <!-- Version Response -->
+    <msgdef msgid="RspVersion">
+      <fielddef fname="mfgName"   ftype="string" size="CB_ID_STR_LEN_MAX" />
+      <fielddef fname="prodName"  ftype="string" size="CB_ID_STR_LEN_MAX" />
+      <fielddef fname="hwSN"      ftype="string" size="CB_ID_STR_LEN_MAX" />
+      <fielddef fname="hwVer"     ftype="string" size="CB_ID_STR_LEN_MAX" />
+      <fielddef fname="fwApp"     ftype="string" size="CB_ID_STR_LEN_MAX" />
+      <fielddef fname="fwVer"     ftype="string" size="CB_ID_STR_LEN_MAX" />
+      <fielddef fname="fwDate"    ftype="string" size="CB_ID_STR_LEN_MAX" />
+    </msgdef>
+
+    <!-- Ping Request (Ok Response) -->
+    <msgdef msgid="ReqPing" />
+  
+    <!-- Loopback Request -->
+    <msgdef msgid="ReqLoopback">
+      <fielddef fname="cdata" ftype="u8[]" />
+    </msgdef>
+  
+    <!-- Loopback Response -->
+    <msgdef msgid="RspLoopback">
+      <fielddef fname="cdata" ftype="u8[]" />
+    </msgdef>
+  
+    <!-- Soft Reboot Request (Ok Response) -->
+    <msgdef msgid="ReqReboot">
+      <fielddef fname="bootloader" ftype="bool" />
+    </msgdef>
+  
+    <!--  Sleep Request (Ok Response) -->
+    <msgdef msgid="ReqSleep" />
+  
+    <!--  Wake Up Request (Ok Response) -->
+    <msgdef msgid="ReqWakeUp" />
+  
+
+    <!-- ::::::::
+         Get and Set Working Memory Operational Parameters
+         :::::::: -->
+
+    <!-- Set Serial USB Baud Rate Parameter Request (Ok Response) -->
+    <msgdef msgid="ReqSetOpParamBaudRate">
+      <fielddef fname="baudrate" ftype="u32"
+                                 min="CB_PARAM_BAUD_RATE_115200"
+                                 max="CB_PARAM_BAUD_RATE_4000000" />
+    </msgdef>
+
+    <!-- Get Serial USB Baud Rate Parameter Request -->
+    <msgdef msgid="ReqGetOpParamBaudRate" />
+
+    <!-- Get Serial USB Baud Rate Parameter Response -->
+    <msgdef msgid="RspGetOpParamBaudRate">
+      <fielddef fname="baudrate" ftype="u32" />
+    </msgdef>
+
+    <!-- Set Auto-Restore on Boot Parameter Request (Ok Response) -->
+    <msgdef msgid="ReqSetOpParamAutoRestore">
+      <fielddef fname="enable" ftype="bool" />
+    </msgdef>
+
+    <!-- Get Auto-Restore on Boot Parameter Request -->
+    <msgdef msgid="ReqGetOpParamAutoRestore" />
+
+    <!-- Get Auto-Restore on Boot Parameter Response -->
+    <msgdef msgid="RspGetOpParamAutoRestore">
+      <fielddef fname="enable" ftype="bool" />
+    </msgdef>
+
+    <!-- Set Auto-Sleep Parameter Request (Ok Response) -->
+    <msgdef msgid="ReqSetOpParamAutoSleep">
+      <fielddef fname="sec" ftype="u16"
+                            min="CB_PARAM_AUTO_SLEEP_SEC_MIN"
+                            max="CB_PARAM_AUTO_SLEEP_SEC_MAX" />
+    </msgdef>
+
+    <!-- Get Auto-Sleep Parameter Request -->
+    <msgdef msgid="ReqGetOpParamAutoSleep" />
+
+    <!-- Get Auto-Sleep Parameter Response -->
+    <msgdef msgid="RspGetOpParamAutoSleep">
+      <fielddef fname="sec" ftype="u16" />
+    </msgdef>
+  
+    <!-- Set LED Bling Parameters Request (Ok Response) -->
+    <msgdef msgid="ReqSetOpParamLedBling">
+      <fielddef fname="params" ftype="LedBlingParams" />
+    </msgdef>
+
+    <!-- Get LED Bling Parameters Request -->
+    <msgdef msgid="ReqGetOpParamLedBling" />
+
+    <!-- Get LED Bling Parameters Response -->
+    <msgdef msgid="RspGetOpParamLedBling">
+      <fielddef fname="params" ftype="LedBlingParams" />
+    </msgdef>LCOMP
+
+
+    <!-- ::::::::
+         Get and Set Working Memory CogniMem Global Parameters
+         :::::::: -->
+
+    <!-- Set CogniMem Classifier Parameter Request (Ok Response) -->
+    <msgdef msgid="ReqSetCMParamClassifier">
+      <fielddef fname="classifier" ftype="u8" />
+    </msgdef>
+
+    <!-- Get CogniMem Classifier Parameter Request -->
+    <msgdef msgid="ReqGetCMParamClassifier" />
+
+    <!-- Get CogniMem Classifier Parameter Response -->
+    <msgdef msgid="RspGetCMParamClassifier">
+      <fielddef fname="classifier" ftype="u8" />
+    </msgdef>
+  
+    <!-- Set CogniMem Context Parameter Request (Ok Response) -->
+    <msgdef msgid="ReqSetCMParamContext">
+      <fielddef fname="context" ftype="u8"
+                                min="CM_CONTEXT_MIN"
+                                max="CM_CONTEXT_MAX" />
+    </msgdef>
+
+    <!-- Get CogniMem Context Parameter Request -->
+    <msgdef msgid="ReqGetCMParamContext" />
+
+    <!-- Get CogniMem Context Parameter Response -->
+    <msgdef msgid="RspGetCMParamContext">
+      <fielddef fname="context" ftype="u8" />
+    </msgdef>
+  
+    <!-- Set CogniMem Norm Parameter Request (Ok Response) -->
+    <msgdef msgid="ReqSetCMParamNorm">
+      <fielddef fname="norm" ftype="u8" />
+    </msgdef>
+
+    <!-- Get CogniMem Norm Parameter Request -->
+    <msgdef msgid="ReqGetCMParamNorm" />LCOMP
+
+    <!-- Get CogniMem Norm Parameter Response -->
+    <msgdef msgid="RspGetCMParamNorm">
+      <fielddef fname="norm" ftype="u8" />
+    </msgdef>
+  
+    <!-- Set CogniMem Minimum Influence Field Parameter Request (Ok Response)-->
+    <msgdef msgid="ReqSetCMParamMinIF">
+      <fielddef fname="minif" ftype="u16" />
+    </msgdef>
+
+    <!-- Get CogniMem Minimum Influence Field Parameter Request -->
+    <msgdef msgid="ReqGetCMParamMinIF" />
+
+    <!-- Get CogniMem Minimum Influence Field Parameter Response -->
+    <msgdef msgid="RspGetCMParamMinIF">
+      <fielddef fname="minif" ftype="u16" />
+    </msgdef>
+  
+    <!-- Set CogniMem Maximum Influence Field Parameter Request (Ok Response)-->
+    <msgdef msgid="ReqSetCMParamMaxIF">
+      <fielddef fname="maxif" ftype="u16" />
+    </msgdef>
+
+    <!-- Get CogniMem Maximum Influence Field Parameter Request -->
+    <msgdef msgid="ReqGetCMParamMaxIF" />
+
+    <!-- Get CogniMem Maximum Influence Field Parameter Response -->
+    <msgdef msgid="RspGetCMParamMaxIF">
+      <fielddef fname="maxif" ftype="u16" />
+    </msgdef>
+  
+    <!-- Set CogniMem Maximum Classified Parameter Request (Ok Response)-->
+    <msgdef msgid="ReqSetCMParamMaxClassified">
+      <fielddef fname="max" ftype="u8"
+                            min="CB_PARAM_MAX_CLASSIFIED_MIN"
+                            max="CB_PARAM_MAX_CLASSIFIED_MAX" />
+    </msgdef>
+
+    <!-- Get CogniMem Maximum Classified Parameter Request -->
+    <msgdef msgid="ReqGetCMParamMaxClassified" />
+
+    <!-- Get CogniMem Maximum Classified Parameter Response -->
+    <msgdef msgid="RspGetCMParamMaxClassified">
+      <fielddef fname="max" ftype="u8" />
+    </msgdef>
+  
+
+    <!-- ::::::::
+         Get and Set Working Memory Neural Network Auxiliary Parameters
+         :::::::: -->
+  
+    <!-- Set Neural Network Training Set Label Parameter Request (Ok Rsp) -->
+    <msgdef msgid="ReqSetNNParamLabel">
+      <fielddef fname="label" ftype="string" size="CB_PARAM_NN_LABEL_LEN_MAX" />
+    </msgdef>
+
+    <!-- Get Neural Network Training Set Label Parameter Request -->
+    <msgdef msgid="ReqGetNNParamLabel" />
+
+    <!-- Get Neural Network Training Set Label Parameter Response -->
+    <msgdef msgid="RspGetNNParamLabel">
+      <fielddef fname="label" ftype="string" size="CB_PARAM_NN_LABEL_LEN_MAX" />
+    </msgdef>
+
+
+    <!-- ::::::::
+         Non-Volatile Memory Operations
+         :::::::: -->
+
+    <!-- Reset Non-Volatile Memory Data to Factory Defaults Request (Ok Rsp) -->
+    <msgdef msgid="ReqNVMemReset" />
+
+    <!-- Save Working Hardware Data to Non-Volatile Memory Request (Ok Rsp) -->
+    <msgdef msgid="ReqNVMemSave" />
+
+    <!-- Restore Working Hardware Data from NV Memory Request (Ok Response) -->
+    <msgdef msgid="ReqNVMemRestore" />
+
+    <!-- Get NV Memory Neural Network Count Parameter Request -->
+    <msgdef msgid="ReqNVMemGetNNCount" />
+
+    <!-- Get Neural Network Training Set Label Parameter Response -->
+    <msgdef msgid="RspNVMemGetNNCount">
+      <fielddef fname="count" ftype="u16" />
+    </msgdef>
+  
+
+    <!-- ::::::::
+         CogniBoost CogniMem Neural Net Operation (Raison D'Etre)
+         :::::::: -->
+
+    <!-- Train CogniMem Neural Network on Pattern Request -->
+    <msgdef msgid="ReqNNTrain">
+      <fielddef fname="category"  ftype="u16"
+                                  min="CM_CAT_MIN"
+                                  max="CM_CAT_MAX" />
+      <fielddef fname="pattern"   ftype="u8[]" size="CM_PATTERN_COMP_NUMOF" />
+    </msgdef>
+
+    <!-- Train CogniMem Neural Network on Pattern Response -->
+    <msgdef msgid="RspNNTrain">
+      <fielddef fname="neuronId" ftype="u16" />
+    </msgdef>
+
+    <!-- Catergorize Presented Pattern to CogniMem Request -->
+    <msgdef msgid="ReqNNCatergorize">
+      <fielddef fname="pattern" ftype="u8[]" size="CM_PATTERN_COMP_NUMOF" />
+    </msgdef>
+
+    <!-- Catergorize Presented Pattern to CogniMem Response -->
+    <msgdef msgid="RspNNCatergorize">
+      <fielddef fname="classified"  ftype="Classification[]"
+                                    size="CB_PARAM_MAX_CLASSIFIED_MAX" />
+    </msgdef>
+
+    <!-- Forget All CogniMem Trained Neurons Request (Ok Response) -->
+    <msgdef msgid="ReqNNForget" />
+
+    <!-- Get CogniMem Trained Neurons Count Request -->
+    <msgdef msgid="ReqNNGetCount" />
+
+    <!-- Get CogniMem Trained Neurons Count Response -->
+    <msgdef msgid="RspNNGetCount">
+      <fielddef fname="count" ftype="u16" />
+    </msgdef>
+
+
+    <!-- ::::::::
+         Low-Level CogniMem Register Access (Big Boys Only)
+         :::::::: -->
+
+    <!-- Read CogniMem Register Request -->
+    <msgdef msgid="ReqCMReadReg">
+      <fielddef fname="addr" ftype="u8" />
+    </msgdef>
+
+    <!-- Read CogniMem Register Response -->
+    <msgdef msgid="RspCMReadReg">
+      <fielddef fname="addr"    ftype="u8" />
+      <fielddef fname="value"   ftype="u16" />
+    </msgdef>
+
+    <!-- Write CogniMem Register Request (Ok Response) -->
+    <msgdef msgid="ReqCMWriteReg">
+      <fielddef fname="addr"    ftype="u8" />
+      <fielddef fname="value"   ftype="u16" />
+    </msgdef>
+  
+
+    <!-- ::::::::
+         Bulk Download and Upload of Parameters and NN Set
+         :::::::: -->
+  
+    <!-- Upload Parameters to CogniBoost Request (Ok Response) -->
+    <msgdef msgid="ReqUploadParams">
+      <fielddef fname="dst" ftype="u8" />
+      <fielddef fname="params" ftype="CogniBoostParams" />
+    </msgdef>
+
+    <!-- Download Parameters to Host Request -->
+    <msgdef msgid="ReqDownloadParams">
+      <fielddef fname="src" ftype="u8" />
+    </msgdef>
+
+    <!-- Download Parameters to Host Response -->
+    <msgdef msgid="RspDownloadParams">
+      <fielddef fname="params" ftype="CogniBoostParams" />
+    </msgdef>
+
+    <!-- Upload Neural Network Training Set to CB Start Request (Ok Rsp) -->
+    <msgdef msgid="ReqUploadNNSetStart">
+      <fielddef fname="dst"         ftype="u8" />
+      <fielddef fname="numNeurons"  ftype="u16" />
+      <fielddef fname="neuron"      ftype="Neuron" />
+    </msgdef>
+
+    <!-- Upload Neural Network Training Set Next Request (Ok Response) -->
+    <msgdef msgid="ReqUploadNNSetNext">
+      <fielddef fname="neuron"  ftype="Neuron" />
+    </msgdef>
+
+    <!-- Download Neural Network Training Set to Host Start Request -->
+    <msgdef msgid="ReqDownloadNNSetStart">
+      <fielddef fname="src" ftype="u8" />
+    </msgdef>
+
+    <!-- Download Neural Network Training Set to Host Start Response -->
+    <msgdef msgid="RspDownloadNNSetStart">
+      <fielddef fname="numNeurons"  ftype="u16" />
+      <fielddef fname="neuron"      ftype="Neuron" />
+    </msgdef>
+
+    <!-- Download Neural Network Training Set to Host Next Request -->
+    <msgdef msgid="ReqDownloadNNSetNext" />
+
+    <!-- Download Neural Network Training Set to Host Next Response -->
+    <msgdef msgid="RspDownloadNNSetNext">
+      <fielddef fname="neuron"  ftype="Neuron" />
+    </msgdef>
+
+    <!-- Download/Upload NNetwork Training Set Stop Request (Ok Response) -->
+    <msgdef msgid="ReqXferNNSetStop">
+      <fielddef fname="abort" ftype="bool" />
+    </msgdef>
+
+  </msg_types>
+
+</netmsgs>
