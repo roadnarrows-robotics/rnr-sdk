@@ -1,0 +1,56 @@
+////////////////////////////////////////////////////////////////////////////////
+// Package:   BotSense
+//
+// File:      gModSdkMod.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the SDK for
+//  server module plugins and client libraries.
+//
+//////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+\defgroup bssdkmod Application-Specific PlugIn SDK
+
+\section bssdkmod_intro Intro
+The Software Development Kit for writing bsProxy protocol interface plugin
+modules and the associated client library are described in the:
+<div style="padding-left:25px;">
+<b><em>"BotSense User-AddOn Proxied Device Software Developer's Guide"</em></b>.
+</div>
+\note The Guide is TBW (To Be Written).
+
+\section bssdkmod_plugin Server PlugIn Module
+The server side plugin is a dynamic link library that provides a set of
+function entry points with fixed symbol names. The bsProxy server attaches
+to the addresses of these symbols to interface with the module.
+
+The plugin supplies functions to:
+\li initialize/exit
+\li open/close
+\li service request
+\li trace
+\li provide module info
+
+See \ref bsProxyModIF.h for more details.
+
+\section bssdkMod_lib Client Library
+Associated with the server plugin is typically a client library that interfaces
+to the supporting libbotsense library. The functional interface is determined
+by the application developer. However, usually for each device-specific 
+request/response message exchange, the is a functional interface to hide the
+messaging transaction details.
+
+The proxied open and close functions are server-terminated requests. The
+application library may wrap this functions to provide a more natural 
+interface to the specific device. 
+
+See \ref libBotSense.h for more details on the libbotsense interface.
+
+See \ref bsmod for example implementations.
+ * \{
+ */
+
+/*! \} */

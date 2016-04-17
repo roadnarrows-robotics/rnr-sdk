@@ -1,0 +1,19 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   BotSense
+//
+// File:      bModBotSense.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate BotSense definitions.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! \defgroup botsense_h Top-Level Defines
+ *
+ * The \h_botsense top-level unifying defines and type declarations.
+ *
+ * See BotSense.h
+ */

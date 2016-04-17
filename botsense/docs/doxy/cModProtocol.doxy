@@ -1,0 +1,270 @@
+////////////////////////////////////////////////////////////////////////////////
+// Package:   BotSense
+//
+// File:      cModProtocol.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the BotSense IP
+//  Proxy Client - Server messaging protocol.
+//
+//////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+\defgroup bsprotocol BotSense Protocol
+
+\section bsprot_intro Intro
+The transport mechanism of all messages flowing between the bsProxy server and
+the server's registered clients is TCP/IP.
+A client establishes communication with the server by making a connection
+request to the listening TCP port of the server (default port: <b>9195</b>).
+If the server has client space, the connection is accepted and the 
+communication is established.
+
+Closing of the client's port automatically unregisters the client from the 
+server.
+
+There are two classes of messages:
+\li built-in server-terminated messages
+\li proxied device-terminated specific messages
+
+Two different Message Exhange Patterns are supported:
+\li client request - server response
+\li server to client device-specific out-flow streaming
+
+\section bsprot_framework Message Structure
+\htmlonly
+<div style="float:left; border:0; padding:0px 10px 0px 5px;">
+\endhtmlonly
+\image html bsProxyMsg.png
+\htmlonly
+</div>
+\endhtmlonly
+All requests and response messages contain an 8-byte header plus an optional
+message body. For server-terminated request/response messages, the RoadNarrows
+NetMsgs 8-bit Identifier-Type-Value field encoding format is used for all
+message bodies. All fields are big-endian.
+See the <b>NetMsgs Package</b> for more details.
+For device-terminated specific requests and responses, the message body is
+transparent to the server and, so, can be of any format defined by the
+application.  However it is recommended that the application developer
+use the NetMsgs package for ease
+of building message code and for better run-time diagnostics
+and message tracing that is built into bsProxy.
+
+\subsection bsprot_fw_hdr Message Header
+The 8-byte header (\ref BSPROXY_MSG_HDR_LEN) contains 5 fields read by the
+server to determine how to dispatch and process the request.
+The header is formatted using the NetMsgs
+flat encoding with big-endian byte order of all values.
+Table 1 summarizes the header fields.
+
+<div style="margin-left:24px; margin-right:24px;">
+<table style="border-width:1px; border-spacing:1px; border-style:solid; border-color:#990000;">
+<tr>
+  <td><b>Field</b></td>
+  <td style="padding-right:10px;"><b>Size</b></td>
+  <td><b>Description</b></td>
+</tr>
+<tr>
+  <td>m_hdrMagic</td><td>2</td>
+  <td style="padding-bottom:5px;">
+  The start-of-message magic number \ref BSPROXY_MSG_MAGIC.
+  The magic number is required to start all messages. It may be used to 
+  resynchornize a message stream, i.e. anti-aliasing.
+  </td>
+</tr>
+<tr>
+  <td>m_hdrTid</td><td>1</td>
+  <td style="padding-bottom:5px;">
+  The request/response transaction id (tid). The client generates the tid for a
+  request and the server copies the tid to the response header. The \h_botsense
+  library libbotsense will automatically generate and match Tid's in a
+  request-response sequence. See \ref bs_tid.
+  </td>
+ </tr>
+<tr>
+  <td>m_hdrVConn</td><td>1</td>
+  <td style="padding-bottom:5px;">
+  The virtual connection handle. The value \ref BSPROXY_VCONN_SERVER is
+  reserved for server-terminated requests. All other values are for 
+  device-terminated specific requests and responses. See \ref bs_vconn_handle.
+  </td>
+</tr>
+<tr>
+  <td>m_hdrMsgId</td><td>2</td>
+  <td style="padding-bottom:5px;">
+  The message identifier uniquely identifies the request and response messages
+  within a virtual connection context. See \ref bs_msgid.
+  For server-terminated message ids
+  see the \ref bsProxyMsgs.h <b>NetMsgs</b> generated file.
+  </td>
+</tr>
+<tr>
+  <td style="padding-right:8px;">m_hdrBodyLen</td><td>2</td>
+  <td style="padding-bottom:5px;">
+  The length of the message body in bytes immediately following the header
+  in the IP packet. If there is no message body, then this value should be set
+  to 0 (zero).
+  </td>
+</tr>
+<tr>
+  <td colspan="3" style="{text-align:center; font-weight:bold; border:none 1px}">
+    Table 1: \h_botsense Message Header Format
+  </td>
+</tr>
+</table>
+</div>
+
+\section bsprot_msg Server-Terminated Messages
+The set of request and response server-terminated messages are described below.
+Server-terminated messages provide the base set of services to manage
+proxied devices. Per each request message, libbotsense provids a functional
+interface. See the \ref man_libbotsense_svr "libotsense Man Pages" for the full
+list of libbotsense functions.
+See \ref bsprot_xml for the server-terminated message specification.
+
+For any request that fails, the bsProxy server will send a generic error
+response message (\ref bsprot_msg_err). The library libbotsense will
+automatically interpret server error messages, logging the error, and
+returning the appropriate error code to the calling client function.
+
+\subsection bsprot_msg_ver Get Version Messages
+Get the version string of the bsProxy server.
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqGetVersion \endterm
+\term Request Body: \termdata None \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspGetVersion \endterm
+\term Response Body: \termdata \ref BsProxyRspGetVersion_T \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqGetVersion () \endterm
+\endtermblock
+
+\subsection bsprot_msg_loop Loopback Messages
+Loopback character data sent by the client and loopbacked by the servier.
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqLoopback \endterm
+\term Request Body: \termdata \ref BsProxyReqLoopback_T \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspLoopback \endterm
+\term Response Body: \termdata \ref BsProxyRspLoopback_T \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqLoopback () \endterm
+\endtermblock
+
+\subsection bsprot_msg_log Set Diagnostic Logging Messages
+Set the level of diagnostic logging performed by the server. The new level
+will override the current value set either during server startup or by servicing
+a previous 'set logging' request message. The diagnostic logging level has
+global server impact in that it effects the logging of the server and
+all virtual connection.
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqSetLogging \endterm
+\term Request Body: \termdata \ref BsProxyReqSetLogging_T \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspOk \endterm
+\term Response Body: \termdata None \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqSetLogging () \endterm
+\endtermblock
+
+\subsection bsprot_msg_trace Message Tracing Enable/Disable Messages
+Enable/disable tracing of message packing/unpacking. The tracing only effects
+the specified virtual connection. Both the bsProxy server and the libbotsense
+library will print the tracing to stderr.
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqMsgTrace \endterm
+\term Request Body: \termdata \ref BsProxyReqMsgTrace_T \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspOk \endterm
+\term Response Body: \termdata None \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqMsgTrace () \endterm
+\endtermblock
+
+\subsection bsprot_msg_open Open a Proxied Device Messages
+Open a proxied device. The client specifies the proxied device, the interface
+protocol module, and any optional device-specific open parameters in a
+packed format. The server will return a new virtual connection handle.
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqDevOpen \endterm
+\term Request Body: \termdata \ref BsProxyReqDevOpen_T \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspOk \endterm
+\term Request Body: \termdata \ref BsProxyRspDevOpen_T \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqOpenDev () \endterm
+\endtermblock
+
+\subsection bsprot_msg_close Close a Proxied Device Messages
+Close a proxied device. The virtual connection handle is no longer valid
+after the request is serviced.
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqDevClose \endterm
+\term Request Body: \termdata \ref BsProxyReqDevClose_T \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspOk \endterm
+\term Response Body: \termdata None \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqCloseDev () \endterm
+\endtermblock
+
+\subsection bsprot_msg_vclist Get the List of Virtual Connections Messages
+Get the server's list of virtual connection handles for this client. 
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqGetVConnList \endterm
+\term Request Body: \termdata None \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspOk \endterm
+\term Response Body: \termdata \ref BsProxyRspGetVConnList_T \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqGetVConnList () \endterm
+\endtermblock
+
+\subsection bsprot_msg_log Get Virtual Connection Information Messages
+Get the server's information on the given virtual connection.
+The client specifies the virtual connection handle. The response message
+contains the details.
+\termblock
+\term Request MsgId: \termdata \ref BsProxyMsgIdReqGetVConnInfo \endterm
+\term Request Body: \termdata \ref BsProxyReqGetVConnInfo_T \endterm
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspOk \endterm
+\term Response Body: \termdata \ref BsProxyRspGetVConnInfo_T \endterm
+\term libbotsense Call: \termdata \ref man_bsServerReqGetVConnInfo () \endterm
+\endtermblock
+
+\subsection bsprot_msg_ok Standard Ok Response Message
+The \h_botsense standard ok (success) response message. The message can be
+sent in response to either a server-terminated or a device-terminated request.
+The libotsense library will automatically intercept the ok message and
+return \ref BS_OK to the calling client function.
+\termblock
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspOk \endterm
+\term Response Body: \termdata None \endterm
+\endtermblock
+
+\subsection bsprot_msg_err Standard Error Response Message
+The \h_botsense standard error (failure) response message. The message can be
+sent in response to either a server-terminated or a device-terminated request.
+The response contains one of the \ref bs_ecodes, plus an error string.
+The libotsense library will automatically intercept the error message,
+print the appropriate diagnostic, and return
+to the calling client function with the received error code.
+\termblock
+\term Response MsgId: \termdata \ref BsProxyMsgIdRspErr \endterm
+\term Response Body: \termdata \ref BsProxyRspErr_T \endterm
+\endtermblock
+
+ * \{
+ */
+
+/*! \} */
+
+/*!
+ * \ingroup bsprotocol
+ * \defgroup bsprot_xml XML Message Set
+
+\section bsprot_xml_intro Introduction
+The RoadNarrows BotSense NetMsgs XML message specifications define the
+set of client-server-terminated messages supported by bsProxy. 
+
+The RoadNarrows NetMsgs package defines the supported XML format and generates
+the appropriate c and python code.
+
+The message encoding is 8-bit Id-Type-Value (itv). All message fields are 
+packed in big-endian order.
+
+\include libbotsense/bsProxyMsgs.xml
+
+ * \{
+ */
+
+/*! \} */

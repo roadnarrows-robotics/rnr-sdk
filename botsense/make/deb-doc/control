@@ -1,0 +1,7 @@
+Package:rnr-botsense-doc
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Maintainer: Robin Knight <robin.knight@roadnarrows.com>
+Description: RoadNarows botsense development package documentation.

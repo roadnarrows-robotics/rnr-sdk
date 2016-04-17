@@ -1,0 +1,111 @@
+////////////////////////////////////////////////////////////////////////////////
+// Package:   BotSense
+//
+// File:      yModListOfImages.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the List of Images
+//  page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup loi List of Images
+ *
+ * \{
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_framework BotSense Framework - Large
+ *
+ * \image html bsFrameWork.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_arch BotSense Architecture - Large
+ *
+ * \image html bsArch.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_bsproxy_conn bsProxy Connection Flow Chart
+ *
+ * \image html bsProxyConn.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_bsproxy_open bsProxy Open Proxied Device Flow Chart
+ *
+ * \image html bsProxyOpenDev.png
+ * \{
+ * \}
+ */
+
+/*!
+/*!
+ * \ingroup loi
+ * \defgroup loi_libreqrsp libbotsense Requst/Response Design - Large
+ *
+ * \image html bsLibReqRsp.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_sz SkewlZone Legged Robot Pack
+ *
+ * \image html RN-SZ-Pack.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_rs RoboSight Neural Camera
+ *
+ * \image html RN-RS.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_k3 Khepera III Robot
+ *
+ * \image html RN-K3.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_koa Koala Robot
+ *
+ * \image html RN-Koa.png
+ * \{
+ * \}
+ */
+
+/*!
+ * \ingroup loi
+ * \defgroup loi_hek Hekateros Robotic Manipulator
+ *
+ * \image html RN-Hek.png
+ * \{
+ * \}
+ */
+
+/*! \} */

@@ -1,0 +1,34 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   BotSense
+//
+// File:      fModStdMods.doxy
+//
+// Description:
+//  This file contains the doxygen directives to anchor the BotSense Standard
+//  Modules documents. These modules come standard with the BotSense package.
+//
+//  See bsModules/<mod>/<mod>.doxy for specific <mod> documentation.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup bsmod Standard PlugIn Modules
+ *
+ * The \h_botsense Standard Modules are the set of supported proxied devices
+ * and functional interfaces that come standard with the \h_botsense package.
+ *
+ * Each Standard Module contains:
+ * \li Target-specific compiled client libraries with associated C header files.
+ * \li Python \h_botsense package module and C extension module.
+ * \li Target-specific bsProxy server DLL plug-in.
+ * \li NetMsgs XML message specification file.
+ * \li Source files.
+ *
+ * \{
+ */
+
+/*! \} */
+

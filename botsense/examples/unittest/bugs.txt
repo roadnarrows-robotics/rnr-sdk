@@ -1,0 +1,18 @@
+Bug 1: FIXED
+Problem: bsProxy unresponsive after the following trace.
+
+BSPROXY: Diag1: bsProxy.c[473] bsProxy_9195: yield(127.0.0.1:3751): Connection accepted, client registered.
+BSPROXY: Diag2: bsProxyClient.c[862] bsProxy_9195: yield(127.0.0.1:3751):
+Rx Req MsgHdr = {
+  Magic:   0xaaaa
+  Tid:     0
+  Handle:  254
+  MsgId:   3 BsProxyReqLoopback
+  BodyLen: 33
+}
+BSPROXY: Error: bsProxyClient.c[808] bsProxy_9195: yield(127.0.0.1:3751): Message fragment(ecode=6): Received length=31, expected length=33.
+BSPROXY: Diag2: bsProxyClient.c[675] bsProxy_9195: yield(127.0.0.1:3751): resyncing.
+BSPROXY: Error: bsProxyClient.c[884] bsProxy_9195: yield(127.0.0.1:3751): Message corrupted(ecode=9): MsgId=3
+
+
+Bug 2:

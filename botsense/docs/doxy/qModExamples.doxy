@@ -1,0 +1,52 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   BotSense
+//
+// File:      qModExamples.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the examples
+//  pages found in the "Related Pages" document section.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup examples Example Clients
+ * \{
+ */
+
+/*!
+ * \ingroup examples
+ * \defgroup example_loopback loopback.sh
+ * \{
+ * The loopback.sh bash script illustrates a simple loopback with the bsproxy
+ * server.
+ *
+ * \include examples/unittest/loopback.sh
+ * \}
+ */
+
+/*!
+ * \ingroup examples
+ * \defgroup example_ut bsUnitTest
+ * \{
+ * The bsUnitTest.py python script provides an interactive, command-line
+ * unit test of the bsproxy server, libbotsense library, and the BotSense
+ * python package.
+ *
+ * \}
+ */
+
+/*!
+ * \ingroup examples
+ * \defgroup example_lt bsLoadTest
+ * \{
+ * The <b>bsLoadTest</b> client load tests the bsProxy server and the
+ * libbotsense library.
+ *
+ * \}
+ */
+
+/* \} */

@@ -1,0 +1,178 @@
+////////////////////////////////////////////////////////////////////////////////
+// Package:   BotSense
+//
+// File:      dModServer.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the bsProxy server
+//  documentation.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup bsserver BotSense Server
+ *
+\section bssvr_intro Intro
+
+The \h_botsense bsProxy IP Proxy Server provides the server-side services
+for \h_botsense clients. The bsProxy is an IP base proxy server for proxied
+(pseudo) devices on the target system, such as a robot's
+sensors and effectors. By providing an IP interface, the proxied hardware
+and software resources can be read and controlled remotely, anywhere.
+
+The bsProxy can support multiple simultaneous clients, with each client having
+access to multiple proxied devices. Different clients can have access to the
+same proxied device. The bsProxy provides mutual exclusion mechanisms to ensure
+device and message correctness.
+
+A proxied device is a target system resource, typcially a device driver 
+controlling a specific hardware device.
+For example, a target system's
+I<sup>2</sup>C Bus and an RS-232 serial port are proxied devices. 
+
+A proxied device may be a pseudo device in that it may proxy a software resource
+rather than a specific piece of hardware. Shared memory is an example
+of a proxied pseudo device.
+
+Paired with each proxied device is a bsProxy associated Dynamic Link Library
+plug-in interface module. The interface module provides the device-specific
+request-response protocol termination for client requests.
+
+When a client opens a virtual connection to a proxied device,
+the client specifies the proxied device's (partial) URI and the protocol to
+apply to that device. The protocol is instantiated by specifying the
+interface module's (partial) URI.
+For example, a valid device/module URI pair could be:\n
+\htmlonly
+<div style="padding-left: 30px;">/dev/ttyUSB0 , robot/libbsserver_brain</div>
+\endhtmlonly
+
+The opened proxied device connection is referred to as a virtual connection
+since it is a logical connection multiplexed over the actual client/server IP
+connection. Each virtual connection is identified by a server-wide unique
+handle.
+
+\section bssvr_flow Flow Control Charts
+\subsection bssvr_flow_conn BotSense bsProxy Client Connect Flow Control
+\htmlonly
+<div style="float:right; border:0; text-align:center;">
+\endhtmlonly
+\image html bsProxyConn.png "Figure 3: bsProxy Connection Flow Chart"
+\htmlonly
+</div>
+\endhtmlonly
+
+The flow control chart in Figure 3 provides a high-level view of the 
+control and data flow within the \h_botsense bsProxy server when a new
+client attempts to connect to the server.
+
+When a new client connects to the bsProxy server (connect(2)), the server
+checks if the new client will be within the server's configurable limits and
+restrictions. If the new client is accepted, the server calls accept(2) to 
+create a new, client-specific socket, configures the socket, as inserts the
+client data into the server's table of registered clients.
+
+On the client side, the \h_botsense library libbotsense will automatically
+keep track of the client's connection.
+
+If bsProxy denies the client connection, it closes the connection. The
+\h_botsense library libbotsense will dectect the failure and return the
+appropiate error code back to the client.
+\htmlonly
+<div style="clear:both;"></div>
+\endhtmlonly
+
+\subsection bssvr_flow_open BotSense bsProxy Client Open Device Request Flow Control
+\htmlonly
+<div style="border:0; text-align:center;">
+\endhtmlonly
+\image html bsProxyOpenDev.png "Figure 4: bsProxy Open Device Flow Chart"
+\htmlonly
+</div>
+\endhtmlonly
+The flow control chart in Figure 4 provides a high-level view of the 
+control and data flow executed by bsProxy to open a proxied device.
+
+When a client requests a proxied device to be opened, and a virtual connection
+to be established, the bsProxy server receives the request over the client's
+IP connection. The dispatcher queues the request in the server-termainated
+request thread (not shown).
+
+In the server request thread context, 
+a virtual connection entry is first created in the internal virtual connection
+table and a virtual connection handle assigned.
+Both the proxied device and interface modules Uniform Resource Identifiers
+(file path names) are canonicalized and validated. If a URI is invalid or 
+violates security settings (future), the request is rejected.
+
+The interface module and proxied device resources are attached to the 
+virtual connection data.
+
+When the virtual connection has been successfully set up,
+the server sends a response message back to the client containing the parameter
+of the newly assigned virtual connection handle. The \h_botsense library
+libbotsense processes the response message and returns the handle back to the
+client's calling context.
+
+\htmlonly
+<span style="font-weight:bold; font-size:larger; color:#003399;">&alpha; </span>
+\endhtmlonly
+All client requests require a response from the server. At any time when
+an error occurs and the bsProxy server cannot service the request successfully,
+the flow logic delineated by the 
+\htmlonly
+<b>&alpha;</b>
+\endhtmlonly
+connector is executed and the request is terminated.
+The \h_botsense library libbotsense processes the error response message and
+returns the appropriate error code back to the client's calling context.
+The error branches are not shown for clarity.
+
+\htmlonly
+<span style="font-weight:bold; font-size:larger; color:#003399;">&beta; </span>
+\endhtmlonly
+The module processing sub-flow control logic is executed starting at the
+\htmlonly
+<b>&beta;</b>
+\endhtmlonly
+connector. If the interace module uniquely identified by its URI has already
+been dynamically loaded into bsProxy's application execution space then
+its reference count is incremented. Otherwise the module is dynamically loaded.
+The command-line library search paths are first searched, followed by any
+\h_botsense configuration file paths, and finally the default paths are
+searched. Once the file has been loaded and dynamically linked, the required
+module initialization function is called. The module data are inserted into 
+the internal module hash table. Finally, regardless of the conditional logic
+above, the required module open
+function is called with specific parameters provided by the client's request
+message.
+
+\htmlonly
+<span style="font-weight:bold; font-size:larger; color:#003399;">&gamma; </span>
+\endhtmlonly
+The thread processing sub-flow control logic is executed starting at the
+\htmlonly
+<b>&gamma;</b>
+\endhtmlonly
+connector. One device thread is created per each unique proxied device URI.
+Again, if the device thread already exists the the tis reference count is
+increemented. Otherwise a thread control block along with its input queue
+are created and inserted into the internal device thread hash table.
+The thread is then created and started in its own execution context.
+ * \{
+ */
+
+/*! \} */
+
+/*!
+ * \ingroup bsserver
+ * \defgroup bsrv_cfg bsProxy Configuration
+ *
+ * The bsServer XML configuration will be supported in \h_botsense v3.1.0.
+ * \{
+ */
+
+/*! \} */
+

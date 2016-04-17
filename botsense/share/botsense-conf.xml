@@ -1,0 +1,13 @@
+   <?xml version="1.0" encoding="UTF-8"?>
+   <sections>
+     <comment> Company employees</comment>
+     <section name="employee1">
+       <item key="name" value="Bob Johnson" />
+       <item key="department" value="Accounting" />
+     </section>
+     <section name="employee2">
+       <item key="name" value="Susan Fielding" />
+       <item key="department" value="Sales" />
+     </section>
+   </sections>
+

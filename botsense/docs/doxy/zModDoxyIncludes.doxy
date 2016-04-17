@@ -1,0 +1,54 @@
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   BotSense
+//
+// File:      zModDoxyIncludes.doxy
+//
+// Version:
+// $LastChangedDate: 2012-02-14 12:39:13 -0700 (Tue, 14 Feb 2012) $
+// $Rev: 1801 $
+//
+// Description:
+// Useful Documentation Include Blocks (see \copydoc)
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup doxy_includes Doxygen Includes
+ * Useful doxygen documentation blocks that can be included into other
+ * documentation with the <b>\\copydoc</b> command.
+ * \{
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_param_ecode doc_param_ecode
+ * \{
+One of \ref bs_ecodes  "BotSense Error Codes".
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_ecode doc_return_ecode
+ * \{
+On error, the appropriate \h_lt 0 negated \ref bs_ecodes 
+"BotSense Error Code" is returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_std doc_return_std
+ * \{
+\return
+On success, \ref BS_OK is returned.\n
+On error, the appropriate \h_lt 0 negated \ref bs_ecodes 
+"BotSense Error Code" is returned.
+ * \}
+ */
+
+/*! \} end of doxy_includes */

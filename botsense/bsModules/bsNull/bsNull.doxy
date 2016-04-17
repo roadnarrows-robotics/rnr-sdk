@@ -1,0 +1,285 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   BotSense
+//
+// File:      bsNull.doxy
+//
+// Description:
+//  This file contains the doxygen directives to document the BotSense Standard
+//  /dev/null Module. This module comes standard with the BotSense package.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/* ---------------------------------------------------------------------------
+ * Null
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod
+ * \defgroup bsmod_null Null
+ *
+ * BotSense standanrd raw /dev/null module.
+ *
+ * The primary purpose of this module is for testing and connection validation
+ * (although if you need a proxied /dev/null...).
+ *
+ * \section bsmod_intro Introduction
+ * The client side C/C++ interfaces are provided by the header file
+ * \ref include/botsense/bsNull.h "botsense/bsNull.h" in conjunction with
+ * the libraries libbsclient_null.a or libbsclient_null.so.
+ * For python clients, the python module
+ * \ref bsPython/modules/BotSense/bsNull.py "BotSense.bsNull"
+ * provides wrapper functions for the C libraries.
+ *
+ * The server side \ref man_bsproxy "bsProxy" plug-in is the Dynamic Link
+ * Library (DLL) libbsserver_null.so.
+ *
+ * \par Source Subdirectory: 
+ * bsModules/bsNull
+ * \{
+ */
+
+/*! \} */ /* end bsmod_null */
+
+
+/* ---------------------------------------------------------------------------
+ * Null Client
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_null
+ * \defgroup bsmod_null_cli Client Interfaces
+ *
+ * The BotSense standard /dev/null client side interfaces provide APIs for C/C++
+ * and python applications.
+ *
+ * \{
+ */
+
+/*! \} */ /* end bsmod_null_cli */
+
+/*!
+ * \ingroup bsmod_null_cli
+ * \defgroup man_libbsclient_null libbsclient_null Man Pages
+ *
+ * The libbsclient_null library provides the functional API between 
+ * client applications on one side and request-response messages to/from
+ * the \ref man_bsproxy "bsProxy" server on the other side.
+ * The \ref man_libbotsense "libbotsense" client library mediates the 
+ * client-server session.
+ *
+ * \{
+ */
+
+/*!
+\ingroup man_libbsclient_null
+\defgroup man_bsNullGetMsgName bsNullGetMsgName
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "botsense/bsNull.h"\n\n
+const char * \ref bsNullGetMsgName(\ref BsClient_P   pClient,
+                                  \ref BsVConnHnd_T hndVConn,
+                                  uint_t       uMsgId);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsNullGetMsgName
+ */
+
+/*!
+\ingroup man_libbsclient_null
+\defgroup man_bsNullReqClose bsNullReqClose
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "botsense/bsNull.h"\n\n
+int \ref bsNullReqClose(\ref BsClient_P pClient,
+                       \ref BsVConnHnd_T hndVConn);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsNullReqClose
+ */
+
+/*!
+\ingroup man_libbsclient_null
+\defgroup man_bsNullReqOpen bsNullReqOpen
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "botsense/bsNull.h"\n\n
+int \ref bsNullReqOpen(\ref BsClient_P pClient,
+                      const char *sDevName,
+                      bool_t bInitTrace);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsNullReqOpen
+ */
+
+/*!
+\ingroup man_libbsclient_null
+\defgroup man_bsNullReqWrite bsNullReqWrite
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "botsense/bsNull.h"\n\n
+int \ref bsNullReqWrite(\ref BsClient_P    pClient,
+                  \ref BsVConnHnd_T  hndVConn,
+                  byte_t        wbuf[],
+                  size_t        uWriteLen);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsNullReqWrite
+ */
+
+/*! \} */ /* end bsmod_libbsclient_null */
+
+
+/*!
+ * \ingroup bsmod_null_cli
+ * \defgroup bsNull_py BotSense.bsNull Python Module
+ *
+ * \{
+The bsNull module under the BotSense python package provides python
+applications an interface to communicate with proxied /dev/null devices.
+The underlining compiled extension module _bsNull.so library provides the  
+provides the shim between python calling conventions and the C
+libbsclient_null.[a,so] library.
+
+\sa \ref BotSense.bsNull
+
+\par Example:
+\code
+#
+# Example use of BotSense.bsNull Module
+#
+
+import sys
+
+import BotSense.BotSenseTypes as bsTypes
+import BotSense.BotSenseError as bsError
+import BotSense.BotSenseServer as bsServer
+import BotSense.bsNull as bsNull
+
+# create a BotSense client 
+cli = bsTypes.BsClient('nullandvoid')
+
+# connect to the bsProxy server using default IP address and port
+try:
+  bsServer.ServerConnect(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# open a virtual connection to a proxied serial device
+try:
+  hndVConn = bsNull.NullReqOpen(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+print "Example: established virtual connection %d" % (hndVConn)
+
+bitbucket = [
+    'into the bit bucket',
+    ['a', 'b', 'c', 'd'],
+    'wheeee',
+    '\x01\x02\x03'
+]
+
+# write some data
+for i in xrange(10):
+  j = i % len(bitbucket)
+  try:
+    n = bsNull.NullReqWrite(cli, hndVConn, bitbucket[j])
+  except bsError.BotSenseError, inst:
+    print inst
+    sys.exit(8)
+  print "Example: %d: %s written" % (i, repr(bitbucket[j][:n]))
+
+# close the virtual connection
+try:
+  bsNull.NullReqClose(cli, hndVConn)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# close the connection to the bsProxy server
+try:
+  bsServer.ServerDisconnect(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# delete the client
+del cli
+\endcode
+ */
+
+/*! \} */ /* end bsNull_py */
+
+
+/* ---------------------------------------------------------------------------
+ * Null Server
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_null
+ * \defgroup bsmod_null_srv Server Plug-In
+ *
+ * BotSense \ref man_bsproxy "bsProxy" server plug-in DLL for proxied raw
+ * /dev/null devices.
+ *
+ * See \ref bsModules/bsNull/bsNullServer.c
+ *
+ * \{
+ */
+
+/*! \} */ /* end bsmod_null_srv */
+
+/*!
+ * \ingroup bsmod_null_srv
+ * \defgroup bsmod_null_srv_cfg Null Configuration
+ *
+ * The /dev/null plug-in XML configuration will be supported in BotSense v3.1.0.
+ * \{
+ */
+
+/*! \} */ /* end bsmod_null_srv_cfg */
+
+
+/* ---------------------------------------------------------------------------
+ * Null XML
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_null
+ * \defgroup bsmod_null_xml XML Message Set
+
+The bsNullMsgs.xml specification defines the set of messages
+for BotSense virtual connections exstablished
+between BotSense clients and raw /dev/null devices proxied by
+the \ref bsserver "bsProxy" server.
+
+The /dev/null messages are terminated between the BotSense client
+libbsclient_null.so shared library or libbsclient_null.a static library
+and the bsProxy plug-in libbsserver_null.so interface module DLL.
+
+The message encoding is 8-bit Id-Type-Value (itv). All message fields are 
+packed in big-endian order.
+
+\include bsModules/bsNull/bsNullMsgs.xml
+
+ */

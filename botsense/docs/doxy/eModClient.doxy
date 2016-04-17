@@ -1,0 +1,773 @@
+////////////////////////////////////////////////////////////////////////////////
+// Package:   BotSense
+//
+// File:      dModClient.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the client
+//  documentation.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+\defgroup bsclient BotSense Client
+
+\section bscli_intro Intro
+
+The \h_botsense client communicates with the bsProxy server through a
+messaging protocol transmitted and received over an IP socket interface.
+The libbotsense library provides a functional interface for the client
+application, hiding the underlining messaging.
+
+\htmlonly
+<div style="float:right; border:0; text-align:center;">
+\endhtmlonly
+\image html bsLibReqRsp-Small.png "Figure 5: libbotsense Request/Response Design."
+\htmlonly
+<div style="text-align: center;"><a href="bsLibReqRsp.png">click to enlarge</a></div>
+</div>
+\endhtmlonly
+
+Although a client may use the libbotsense library directly,
+typically, a client interfaces with an application-specific plug-in library
+module.
+The plug-in library makes the appropriate calls to the lower libbotsense layer.
+
+In Figure 5, the high-level, internal control and data flows are illustrated
+for a client to server request/response message exchange.
+An application-specific plug-in normally makes the call to
+<em>bsClientTrans()</em>, checks for errors, and parses the application-specific
+response. The plug-in library is not shown for clarity.
+
+The sequence:
+<ol>
+<li>The client's calling function issues a transaction request.
+The call contains the packed request body (if any) and a buffer to hold the
+packed response.</li>
+<li>libbotsense prepends the message header to the body and transmits the
+message to the bsProxy server.</li>
+<li>Until a timout, error, or the response has been received, repeat:</li>
+<ol style="list-style-type: lower-alpha;">
+<li>Check the transaction cache for an already received response.
+(This could have happened in another client thread.)</li>
+<li>Receive a response from the server. If not the response for this
+transaction, then cache it.</li>
+</ol>
+<li>Return to the client's calling function.</li>
+</ol>
+
+The locking and unlocking mutal exclusion are done at a per client level,
+uneffecting other clients. There is also one transaction cache per client.
+This design has been optimized for maximal multi-threaded performance.
+
+The libbotsense library:
+\li supports multiple, simultaneous clients
+\li supports multi-threaded clients
+\li is thread safe with reentrant functions
+\li maintains thread concurrency control
+\li assures transaction response message ordering
+\li supports standard ok and error response processing
+\li supports error processing
+\li provides diagnostics
+\li provides message tracing
+\li provides standard server-terminated functions.
+
+ * \{
+ */
+
+/*! \} end of bsclient */
+
+
+// ---------------------------------------------------------------------------
+// Library libbotsense Man Pages
+// ---------------------------------------------------------------------------
+
+/*! 
+ * \ingroup bsclient
+ * \defgroup man_libbotsense libbotsense Man Pages
+ *  
+ *  The core libbotsense libary man pages.
+ *
+ *  \{
+ */
+
+/*! \} end of man_libbotsense */
+
+// ...........................................................................
+// Library Macros and Utilities
+// ...........................................................................
+
+/*!
+ * \ingroup man_libbotsense
+ * \defgroup man_libbotsense_util Macros and Utilities
+ *
+ * The libbotsense library \#define's, helper macros and utility functions.
+ *
+ * \{
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_LOG_WARN BSCLIENT_LOG_WARN
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_LOG_WARN(pClient, ecode, wfmt, ...);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_LOG_WARN
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_LOG_ERROR BSCLIENT_LOG_ERROR
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_LOG_ERROR(pClient, ecode, efmt, ...);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_LOG_ERROR
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_LOG_NM_ERROR BSCLIENT_LOG_NM_ERROR
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_LOG_NM_ERROR(pClient, nmecode, efmt, ...);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_LOG_NM_ERROR
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_LOG_SYSERROR BSCLIENT_LOG_SYSERROR
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_LOG_SYSERROR(pClient, ecode, efmt, ...);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_LOG_SYSERROR
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_TRY_ECODE BSCLIENT_TRY_ECODE
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_TRY_ECODE(pClient, ecode, efmt, ...);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_TRY_ECODE
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_TRY_NM_ECODE BSCLIENT_TRY_NM_ECODE
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_TRY_NM_ECODE(pClient, nmecode, efmt, ...);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_TRY_NM_ECODE
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_TRY_EXPR BSCLIENT_TRY_EXPR
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_TRY_EXPR(pClient, expr, ecode, efmt, ...);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_TRY_EXPR
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_IS_VCONN_HANDLE BSCLIENT_IS_VCONN_HANDLE
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_IS_VCONN_HANDLE(hnd);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_IS_VCONN_HANDLE
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_BSCLIENT_HAS_VCONN BSCLIENT_HAS_VCONN
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * BSCLIENT_HAS_VCONN(pClient, hnd);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc BSCLIENT_HAS_VCONN
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_bsStrError bsStrError
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * const char * \ref bsStrError (int \ref bs_ecodes "nECode");
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsStrError
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_bsPackMsgHdr bsPackMsgHdr
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsPackMsgHdr(\ref BsProxyMsgHdr_T *pMsgHdr, byte_t buf[],
+ *                            size_t bufSize);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsPackMsgHdr
+ * \}
+ */
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_bsUnpackMsgHdr bsUnpackMsgHdr
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsUnpackMsgHdr(byte_t buf[], size_t bufSize,
+ *                            \ref BsProxyMsgHdr_T *pMsgHdr);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsUnpackMsgHdr
+ * \}
+ */
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_bsLogBuf bsLogBuf
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * void \ref bsLogBuf(const char *sBufName, byte_t buf[],
+ *                            size_t uCount);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsLogBuf
+ * \}
+ */
+/*!
+ * \ingroup man_libbotsense_util
+ * \defgroup man_bsLogAsciiBuf bsLogAsciiBuf
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * void \ref bsLogAsciiBuf(const char *sBufName, byte_t buf[],
+ *                            size_t uCount);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsLogAsciiBuf
+ * \}
+ */
+
+/*! \} end of man_libbotsense_util */
+
+// ...........................................................................
+// Library Client-Specific Functions
+// ...........................................................................
+
+/*!
+ * \ingroup man_libbotsense
+ * \defgroup man_libbotsense_cli Client-Specific Functions
+ *
+ * The libbotsense library base, client-specific functions.
+ *
+ * \{
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientNew bsClientNew
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * \ref BsClient_P * \ref bsClientNew(
+ *                              const char *sClientName );
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientNew
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientDelete bsClientDelete
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * void \ref bsClientDelete(\ref BsClient_P pClient);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientDelete
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientTrans bsClientTrans
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsClientTrans(\ref BsClient_P pClient,
+ *                  int hndVConn,
+ *                  uint_t     uReqMsgId,
+ *                  byte_t     bufReq[],
+ *                  size_t     uReqBodyLen,
+ *                  uint_t     uRspMsgId,
+ *                  byte_t     bufRsp[],
+ *                  size_t     sizeRspBuf);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientTrans
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrGetName bsClientAttrGetName
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * const char * \ref bsClientAttrGetName(\ref BsClient_P pClient);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrGetName
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrGetTraceState bsClientAttrGetTraceState
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * bool_t \ref bsClientAttrGetTraceState(\ref BsClient_P pClient,
+ *                              \ref BsVConnHnd_T hndVConn);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrGetTraceState
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrGetVConnCount bsClientAttrGetVConnCount
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsClientAttrGetVConnCount(\ref BsClient_P pClient);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrGetVConnCount
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrHasVConn bsClientAttrHasVConn
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * bool_t \ref bsClientAttrHasVConn(\ref BsClient_P pClient,
+ *                              \ref BsVConnHnd_T hndVConn);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrHasVConn
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrGetDevName bsClientAttrGetDevName
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * const char * \ref bsClientAttrGetDevName(\ref BsClient_P pClient,
+ *                              \ref BsVConnHnd_T hndVConn);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrGetDevName
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrGetModName bsClientAttrGetModName
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * const char * \ref bsClientAttrGetModName(\ref BsClient_P pClient,
+ *                              \ref BsVConnHnd_T hndVConn);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrGetModName
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrSetLogging bsClientAttrSetLogging
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * void \ref bsClientAttrSetLogging(\ref BsClient_P pClient,
+ *                          int nLevel);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrSetLogging
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientAttrGetConnState bsClientAttrGetConnState
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * void \ref bsClientAttrGetConnState(\ref BsClient_P pClient,
+ *                              \ref BsClientConnState_T *pConnState);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientAttrGetConnState
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientFillMsgHdr bsClientFillMsgHdr
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * void \ref bsClientFillMsgHdr(\ref BsClient_P pClient,
+ *                              \ref BsVConnHnd_T hndVConn,
+ *                              uint_t uMsgId,
+ *                              size_t uBodyLen,
+ *                              \ref BsProxyMsgHdr_T *pMsgHdr);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientFillMsgHdr
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientGetMsgName bsClientGetMsgName
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * const char * \ref bsClientGetMsgName(\ref BsClient_P pClient,
+ *                              \ref BsVConnHnd_T hndVConn,
+ *                              uint_t uMsgId);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientGetMsgName
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_cli
+ * \defgroup man_bsClientLogMsgHdr bsClientLogMsgHdr
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * void \ref bsClientLogMsgHdr(\ref BsClient_P pClient,
+ *                            const char *sPreface,
+ *                            \ref BsProxyMsgHdr_T *pMsgHdr);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsClientLogMsgHdr
+ * \}
+ */
+
+/*! \} end of man_libbotsense_cli */
+
+// ...........................................................................
+// Library Client-Specific Functions
+// ...........................................................................
+
+/*!
+ * \ingroup man_libbotsense
+ * \defgroup man_libbotsense_svr Client-Server Connection and Requests Functions
+ *
+ * The libbotsense library client-server connnection and control functions
+ * and server-terminated request functions.
+ *
+ * \{
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerConnect bsServerConnect
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerConnect(\ref BsClient_P pClient,
+ *                          const char *sServerHostName,
+ *                          int ipPortServer);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerConnect
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerDisconnect bsServerDisconnect
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerDisconnect(\ref BsClient_P pClient);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerDisconnect
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqGetVersion bsServerReqGetVersion
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqGetVersion(\ref BsClient_P pClient,
+ *                      char buf[],
+ *                      size_t sizeBuf);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqGetVersion
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqLoopback bsServerReqLoopback
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqLoopback(\ref BsClient_P pClient,
+ *                      char sLoopbackMsg[]);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqLoopback
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqSetLogging bsServerReqSetLogging
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqSetLogging(\ref BsClient_P pClient,
+ *                      int nLogLevel);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqSetLogging
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqMsgTrace bsServerReqMsgTrace
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqMsgTrace(\ref BsClient_P pClient,
+ *                      \ref BsVConnHnd_T hndVConn,
+ *                      bool_t bTrace);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqMsgTrace
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqOpenDev bsServerReqOpenDev
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqOpenDev(\ref BsClient_P pClient,
+ *                      const char *sDevName,
+ *                      const char *sModName,
+ *                      byte_t argbuf[],
+ *                      size_t arglen,
+ *                      const \ref BsClientAppInfo_T *pAppInfo,
+ *                      bool_t bTrace);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqOpenDev
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqCloseDev bsServerReqCloseDev
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqCloseDev(\ref BsClient_P pClient,
+ *                              \ref BsVConnHnd_T hndVConn);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqCloseDev
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqGetVConnList bsServerReqGetVConnList
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqGetVConnList(\ref BsClient_P pClient,
+ *                      \ref BsVecHandles_T *pVecHandles);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqGetVConnList
+ * \}
+ */
+
+/*!
+ * \ingroup man_libbotsense_svr
+ * \defgroup man_bsServerReqGetVConnInfo bsServerReqGetVConnInfo
+ * \{
+ * \par Synopsis:
+ * <tt>
+ * \#include "botsense/BotSense.h"\n
+ * \#include "botsense/libBotSense.h"\n\n
+ * int \ref bsServerReqGetVConnInfo(\ref BsClient_P pClient,
+ *                      \ref BsVConnHnd_T hndVConn,
+ *                      \ref BsVConnInfo_T  *pVConnInfo);
+ * </tt>
+ *
+ * <b>Description:</b>\n
+ * \copydoc bsServerReqGetVConnInfo
+ * \}
+ */
+
+/*! \} end of man_libbotsense_svr */

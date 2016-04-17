@@ -1,0 +1,426 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows BotSense Package
+//
+// File:      main.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! \mainpage RoadNarrows BotSense Package
+
+\section intro Introduction
+
+\htmlonly
+<div style="float:right; border:0; text-align:center;">
+\endhtmlonly
+\image html bsFrameWork-Small.png "Figure 1: BotSense Framework"
+\htmlonly
+<div style="text-align: center;"><a href="bsFrameWork.png">click to enlarge</a></div>
+</div>
+\endhtmlonly
+
+The \h_botsense software package provides a client-server framework for clients
+to remotely interface to proxied server devices over IP. Additional proxied
+devices may be easily added by developers using the open and documented
+programming interface.
+
+Figure 1 illustrates the \h_botsense framework. The bsProxy server plus any
+specific module plug-ins operate on the target system. The target system has
+direct access to the devices and resources to be proxied. The client
+applications may running either on or off target.
+Compiled C/C++ applications are linked to the \h_botsense libraries.
+Python clients use the modules imported from the BotSense python package.
+
+\subsection intro_mot Motivation
+The \h_botsense effort is motivated by the need by RoadNarrows to
+support diverse robotic systems and remote embedded devices in unified and
+virtualized framework over the ubiquitous Internet. Client applications using
+\h_botsense may then be implemented rapidly to a consistent, common, open API.
+
+\subsection intro_obj Objective
+The objective is to create an IP-based, open-source, near real-time
+client-server middleware framework that readily supports multiple computing
+architectures including embedded processors with limited resources. The proxy
+server supports concurrent clients. Both request-response and streaming-out
+message exchange patterns are supported. The extensible framework easily
+supports application-specific new proxied (pseudo) devices and robotic systems.  
+\subsection intro_horse Some Horse Sense
+\termblock
+\term "Common sense is not so common." \termdata - Voltaire \endterm
+\term "Common sense...Get some!" \termdata - Anonymous \endterm
+\term "Robot sense...Build some!" \termdata - RoadNarrows \endterm
+\endtermblock
+
+
+\page page_arch Architecture
+The \h_botsense architecture is summarized in the following sections
+(refer to Figure 2):
+
+\htmlonly
+<div style="float:right; border:0; text-align:center;">
+\endhtmlonly
+\image html bsArch-Small.png "Figure 2: BotSense Architecture"
+\htmlonly
+<div style="text-align: center;"><a href="bsArch.png">click to enlarge</a></div>
+</div>
+\endhtmlonly
+
+\section arch_prj Project Constraints
+\li Provide open source with well documented and published interfaces.
+\li Core system written in C to the POSIX compliant interface standards.
+\li Use the cross-compiler, multi-platform RoadNarrows <b>rnmake</b> make system
+    built around GNU make.
+\li Use RoadNarrows <b>NetMsgs</b> package for client-server and 
+    module-device message XML specifications with auto-code
+    generation.
+\li Fully doxygen source documentation.
+\li Provide a Programmer's Guide.
+\li Use subversion for source control.
+
+\section arch_core Invariant Core:
+\li Software written in C to the POSIX compliant interface standards.
+\li \h_botsense interface moudle plug-ins support multiple languages:\n
+    C, C++, and Python (to be expanded in the future).
+\li Proxy server and core client library are multi-threaded, multi-client,
+    and real-time optimized. 
+\li Approach is validated by support of legged and wheeled robots and other
+    intelligent devices.
+
+\section arch_bsproxy BotSense bsProxy Server
+\li Multi-threaded, multi-client, and real-time optimized.
+\li Multiple instances can run on one target server – each listening to a
+    different IP port.
+\li XML configuration file(s).
+\li 16 clients per bsProxy server (default, configurable).
+\li 255 virtual connections per bsProxy server.
+\li Message Exchange Patterns: request-response, stream-out.
+
+\section arch_libbs BotSense libbotsense Client Library
+\li Multi-threaded safe, multi-client support, and real-time optimized.
+\li Automatic receive message ordering.
+\li Message Exchange Patterns: request-response, stream-out.
+
+\section arch_plugin Application-Specfic BotSense Plug-Ins
+\li \h_botsense plug-ins support multiple languages.
+\li Well defined plug-in interfaces for server.
+\li \h_botsense Standard Modules:\n
+    raw serial, raw I2C, STREAMS, pipes, shared memory.
+\li Client-server and plugin-device message XML specifications with auto-code
+    generation.
+
+\section arch_util RoadNarrows Utilities and Libraries
+\li RoadNarrows <b>NetMsgs</b> message packing/unpacking auto-code generation
+    package.\n
+    output languages: C, Python;\n
+    byte order: big, little, native;\n
+    encoding: flat, identifier-type-value.\n
+    libnetmsgs – network messaging packing and unpacking library.
+\li RoadNarrows <b>librnr</b> package – common definitions and functions
+    library.
+\li RoadNarrows <b>libserial</b> package – RS-232 serial library.
+\li RoadNarrows <b>libi2c</b> package – I2C library.
+
+
+
+\page page_pkg Package
+The RoadNarrows \h_botsense package is a collections of libraries,
+API header files, applications, and python modules.
+
+\section pkg_core Core Components
+\termblock
+  \term bsProxy
+    \termdata The \h_botsense IP proxy server. \endterm
+  \term libbotsense.[so,a]
+    \termdata The \h_botsense client base static and shared libraries. \endterm
+  \term botsense/BotSense.h 
+    \termdata \h_botsense package top-level C header file. \endterm
+  \term botsense/libBotSense.h
+    \termdata \h_botsense client base library declarations. \endterm
+  \term botsense/bsProxyModIF.h
+    \termdata \h_botsense bsProxy DLL module interface. \endterm
+  \term bsProxyMsgs.xml
+    \termdata Core server-terminated NetMsg XML specificiation. \endterm
+  \term botsense/bsProxyMsgs.h
+    \termdata \h_botsense core server-terminated, NetMsgs generated
+    message types and declarations. \endterm
+\endtermblock
+
+\section pkg_py Python Core BotSense Components
+\termblock
+  \term BotSense._BotSenseCore
+    \termdata The swigged extended module C library interface to libbotsense.
+    \endterm
+  \term BotSense.BotSenseCore
+    \termdata The swigged raw python module for _BotSenseCore.so \endterm
+  \term BotSense.BotSenseError
+    \termdata \h_botsense exception classes and supporting routines. \endterm
+  \term BotSense.BotSenseTypes
+    \termdata \h_botsense types. \endterm
+  \term BotSense.BotSenseServer
+    \termdata \h_botsense client-server connection and request functions.
+    \endterm
+  \term BotSense.bsProxyMsgs
+    \termdata \h_botsense core server-terminated NetMsgs generated
+    message classes and data. \endterm
+\endtermblock
+
+\section pkg_mod Standard PlugIn Modules
+For each \h_botsense Standard Module, there are a set of module specific
+components. See \ref bsmod for more details.
+Given that the module base name is <em>Mod</em> (and <em>mod</em> for all
+lower case):
+\termblock
+  \term libbsserver_<em>mod</em>.so
+    \termdata \h_botsense bsProxy server plug-in library. \endterm
+  \term libbsclient_<em>mod</em>.[a,so]
+    \termdata \h_botsense client interface static and shared libraries. \endterm
+  \term botsense/bs<em>Mod</em>.h
+    \termdata Client interface declarations. \endterm
+  \term bs<em>Mod</em>Msgs.xml
+    \termdata Module virtual connection specific NetMsg XML specificiation.
+    \endterm
+  \term botsense/bs<em>Mod</em>Msgs.h
+    \termdata Module-terminated, NetMsgs generated
+    message types and declarations.\endterm
+  \term \h_botsense._bs<em>Mod</em>
+    \termdata The swigged extended module C library interface to
+    libbsclient_<em>mod</em>. \endterm
+  \term \h_botsense.bs<em>Mod</em>
+    \termdata The swigged python module for _bs<em>Mod</em>.so \endterm
+  \term \h_botsense.bs<em>Mod</em>Msgs
+    \termdata \h_botsense module-terminated, NetMsgs generated
+    message classes and data. \endterm
+\endtermblock
+
+
+\page page_req Requirements and Dependencies 
+\section req_rn RoadNarrows Required Packages
+\termblock
+  \term <b>rnmake</b>
+    \termdata RoadNarrows make system package. \endterm
+  \term <b>librnr</b>
+    \termdata RoadNarrows Robotics common libray 1 package. \endterm
+  \term <b>libserial</b>
+    \termdata  RoadNarrows Robotics RS-232 serial library package. \endterm
+  \term <b>i2c</b>
+    \termdata  RoadNarrows Robotics \h_i2c package. \endterm
+  \term <b>netmsgs</b>
+    \termdata  RoadNarrows network messaging code generation and run-time
+    packing/unpacking package. \endterm
+\endtermblock
+
+
+\page page_platforms Supported Platforms
+Validation through Experience
+
+\section platform_proxied Proxied Platforms
+The list current and planned near-term proxied hardware supported
+by \h_botsense are itemized below. 
+
+\subsection plat_prox_sz RoadNarrows SkewlZone Legged Robots
+\htmlonly
+<div style="float:left; border:0; text-align:center;">
+\endhtmlonly
+\image html RN-SZ-Pack-100.png
+\htmlonly
+</div>
+\endhtmlonly
+The RoadNarrows SkewlZone\h_tm robots are installed the SkewlZone Brain and
+Sensor pack. The "brain" is the K-Team's KoreBot2\h_tm board
+containing the gumstix Verdex\h_tm Pro PXA270 Arm process running Angsrom linux.
+The bsProxy runs on the KoreBot2 with IP over WiFi for off-target clients.
+interactions. Proxied devices are the SkewlZone \h_i2c smart sensors plus
+the robot's manufacture's controller board (usually interfaced through a 
+serial interface).
+\htmlonly
+<div style="clear:both;">
+</div>
+\endhtmlonly
+
+\subsection plat_prox_rs RoadNarrows RoboSight
+\htmlonly
+<div style="float:left; border:0; text-align:center;">
+\endhtmlonly
+\image html RN-RS-100.png
+\htmlonly
+</div>
+\endhtmlonly
+The RoadNarrows RoboSight\h_tm neural-network camera. The bsProxy does not
+execute on the RoboSights PIC processor, but rather on any supported
+target computing architecture with a serial connection to the RoboSight(s).
+\htmlonly
+<div style="clear:both;">
+</div>
+\endhtmlonly
+
+\subsection plat_prox_k3 K-Team's Khepera III
+\htmlonly
+<div style="float:left; border:0; text-align:center;">
+\endhtmlonly
+\image html RN-K3-100.png
+\htmlonly
+</div>
+\endhtmlonly
+K-Team's Khepera\h_tm III robot with an installed KoreBot2.
+The bsProxy running on the KoreBot2 supports proxied interfaces for the
+Khepera III's motors, odometry, IR sensors, UltraSonic sensors, plus any other
+RoadNarrows supported sensors. 
+The remote bsProxy interfaces are IP over WiFi for off-target clients.
+\htmlonly
+<div style="clear:both;">
+</div>
+\endhtmlonly
+
+\subsection plat_prox_koa K-Team's Koala
+\htmlonly
+<div style="float:left; border:0; text-align:center;">
+\endhtmlonly
+\image html RN-Koa-100.png
+\htmlonly
+</div>
+\endhtmlonly
+K-Team's Koala robot with an installed KoreBot2.
+The bsProxy running on the KoreBot2 supports proxied interfaces for the
+Koala's motors, odometry, IR sensors, plus any other
+RoadNarrows supported sensors. 
+The remote bsProxy interfaces are IP over WiFi for off-target clients.
+\htmlonly
+<div style="clear:both;">
+</div>
+\endhtmlonly
+
+\subsection plat_prox_hek RoadNarrows Hekateros Robotic Manipulator
+\htmlonly
+<div style="float:left; border:0; text-align:center;">
+\endhtmlonly
+\image html RN-HekArm-100.png
+\htmlonly
+</div>
+\endhtmlonly
+RoadNarrows' Hekateros\h_tm robotic arm has a built-in gumstix Overo\h_tm
+main processor with a TI OMAP 35xx processor.
+The bsProxy running on the OMAP supports proxied interfaces for the
+Robotis Dynamixel\h_tm servos, encoders, USB cameras and inverse and forward
+kinematics.
+The remote bsProxy interfaces are IP over WiFi and IP over USB for off-target
+clients.
+\htmlonly
+<div style="clear:both;">
+</div>
+\endhtmlonly
+
+\subsection plat_prox_ctlr Robot Controller Boards
+\htmlonly
+<div style="float:left; border:0; text-align:center;">
+\endhtmlonly
+\image html RN-Dyna-100.png
+\htmlonly
+</div>
+\endhtmlonly
+The \h_botsense package supports a variety of proxied robot controller boards.
+Most of these boards have some form of serial interface in which the bsProxy
+server interface to from any supported
+target computing architecture with the supported serial drivers.
+Current and planned supported controller boards are:
+<div style="padding-left:120px;">
+<ul>
+<li>Kondo RCB-3 controller board for KHR robots.</li>
+<li>Robotis Dynamixel CM-5x and CM-700 controller boards.</li>
+<li>Hitec Robonova controller board.</li>
+</ul>
+</div>
+\htmlonly
+<div style="clear:both;">
+</div>
+\endhtmlonly
+
+\section platform_3rd 3rd Party Software Interfaces
+The list current and planned support for third party software platforms
+by \h_botsense are itemized below. 
+\li Tekkotsu - an open source framework for a variety of robotic platforms.\n
+    http://www.tekkotsu.org
+\li OpenRave - the Open Robotics Automation Virtual Environment.\n
+    http://openrave.programmingvision.com
+\li ROS - Willow Garage's Robot Operating System or Robot Open Source.\n
+    http://www.ros.org
+\li Myro - Institute for Personal Robots in Education python software.\n
+    http://wiki.roboteducation.org
+
+\section platform_arch Supported Target Architectures
+The list of current and planned support of processor architectures are listed
+below:
+\li Ubuntu Linux 32-bit and 64-bit Intel compatible processors.
+\li Fedora Linux 32-bit and 64-bit Intel compatible processors.
+\li Familiar Linux 32-bit ARM processors (K-Team old KoreBot).
+\li Angstrom Linux 32-bit ARM processors (Verdex gumstix).
+\li Angstrom Linux 32-bit OMAP processors (Overo gumstix).
+\li Ubuntu Linux 32-bit OMAP processors (Overo gumstix).
+\li Windows XP and 7 systems with cygwin.
+\li Mac OS X systems.
+
+\section platform_tested Tested Systems
+The list of tested architecures are list below. Note that the list continually
+expands and may not be up to date.
+\termblock
+  \term Ubuntu
+    \termdata Ubuntu 10.4 Linux for the i386 and x86_64 architectures.
+  \endterm
+  \term Fedora Core
+    \termdata Fedora Core 5 and 6 Linux for the i386 and x86_64 architectures.
+  \endterm
+  \term Angstrom 
+    \termdata Angstrom Linux 2.6 (K-Team KoreBot2 version) for the XScale PXA
+    255 Arm.
+  \endterm
+  \term Familiar
+    \termdata Familiar Linux 2.4 (K-Team KoreBot version) for the XScale PXA
+    255 Arm.
+  \endterm
+  \term Windows
+    \termdata Windows 7 and XP with Cygwin for Intel processors.
+  \endterm
+  \term Mac
+    \termdata Mac OS-X 10.x for Intel processors.
+  \endterm
+\endtermblock
+
+\page page_eula EULA
+\section eula_txt RoadNarrows Robotics BotSense Package End User Licence Agreement
+
+\subsection eula_permissions Permissions
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that
+(1) The above copyright notice and the following two paragraphs
+appear in all copies of the source code and (2) redistributions
+including binaries reproduces these notices in the supporting
+documentation.   Substantial modifications to this software may be
+copyrighted by their authors and need not follow the licensing terms
+described here, provided that the new terms are clearly indicated in
+all files where they apply.
+
+\subsection eula_warranties Warranties
+In no event shall the author, RoadNarrows Robotics or any members/employees
+of RoadNarrows Robotics or distributors of this software be liable to any
+party for direct, indirect, special, incidental, or consequential
+damages arising out of the use of this software and its documentation,
+even if the authors or any of the above parties have been advised of
+the possibility of such damage.
+
+The author and RoadNarrows Robotics specifically disclaim any warranties,
+including, but not limited to, the implied warranties of merchantability anD
+fitness for a particular purpose. the software provided hereunder is on an
+"as is" basis, and the authors and distributors have no obligation tO
+provide maintenance, support, updates, enhancements, or modifications.
+
+\subsection eula_copyright Copyright
+All Rights Reserved by RoadNarrows Robotics
+\n (C) 2007-2010
+\n http://www.roadnarrowsrobotics.com
+
+*/
