@@ -1,0 +1,28 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   appkit
+//
+// File:      x_gtest.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the unit test modules
+//
+/*!
+  \file
+  $LastChangedDate: 2013-02-19 08:24:43 -0700 (Tue, 19 Feb 2013) $
+  $Rev: 2692 $
+*/
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*!
+ * \defgroup gtest Unit Testing Framework
+ * \brief How to create unit tests using the gtest framework.
+ * \{ 
+ */
+
+GTest is pretty much the most awesome thing ever.
+
+/*!
+ * \}
+ */

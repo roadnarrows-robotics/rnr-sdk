@@ -1,0 +1,21 @@
+<?xml-stylesheet
+  href="http://www.roadnarrows.com/xml/readme/1.0/readme.css"
+  type="text/css"?>
+<!--
+ - README.xml
+ -
+ - $LastChangedDate: 2013-02-19 08:24:43 -0700 (Tue, 19 Feb 2013) $
+ - $Rev: 2692 $
+ -->
+<readme>
+  <package>appkit</package>
+  <synopsis>RoadNarrows Robotics Application Tool Kit</synopsis>
+  <description>
+    The RoadNarrows application tool kit appkit provides a set of classes
+    to rapidly develop applications and packages.
+  </description>
+  <dependencies>
+    Please add dependencies
+  </dependencies>
+  <seealso>See documentation for more details.</seealso>
+</readme>

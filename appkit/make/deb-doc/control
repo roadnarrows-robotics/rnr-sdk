@@ -1,0 +1,7 @@
+Package:rnr-appkit-doc
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Maintainer: Robin Knight <robin.knight@roadnarrows.com>
+Description: Libraries for writing applications quickly and consistently.
