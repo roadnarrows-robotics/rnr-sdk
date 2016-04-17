@@ -1,0 +1,15 @@
+$ ../loc/bin.x86_64/example_log -l diag2 -t 3 peaches plums 2>example_log.run1
+
+librnr: Diag1: log.c:108: Logging level set to 3
+logexample: Diag1: example_log.c:152: Post options processed non-option arguments:
+  argv[0]="peaches"
+  argv[1]="plums"
+logexample: Diag1: example_log.c:62: logtest_num1(p=0x7ffff37e7bbe,\
+  sFruit="pears",n=12,half=10,f=-0.015000,hex=0xf1,bAreRipe=true)
+logexample: Diag2: example_log.c:67: There are 12 juicy pears in Tuscany
+logexample: Diag2: example_log.c:84: logtest_num2(count=3)
+logexample: Error: example_log.c:89: Salmonella scare 2...
+logexample: Error: example_log.c:89: Salmonella scare 1...
+logexample: Error: example_log.c:89: Salmonella scare 0...
+logexample: Error: example_log.c:95: No such file or directory(errno=2):\
+  PackingShedOnStrike.newsflash

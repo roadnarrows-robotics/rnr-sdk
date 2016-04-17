@@ -1,0 +1,7 @@
+Package:rnr-librnr-src
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Maintainer: Robin Knight <robing.knight@roadnarrows.com>
+Description: Basic RoadNarrows utilities and configuration source 

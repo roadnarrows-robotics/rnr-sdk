@@ -1,0 +1,27 @@
+<?xml-stylesheet
+  href="http://www.roadnarrows.com/xml/readme/1.0/readme.css"
+  type="text/css"?>
+<!--
+ - README.xml
+ -
+ - $LastChangedDate$
+ - $Rev$
+ -->
+<readme>
+  <package>librnr</package>
+  <synopsis>RoadNarrows Robotics Common Library 1</synopsis>
+  <description>
+The librnr library provides a set of useful interfaces to:
+<ul>
+  <li>Quickly develop packages.</li>
+  <li>Provide a uniform interface for RoadNarrows packages.</li>
+</ul>
+  </description>
+  <dependencies>
+  RoadNarrows Required Packages:
+  <ul>
+    <li>rnmake</li>
+  </ul>
+  </dependencies>
+  <seealso>See documentation for more details.</seealso>
+</readme>

@@ -1,0 +1,113 @@
+$ ../loc/bin.x86_64/example_config
+  Configuration Example
+(enter 'help' for list of commands; partial command matching supported)
+
+config> help
+dbdelete                       - delete existing configuration db
+dbnew                          - create new, empty configuration db
+dbprint                        - print out configuration db
+dbread <filename>              - read configuration db from file
+delete <section> <key>         - delete entry from section
+find <pattern>                 - find all entries that partially match pattern
+getd <section> <key>           - get key=<double> in section
+geti <section> <key>           - get key=<int> in section
+gets <section> <key>           - get key=<string> in section
+help                           - print list of commands
+log <level>                    - set logging level [0-4]
+quit                           - quit program
+sectdelete <section>           - delete section in configuration db
+sectnew <section>              - create new, empty section in configuration db
+setd <section> <key> <double>  - set key=<double> in section
+seti <section> <key> <int>     - set key=<int> in section
+sets <section> <key> <string>  - set key=<string> in section
+config> dbread example.ini
+config>
+config> dbprint
+# Configuration example.ini
+[clowns]
+joe_cooler=Chester De Beers
+clownfish=I. Smelt
+armed_and_silly=Herb Humorous
+
+[the_golden_fleas]
+flea4=bounds
+flea3=skips
+flea2=jumps
+flea1=leaps
+
+[von_trapeze_family]
+spotter=Kurt
+flyer1=Leisl
+flyer2=Gretl
+rigger=Maria
+board_biscuit=Friedrich
+catcher=Captain Georg von Trapeze
+
+[dandylions]
+spiffy_susan=9 yr. female
+fastidiously_eddie=9 year old male asian
+fopulous=3 yr. old male
+
+[global]
+asset4=von_trapeze_family
+asset1=clowns
+circus=Traveling Ring-Neck Broths
+asset3=the_golden_fleas
+founded=1954
+asset2=dandylions
+num_assets=4
+
+config>
+config> find flea
+example.ini: [the_golden_fleas]: flea4=bounds
+example.ini: [the_golden_fleas]: flea3=skips
+example.ini: [the_golden_fleas]: flea2=jumps
+example.ini: [the_golden_fleas]: flea1=leaps
+config> geti global founded
+example.ini: [global]: founded=1954
+config> sets the_golden_fleas flea5 hops
+example.ini: [the_golden_fleas]: flea5=hops
+config> del global asset2
+example.ini: [global]: asset2: deleted
+config> sectdel danydlions
+Error: failed to delete section
+config> sectdel dandylions
+example.ini: [dandylions] deleted
+config> seti global num_assets 3
+example.ini: [global]: num_assets=3
+config>
+config> dbprint
+# Configuration example.ini
+[clowns]
+joe_cooler=Chester De Beers
+clownfish=I. Smelt
+armed_and_silly=Herb Humorous
+
+[the_golden_fleas]
+flea5=hops
+flea4=bounds
+flea3=skips
+flea2=jumps
+flea1=leaps
+
+[von_trapeze_family]
+spotter=Kurt
+flyer1=Leisl
+flyer2=Gretl
+rigger=Maria
+board_biscuit=Friedrich
+catcher=Captain Georg von Trapeze
+
+[global]
+asset4=von_trapeze_family
+asset1=clowns
+circus=Traveling Ring-Neck Broths
+asset3=the_golden_fleas
+founded=1954
+num_assets=3
+
+config> dbdel
+config> dbprint
+Error: configuration db does not exist
+config> quit
+

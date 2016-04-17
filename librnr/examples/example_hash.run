@@ -1,0 +1,95 @@
+$ ../loc/bin.x86_64/example_hash
+Hashing example (enter '?' for list of commands)
+hash> ?
+n                      create new empty hash table
+x                      delete entire hash table
+a <key> <val>          add value to hash table
+d <key>                delete value from hash table
+l <key>                lookup value in hash table
+c                      show counts: number of entries and table size
+t                      dump whole hash table
++                      force increase hash table (by auto-adding)
+-                      force decrease hash table (by auto-deleting)
+v <level>              set logging verbosity level 0-4
+q                      quit
+hash> n
+hash> c
+count=0, size=4
+hash> +
+ starting count=0, table size=4
+ added mt_lincoln(0) -> 14,286
+ added crestone_peak(1) -> 14,294
+ added mt_antero(2) -> 14,269
+ added blanca_peak(3) -> 14,345
+ added mt_massive(4) -> 14,421
+ added mt_wilson(5) -> 14,246
+ added torreys_peak(6) -> 14,267
+ added quandary_peak(7) -> 14,265
+ ending count=8, table size=8
+hash> a mt_cameron 14,238
+hash> l mt_cameron
+mt_cameron -> 14,238
+hash> d blanca_peak(3)
+deleted blanca_peak(3) -> 14,345
+hash> t
+mt_wilson(5) -> 14,246
+mt_cameron -> 14,238
+torreys_peak(6) -> 14,267
+crestone_peak(1) -> 14,294
+quandary_peak(7) -> 14,265
+mt_massive(4) -> 14,421
+mt_lincoln(0) -> 14,286
+mt_antero(2) -> 14,269
+hash> +
+ starting count=8, table size=8
+ added mt_antero(8) -> 14,269
+ added mt_evans(9) -> 14,264
+ added torreys_peak(10) -> 14,267
+ added castle_peak(11) -> 14,265
+ added mt_harvard(12) -> 14,420
+ added castle_peak(13) -> 14,265
+ added blanca_peak(14) -> 14,345
+ added crestone_peak(15) -> 14,294
+ ending count=16, table size=16
+hash> t
+castle_peak(13) -> 14,265
+mt_wilson(5) -> 14,246
+mt_harvard(12) -> 14,420
+castle_peak(11) -> 14,265
+quandary_peak(7) -> 14,265
+torreys_peak(10) -> 14,267
+mt_lincoln(0) -> 14,286
+mt_antero(2) -> 14,269
+blanca_peak(14) -> 14,345
+mt_cameron -> 14,238
+crestone_peak(1) -> 14,294
+torreys_peak(6) -> 14,267
+mt_antero(8) -> 14,269
+mt_massive(4) -> 14,421
+mt_evans(9) -> 14,264
+crestone_peak(15) -> 14,294
+hash> -
+ starting count=16, table size=16
+ deleted castle_peak(13) -> 14,265
+ deleted mt_wilson(5) -> 14,246
+ deleted mt_harvard(12) -> 14,420
+ deleted castle_peak(11) -> 14,265
+ deleted quandary_peak(7) -> 14,265
+ deleted torreys_peak(10) -> 14,267
+ deleted mt_lincoln(0) -> 14,286
+ deleted mt_antero(2) -> 14,269
+ ending count=8, table size=8
+hash> -
+ starting count=8, table size=8
+ deleted blanca_peak(14) -> 14,345
+ deleted mt_cameron -> 14,238
+ deleted crestone_peak(1) -> 14,294
+ deleted torreys_peak(6) -> 14,267
+ ending count=4, table size=4
+hash> t
+mt_antero(8) -> 14,269
+mt_massive(4) -> 14,421
+mt_evans(9) -> 14,264
+crestone_peak(15) -> 14,294
+hash> x
+hash> q

@@ -1,0 +1,126 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows Robotics Common Library 1
+//
+// File:      examples.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the examples
+//  pages found in the "Related Pages" document section.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \page example_assoc example_assoc
+ * This example_assoc page provides an example of librnr support for simple
+ * associative mapping.
+ *
+ * \section example_assoc_c Example main():
+ * configuration databases.
+ * \include examples/example_assoc.c
+ *
+ * \section example_assoc_run Generated output:
+ * \include example_assoc.run
+ */
+
+/*!
+ * \page example_checksum example_checksum
+ * This example_checksum page provides an example of librnr support for
+ * various checksum algorithms.
+ *
+ * \section example_checksum_c Example main():
+ * \include example_checksum.c
+ */
+
+/*!
+ * \page example_config example_config
+ * This example_config page provides an example of librnr support for
+ * configuration parsing and database access.
+ *
+ * \section example_config_c Example main():
+ * This example provides a simple shell to create, modify, and delete
+ * configuration databases.
+ * \include example_config.c
+ *
+ * \section example_config_ini Configuration input file:
+ * \include example.ini
+ *
+ * \section example_config_run Generated output:
+ * \include example_config.run
+ */
+
+/*!
+ * \page example_cpp example_cpp
+ * This example_cpp page provides an example of compiling and linking C++
+ * application against librnr.
+ *
+ * \section example_cpp_cxx Example main():
+ * configuration databases.
+ * \include examples/example_cpp.cxx
+ */
+
+/*!
+ * \page example_dlist example_dlist
+ * This example_dlist page shows how to "derive" and use a doubly-linked list
+ * using the librnr dlistvoid.h header file and the library functions 
+ * DListVoid\<<em>x</em>\> defined in dlistvoid.c.
+ * 
+ *
+ * \section example_dlist_h Example header file:
+ * \include example_dlist.h
+ *
+ * \section example_dlist_c Example main():
+ * \include example_dlist.c
+ *
+ * \section example_dlist_run Generated output:
+ * \include example_dlist.run
+ */
+
+/*!
+ * \page example_hash example_hash
+ * This example_hash page provides an example of librnr support for hashing.
+ *
+ * \section example_hash_c Example main():
+ * This example is a modified version of the unit test code writen by
+ * Kaz Kylheku (kaz@ashi.footprints.net), (C) 1997.
+ * See also the original EULA in hash.h.
+ * \include example_hash.c
+ *
+ * \section example_hash_run Generated output:
+ * \include example_hash.run
+ */
+
+/*!
+ * \page example_log example_log
+ * This example_log page provides an example of librnr support for logging and 
+ * command-line options processing.
+ *
+ * \section example_log_c Example main():
+ * \include example_log.c
+ *
+ * \section example_log_run1 Generated output for run #1:
+ * \include example_log.run1
+ *
+ * \section example_log_run2 Generated output for run #2:
+ * \include example_log.run2
+ */
+
+/*!
+ * \page example_shm example_shm
+ * This example_shm page provides an example of librnr support for
+ * shared memory.
+ *
+ * \section example_shm_c Example main():
+ * \include example_shm.c
+ */
+
+/*!
+ * \page example_uri example_uri
+ * This example_uri page provides an example of librnr support for Uniform
+ * Resource Identifier (URI) parsing.
+ *
+ * \section example_uri_c Example main():
+ * \include example_uri.c
+ */

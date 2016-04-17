@@ -1,0 +1,107 @@
+/*----------------------------------------------------------------------------
+ * RNR specific types
+ *--------------------------------------------------------------------------*/
+
+/*
+body.rnbody {
+  background: #ffffff;
+  color: black;
+  margin-right: 20px;
+  margin-left: 20px;
+}
+*/
+
+/* standard table */
+table.rn-std
+{
+  margin: 0;
+  padding: 0 0 0 10px;
+  border: 2px solid black;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+table.rn-std td
+{
+  vertical-align: top;
+  border: 1px solid black;
+}
+
+table.rn-std th
+{
+  text-align: center;
+  /* text-decoration: underline; */
+  background: #cccccc;
+  font-weight: bold;
+}
+
+/* two-column definition */
+table.rn-def
+{
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+table.rn-def td
+{
+  vertical-align: top;
+  margin: 0;
+  padding: 0 10px 0 0;
+  border: 0;
+  white-space: nowrap;
+}
+
+table.rn-def td.termdata
+{
+  vertical-align: top;
+  margin: 0;
+  padding: 0 10px 0 0;
+  border: 0;
+  white-space: normal;
+}
+
+p.rn-indent
+{
+  margin-left: 10px;
+}
+
+/* man page options table */
+table.rn-opts
+{
+  margin: 0;
+  padding: 0 0 0 10px;
+  border: 0;
+  text-align: left;
+}
+
+table.rn-opts td.rn-opts-grp
+{
+  vertical-align: top;
+  margin: 0;
+  padding: 10px 0 0 0;
+  border: 0;
+  font-weight: bold;
+}
+
+table.rn-opts td.rn-opts-opt
+{
+  vertical-align: top;
+  margin: 0;
+  padding: 0 0 0 10px;
+  border: 0;
+  font-family: monospace, fixed;
+  font-size: 110%;
+}
+
+table.rn-opts td
+{
+  vertical-align: top;
+  margin: 0;
+  padding: 0 0 0 40px;
+  border: 0;
+}
+
+span.rn-code {
+  color: #008000
+}

@@ -1,0 +1,43 @@
+$ ../loc/bin.x86_64/example_dlist >example_dlist.run
+
+I bought an empty zoo.
+
+I bought some animals from the zoo in Flat Earth, NE.
+Node  0: 000 "Shoes": alligator mississippiensis (American alligator)
+Node  1: 001 "Fluffy": loxodonta africana (African bush elephant)
+Node  2: 002 "Snuggles": python sebae (African rock python)
+Node  3: 003 "Wild Bill": ramphastos toco (Toco toucan)
+Node  4: 004 "The Prez": lasiorhinus latifrons (southern hairy-nosed wombat)
+
+Alas, Fluffy died.
+Node  0: 000 "Shoes": alligator mississippiensis (American alligator)
+Node  1: 002 "Snuggles": python sebae (African rock python)
+Node  2: 003 "Wild Bill": ramphastos toco (Toco toucan)
+Node  3: 004 "The Prez": lasiorhinus latifrons (southern hairy-nosed wombat)
+
+But I got a new primo 'phant from the kid down the block.
+Node  0: 005 "eMouse": elephas maximus (Asiatic elephant)
+Node  1: 000 "Shoes": alligator mississippiensis (American alligator)
+Node  2: 002 "Snuggles": python sebae (African rock python)
+Node  3: 003 "Wild Bill": ramphastos toco (Toco toucan)
+Node  4: 004 "The Prez": lasiorhinus latifrons (southern hairy-nosed wombat)
+
+Time to give my menagerie their yearly vitamin shots.
+  injected eMouse
+  injected Shoes
+  injected Snuggles
+  injected Wild Bill
+  injected The Prez
+
+I guess "The Prez" wasn't male. Pass out the bubble gum cigars!
+Node  0: 005 "eMouse": elephas maximus (Asiatic elephant)
+Node  1: 000 "Shoes": alligator mississippiensis (American alligator)
+Node  2: 002 "Snuggles": python sebae (African rock python)
+Node  3: 003 "Wild Bill": ramphastos toco (Toco toucan)
+Node  4: 007 "wittlewomby2": lasiorhinus latifrons (southern hairy-nosed wombat)
+Node  5: 006 "wittlewomby1": lasiorhinus latifrons (southern hairy-nosed wombat)
+Node  6: 004 "The Prez": lasiorhinus latifrons (southern hairy-nosed wombat)
+
+I decided to let my animals go free - in Alaska.
+
+Goodbye.

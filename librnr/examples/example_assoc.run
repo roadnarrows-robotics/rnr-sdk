@@ -1,0 +1,27 @@
+$ ../loc/bin.x86_64/example_assoc
+name:     Moon
+diameter: 3.476000e+03 km
+distance: 3.844000e+05 km
+period:   27.322000 days
+orbits:   Earth
+
+name:     Mercury
+diameter: 4.878000e+03 km
+distance: 4.600000e+07 km
+period:   87.660000 days
+orbits:   Sun
+
+name:     Earth
+diameter: 1.275566e+04 km
+distance: 1.464503e+08 km
+period:   365.250000 days
+orbits:   Sun
+
+name:     Callisto
+diameter: 4.800000e+03 km
+distance: 1.883000e+06 km
+period:   16.689000 days
+orbits:   Jupiter
+
+ceres id: 0
+jupiter id: 10

@@ -1,0 +1,486 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows Make System
+//
+// File:      main.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! \mainpage RoadNarrows Make System
+
+\section rnmake_intro Introduction
+
+The rnmake system provides a fast and simple make system for RoadNarrows LLC
+packages.
+Each package has a required, but flexible, directory hierarchical structure.
+
+The rnmake system supports both native and cross-compliled target
+architectures.
+
+The rnmake system is built around GNU make plus some simple shell (sh/bash)
+utilities and the doxygen documentation tools.
+
+At RoadNarrows, a typical workstation builds for multiple targets. So rnmake
+evolved to support multiple-target, cross-compilations. All supported compiler
+tool chains are GNU gcc based. The target platform must be near Posix compliant.
+
+All rnmake core files reside under /<em>installpath</em>/rnmake where
+/<em>installpath</em> is the installed directory path root of the rnmake/.
+
+\section rnmake_quickstart Quick Start
+Change your current working directory to the top package directory.
+
+The default target architecture is defined by the environment variable
+<b>RNMAKE_ARCH_DFT</b> if defined. Else the <em>i386</em> 
+32-bit Linux Posix is the default.
+
+To make the package for the default target architecture:
+\code
+  $ make deps
+  $ make
+  $ make install
+\endcode
+
+To clean or to clobber the pre-installed distribution:
+\code
+  $ make clean
+  $ make distclean 
+\endcode
+
+To make for a specific target architecture, add arch=<em>arch</em> to the
+command line. For example, to build and install for Arm PXA XScale Linux target:
+\code
+  $ make arch=armpxa install 
+\endcode
+
+\section rnmake_pkg_def Package Definition
+A package is a set of functionally related components such as libraries,
+header files, applications, configuration files, and documentation.
+
+\section rnmake_prod_def Product Definition
+A product is a collection of one or more packages.
+Because a package has a focused use, a package may
+be used across multiple products developed by RoadNarrows, RoadNarrows Robotics,
+and RoadNarrows Intelligent Systems.
+
+\section rnmake_core_mk Core Make Files
+\li The core make file \ref Rules.mk "rnmake/Rules.mk"
+is included in all package make files. It
+defines the set of rules to make a package.
+\li The rnmake/Arch/ subdirectory
+contains the make macro definitions to build for a given target platform
+architecture. It includes tool-chain locations, install locations,
+and build flags.
+\li The rnmake/doxy/ subdirectory defines the doxygen directives and styles
+for a package.
+\li The rnmake/utils subdirectory contains simple shell utility scripts.
+
+\section rnmake_pkg_mk Package Make Files
+\li Under each package's top directory <em>topdir</em> there exists the
+subdirectory make/ where:\n
+The Pkg.mk file defines the package specific make definitions.\n
+The doxy.conf file defines the configuration for the doxygen document
+generation.
+\li For each source [sub]directory under <em>topdir</em>
+there exists a Makefile defining how to make that level of the package.
+
+\section rnmake_doxy Doxygen
+RoadNarrows heavily uses doxygen (see http://www.stack.nl/~dimitri/doxygen) to
+document the source code. The rnmake system has built-in targets to support
+the generation of doxygen HTML documenation.
+
+\section rnamke_rules Make Target Rules
+\termblock
+\term make [arch=<em>arch</em>] help
+  \termdata List available key make targets.
+\endterm
+\term \endterm
+\term make [arch=<em>arch</em>] deps
+  \termdata Make dependencies.
+\endterm
+\term make [arch=<em>arch</em>] [all]
+  \termdata Compile libraries and applications.
+\endterm
+\term make [arch=<em>arch</em>] documents
+  \termdata Make documentation.
+\endterm
+\term make [arch=<em>arch</em>] install
+  \termdata Install distribution. (libraries, applications, and documentation
+            are automatically made as required).
+\term \endterm
+\endterm
+\term make [arch=<em>arch</em>] tarballs
+  \termdata Make binary, source, and documenation compressed tar files
+           (tarballs).
+\term \endterm
+\endterm
+\term make [arch=<em>arch</em>] clean
+  \termdata Clean object files.
+\endterm
+\term make [arch=<em>arch</em>] distclean
+  \termdata Clean plus remove distribution and local files, and dependencies.
+\endterm
+\term make [arch=<em>arch</em>] clobber
+  \termdata Same as distclean.
+\endterm
+\term \endterm
+\term make [arch=<em>arch</em>] <em>file</em>.o
+  \termdata Make an individual object file.
+\endterm
+\term make [arch=<em>arch</em>] <em>file</em>.ii
+  \termdata Make an individual post c preprocessor file.
+\endterm
+\endtermblock
+
+\section rnmake_arch Architectures
+The currently supported architectures are:
+\termblock
+\term i386
+  \termdata Linux with any Intel (backwards) compatible 32-bit architectures.
+\endterm
+\term x86_64
+  \termdata Linux with any AMD 64-bit architectures.
+\endterm
+\term armpxa
+  \termdata Cross-compiled Familiar Linux XScale Arm PXA architectures.
+\endterm
+\term armang
+  \termdata Cross-compiled Angstrom Linux XScale Arm PXA architectures.
+\endterm
+\term cygwin
+  \termdata Cross-compiled for Windows systems with install cygwin
+  (see http://www.cygwin.com).
+\endterm
+\term cygwin-nat
+  \termdata Natively compiled on Windows systems with install cygwin
+  (see http://www.cygwin.com).
+\endterm
+\term osx
+  \termdata Apple Mac OS-X natively compiled systems.
+  Tested on users' personal machines, but has not officially
+  RoadNarrows tested and verified.
+\endterm
+\endtermblock
+New architectures are added as needed. One near-term addition will be the
+Gumstix Verdex and Overo platform running Linux 2.6.
+
+\section rnmake_toolchains Tool Chains
+No compiler tool chains are included. This is the responsibility of the 
+developer or organization.
+
+\subsection rnmake_toolchains_ver Verified Tool-Chains and Targets
+The rnmake system and resultant compiled packages have been verified using the
+following tool chains and cross-compiled targets:
+\termblock
+\term make
+  \termdata GNU make 3.8+.\n
+            make 3.81 Fedora Core 5/6 on 32-bit and 64-bit machines.\n
+            make 3.81 Ubuntu 8.1/9.4 on 32-bit and 64-bit machines.\n
+            make 3.8+ Windows cygwin on 32-bit machines.
+\endterm
+
+\term gcc
+  \termdata GNU gcc 4.3+ compiler, link loader, pre-processor, archiver,
+            utilities, target system headers and libraries.\n
+            gcc 4.1.2 Fedora Core 5/6 on 32-bit and 64-bit machines.\n
+            gcc 4.3.2+ for Ubuntu 8.1/9.4 on 32-bit and 64-bit machines.\n
+            gcc 4.3+ Windows cygwin on 32-bit machines.
+\endterm
+
+\term arm-linux-gcc
+  \termdata GNU gcc 4.1 cross-compiler, link loader, pre-processor, archiver,
+            utilities, target system headers and libraries.\n
+            gcc 4.1.0 Linux 2.4 XScale Arm PXA. Tested on the K-Team
+            KoreBot single board computer.
+\endterm
+
+\term i686-pc-cygwin-gcc
+  \termdata GNU gcc 4.3+ cross-compiler, link loader, pre-processor,
+            archiver, utilities, target system headers and libraries.\n
+            gcc 4.3 for Fedora Core 5 & 6 on 32-bit and 64-bit machines.
+\endterm
+
+\term doxygen
+  \termdata Doxygen 1.5.8 for Fedora Core 5/6, Ubuntu 8.1/9.4, and
+            Windows cygwin platforms
+\endterm
+
+\term shell
+  \termdata System standard <b>sh</b> or <b>bash</b> shell.
+\endterm
+\endtermblock
+
+\section rnmake_tweaks Tweaks
+There are many tweaks a developer can do to rnmake to alter its behavior by
+simply editing the appropriate make file macros. Some common tweaks are:
+\li Export the environment variable <b>RNMAKE_ARCH_DFT</b> to defined the 
+default make architecture.
+\code
+# Example
+$ export RNMAKE_ARCH_DFT=x86_64
+$
+$ make         # make [sub]package for x86_64 architecture
+\endcode
+\li A developer can easily add a new host architecture by adding their new
+rnmake architecture make file Arch.<em>newarch</em>.mk to rnmake/Arch/
+directory. The best way to start is to copy an existing Arch.<em>arch</em>.mk
+file and make the appropriate changes.
+\li For Arch.<em>arch</em>.mk (see files for full set of tweaks):
+  \termblock
+   \term prefix \termdata Defines where to install the package. \endterm
+    \term CROSS_COMPILE \termdata Tool chain command prefix string  \endterm
+   \endtermblock
+\li Top Makefile
+   \termblock
+    \term prefix_root
+    \termdata Root directory to install all target architectures.
+              If <em>prefix</em> is defined, <em>prefix_root</em> is ignored.\n
+              Default: <em>topdir</em>/xinstall/
+   \endtermblock
+
+\section rnmake_mani File Manifest
+List of directories, files, and naming conventions.
+
+\subsection rnamake_mani_nom Nomenclature
+\termblock
+\term <em>rnmake</em>
+  \termdata Directory path to the top directory of the rnmake package.\n
+            Example: /prj/rnmake
+\endterm
+\term <em>pkgroot</em>
+  \termdata Directory path to package top directory.\n
+            Example: /prj/pkg/librnr
+\endterm
+\term <em>topdir</em>
+  \termdata Directory path to product's top directory. May be same as
+            <em>pkgroot</em> for single packages.
+\endterm
+\term <em>prefix</em>
+  \termdata Install root directory.\n
+            Example: <em>topdir</em>/xinstall/<em>arch</em>/ \n
+            Default: /prj/xinstall/<em>arch</em>/
+\endterm
+\term <em>arch</em>
+  \termdata Target host platform architecture.
+\endterm
+\term <em>pkg</em>
+  \termdata Package fully qualified name.
+\endterm
+\term <em>prod</em>
+  \termdata Product fully qualified name.
+\endterm
+\term <em>path</em>
+  \termdata A directory path.
+\endterm
+\endtermblock
+
+\subsection rnmake_mani_core Core Make System
+\termblock
+\term <em>rnmake</em>/
+  \termdata The rnmake top directory containing core make files including
+            Rules.mk.
+\endterm
+\term <em>rnmake</em>/Arch/
+  \termdata The subdirectory holding the architecture make files.
+\endterm
+\term <em>rnmake</em>/doxy/
+  \termdata The doxygen package files.
+\endterm
+\term <em>rnmake</em>/utils/
+  \termdata Various rnmake utility scripts.
+\endterm
+\endtermblock
+
+\subsection rnmake_mani_pkg General Package Structure
+\termblock
+\term <em>pkgroot</em>/docs/
+  \termdata Package doxygen main and support documentation.
+\endterm
+\term <em>pkgroot</em>/examples/
+  \termdata Package example programs.
+\endterm
+\term <em>pkgroot</em>/include/
+  \termdata Package top include directory.
+\endterm
+\term <em>pkgroot</em>/make/
+  \termdata Package wide make and configuration files.
+\term <em>pkgroot</em>/<em>path</em>/
+  \termdata Package subcomponent directory. \n
+            For examploe: a subdirectory holding source files for a library.
+\endterm
+\endtermblock
+
+\subsection rnmake_mani_prod General Product Structure
+\termblock
+\term <em>topdir</em>/make/
+  \termdata Product wide make and configuration files.
+\endterm
+\term <em>topdir</em>/<em>pkg_n</em>/
+  \termdata Package <em>n</em> root directory.
+\endterm
+\endtermblock
+
+\subsection rnmake_mani_inter Make Intermediates
+\termblock
+\term <em>pkgroot</em>/<em>path</em>/.deps/
+  \termdata Source dependencies for package directory.
+\endterm
+\term <em>pkgroot</em>/<em>path</em>/.deps/deps.<em>arch</em>/
+  \termdata Source dependencies for <em>arch</em> architecure.
+\endterm
+\term <em>pkgroot</em>/<em>path</em>/obj/
+  \termdata Object files for packaage directory.
+\endterm
+\term <em>pkgroot</em>/<em>path</em>/obj/obj.<em>arch</em>/
+  \termdata Object files for <em>arch</em> architecure.
+\endterm
+\term <em>pkgroot</em>/loc/
+  \termdata Top directory containing local-only generated
+            libraries and applications. Local files are not installed.
+\endterm
+\term <em>topdir</em>/dist/
+  \termdata Distribution generated files top directory.
+            Distribution files are installed to <em>prefix</em>.
+\endterm
+\term <em>topdir</em>/dist/dist.<em>arch</em>/
+  \termdata Distribution generated files for <em>arch</em> architecture.
+\endterm
+\term <em>topdir</em>/dist/dist.<em>arch</em>/bin/
+  \termdata Executables.
+\endterm
+\term <em>topdir</em>/dist/dist.<em>arch</em>/lib/
+  \termdata Libraries.
+\endterm
+\term <em>topdir</em>/dist/dist.<em>arch></em>/etc/
+  \termdata System configuration.
+\endterm
+\term <em>topdir</em>/dist/dist.<em>arch</em>/share/
+  \termdata Package configuration and documenation including doxygen
+            generated HTML.
+\endterm
+\term <em>topdir</em>/dist/dist.<em>arch</em>/src/
+  \termdata A clean copy of source files for tarring, etc.
+\endterm
+\term <em>topdir</em>/dist/dist.<em>arch</em>/tmp/
+  \termdata Directory holding temporaries.
+\endterm
+\endtermblock
+
+\subsection rnmake_mani_ins Install
+Install directories. Any of the following parameters can be overriden
+as necessary 
+in an including Makefile or on the command line.
+Note that these parameters are the same as the traditional <b>configuration</b>
+naming convention.
+\termblock
+\term <em>prefix</em>/
+  \termdata Installed files root directory.
+\endterm
+\term <em>exec_prefix</em>
+  \termdata Installed executables root directory
+    <br>default: <em>prefix</em>
+\endterm
+\term <em>bindir</em>
+  \termdata Installed executables directory
+      <br>default: <em>exec_prefix</em>/bin
+\endterm
+\term <em>sbindir </em>
+  \termdata Installed system executables directory
+      <br>default: <em>exec_prefix</em>/sbin
+\endterm
+\term <em>libexecdir</em>
+  \termdata Installed executable libraries directory
+      <br>default: <em>exec_prefix</em>/libexec
+\endterm
+\term <em>sysconfdir</em>
+  \termdata Installed system configuration files directory
+      <br>default: <em>prefix</em>/etc
+\endterm
+\term <em>localstatedir</em>
+  \termdata Installed local state directory
+      <br>default: <em>prefix</em>/var
+\endterm
+\term <em>libdir</em>
+  \termdata Installed libraries directory
+      <br>default: <em>exec_prefix</em>/lib
+\endterm
+\term <em>includedir</em>
+  \termdata Installed API headers directory
+      <br>default: <em>prefix</em>/include
+\endterm
+\term <em>sharedir</em>
+  \termdata Installed shared data directory
+      <br>default: <em>prefix</em>/share
+\endterm
+\term <em>infodir</em>
+  \termdata Installed information directory
+      <br>default: <em>prefix</em>/info
+\endterm
+\term <em>docdir</em>
+  \termdata Installed documentation directory
+      <br>default: <em>prefix</em>/share/doc
+\endterm
+\term <em>mandir</em>
+  \termdata Installed manpages directory
+      <br>default: <em>prefix</em>/man
+\endterm
+\endtermblock
+
+\subsection rnmake_mani_tar Tarballs
+\termblock
+\term <em>topdir</em>/dist/<em>pkg</em>-doc.tar.gz
+  \termdata Package source documentation tarball file.
+\endterm
+\term <em>topdir</em>/dist/<em>pkg</em>-src.tar.gz
+  \termdata Package source tarball file.
+\endterm
+\term <em>topdir</em>/dist/<em>pkg</em>-<em>arch</em>.tar.gz
+  \termdata Package binary compiled source tarball file
+            for <em>arch</em> architecture (only if stand-alone package).
+\endterm
+\term <em>topdir</em>/dist/<em>prod</em>-<em>arch</em>.tar.gz
+  \termdata Product binary compiled source tarball file for <em>arch</em>
+            architecture .
+\endterm
+\endtermblock
+
+\page page_eula EULA
+\section eula_txt RoadNarrows LLC rnmake Package End User Licence Agreement
+
+\subsection eula_permissions Permissions
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that
+(1) The above copyright notice and the following two paragraphs
+appear in all copies of the source code and (2) redistributions
+including binaries reproduces these notices in the supporting
+documentation.   Substantial modifications to this software may be
+copyrighted by their authors and need not follow the licensing terms
+described here, provided that the new terms are clearly indicated in
+all files where they apply.
+
+\subsection eula_warranties Warranties
+In no event shall the author, RoadNarrows LLC or any members/employees
+of RoadNarrows LLC or distributors of this software be liable to any
+party for direct, indirect, special, incidental, or consequential
+damages arising out of the use of this software and its documentation,
+even if the authors or any of the above parties have been advised of
+the possibility of such damage.
+
+The author and RoadNarrows LLC specifically disclaim any warranties,
+including, but not limited to, the implied warranties of merchantability anD
+fitness for a particular purpose. the software provided hereunder is on an
+"as is" basis, and the authors and distributors have no obligation tO
+provide maintenance, support, updates, enhancements, or modifications.
+
+\subsection eula_copyright Copyright
+All Rights Reserved by RoadNarrows LLC
+\n (C) 2004-2009
+\n http://www.roadnarrows.com
+
+*/
