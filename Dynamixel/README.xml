@@ -1,0 +1,35 @@
+<?xml-stylesheet
+  href="http://www.roadnarrows.com/xml/readme/1.0/readme.css"
+  type="text/css"?>
+<!--
+ - README.xml
+ -
+ - $LastChangedDate: 2011-06-22 08:41:22 -0600 (Wed, 22 Jun 2011) $
+ - $Rev: 1061 $
+ -->
+<readme>
+  <package>Dynamixel</package>
+  <synopsis>RoadNarrows Dynamixel Package</synopsis>
+  <description>
+    The Dynamixel software package provides RoadNarrows software extensions to
+    Robotis Dynamixel servos. Specifically, an on-target Dynamixel 
+    library plus the BotSense client-server
+    modules for operation and monitoring of a Dynamixel chain over IP.
+  </description>
+  <dependencies>
+    RoadNarrows Required Packages:
+    <ul>
+      <li>rnmake</li>
+      <li>librnr</li>
+      <li>libserial</li>
+      <li>netmsgs</li>
+      <li>botsense</li>
+    </ul>
+    Robotis Required Hardware:
+    <ul>
+      <li>USB2Dynamixel dongle</li>
+      <li>Dynamixel servos</li>
+    </ul>
+  </dependencies>
+  <seealso>See documentation for more details.</seealso>
+</readme>

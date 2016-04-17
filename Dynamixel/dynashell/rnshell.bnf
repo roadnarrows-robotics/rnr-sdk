@@ -1,0 +1,141 @@
+#
+# rnsh (dynashell for one) BNF with examples.
+# This is a work in progress. Just want to record ideas.
+#
+
+#------------------------------------------------------------------------------
+# Example to support:
+#
+
+// some variable
+label = "moving servo"
+goalpos = 340
+degpertick = 0.29
+
+readcurpos $chain
+
+if $1.curpos < goalpos
+{
+  dir = "cw"
+}
+else
+{
+  dir = "ccw"
+}
+  
+deg = goalpos * degpertick
+
+// moving servo 1 cw/ccw to goal position <deg>
+echo label 1 dir "to goal position" deg
+
+moveto $1 goalpos
+
+while $1.curpos != goalpos
+{
+  readcurpos $1
+  deg = $1.curpos * degpertick
+  echo "servo 1 at" deg
+  wait 0.01 
+}
+
+echo "done\n\n"
+
+
+#------------------------------------------------------------------------------
+# BNF
+#
+
+statement-list ::=
+    statement
+  | statement-list statement
+
+statement ::=
+    cmd-stmt
+  | assignment-stmt
+  | if-stmt
+  | elif-stmt
+  | else-stmt
+  | while-stmt
+  | block-stmt
+
+cmd-stmt ::=
+  command [arg [arg...]]
+
+assignment-stmt ::=
+  identifier '=' arith-expr
+
+if-stmt ::=
+  'if' cond-expr block-stmt
+
+elif-stmt ::=
+  'elif' cond-expr block-stmt
+
+else-stmt ::=
+  'else' block-stmt
+
+while-stmt ::=
+  'while' cond-expr block-stmt
+
+block-stmt ::=
+  '{' statement-list '}'
+
+arg ::=
+  primary-expr
+
+expr ::=
+    arith-expr
+  | cond-expr
+
+arith-expr ::=
+  add-expr
+
+add-expr ::=
+    mul-expr
+  | add-expr '+' mul-expr
+  | add-expr '-' mul-expr
+
+mul-expr ::=
+    primary-expr
+  | mul-expr '*' primary-expr
+  | mul-expr '/' primary-expr
+  | mul-expr '%' primary-expr
+
+cond-expr ::=
+    comp-expr
+  | cond-expr 'or' cond-expr
+  | cond-expr 'and' cond-expr
+  | 'not' cond-expr
+
+comp-expr ::=
+  primary-expr comp-op primary-expr
+
+comp-op ::= '==' | '!=' | '>=' | '<=' | '>' | '<'
+
+primary-expr ::=
+    identifier
+  | constant
+
+identifier ::=
+    IDENTIFIER
+  | servo-id
+  
+servo-id ::=
+    '$' INTEGER
+  | '$' INTEGER '.' IDENTIFIER
+  | '$chain'
+  | '$*'
+  | '$masters'
+  | '$m'
+
+constant ::=
+    BOOL
+  | INTEGER
+  | FLOAT
+  | string
+
+string ::=
+  '"' char-seq '"'
+
+char-seq ::=
+    CHAR
+  | char-seq CHAR

@@ -1,0 +1,275 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Dynamixel
+//
+// File:      cModPktProtocol.doxy
+//
+// Version:
+// $LastChangedDate: 2014-06-25 13:09:23 -0600 (Wed, 25 Jun 2014) $
+// $Rev: 3669 $
+//
+// Description:
+// Defines Dynamixel Bus Packet Protocol
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \addtogroup dyna_bus_proto
+\section dbp_intro Intro
+The Dynamixel Bus packats are tranmitted over a half-duplex serial interface 
+at baud rates up to 3Mbs. The host initiates communication by transmitting a
+request and then waits for a response, if any, from the servo.
+There are two broad versions of the protocol:
+  - Version 1: Dynamixel product line (e.g. AX, MX, etc).
+  - Version 2: Dynamixel Pro product line.
+
+Currently, only Version 1 of the protocol is supported.
+
+\section dbp_pkt_types Supported Packets Types
+\termblock
+\term \b Ping \termdata Pings the specified servo. \endterm
+\term \b Read \termdata Read byte/word from the specified servo. \endterm
+\term \b Write \termdata Write byte/word to the specified servo. \endterm
+\term \b SyncWrite
+  \termdata Synchonize write data to a specified set of servos.
+\endterm
+\endtermblock
+
+\section dbp_pkt_fields Packet Fields
+\termblock
+\term \e Field \termdata \e Pos \termdata \e Len \termdata \e Values
+  \termdata \e Notes
+\endterm
+\term FRAME \termdata 0 \termdata 2 \termdata 0xffff
+  \termdata All tx/rx packets begin with the frame bytes.
+\endterm
+\term id \termdata 2 \termdata 1 \termdata 0-253, 254
+  \termdata Servo identifier: 0-253, BROADCAST: 254
+\endterm
+\term len \termdata 3 \termdata 1 \termdata 2-255
+  \termdata Length of packet excluding FRAME, len, and chksum.
+\endterm
+\term inst \termdata 4 \termdata 1 \termdata enum
+  \termdata Instruction. PING: 1, READ: 2, WRITE: 3, SYNC_WRITE: 131
+\endterm
+\term addr \termdata 5 \termdata 1 \termdata 0-255
+  \termdata Address of servo control table data.
+\endterm
+\term val_len \termdata 6 \termdata 1 \termdata 1, 2
+  \termdata Length of servo control table data.
+\endterm
+\term val \termdata - \termdata 1 \termdata byte
+  \termdata Byte read/written from/to servo control.
+\endterm
+\term val_lsb \termdata - \termdata 1 \termdata byte
+  \termdata Word LSB read/written from/to servo control table.
+\endterm
+\term val_msb \termdata - \termdata 1 \termdata byte
+  \termdata Word MSB read/written from/to servo control table.
+\endterm
+\term chksum \termdata len+3 \termdata 1 \termdata byte
+  \termdata Checksum over packet excluding FRAME.
+\endterm
+\endtermblock
+
+\section dbp_pkt Packet Formats
+\subsection dbp_pkt_ping Ping
+\beginhtml
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">TX (6)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">2</td>
+  <td style="text-align:center; width:5em;">PING</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">RX (6)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">2</td>
+  <td style="text-align:center; width:5em;">PING</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+\endhtml
+
+\subsection dbp_pkt_read_byte Read Byte
+\beginhtml
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">TX (8)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">4</td>
+  <td style="text-align:center; width:5em;">READ</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">1</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">RX (8)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">4</td>
+  <td style="text-align:center; width:5em;">READ</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">val</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+\endhtml
+
+\subsection dbp_pkt_read_word Read Word
+\beginhtml
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">TX (8)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">4</td>
+  <td style="text-align:center; width:5em;">READ</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">2</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">RX (9)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">5</td>
+  <td style="text-align:center; width:5em;">READ</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">val_lsb</td>
+  <td style="text-align:center; width:5em;">val_msb</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+\endhtml
+
+\subsection dbp_pkt_write_byte Write Byte
+\beginhtml
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">TX (8)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">4</td>
+  <td style="text-align:center; width:5em;">WRITE</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">val</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">RX (6)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">2</td>
+  <td style="text-align:center; width:5em;">WRITE</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+\endhtml
+
+\subsection dbp_pkt_write_word Write Word
+\beginhtml
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">TX (9)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">5</td>
+  <td style="text-align:center; width:5em;">WRITE</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">val_lsb</td>
+  <td style="text-align:center; width:5em;">val_msb</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:5em;">RX (6)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">id</td>
+  <td style="text-align:center; width:5em;">2</td>
+  <td style="text-align:center; width:5em;">WRITE</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+\endhtml
+
+\subsection dbp_pkt_sync_write_byte Sync Write Byte
+\beginhtml
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:6em;">TX (len+4)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">BROADCAST</td>
+  <td style="text-align:center; width:5em;">4+2*n</td>
+  <td style="text-align:center; width:5em;">SYNC_WRITE</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">1</td>
+  <td style="text-align:center; width:5em;">id_1</td>
+  <td style="text-align:center; width:5em;">val_1</td>
+  <td style="text-align:center; width:3em;">...</td>
+  <td style="text-align:center; width:5em;">id_n</td>
+  <td style="text-align:center; width:5em;">val_n</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+<p>no response</p>
+\endhtml
+
+
+\subsection dbp_pkt_sync_write_word Sync Write Word
+\beginhtml
+<table class="rn-std" style="margin-bottom:10px;">
+<tr>
+  <td style="text-align:center; width:6em;">TX (len+4)</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">0xff</td>
+  <td style="text-align:center; width:5em;">BROADCAST</td>
+  <td style="text-align:center; width:5em;">4+3*n</td>
+  <td style="text-align:center; width:5em;">SYNC_WRITE</td>
+  <td style="text-align:center; width:5em;">addr</td>
+  <td style="text-align:center; width:5em;">2</td>
+  <td style="text-align:center; width:5em;">id_1</td>
+  <td style="text-align:center; width:5em;">val_lsb_1</td>
+  <td style="text-align:center; width:5em;">val_msb_1</td>
+  <td style="text-align:center; width:3em;">...</td>
+  <td style="text-align:center; width:5em;">id_n</td>
+  <td style="text-align:center; width:5em;">val_lsb_n</td>
+  <td style="text-align:center; width:5em;">val_msb_n</td>
+  <td style="text-align:center; width:5em;">chksum</td>
+</tr>
+</table>
+<p>no response</p>
+\endhtml
+
+ */
+\endhtml
+
+
+ */

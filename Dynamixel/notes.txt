@@ -1,0 +1,68 @@
+Dynamixel Packet Protocol
+-------------------------
+READ8 PACKET:
+Req 7 bytes: 0xff 0xff servo_id len inst address 1 chksum
+Rsp 7 bytes: 0xff 0xff servo_id len err val chksum
+
+READ16 PACKET:
+Req 7 bytes: 0xff 0xff servo_id len inst address 2 chksum
+Rsp 8 bytes: 0xff 0xff servo_id len err val_lo val_hi chksum
+
+WRITE8 PACKET:
+Req 8 bytes: 0xff 0xff servo_id len inst address val chksum
+Rsp 6 bytes: 0xff 0xff servo_id len err chksum
+
+WRITE16 PACKET:
+Req 9 bytes: 0xff 0xff servo_id len inst address val_lo val_hi chksum
+Rsp 6 bytes: 0xff 0xff servo_id len err chksum
+
+
+BgThread:
+---------
+7 servos, 6 masters, 6 in continuous mode, 1 in servo mode.
+
+Dynamics Per Cycle (no torque control):
+NServos Operation         tx    tx_tot    rx    rx_tot
+6       ReadCurPos        7       42      8       48
+6       ReadCurSpeed      7       42      8       48
+6       ReadCurLoad       7       42      8       48
+5       WriteGoalSpeed    9       45      6       30
+1       WriteGoalSpeed    9        9      6        6
+1       WriteGoalPos      9        9      6        6
+                        Totals   189             186
+
+Health Per Cycle:
+NServos Operation         tx    tx_tot    rx    rx_tot
+1       ReadTemp          7       7       7       7
+1       ReadVolt          7       7       7       7
+1       ReadCurLoad       7       7       8       8
+                        Totals   21              22
+
+Total Tx: 210 bytes = 1680 bits = .17% of 1Mbps; 1.7msec transmit time
+Total Rx: 208 bytes = 1664 bits = .17% of 1Mbps; 1.7msec receive time
+
+
+50Hz Cycle : 20msec Period: IMPOSSIBLE
+Tx: 10500 bytes = 84000 bits = 8.40% of 1Mbps;  84.0 msec transmit time
+Rx: 10400 bytes = 83200 bits = 8.32% of 1Mbps;  83.2 msec receive time
+                      Total(with no latency):  167.2 msec
+
+25Hz Cycle : 40msec Period: IMPOSSIBLE
+Tx:  5240 bytes = 42000 bits = 4.20% of 1Mbps;  42.0 msec transmit time
+Rx:  5200 bytes = 43200 bits = 4.16% of 1Mbps;  41.6 msec receive time
+                      Total(with no latency):   83.6 msec
+
+20Hz Cycle : 50msec Period: IMPOSSIBLE
+Tx:  4200 bytes = 33600 bits = 3.36% of 1Mbps;  33.6 msec transmit time
+Rx:  4160 bytes = 33280 bits = 3.33% of 1Mbps;  33.3 msec receive time
+                      Total(with no latency):   66.9 msec
+
+10Hz Cycle : 100msec Period: GOOD 66.6 msec for latency and work
+Tx:  2100 bytes = 16800 bits = 1.68% of 1Mbps;  16.8 msec transmit time
+Rx:  2080 bytes = 16640 bits = 1.66% of 1Mbps;  16.6 msec receive time
+                      Total(with no latency):   33.4 msec
+
+15Hz Cycle : 66.7msec Period: GOOD 16.5 msec for latency and work
+Tx:  3150 bytes = 25200 bits = 2.52% of 1Mbps;  25.2 msec transmit time
+Rx:  3120 bytes = 24960 bits = 2.50% of 1Mbps;  25.0 msec receive time
+                      Total(with no latency):   50.2 msec

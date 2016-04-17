@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE netmsgs PUBLIC "-//www.roadnarrows.com//DTD NETMSGS 1.0//EN"
+          "http://www.roadnarrows.com/xml/netmsgs/1.0/netmsgs.dtd">
+
+<!--
+ - Package: Dynamixel
+ - Module:  bsDyna
+ - File:    bsDynaMsgs.xml
+ -
+
+/*!
+ \file
+
+  $LastChangedDate: 2015-01-12 10:56:06 -0700 (Mon, 12 Jan 2015) $
+  $Rev: 3845 $
+
+  \brief BotSense client - bsProxy server Dynamixel device messages.
+  
+  \author Robin Knight (robin.knight@roadnarrows.com)
+  
+  \par Copyright:
+  (C) 2012-2015.  RoadNarrows LLC.
+  (http://www.roadnarrows.com)
+  \n All Rights Reserved
+*/
+-->
+
+<!--
+@EulaBegin@
+ - 
+ - Unless otherwise stated explicitly, all materials contained are copyrighted
+ - and may not be used without RoadNarrows LLC's written consent,
+ - except as provided in these terms and conditions or in the copyright
+ - notice (documents and software) or other proprietary notice provided with
+ - the relevant materials.
+ - 
+ - IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
+ - MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
+ - BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
+ - CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
+ - DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
+ - ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ - 
+ - THE AUTHORS AND  ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ - INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ - FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ - "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ - PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ - 
+@EulaEnd@
+-->
+
+<netmsgs encoding="itv" endian="big">
+
+  <!-- ........................................................................
+    - Meta Data to Tweak Source Generation
+    ....................................................................... -->
+  <meta>
+    <brief>
+      \h_botsense Server/Client Dynamixel NetMsgs XML Definitions.
+    </brief>
+    <ns>BsDyna</ns>
+    <prologue lang="h">
+#include "botsense/BotSense.h"
+#include "Dynamixel/Dynamixel.h"
+    </prologue>
+    <epilogue lang="h"></epilogue>
+    <prologue lang="c"></prologue>
+    <epilogue lang="c"></epilogue>
+    <prologue lang="python">
+    </prologue>
+    <epilogue lang="python"></epilogue>
+  </meta>
+
+  <!-- ........................................................................
+    - Extended Field Types (Optional)
+    ....................................................................... -->
+  <field_types>
+    <ftypedef ftid="WriteTuple"     ftype="struct">
+      <fielddef fname="servo_id"    ftype="u8" />
+      <fielddef fname="val"         ftype="u16" />
+    </ftypedef>
+  </field_types>
+
+
+  <!-- ........................................................................
+    - Message Definitions
+    ....................................................................... -->
+  <msg_types>
+
+    <!-- Dynamixel USB Serial Open Request Arguments Sub-Message -->
+    <msgdef msgid="ReqOpenArgs">
+      <fielddef fname="baudrate"  ftype="u32" />
+    </msgdef>
+
+    <!-- Set Baudrate Request (Ok Response) -->
+    <msgdef msgid="ReqSetBaudRate">
+      <fielddef fname="baudrate"  ftype="u32" />
+    </msgdef>
+
+    <!-- Read 8-btis Request -->
+    <msgdef msgid="ReqRead8">
+      <fielddef fname="servo_id"  ftype="u8" />
+      <fielddef fname="addr"      ftype="u8" />
+    </msgdef>
+
+    <!-- Read 8-btis Response -->
+    <msgdef msgid="RspRead8">
+      <fielddef fname="alarms"    ftype="u8" />
+      <fielddef fname="val"       ftype="u8" />
+    </msgdef>
+
+    <!-- Read 16-btis Request -->
+    <msgdef msgid="ReqRead16">
+      <fielddef fname="servo_id"  ftype="u8" />
+      <fielddef fname="addr"      ftype="u8" />
+    </msgdef>
+
+    <!-- Read 8-btis Response -->
+    <msgdef msgid="RspRead16">
+      <fielddef fname="alarms"    ftype="u8" />
+      <fielddef fname="val"       ftype="u16" />
+    </msgdef>
+
+    <!-- Write 8-btis Request -->
+    <msgdef msgid="ReqWrite8">
+      <fielddef fname="servo_id"  ftype="u8" />
+      <fielddef fname="addr"      ftype="u8" />
+      <fielddef fname="val"       ftype="u8" />
+    </msgdef>
+
+    <!-- Write 8-btis Response -->
+    <msgdef msgid="RspWrite8">
+      <fielddef fname="alarms"    ftype="u8" />
+    </msgdef>
+
+    <!-- Write 16-btis Request -->
+    <msgdef msgid="ReqWrite16">
+      <fielddef fname="servo_id"  ftype="u8" />
+      <fielddef fname="addr"      ftype="u8" />
+      <fielddef fname="val"       ftype="u16" />
+    </msgdef>
+
+    <!-- Write 16-btis Response -->
+    <msgdef msgid="RspWrite16">
+      <fielddef fname="alarms"    ftype="u8" />
+    </msgdef>
+
+    <!-- Sync Write Request (Ok Response) -->
+    <msgdef msgid="ReqSyncWrite">
+      <fielddef fname="addr"      ftype="u8" />
+      <fielddef fname="data_size" ftype="u8" />
+      <fielddef fname="tuples"    ftype="WriteTuple[]" size="DYNA_ID_NUMOF" />
+    </msgdef>
+
+    <!-- Ping Servo Request -->
+    <msgdef msgid="ReqPing">
+      <fielddef fname="servo_id"  ftype="u8" />
+    </msgdef>
+
+    <!-- Ping Servo Response -->
+    <msgdef msgid="RspPing">
+      <fielddef fname="pong"      ftype="bool" />
+    </msgdef>
+
+    <!-- Reset Servo Request (Ok Response) -->
+    <msgdef msgid="ReqReset">
+      <fielddef fname="servo_id"  ftype="u8" />
+    </msgdef>
+
+    <!-- Set Half-Duplex Control Request (Ok Response) -->
+    <msgdef msgid="ReqSetHalfDuplexCtl">
+      <fielddef fname="signal"  ftype="u32" />
+    </msgdef>
+
+  </msg_types>
+
+</netmsgs>
