@@ -1,0 +1,14 @@
+#
+# Handy little script to filter out unfixable errors from doxygen generated
+# doxy.err.log file.
+#
+# Ignored Groups of Errors:
+#   Swigged generated interface don't adhere to doxygen, so ignore these
+#   NetMsggs generated python message module
+#   
+
+cat doxy.err.log | grep -v \
+  -e "_swig" -e "_wrap" -e "\.i" \
+  -e "cbCore.py" \
+  -e "cbMsgs.py"
+  

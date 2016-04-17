@@ -1,0 +1,7 @@
+<Modules>
+    <Module path="/prj/lib/libnimCodecs.so" />
+    <Module path="/prj/lib/libnimMockNodes.so" />
+    <Module path="/prj/lib/libnimRecorder.so" />
+    <Module path="/prj/lib/libXnDeviceSensorV2.so" />
+    <Module path="/prj/lib/libXnDeviceFile.so" />
+</Modules>
