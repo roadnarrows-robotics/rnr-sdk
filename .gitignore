@@ -1,0 +1,31 @@
+# git ls-files --others --exclude-from=.git/info/exclude
+# Lines that start with '#' are comments.
+# For a project mostly in C, the following would be a good set of
+# exclude patterns (uncomment them if you want to use them):
+# *.[oa]
+# *~
+
+# botsense
+botsense/bsModules/bsI2C/bsI2CMsgs.c
+botsense/bsModules/bsNull/bsNullMsgs.c
+botsense/bsModules/bsSerial/bsSerialMsgs.c
+botsense/bsPython/modules/BotSense/bsI2CMsgs.py
+botsense/bsPython/modules/BotSense/bsNullMsgs.py
+botsense/bsPython/modules/BotSense/bsProxyMsgs.py
+botsense/bsPython/modules/BotSense/bsSerialMsgs.py
+botsense/include/botsense/bsI2CMsgs.h
+botsense/include/botsense/bsNullMsgs.h
+botsense/include/botsense/bsProxyMsgs.h
+botsense/include/botsense/bsSerialMsgs.h
+botsense/libbotsense/bsProxyMsgs.c
+botsense/share/msgs/
+botsense/bsModules/*/*_wrap.c
+botsense/bsModules/*/*.done
+botsense/bsPython/src/*_wrap.c
+botsense/bsPython/src/*.done
+botsense/bsPython/build
+botsense/bsPython/build.*/
+botsense/bsPython/modules/BotSense/BotSenseCore.py
+botsense/bsPython/modules/BotSense/bsI2C.py
+botsense/bsPython/modules/BotSense/bsNull.py
+botsense/bsPython/modules/BotSense/bsSerial.py
