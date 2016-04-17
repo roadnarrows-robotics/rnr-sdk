@@ -1,0 +1,404 @@
+################################################################################
+#
+# ./Makefile
+#
+# Description:
+#   RN Make System Specific Makefile
+# 
+#   Make the @prod_fqname@ product.
+#
+# Usage:
+#   See make help
+#           
+# Author: Robin Knight
+#
+# Copyright:
+# (C) @THIS_YEAR@.  @rndiv_fqname@
+# All Rights Reserved
+#
+# EULA:@rndiv_eula:make@#
+################################################################################
+
+# -----------------------------------------------------------------------------
+#  Environment
+
+# This is the top-level product makefile 
+TLMAKEFILE = 1
+
+# Path to RoadNarrows Make System
+rnmake		= $(realpath rnmake)
+
+# Include product specifics
+include make/Prod.mk
+
+# Default command-line architecture, if not specified
+ifndef arch
+ifdef RNMAKE_ARCH_DFT
+	arch=$(RNMAKE_ARCH_DFT)
+else
+	arch = i386
+endif
+endif
+
+# architecture make file name
+ARCH_MKFILE = $(rnmake)/Arch/Arch.$(arch).mk
+
+# check to see if architecture file exists
+hasArch := $(shell if [ -f $(ARCH_MKFILE) ]; then echo "true"; fi)
+ifndef hasArch
+$(error Error: Unknown architecture: $(arch). See $(rnmake)/Arch/Arch.<arch>.mk)
+endif
+
+# Include the architecture make file
+include $(ARCH_MKFILE)
+
+# Included architecture makefile must define ARCH which "overrides" the
+# command-line arch in the rules targets.
+#
+ifndef ARCH
+$(error Error: ARCH: not defined in including Makefile)
+endif
+
+
+# Include standard host commands 
+include $(rnmake)/Cmds.mk
+
+# distribution directory
+DISTDIR = $(abspath $(distroot)/dist.$(ARCH))
+
+# Make semaphore file
+SEMAFILE = $(DISTDIR)/distro.txt
+
+# -----------------------------------------------------------------------------
+# Product Make Targets
+ 
+# Make all product packages.
+.PHONY: all
+all:
+	@$(call semaclear)
+	@$(call prodbanner,$(@))
+	@for pkg in $(PKGS); \
+	do \
+		$(call pkgbanner,$$pkg,all); \
+		$(call makepkg,$$pkg,deps); \
+		$(call makepkg,$$pkg,all); \
+	done
+	@$(call semaset)
+
+# Install product.
+.PHONY: install
+install: 	install-pre install-bin install-lib install-includes install-docs \
+					install-share install-etc install-post
+
+# Install pre-processing
+.PHONY: install-pre
+install-pre:
+	@$(call semachk)
+	@$(call prodbanner,install)
+
+# Install executables
+.PHONY: install-bin
+install-bin:
+	@echo ""
+	@echo "Installing executables to $(bindir)"
+	@$(rnmake)/utils/doinstall.sh 755 $(DISTDIR)/bin $(bindir)
+	$(call postinstall,$(STRIP_EXE),$(DISTDIR)/bin,$(bindir))
+
+# Install libraries
+.PHONY: install-lib
+install-lib:
+	@echo ""
+	@echo "Installing libraries to $(libdir)"
+	@$(rnmake)/utils/doinstall.sh 755 $(DISTDIR)/lib $(libdir)
+	$(call postinstall,$(STRIP_LIB),$(DISTDIR)/lib,$(libdir))
+
+# Install includes
+.PHONY: install-includes
+install-includes:
+	@echo ""
+	@echo "Installing includes to $(includedir)"
+	@$(rnmake)/utils/doinstall.sh 664 $(DISTDIR)/include $(includedir)
+
+# Make and install documentation
+.PHONY: install-docs
+install-docs:
+	@echo ""
+	@echo "Installing documents to $(docdir)"
+	@$(call makeallpkgs,documents);
+	@$(call pkgbanner,rnmake,documents);
+	@$(call makepkg,rnmake,documents);
+	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR)/doc $(docdir)
+
+# Install package share files
+.PHONY: install-share
+install-share:
+	@echo ""
+	@echo "Installing system share files to $(sharedir)"
+	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR)/share $(sharedir)
+
+# Install package configuration files
+.PHONY: install-etc
+install-etc:
+	@echo ""
+	@echo "Installing system configuration to $(sysconfdir)"
+	@$(rnmake)/utils/doinstall.sh 664 $(DISTDIR)/etc $(sysconfdir)
+
+# Install post-proecessing
+.PHONY: install-post
+install-post: install-post-docs
+
+# Install documentation post-proecessing
+.PHONY: install-post-docs
+install-post-docs:
+	@{ \
+		echo ""; \
+		echo "Installing product source documentation to $${dsrcdoc}"; \
+		ddistdoc=$(DISTDIR)/doc; \
+		dinsdoc=$(docdir)/$(PROD_FULL_NAME)-doc; \
+		dsrcdoc=$${dinsdoc}/srcdoc; \
+		dprodmk=$(topdir)/make; \
+		$(MKDIR) $${dsrcdoc}; \
+		$(CP) $${dprodmk}/srcdoc.html $${dsrcdoc}/index.html; \
+		$(CP) $${dprodmk}/srcdoc_doxy.css $${dsrcdoc}/.; \
+		$(CP) $(topdir)/README.txt $${dinsdoc}/.; \
+		$(CP) $(SEMAFILE) $${dinsdoc}/VERSION.txt; \
+		$(CP) $(topdir)/EULA.html $${dinsdoc}/.; \
+		$(rnmake)/utils/doinstall.sh -s 664 $${dprodmk}/images $${dsrcdoc}/images; \
+		for pkgname in $(PKGS) rnmake; \
+		do \
+			pkgfqname=`$(BASENAME) $${ddistdoc}/$${pkgname}*-doc`; \
+			if [ -h $${dsrcdoc}/$${pkgname} ]; \
+			then \
+				$(RMFILE) $${dsrcdoc}/$${pkgname}; \
+			fi; \
+			$(SYMLINK) $(docdir)/$${pkgfqname} $${dsrcdoc}/$${pkgname}; \
+		done; \
+	}
+
+# Make tarballs
+.PHONY: tarballs
+tarballs: tarball-pre tarball-bin tarball-doc tarball-src
+
+# Tarball pre-processing
+.PHONY: tarball-pre
+tarball-pre:
+	@$(call semachk)
+	@$(call prodbanner,tarballs)
+
+# Binary tarball
+.PHONY: tarball-bin
+tarball-bin:
+	@{ \
+		echo ""; \
+		echo "Tarballing $(ARCH) binaries"; \
+		test -d $(DISTDIR)/tmp || $(MKDIR) $(DISTDIR)/tmp; \
+		cd $(DISTDIR); \
+		$(FIND) bin lib include etc share -print | \
+		while read f; \
+		do \
+			if [ -f $${f} ]; \
+			then \
+				$(rnmake)/utils/cppath.sh $${f} tmp/$(PROD_FULL_NAME)-$(ARCH); \
+			fi; \
+		done; \
+		cd tmp; \
+		$(TAR) ../../$(PROD_FULL_NAME)-$(ARCH).tar.gz $(PROD_FULL_NAME)-$(ARCH); \
+	}
+
+# Documentation tarball
+.PHONY: tarball-doc
+tarball-doc:
+	@{ \
+		echo ""; \
+		echo "Tarballing documentation"; \
+		ddistdoc=$(DISTDIR)/doc; \
+		dtmp=$(DISTDIR)/tmp/$(PROD_FULL_NAME)-doc; \
+		dsrcdoc=$${dtmp}/srcdoc; \
+		dprodmk=$(topdir)/make; \
+		for pkgname in $(PKGS) rnmake; \
+		do \
+			pkg_dir=$${ddistdoc}/$${pkgname}*-doc; \
+			$(rnmake)/utils/doinstall.sh -s 664 $${pkg_dir} $${dsrcdoc}/$${pkgname}; \
+		done; \
+		$(CP) $${dprodmk}/srcdoc.html $${dsrcdoc}/index.html; \
+		$(CP) $${dprodmk}/srcdoc_doxy.css $${dsrcdoc}/.; \
+		$(rnmake)/utils/doinstall.sh -s 664 $${dprodmk}/images $${dsrcdoc}/images; \
+		$(CP) $(topdir)/README.txt $${dtmp}/.; \
+		$(CP) $(SEMAFILE) $${dtmp}/VERSION.txt; \
+		$(CP) $(topdir)/EULA.txt $${dtmp}/.; \
+		$(CP) $(topdir)/EULA.html $${dtmp}/.; \
+		cd $(DISTDIR)/tmp; \
+		$(TAR) ../../$(PROD_FULL_NAME)-doc.tar.gz $(PROD_FULL_NAME)-doc; \
+	}
+
+# Source tarball
+.PHONY: tarball-src
+tarball-src:
+	@{ \
+		echo ""; \
+		echo "Tarballing source"; \
+		dtmp=$(DISTDIR)/tmp/$(PROD_FULL_NAME); \
+		cd $(topdir); \
+		$(FIND) . \( \
+		-wholename './xinstall' -or -wholename xinstall -or \
+		-wholename './dist' -or -wholename dist -or \
+		-wholename './loc' -or -wholename '*/loc' -or \
+		-wholename './.build' -or -wholename .build -or \
+		-name '*.svn*' -or -wholename '.svn' -or \
+		-wholename '*.deps*' -or -wholename '.deps' -or \
+		-wholename '*obj*' -or -wholename 'obj' -or -wholename '*.o' -or \
+		-wholename '*.out' -or -wholename '*.log' -or \
+		-wholename '*.pyc' -or -wholename '*.pyo' -or \
+		-wholename '*.bak' -or \
+		-wholename '*/include/arch' -or -wholename '*/include/version.h' \
+	  \) -prune -or -print | \
+		while read f; \
+		do \
+			$(rnmake)/utils/cppath.sh $${f} $${dtmp}; \
+		done; \
+		$(CP) $(SEMAFILE) $${dtmp}/VERSION.txt; \
+		cd $(DISTDIR)/tmp; \
+		$(TAR) ../../$(PROD_FULL_NAME)-src.tar.gz $(PROD_FULL_NAME); \
+	}
+
+# Build product package dependencies.
+.PHONY: deps
+deps:
+	@echo "Dependencies are automatically made."
+
+# Product clean-up
+.PHONY: distclean clobber clean
+distclean clobber clean:
+	@$(call semaclear)
+	@$(call prodbanner,$(@))
+	@$(call makeallpkgs,$(@));
+
+# Product top-level make help
+.PHONY: help
+help:
+	@{ \
+		echo "$(PROD_FULL_NAME) Make Help"; \
+		echo "usage: make [arch=<arch>] <target>..."; \
+		echo ""; \
+		echo " Targets"; \
+		echo "[all]     - make all product packages"; \
+		echo "install   - install product from distribution"; \
+		echo "tarballs  - make product binaries, source, and documentation g'zipped tar files."; \
+		echo "clean     - deletes generated intermediate files."; \
+		echo "distclean - cleans plus deletes distribution and local made files"; \
+		echo ""; \
+		echo "help      - print this help"; \
+		echo "rnhelp    - print more detailed rnmake help"; \
+	}
+
+# The rnmake system help
+rnhelp:
+	@$(MAKE) -f $(rnmake)/Rules.mk rnmake=$(rnmake) help
+
+
+# -----------------------------------------------------------------------------
+# Package Make Targets (bypasses product targets)
+
+# <pkg>
+.PHONY:	$(PKGS)
+$(PKGS):
+	@$(call pkgbanner,$(@),$(wordlist 2,10,$(MAKECMDGOALS)))
+	@$(MAKE) -C $(@) $(wordlist 2,10,$(MAKECMDGOALS))
+
+
+# -----------------------------------------------------------------------------
+#  Functions
+
+# Make target(s) for a single package.
+#
+# makepkg <pkg> <target1> [<target2> ...]
+#
+define makepkg
+	$(MAKE) -C $(1) $(2)
+endef
+
+# Make target(s) for all packages.
+#
+# makeallpkgs <target1> [<target2> ...]
+#
+define makeallpkgs
+	for pkg in $(PKGS); \
+	do \
+		$(call pkgbanner,$$pkg,$(1)); \
+		$(call makepkg,$$pkg,$(1)); \
+	done
+endef
+
+# Clear "made distro" semaphore 
+define semaclear 
+	-$(RMFILE) $(SEMAFILE)
+endef
+
+# Set "made distro" semaphore 
+define semaset 
+	echo "$(PROD_FULL_NAME) v$(PROD_VERSION_DOTTED)" >$(SEMAFILE)
+	echo "Copyright (C) @THIS_YEAR@ @rndiv_fqname@" >> $(SEMAFILE)
+	echo ""	>> $(SEMAFILE)
+	echo "Compiled: " `date` >> $(SEMAFILE)
+endef
+
+# Check "made distro" semaphore 
+define semachk 
+	$(if $(call isfile,$(SEMAFILE)),,$(error Nothing made - Try 'make' first.))
+endef
+
+# Check if regular file exists
+isfile = $(shell if [ -f $(1) ]; then echo 1; fi)
+
+# Post-Install directory processing 
+#
+# postinstall <cmd> <source_dir> <dest_dir>
+#
+define postinstall
+	@cd $(2); \
+	srclist=$$($(FIND) . -type f); \
+	for src in $$srclist; \
+	do \
+	  dst="$(3)/$${src##./}"; \
+		echo "  $(1) $$dst"; \
+		$(1) $$dst; \
+	done;
+endef
+
+# Show the product major banner.
+#
+# prodbanner <target>
+#
+define prodbanner
+	{ \
+	echo ""; \
+	echo "$(majorline)"; \
+	echo "*"; \
+	echo "* Product: $(PROD_FULL_NAME)"; \
+	echo "* Target:  $(1)"; \
+	echo "*"; \
+	echo "$(majorline)"; \
+	}
+endef
+
+# Show the package minor banner.
+#
+# pkgbanner <pkg> <target>
+#
+define pkgbanner
+	{ \
+	echo ""; \
+	echo ""; \
+	echo "$(minorline)"; \
+	echo "Product: $(PROD_FULL_NAME)"; \
+	echo "Package: $(1)"; \
+	echo "Target:  $(2)"; \
+	echo "$(minorline)"; \
+	}
+endef
+
+minorline := \
+"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+majorline := \
+"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"

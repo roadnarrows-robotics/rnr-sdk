@@ -1,0 +1,24 @@
+@rndiv_fqname@ @prod_name@ End User License Agreement
+
+The @prod_name@ product is a set of packages, each with its specific EULA,
+as summarized by Table 1 below.
+
+Table 1:
+--------
+@pkg_info_iter:"%2d %-20s %s/EULA.txt" % (_icnt, _ivar['synopsis'], _ivar['package'])
+
+Warranties:
+-----------
+In no event shall the authors, @rndiv_fqname@ or
+members/employees of @rndiv_fqname@ or distributors of this
+software be liable to any party for direct, indirect, special, incidental,
+or consequential damages arising out of the use of this software and its
+documentation, even if the authors or any of the above parties have been
+advised of the possibility of such damage.
+
+The authors and @rndiv_fqname@ specifically disclaim any
+warranties, including, but not limited to, the implied warranties of
+merchantability and fitness for a particular purpose. The software provided
+hereunder is on an “as-is” basis, and the authors and distributors have no
+obligation to provide maintenance, support, updates, enhancements, or
+modifications.

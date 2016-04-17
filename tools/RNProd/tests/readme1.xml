@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- full XML readme.xml test file -->
+<readme xmlns             = "http://default-namespace.org/"
+        xmlns:roadnarrows = "http://www.roadnarrows.com./ns/">
+  <package>RoadNarrows ICanDoEverything</package>
+
+  <synopsis>
+  The ICanDoEverything package (aka "Helen Ready") enables the user to 
+  multitask on up to 7 distinct tasks.
+  </synopsis>
+</readme>
+
+ <badboy>
+  yes i am
+</badboy>

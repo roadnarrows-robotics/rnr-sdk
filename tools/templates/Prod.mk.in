@@ -1,0 +1,87 @@
+################################################################################
+#
+# Prod.mk
+#
+# Description:
+#   RN Make System Package Makefile
+#
+#   @prod_fqname@ Product Makefile.
+#
+# Author(s): @rndiv_fqname@ (@rndiv_email@)
+#
+# Copyright (C) @THIS_YEAR@.  @rndiv_fqname@
+# All Rights Reserved
+#
+# @THIS_DATE@ @THIS_TIME@ 
+#
+# EULA:@rndiv_eula:make@#
+################################################################################
+
+# Prevent mutliple inclusion
+PROD_MK						= 1
+
+#------------------------------------------------------------------------------
+# The Product Definition
+PROD                  = @prod_name@
+PROD_VERSION_MAJOR    = @prod_ver_major@
+PROD_VERSION_MINOR    = @prod_ver_minor@
+PROD_VERSION_RELEASE  = @prod_ver_rev@
+PROD_VERSION_SPEC     = @prod_ver_spec@
+PROD_VERSION_DATE     = @THIS_YEAR@
+PROD_OWNERS           = "@rndiv_fqname@"
+PROD_VERSION_DOTTED   = $(PROD_VERSION_MAJOR).$(PROD_VERSION_MINOR).$(PROD_VERSION_RELEASE)$(PROD_VERSION_SPEC)
+PROD_VERSION_CAT     = $(PROD_VERSION_MAJOR)$(PROD_VERSION_MINOR)$(PROD_VERSION_RELEASE)
+PROD_FULL_NAME        = $(PROD)-$(PROD_VERSION_DOTTED)
+
+#
+# Packages to Build (keep in dependency order)
+#
+PKGS = @pkg_info_iter:"%s " % (_ivar["package"])@
+
+
+#------------------------------------------------------------------------------
+# Tweaking RN make system for products
+
+# Product top-level Makefile
+ifdef TLMAKEFILE
+	topdir = $(realpath .)
+	distroot = ./dist
+
+# A package Makefile
+else
+ifndef pkgroot
+$(error Error: pkgroot: not defined in including Makefile)
+endif
+	topdir = $(realpath $(pkgroot)/..)
+	distroot = $(pkgroot)/../dist
+endif
+
+# top include directories to resolve package inter-dependencies
+PROD_INCDIRS = $(addprefix $(topdir)/,$(addsuffix /include,$(PKGS)))
+
+
+#------------------------------------------------------------------------------
+# Product Installation Directories
+#
+# Override as necessary here. 
+#
+# Note: Each package can have its own installation locations, therefore it
+#       is necessary override the installation locations here so that the
+#       product is coherent. 
+#
+# Note: These variables are the traditional configuration names which the rnmake
+#       system has kept.
+#
+prefix 					= $(topdir)/xinstall/$(ARCH)
+exec_prefix     = $(prefix)
+bindir          = $(exec_prefix)/bin
+sbindir         = $(exec_prefix)/sbin
+libexecdir      = $(exec_prefix)/libexec
+sysconfdir      = $(prefix)/etc
+localstatedir   = $(prefix)/var
+libdir          = $(exec_prefix)/lib
+includedir      = $(prefix)/include
+sharedir        = $(prefix)/share
+infodir         = $(prefix)/info
+docdir          = $(prefix)/share/doc
+mandir          = $(prefix)/man

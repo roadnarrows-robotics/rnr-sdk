@@ -1,0 +1,125 @@
+################################################################################
+# @prod_fqname@
+#
+# @THIS_DATE@ @THIS_TIME@
+#
+# (C) @THIS_YEAR@ @rndiv_fqname@
+################################################################################
+
+1.0 @prod_name@ Overview
+===============================================================================
+@synopsis@
+
+@description@
+
+1.1 Packages
+------------
+@pkg_info_iter:"%-20s - %s\n" % (_ivar["package"], _ivar["synopsis"])@
+
+1.2 Quick Start
+----------------
+Change your current working directory to the top directory
+<usrroot>/@prod_fqname@/ (this is where this README.txt file is located).
+
+To make the @prod_name@ product for a 32-bit Linux Posix (default) architecture:
+  $ make deps
+  $ make
+  $ make install
+
+To clean or to clobber the pre-installed distribution:
+  $ make clean
+  $ make distclean 
+
+To make for a specific target architecture, add arch=<arch> to the command line.
+For example, to install for ARM PXA XScale Linux
+  $ make arch=armpxa install 
+
+1.3 Package Dependencies
+------------------------
+
+
+2.0 RoadNarrows Make Package
+===============================================================================
+The rnmake system is based on GNU make plus some simple shell scripts.
+At RoadNarrows, a typical workstation builds for multiple targets. So rnmake
+evolved to support multiple-target, cross-compilations. All supported compiler
+tool chains are GNU gcc based. The target platform must be Posix compliant.
+
+See the source documentation for more details.
+  o @prod_fqname@-doc.tar.gz
+  o http://www.roadnarrows.com/customer/@prod_name@/latest/srcdoc
+
+
+3.0 Packages
+===============================================================================
+@pkg_info_iter:"3.%d %s\n----------------\n%s\n\n" % (_icnt+1, _ivar["package"], _ivar["description"])@
+
+
+4.0 File Manifest
+===============================================================================
+List of directories, files, and naming conventions.
+Nomenclature:
+  <rnmake>        Directory path to the top directory of the RN make package.
+  <pkgroot>       Directory path to <pkg> top directory.
+  <topdir>        Directory path to product's top directory.
+  <arch>          Target host platform.
+  <pkg>           Package fully qualified name.
+  <prod>          Product fully qualified name.
+  <path>          A directory path.
+
+4.1 Read Me's
+-------------
+README.txt        This file.
+EULA-<pkg>.txt    End User License Agreement for package <pkg>.
+
+4.2 Core Make System
+--------------------
+<rnmake>/                         The rnmake top directory containing core make
+                                  files including Rules.mk.
+<rnmake>/Arch/                    The subdirectory holding the architecture make
+                                  files.
+<rnmake>/doxy/                    The doxygen package files.
+<rnmake>/utils/                   Various rnmake utility scripts.
+
+4.3 General Package Structure
+-----------------------------
+<pkgroot>/docs/                   Package doxygen main and support
+                                  documentation.
+<pkgroot>/examples/               Package example programs.
+<pkgroot>/include/                Package top include directory.
+<pkgroot>/make/                   Package make files.
+<pkgroot>/<path>/                 Package subcomponent (e.g. library) directory.
+
+4.3 Make Intermediates
+----------------------
+<pkgroot>/<path>/.deps/           Source dependencies for package directory.
+<pkgroot>/<path>/.deps/deps.<arch>/ Source dependencies for <arch> architecure.
+<pkgroot>/<path>/obj/             Object files for packaage directory.
+<pkgroot>/<path>/obj/obj.<arch>/  Object files for <arch> architecure.
+<pkgroot>/loc/                    Top directory containing local generated
+                                  libraries and applications. Local files are
+                                  not installed.
+<topdir>/dist/                    Distribution generated files top directory.
+                                  Distribution files are installed to <prefix>.
+<topdir>/dist/dist.<arch>/        Distribution generated files for <arch>
+                                  architecture.
+<topdir>/dist/dist.<arch>/bin/    Executables.
+<topdir>/dist/dist.<arch>/lib/    Libraries.
+<topdir>/dist/dist.<arch>/etc/    System configuration.
+<topdir>/dist/dist.<arch>/share/  Package configuration and documenation
+                                  including doxygen generated HTML.
+<topdir>/dist/dist.<arch>/src/    A clean copy of source files for tarring, etc.
+<topdir>/dist/dist.<arch>/tmp/    Directory holding temporaries.
+
+4.4 Install
+-----------
+<topdir>/xinstall/<arch>/         Installed files for target architecture (can
+                                  be overridden).
+<topdir>/make/                    Product make files.
+<topdir>/dist/<pkg>-doc.tar.gz    Package documentation tarball file.
+<topdir>/dist/<pkg>-src.tar.gz    Package source tarball file.
+<topdir>/dist/<pkg>-<arch>.tar.gz  Package binary compiled source tarball file
+                                  for <arch> architecture (only if stand-alone
+                                  package).
+<topdir>/dist/<prod>-<arch>.tar.gz Product binary compiled source tarball file
+                                  for <arch> architecture .

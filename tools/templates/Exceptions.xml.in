@@ -1,0 +1,12 @@
+<!--
+  - @rndiv_fqname@ @prod_fqname@ Exceptions.
+  - @THIS_DATE@ @THIS_TIME@
+  -->
+<exceptions>
+  <prune_stage>
+  </prune_stage>
+  <prune_src>
+  </prune_src>
+  <prune_srcdoc>
+  </prune_srcdoc>
+</exceptions>

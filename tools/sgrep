@@ -1,0 +1,155 @@
+###############################################################################
+_Cmd="sgrep"
+
+_Synopsis="\
+	${_Cmd} [-s <srclist>] [-c] <pat>
+	${_Cmd} [-s <srclist>] -- [grepopts] <pat>
+	${_Cmd} -?
+"
+
+_Desc="\
+Safely greps source files for <pat> in packages.
+  -p            Plain text output. No color.
+  -s <srclist>  List of source types to search. <srclist> consists of the
+                concatenated source types <srctype>[+<srctype[+...]] where
+                srctype is:
+                  c (default)       C and C++ files
+                  doxy              Doxygen files
+                  htm|html          HTML files
+                  j|java            Java files
+                  m|make|makefile   Makefiles
+                  pl|perl           Perl files
+                  py|python         Python files
+                  tcl               Tcl files
+                  tk                Tk files
+                  *                 Files ending with srctype
+"
+###############################################################################
+
+# The options string
+optstr="s:p"
+
+color="--color=always"
+
+# _usage [msg1 [msg2...]]
+_usage()
+{
+  if [ $# -gt 0 ]
+  then
+    echo -n "${_Cmd}: $1"
+    shift
+    while [ $# -gt 0 ]
+    do
+      echo -n ": $1" 
+      shift
+    done
+    echo "\n"
+  fi
+  echo "usage: ${_Synopsis}"
+  echo "${_Desc}"
+  exit 2
+}
+
+# exclude file list
+_excludes="/.svn|/obj|/.deps|/dist|/loc"
+
+# 
+# Get options. Note: first colon says that getopts will not print errors.
+#
+while getopts :${optstr} opt
+do
+	case $opt in
+		p) 	color="" ;;
+
+		s) 	srclist="$OPTARG" ;;
+
+		# Usage option '-?' or bad option
+		\?) if [ "$OPTARG" = "?" ]
+				then
+					_usage
+				else
+					_usage "Error" "$OPTARG" "Unknown option."
+				fi
+				;;
+
+		# Option requiring argument but none found
+		\:)	_usage "Error" "$OPTARG" "Required argument not specified." ;;
+	esac
+done
+
+shift $(($OPTIND - 1))
+
+# default source list
+if [ "$srclist" = "" ]
+then
+	srclist="c"
+fi
+
+typeset srclist=$srclist'+'	# lowercase & make sure loop terminates
+
+# build find source list
+while [ "$srclist" != "" ]
+do
+	srctype=${srclist%%+*}
+  case "$srctype" in
+    c) 
+				src="-name '*.[cCh]' -or -name '*.cxx' -or -name '*.cpp' -or -name '*.[ch][ch]' -or -name '*.hpp'"
+				;;
+    m|make|makefile) 
+				src="-name Makefile -or -name makefile -or -name '*.mk'"
+				;;
+    pl|perl) 
+				src="-name '*.pl'"
+				;;
+    py|python) 
+				src="-name '*.py'"
+				;;
+    j|java) 
+				src="-name '*.java'"
+				;;
+    tcl) 
+				src="-name '*.tcl'"
+				;;
+    tk) 
+				src="-name '*.tk'"
+				;;
+    htm[l]) 
+				src="-name '*.htm' -or -name '*.html' -or -name '*.xml'" 
+				;;
+    doxy) 
+				src="-name '*.doxy'"
+				;;
+		*) 
+				src="-name '*${srctype}'"
+				;;
+	esac
+
+	_findlist=${_findlist:+"$_findlist -or "}${src}
+
+	srclist=${srclist#$srctype+}
+done
+
+if [ $# -lt 1 ]
+then
+	_usage "Error" "No pattern <pat> specified."
+	exit 2
+fi
+
+_fixupgrepargs()
+{
+	# options e.g. -i
+	while [ $# -gt 1 ]
+	do
+		echo -n "$1 "
+		shift
+	done
+	# pattern
+	echo -n "-e $1"
+}
+
+_grepargs=$(_fixupgrepargs "${@}")
+
+echo -- "find . \( ${_findlist} \) -print | xargs grep -n ${color} $_grepargs"
+eval "find . \( ${_findlist} \) -print" \
+  | grep -v -E "${_excludes}" \
+  | xargs grep -n ${color} ${_grepargs}

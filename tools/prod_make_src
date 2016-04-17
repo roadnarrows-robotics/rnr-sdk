@@ -1,0 +1,10 @@
+# make prodcut source images for availability.
+# specify list packages [patterns]
+# generated tree as follows
+# packagename/
+# Makefile # makes all packages 
+# pkg1
+# pkg2
+# ...
+# optionally build zipped tarballs
+# eventually build rpm, dmg, msi, etc

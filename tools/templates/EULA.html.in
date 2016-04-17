@@ -1,0 +1,108 @@
+<!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
+<!--
+  - @rndiv_fqname@ @prod_fqname@ EULA
+  - @THIS_DATE@ @THIS_TIME@
+  -->
+<html>
+  <head>
+    <title>@rndiv_fqname@ @prod_fqname@ EULA</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <meta http-equiv="Expires" content="0">
+    <meta name="Author" content="@rndiv_fqname@">
+    <meta name="Copyright" content="&copy; @THIS_YEAR@ @rndiv_fqname@"
+>
+    <meta name="Description" content="Intelligent Systems and Robotics Technolog
+ies Company">
+    <meta name="keywords" lang="en-us"
+content="RoadNarrows LLC, RoadNarrows Intelligent Systems LLC, RoadNarrows Robotics, intelligent systems, artificial neural networks, robotics">
+
+    <link rel="icon" type="image/png" href="srcdoc/images/favicon.png">
+
+    <link rel="StyleSheet" type="text/css" href="srcdoc/srcdoc_doxy.css">
+
+<style type="text/css">
+table.tbl1
+{
+  font-size: 14px;
+  padding: 0 10px 5px 0;
+}
+
+table.tbl1 td
+{
+  text-align: left;
+  padding: 0 5px 5px 0;
+}
+
+table.tbl1 td.num
+{
+  text-align: right;
+}
+
+table.tbl1 td.ref
+{
+  text-align: left;
+}
+
+table.tbl1 td.ref a
+{
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+table.tbl1 td.caption
+{
+  text-align: center;
+  font-style: italic;
+}
+</style>
+
+  </head>
+
+  <body>
+    <h1>
+    @rndiv_fqname@ @prod_fqname@ End User License Agreement
+    </h1>
+    <p>
+    The <b>@rndiv_fqname@</b> <b>@prod_name@</b> product is a set of packages,
+    each with its specific
+    EULA, as summarized by <a href="#tbl1">Table 1</a> below.
+    </p>
+
+    <table class="tbl1">
+      @pkg_info_all_iter:"<tr><td class='num'>%d</td><td class='ref'><a href='srcdoc/%s/srcdoc/page_eula.html'>%s</a></td>\n<td>%s</td></tr>" % (_icnt+1, _ivar["package"], _ivar["package"], _ivar["synopsis"])@
+      <tr><td class="caption" colspan="3">Table 1: Package EULAs</td></tr>
+    </table>
+    <a name="tbl1"></a>
+
+    <h2>Standard Warranties</h2>
+    <p>
+    In no event shall the authors, <b>@rndiv_fqname@</b> or
+    members/employees of <b>@rndiv_fqname@</b> or distributors of this
+software be liable to any party for direct, indirect, special, incidental,
+or consequential damages arising out of the use of this software and its
+documentation, even if the authors or any of the above parties have been
+advised of the possibility of such damage.
+    </p>
+    <p>
+    The authors and <b>@rndiv_fqname@</b> specifically disclaim any
+warranties, including, but not limited to, the implied warranties of
+merchantability and fitness for a particular purpose. The software provided
+hereunder is on an &ldquo;as-is&rdquo; basis, and the authors and distributors have no
+obligation to provide maintenance, support, updates, enhancements, or
+modifications.
+    </p>
+
+    <br>
+    <hr size="1">
+    <address>
+      <div style="float:left">
+          &copy;@THIS_YEAR@ @rndiv_fqname@
+          <br>
+          <a href="@rndiv_url@">@rndiv_url@</a>
+      </div>
+      <div style="float:right">
+    @THIS_DATE@
+      </div>
+    </address>
+  </body>
+</html>

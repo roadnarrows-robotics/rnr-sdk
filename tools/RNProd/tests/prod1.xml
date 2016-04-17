@@ -1,0 +1,13 @@
+<rnprod>
+  <prod_ver>1.2.3</prod_ver>
+  <pkg_list>
+    <pkg>/prj/pkg/librnr</pkg>
+    <pkg>
+      /prj/pkg/RoboSight
+    </pkg>
+  </pkg_list>
+  <rndiv>rnr</rndiv>
+  <stage_root>/prj/stage</stage_root>
+  <prod_name>foo</prod_name>
+  <except_file/>
+</rnprod>

@@ -1,0 +1,104 @@
+#! /bin/sh
+################################################################################
+#
+# File:     prod_make_stage
+#
+# Version:
+#   $LastChangedDate$
+#   $Rev$
+#
+# Description:
+#   Make product staging areas. This shell script is a simple wrapper for
+#   the RNProd python module.
+#
+# Author: Robin Knight (robin.knight@roadnarrows.com)
+#
+# Copyright (C) 2009.  RoadNarrows LLC.
+# All Rights Reserved
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that
+# (1) The above copyright notice and the following two paragraphs
+# appear in all copies of the source code and (2) redistributions
+# including binaries reproduces these notices in the supporting
+# documentation.   Substantial modifications to this software may be
+# copyrighted by their authors and need not follow the licensing terms
+# described here, provided that the new terms are clearly indicated in
+# all files where they apply.
+#
+# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+#
+################################################################################
+
+_Cmd="prod_make_stage"
+toolsdir="/prj/tools"
+
+_Synopsis()
+{
+  printf "Usage: ${_Cmd} [OPTIONS]x\n"
+  printf "Make product staging area.\n"
+}
+
+_Desc()
+{
+cat <<EOF
+
+DESCRIPTION
+  Make a prodcut staging area. Make product staging areas. This shell script is
+  a simple wrapper for the RNProd python module.
+
+OPTIONS
+  See 'RNProdStage.py --help' for list of options.
+
+  -?                    Display this help and exit.
+EOF
+}
+
+# help
+_help()
+{
+  _Synopsis
+  _Desc
+  exit 0
+}
+
+# error [msg1 [msg2...]]
+_error()
+{
+  if [ $# -gt 0 ]
+  then
+    printf "${_Cmd}: Error: $1"
+    shift
+    while [ $# -gt 0 ]
+    do
+      printf ": $1" 
+      shift
+    done
+    printf "\n"
+  fi
+  printf "Try '${_Cmd} -?' for more information.\n"
+  exit 2
+}
+
+# Usage option '-?'
+if [ "$1" = "-?" ]
+then
+  _help
+fi
+
+export PYTHONPATH=${PYTHONPATH}:${toolsdir}
+
+# make the stage
+python ${toolsdir}/RNProd/RNProdStage.py $*

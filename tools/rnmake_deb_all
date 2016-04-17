@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Make all debian development RoadNarrow system packages
+#
+
+pkglist='librnr libserial i2c gpio peripherals netmsgs botsense appkit Dynamixel odroid Hekateros Kuon Laelaps PanTilt'
+
+pkgroot='/prj/pkg'
+
+for pkgname in ${pkglist}
+do
+  pkg="${pkgroot}/${pkgname}"
+  if [[ ! -d ${pkg} ]]
+  then
+    continue
+  fi
+  cd ${pkg}
+  echo
+  echo "----------------------------------------------------------------------"
+  echo " ${pkg}"
+  echo "----------------------------------------------------------------------"
+  make clobber; make deps; make install; make deb-pkg-dev
+  cd -
+done

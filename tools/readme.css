@@ -1,0 +1,113 @@
+/* 
+ * File: readme.css
+ *
+ * RoadNarrows LLC README.xml style sheet.
+ *
+ * (C) 2010
+ */
+
+readme
+{
+  display: inline;
+}
+
+readme:after
+{
+  content: "(C) 2010. RoadNarrows LLC.";
+  position: relative;
+  top: 30px;
+  padding: 50px 20px 0px 20px;
+  font-size: 80%;
+}
+
+product, package, version, synopsis, description, dependencies, seealso, p, ul, li, br
+{ 
+  padding: 10px 20px 0px 20px;
+  display: block
+}
+
+:before
+{
+  color: black;
+  padding: 20px 10px 0px 0px;
+  font-size: 120%;
+  font-weight: bold;
+  font-variant: small-caps;
+  clear;
+}
+
+product:before
+{
+  content: "Product:";
+}
+
+package:before
+{
+  content: "Package:";
+}
+
+version:before
+{
+  content: "Version:";
+}
+
+product, package
+{
+  color: #990000;
+  font-size: 100%;
+  font-weight: bold;
+}
+
+synopsis:before
+{
+  content: "Synopsis:";
+}
+
+description:before
+{
+  display: block;
+  content: 'Description:\A';
+  padding-bottom: 5px;
+}
+
+dependencies:before
+{
+  display: block;
+  content: "Dependencies:\A";
+  padding-bottom: 5px;
+}
+
+seealso:before
+{
+  content: "See Also:";
+}
+
+p
+{
+  padding: 10px 0px 10px 0px;
+}
+
+ul
+{
+  list-style-position: outside;
+  list-style-type: circle;
+  padding: 0px 0px 10px 10px;
+}
+
+li:before
+{
+  content: '\0BB';
+  font-weight: bold;
+  font-size: 100%;
+  color: #0000aa;
+  margin-left: -20px;
+  margin-right: 0px;
+}
+
+li
+{
+}
+
+br
+{
+}

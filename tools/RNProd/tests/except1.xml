@@ -1,0 +1,15 @@
+<!--
+  - @rndiv_fqname@ @prod_fqname@ Exceptions.
+  - @THIS_DATE@ @THIS_TIME@
+  -->
+<exceptions>
+  <prune_stage>
+    <path>/tmp</path>
+    <path>.</path>
+    <path>tests/except1.xml</path>
+  </prune_stage>
+  <prune_src>
+  </prune_src>
+  <prune_srcdoc>
+  </prune_srcdoc>
+</exceptions>

@@ -1,0 +1,274 @@
+#!/bin/bash
+################################################################################
+#
+# Package:  RN Tools
+#
+# File:     rnupload-dpkg
+#
+# Version:
+#   $LastChangedDate$
+#   $Rev$
+#
+# Description:
+#   Upload file(s) to www.roadnarrows.com/distro/<aptdir>/incoming/<codename>
+#
+# Author: Robin Knight    (robin.knight@roadnarrows.com)
+# Author: Daniel Packard  (daniel@roadnarrows.com)
+#
+# Copyright (C) 2012-2016.  RoadNarrows LLC.
+#
+# All Rights Reserved
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that
+# (1) The above copyright notice and the following two paragraphs
+# appear in all copies of the source code and (2) redistributions
+# including binaries reproduces these notices in the supporting
+# documentation.   Substantial modifications to this software may be
+# copyrighted by their authors and need not follow the licensing terms
+# described here, provided that the new terms are clearly indicated in
+# all files where they apply.
+#
+# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+#
+################################################################################
+
+_Cmd="rnupload-dpkg"
+
+# debian supported RN packages
+pkglist="\
+librnr \
+libserial \
+gpio \
+i2c \
+appkit \
+netmsgs \
+botsense \
+peripherals \
+Dynamixel \
+odroid \
+Hekateros \
+Kuon \
+Laelaps \
+PanTilt \
+"
+
+archlist="x86_64 linaro odroid"
+codenamelist="precise trusty"
+debtypes='dev src doc'
+
+pkgroot='/prj/pkg'
+
+acct='buckleup@www.roadnarrows.com'
+distro='/home/buckleup/roadnarrows.com/distro'
+
+uppkgs="${pkglist}"
+rnarch="${RNMAKE_ARCH_DFT}"
+codename="trusty"
+noexec=
+verbose=
+
+_Usage()
+{
+
+  printf "Usage: ${_Cmd} [OPTIONS]\n"
+  printf "       ${_Cmd} --help\n"
+}
+
+_Desc()
+{
+cat <<EOF
+
+DESCRIPTION
+  Upload RN debian packages to
+    www.roadnarrows.com/distro/<aptdir>/incoming/<codename>/.
+  Any debian package not found will be skipped.
+
+  RN package list:
+    ${pkglist}
+
+  RN architectures:
+    ${archlist}
+
+  Distribution codenames:
+    ${codenamelist}
+
+  Debian Types:
+    ${debtypes}
+
+OPTIONS
+  -a, --arch=<arch>         Set debian supported RN architectures.
+                            Default: ${rnarch}
+  -c, --codename=<codename> Set debian codename.
+                            Default: ${codename}
+  -n, --noexec              Do not execute upload, only print what would have
+                            been.
+  -p, --pkg=<pkgs>          Set debian packages to upload.
+                            Default: All found debian packages in RN package
+                            list.
+  -v, --verbose             Verbose printing.
+
+  -h, --help                Display this help and exit.
+EOF
+}
+
+# help
+_help()
+{
+  _Usage
+  _Desc
+  exit 0
+}
+
+# error [msg1 [msg2...]]
+_error()
+{
+  if [ $# -gt 0 ]
+  then
+    printf "${_Cmd}: Error: $1"
+    shift
+    while [ $# -gt 0 ]
+    do
+      printf ": $1" 
+      shift
+    done
+    printf "\n"
+  fi
+    _try
+  exit 2
+}
+
+# try
+_try()
+{
+  printf "Try '${_Cmd} --help' for more information.\n" >&2
+}
+
+# 
+# Get options. Note: first colon says that getopts will not print errors.
+#
+export POSIXLY_CORRECT
+
+cmdopts=$(getopt --long=arch:,codename:,noexec,pkg:,verbose,help --options=a:c:np:vh --name=${_Cmd} -- "$@")
+
+if [ $? != 0 ]
+then
+  _try
+  exit 1
+fi
+
+eval set -- "${cmdopts}"
+
+while true
+do
+  case "$1" in
+    -a|--arch)      rnarch="$2"; shift 2;;
+    -c|--codename)  codename="$2"; shift 2;;
+    -n|--noexec)    noexec=true; shift;;
+    -p|--pkg)       uppkgs="$2"; shift 2;;
+    -v|--verbose)   verbose=true; shift;;
+    --help)         _help; shift;;
+    --)             shift; break;;
+    *)              echo "Internal error!"; exit 1;;
+  esac
+done
+
+if [[ "${archlist/${rnarch}}" = "${archlist}" ]]
+then
+  _error "${rnarch}" "Unsupported RN architecture with debian support."
+fi
+
+if [[ "${codenamelist/${codename}}" = "${codenamelist}" ]]
+then
+  _error "${codename}" "Unsupported codename"
+fi
+
+shift $(($OPTIND - 1))
+
+#if [[ $# -lt 1 ]]
+#then
+#fi
+
+case "${rnarch}"
+in
+  x86_64) debarch='amd64'
+          aptdir='apt'
+          ;;
+  linaro) debarch='armhf'
+          aptdir='apt-linaro-omap'
+          ;;
+  odroid) debarch='armhf'
+          aptdir='apt-ubuntu-trusty-odroid'
+          ;;
+  *)  _error "${rnarch}" "Unsupported RN architecture."
+      ;;
+esac
+
+# destination
+dst="${acct}:${distro}/${aptdir}/incoming/${codename}/."
+
+debpkglist=""
+
+make_deb_list()
+{
+  for rnpkg in ${uppkgs}
+  do
+    for deb in ${debtypes}
+    do
+      #srcs=$(echo ${pkgroot}/${rnpkg}/dist/dist.${rnarch}/${rnpkg}-${deb}*-${debarch}.deb)
+      srcs=${pkgroot}/${rnpkg}/dist/dist.${rnarch}/${rnpkg}-${deb}*-${debarch}.deb
+      #echo ${srcs}
+      for src in ${srcs}
+      do
+        if [[ -f ${src} ]]
+        then
+          debpkglist="${debpkglist} ${src}"
+        fi
+      done
+    done
+  done
+}
+
+make_deb_list
+
+if [[ ${noexec} || ${verbose} ]]
+then
+  printf "RN Architecture:     ${rnarch}\n"
+  printf "Codename:            ${codename}\n"
+  printf "RN Packages:         ${uppkgs}\n"
+  printf "Debian Architecture: ${debarch}\n"
+  printf "Apt Repository:      ${aptdir}\n"
+  printf "Destination:         ${dst}\n"
+  printf "Debian Packages:\n"
+  for deb in ${debpkglist}
+  do
+    printf "  ${deb}\n"
+  done
+fi
+
+if [[ ${noexec} ]]
+then
+  exit 0
+else
+  scp ${debpkglist} ${dst}
+  exit $?
+fi
+
+getpasswd()
+{
+  echo -n "${acct} password: "
+  read -s password
+  echo
+}
