@@ -1,0 +1,32 @@
+# testshell.scr
+#
+## URL:    http://www.roadnarrowsrobotics.com
+# Date:   2006.12.15
+# Copyright (C) 2006.  RoadNarrows LLC.
+
+echo Testing 'wait 2.5'
+wait 2.5
+
+echo Testing 'help'
+wait 1.0
+help
+
+echo Testing 'help script' with side comment
+wait 1.0
+help script   # test 'help script' with side comment
+
+echo Testing 'help -list'
+wait 1.0
+help -list
+
+echo Testing error handling with 'script xyz'
+wait 1
+script xyz
+
+echo Testing script recursion with 'script testshell2.scr'
+wait 1
+script testshell2.scr
+
+echo Testing 'quit'
+wait 1
+quit

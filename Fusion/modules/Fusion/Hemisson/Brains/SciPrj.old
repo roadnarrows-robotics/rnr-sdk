@@ -1,0 +1,345 @@
+################################################################################
+#
+# SciPrj.py
+#
+
+""" Science Project Module.
+
+Sarah Knight and Amanda Whitney high school science project demonstrating
+optic flow algorthms to hunt for 'prey'.
+
+Authors: Sarah J. Knight and Amanda Whitney
+Email:   sarah.knight@roadnarrows.com
+         ???
+URL:     http://www.thincbam.com
+Date:    2006.03.08
+"""
+
+#
+# All Rights Reserved
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that
+# (1) The above copyright notice and the following two paragraphs
+# appear in all copies of the source code and (2) redistributions
+# including binaries reproduces these notices in the supporting
+# documentation.   Substantial modifications to this software may be
+# copyrighted by their authors and need not follow the licensing terms
+# described here, provided that the new terms are clearly indicated in
+# all files where they apply.
+#
+# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+#
+################################################################################
+
+import  sys
+import  random
+
+import Fusion.Hemisson.HemiCmd.HemiCmdLinCam as HemiLinCam
+
+#-------------------------------------------------------------------------------
+# Global Data
+#-------------------------------------------------------------------------------
+
+NumPixels     = HemiLinCam.LinCamNumPixels
+Brain         = None
+CookedPixels  = [0] * NumPixels
+Blobs         = {}
+BoiId         = None
+PrevCenter    = 0
+Behavior      = 'hunting'
+RestingCnt    = 0
+SayCnt        = 0
+
+#-------------------------------------------------------------------------------
+# Standard SciPrj Functions
+#-------------------------------------------------------------------------------
+
+#--
+def SciPrjInit(brain):
+  """ Initialize the science.
+
+      Parameters:
+        brain - optic flow brain primitive
+
+      Return Value:
+        None
+  """
+  global Brain
+
+  Brain = brain
+  Behavior = 'hunting'
+  print '***', Behavior
+
+#--
+def SciPrjSetCookedPixels():
+  """ Set the brain's processed pixels. """
+  global Brain, CookedPixels
+  if not Brain:
+    return
+  id = 'cooked_pixels'
+  Brain.mBrum[id] = CookedPixels
+  Brain.GuiVizUpdate(id)
+
+#--
+def SciPrjSetBlobs():
+  """ Set the brain's blobs. """
+  global Brain, Blobs
+  if not Brain:
+    return
+  id = 'blobs'
+  Brain.mBrum[id] = Blobs
+  Brain.GuiVizUpdate(id)
+
+#--
+def SciPrjSetBoiId():
+  """ Set the brain's blob of interest id. """
+  global Brain, BoiId
+  if not Brain:
+    return
+  id = 'boi_id'
+  Brain.mBrum[id] = BoiId
+  Brain.GuiVizUpdate(id)
+
+oldLeft = oldRight = 0
+
+#--
+def SciPrjSetSpeeds(speedLeft, speedRight):
+  """ Set the robot speeds. """
+  global Brain, oldLeft, oldRight
+  if not Brain:
+    return
+  Brain.mBrum['speed_left']  = speedLeft
+  Brain.mBrum['speed_right'] = speedRight
+  if speedLeft != oldLeft or speedRight != oldRight:
+    print 'speed', (speedLeft, speedRight)
+    oldLeft = speedLeft
+    oldRight = speedRight
+
+#--
+def SciPrjSay(spokenText, writtenText=None):
+  """ Say something. """
+  global Brain
+  if not Brain:
+    return
+  Brain.GuiSayWhat(spokenText, writtenText)
+
+
+#-------------------------------------------------------------------------------
+# Sarah and Amanda Hooks
+#-------------------------------------------------------------------------------
+
+#--
+def SciPrjThink():
+  global Brain, CookedPixels, Blobs, BoiId , Behavior
+  """ Think with the optic flow. """
+  if Behavior == 'hunting':
+    hunting()
+  elif Behavior == 'chasing':
+    chasing()
+  else:
+    eating()
+
+#--
+def SciPrjAct():
+  """ Make the robot do something. """
+  pass
+
+
+
+#-------------------------------------------------------------------------------
+# Sarah and Amanda Functions
+#-------------------------------------------------------------------------------
+
+def hunting():
+  global Brain, CookedPixels, Blobs, BoiId, Behavior, RestingCnt, PrevCenter
+  wit = [
+    ['i am hunting', None],
+    ['where is my dinner', None],
+    ['food on the hoof, thats what i need', None],
+  ]
+  SciPrjSetSpeeds(0, 0)
+  vis()
+  if BoiId == 'prey':
+    PrevCenter = Blobs['prey']['center']
+    Behavior = 'chasing'
+    print '***', Behavior
+  else:
+    RestingCnt += 1
+    if RestingCnt >= 3:
+      speedleft = random.randint(-9, 9)
+      speedright = -speedleft
+      RestingCnt = 0
+      SciPrjSetSpeeds(speedleft, speedright)
+    RandSay(wit)
+
+def chasing():
+  global Brain, CookedPixels, Blobs, BoiId, Behavior, RestingCnt, PrevCenter
+  wit = [
+    ['i am chasing', None],
+    ['pant, pant', None],
+    ['the little guys fast', None],
+  ]
+  leftspeed = rightspeed = Brain.mBrum['hunter_speed']
+  if Blobs['prey']['center']<= 45:
+    leftspeed = leftspeed -2
+    rightspeed = rightspeed + 2
+  elif Blobs['prey']['center'] >= 55:
+    leftspeed = leftspeed + 2
+    rightspeed = rightspeed -2
+  dp = Blobs['prey']['center']-PrevCenter
+  if dp < -3:
+    leftspeed = leftspeed -1
+    rightspeed = rightspeed + 1
+  elif dp > 3:
+    leftspeed = leftspeed + 1
+    rightspeed = rightspeed -1
+  SciPrjSetSpeeds (leftspeed, rightspeed)
+  PrevCenter = Blobs['prey']['center']
+  vis()
+  if BoiId == 'sadness':
+    Behavior = 'hunting'
+    print '***', Behavior
+  elif Blobs['prey']['end']-Blobs['prey']['start'] > 75:
+    SciPrjSetSpeeds(0,0)
+    Behavior = 'eating'
+    print '***', Behavior
+  else:
+    RandSay(wit)
+
+def eating():
+  global Brain, CookedPixels, Blobs, BoiId, Behavior, RestingCnt, PrevCenter
+  wit = [
+    ['i am eating', None],
+    ['tastes like chicken', None],
+    ['ooh soft centers', None],
+    ['pass the salt please', None],
+  ]
+  SciPrjSetSpeeds(0, 0)
+  vis()
+  if BoiId == 'sadness':
+    Behavior = 'hunting'
+    print '***', Behavior
+  elif Blobs['prey']['end']-Blobs['prey']['start'] < 55:
+    Behavior = 'hunting'
+    print '***', Behavior
+  else:
+    RandSay(wit)
+
+def vis():
+  global Brain, CookedPixels, Blobs, BoiId, Behavior, RestingCnt, PrevCenter
+  CookedPixels = Brain.mBrum['cooked_pixels']
+  CookedPixels = threshold(CookedPixels, Brain.mBrum['boi_threshold'])
+  #CookedPixels = StretchContrast(CookedPixels, Brain.mBrum['boi_threshold'])
+  SciPrjSetCookedPixels()
+  bloblist = findblobs(CookedPixels)
+  boi = findboi(bloblist)
+  if boi >= 0:
+    BoiId = 'prey'
+    Blobs[BoiId] = {
+      'start': bloblist[boi][0],
+      'end': bloblist[boi][1],
+      'width': bloblist[boi][1] - bloblist[boi][0] + 1,
+      'mass': bloblist[boi][2],
+      'center': bloblist[boi][3]
+    }
+    print Blobs
+  else:
+    BoiId = 'sadness'
+    Blobs = {}
+  SciPrjSetBlobs()
+  SciPrjSetBoiId()
+
+def StretchContrast(pixlist, minmin=0, maxmax=0xff):
+  """Stretch the current image row to the maximum dynamic range with
+  minmin mapped to black(0x00) and maxmax mapped to white(0xff) and
+  all other pixel values stretched accordingly."""
+  if minmin < 0: minmin = 0           # pixel minimum is 0
+  if maxmax > 0xff: maxmax =  0xff    # pixel maximum is 255
+  if maxmax < minmin: maxmax = minmin # range sanity
+  min, max = maxmax, minmin
+  for pixel in pixlist:
+    if pixel < min and pixel >= minmin:
+      min = pixel
+    if pixel > max and pixel <= maxmax:
+      max = pixel
+  if min > max: min = max
+  if min == max:
+    f = 1.0
+  else:
+    f = 255.0 / (max - min)
+  newpixlist = []
+  for pixel in pixlist:
+    if pixel < minmin: pixel = minmin
+    if pixel > maxmax: pixel = maxmax
+    pixel = int((pixel - min) * f)
+    newpixlist.append(pixel)
+  return newpixlist
+
+def threshold(pixlist, th):
+  newpixlist = []
+  for pix in pixlist:
+    if pix < th:
+      newpixlist.append(0)
+    else:
+      newpixlist.append(pix)
+  return newpixlist
+
+def findblobs(pixlist):
+  global NumPixels
+  bloblist = []
+  start = 0
+  while start < NumPixels: 
+    if pixlist[start] > 0:
+      start, end, mass, center = blob(pixlist, start)
+      bloblist += [(start, end, mass, center)]
+      start = end + 1
+    else:
+      start += 1
+  return bloblist
+
+def blob(pixlist, start):
+  global NumPixels
+  end = start+1
+  mass = pixlist[start]
+  moment = mass * start
+  while end < NumPixels:
+    if pixlist[end] > 0:
+      mass += pixlist[end]
+      moment += pixlist[end] * end
+      end += 1
+    else:
+      break
+  end -= 1
+  center = float(moment) / float(mass)
+  return start, end, mass, center
+
+def findboi(bloblist):
+  mass = 0
+  n = 0
+  boi = -1
+  while n < len(bloblist):
+    if bloblist[n][2] > mass:
+      boi = n
+      mass = bloblist[n][2]
+    n += 1
+  return boi
+
+def RandSay(wit):
+  global Brain, SayCnt
+  SayCnt += 1
+  if SayCnt % 2 == 0:
+    n = random.randint(0, len(wit)-1)
+    SciPrjSay(wit[n][0], wit[n][1])

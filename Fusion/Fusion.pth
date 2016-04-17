@@ -1,0 +1,14 @@
+#
+# Fusion path file.
+# Change the line below to point to the parent directory of Fusion, usually
+# Fusion-x.y. Then copy to site-packages/ subdirectoy of your python 
+# installation. (e.g. for Windows, the site-packages directory is likely: c:\Python24\Lib\site-packages)
+#
+#  Unix example:
+#  /usr/local/Fusion-0.9
+#
+#  Windows example:
+#  C:\src\Fusion-0.9
+#
+C:\src\Fusion-0.9
+

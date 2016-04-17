@@ -1,0 +1,25 @@
+# __plugins__.py
+vRobots = [
+  ['sole.py', None,
+   "* The Undead don't got sole"],
+  ['mackerel.py', None,
+   '* Holy mackerel, Batman, you doing another lame movie?'],
+  ['tuna.py', 'Tuna',
+   '* Hot from the piano bar'],
+  ['swordfish.py', None,
+   'Engarde, you coward'],
+  ['octopus.py', None,
+   'Eight is enough'],
+  ['humpback.py', None,
+   'Two very happy dogs?'],
+  ['orangeroughy.py', None,
+   'Big, mean, Broncos player'],
+  ['squid.py', 'Squid',
+   '* A little squirt, but what ink he can lay down on sponge paper.'],
+  ['mahimahi.py', 'MahiMahi',
+   '* Hawaii HowAhYe?'],
+  ['bluecrab.py', None,
+   'Rich Republican assh*le who whines all day long'],
+  ['lobster', None,
+   'A Sicilian who looses ya arms?']
+]

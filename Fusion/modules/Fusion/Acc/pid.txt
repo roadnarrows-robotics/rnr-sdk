@@ -1,0 +1,10 @@
+"""
+RDK Second order version
+Pk = Kp (ek – ek-1)
+Ik = Ki * T ek
+Dk = (Kd/T) (ek – 2 ek-1 + ek-2)
+
+CVk = CVk-1 + Pk + Ik + Dk
+
+where ek = SPk – PVk, and T is the sampling interval.
+"""

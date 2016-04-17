@@ -1,0 +1,22 @@
+#
+# HemiBaseShell simple script to have the Hemisson trace out a square.
+#
+forward 6   # left side of square
+wait 2
+twirl 5     # spin right
+wait 1.0
+
+forward 6   # top side of square
+wait 2
+twirl 5     # spin right
+wait 1.0
+
+forward 6   # right side of square
+wait 2
+twirl 5
+wait 1.0   # spin right
+
+forward 6   # bottom side of square
+wait 2
+
+stop        # shut the little guy down

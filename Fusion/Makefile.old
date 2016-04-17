@@ -1,0 +1,130 @@
+###############################################################################
+# Makefile
+#
+# Version:
+# 	$LastChangedDate: 2010-01-21 10:32:54 -0700 (Thu, 21 Jan 2010) $
+# 	$Rev: 231 $
+#
+# Tar-gzip Fusion Demo Package. 
+###############################################################################
+
+help:
+	@echo ""
+	@echo "Usage: make <tgt>"
+	@echo "       <tgt> - target"
+	@echo ""
+	@echo " Distribution Package Targets"
+	@echo "pkg          - makes Fusion distribution package"
+	@echo ""
+	@echo " Utility Targets"
+	@echo "clean            - remove intermediate and temporary files"
+	@echo "distclean        - clean and remove distribution copies" 
+
+delivdir = /share/deliverables
+dist		 = ../dist
+
+fusbin = /prj/pkg/fusion/bin
+
+#
+# Fusion Packing List
+#
+pkg : pkgname = Fusion
+pkg : pkgver := \
+	$(shell cat VERSION.py|while read name eqsign ver; do \
+			if [ $$name == 'FusionVersion' ]; \
+				then eval ver=$$ver; echo $$ver; break; fi; \
+			done; \
+	)
+pkg : pkgdir = $(pkgname)-$(pkgver)
+pkg : distdir = $(dist)/$(pkgdir)/$(pkgname)
+pkg : topfiles = \
+	__init__.py \
+	VERSION.py \
+	README.txt \
+	EULA.txt \
+	fusion.ini.posix \
+	fusion.ini.win \
+	Fusion.pth
+pkg : subpkgs = \
+	Core \
+	Gui \
+	Utils \
+	Acc \
+	Demos \
+	Khepera \
+	Hemisson \
+	KHR1 \
+	KHR2 \
+	Templates
+
+#
+# Package Target
+#
+pkg: pre-pkg mk-pkg post-pkg
+	
+
+# pre-packing 
+pre-pkg:
+	@echo "Making package $(pkgdir)"
+	@mkdir -p -m 775 $(distdir)
+
+# make package
+mk-pkg: cp-topfiles cp-subpkgs mk-doc mk-bin mk-tarball
+
+# copy top-level files
+cp-topfiles:
+	@for f in $(topfiles); \
+	do \
+	  echo "  copying top-level file $${f}"; \
+		cp -p $${f} $(distdir)/$${f}; \
+	done
+
+# copy subpackages
+cp-subpkgs:
+	@for subpkg in $(subpkgs); \
+	do \
+	  echo "  copying subpackage $${subpkg}"; \
+		cp -R -p $${subpkg} $(distdir)/. ;\
+	done
+
+# make documentation
+mk-doc:
+	@echo "Making documentation"
+	@$(fusbin)/mkdoc.sh $(dist)/$(pkgdir)
+
+# make Fusion bin
+mk-bin:
+	@echo "Making bin"
+	@$(fusbin)/mkbin.sh $(dist)/$(pkgdir)
+		
+# make compressed tar file
+mk-tarball:
+	@if [ -d "$(dist)/$(pkgdir)" ]; \
+	then \
+		echo "  tar-zipping $(pkgdir) to $(delivdir)"; \
+    cd $(dist); \
+	  tar -cv --gzip ./$(pkgdir) > $(delivdir)/$(pkgdir).tar.gz; \
+	else \
+		echo "  build error: directory not found: $(pkgdir)"; \
+		exit 2; \
+  fi
+
+# post-packing
+post-pkg:
+	@echo "  package $(pkgname)-$(pkgver) complete"
+
+
+#
+# Utilities
+#
+
+clean:
+	find . -name '*.py[co]' | xargs rm -f
+	find . -name '*~' | xargs rm -f
+	find . -name '\#*\#' | xargs rm -f
+	find . -name 'lincam*.jpg' | xargs rm -f
+	find . -name 'lincam*.ppm' | xargs rm -f
+	find . -name 'wp_*_*.py'
+
+distclean: clean
+	rm -fr $(dist)

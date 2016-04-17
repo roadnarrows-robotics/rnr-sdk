@@ -1,0 +1,44 @@
+; 
+; Fusion Configuration File
+; 
+
+; 
+; Fusion settings
+; 
+[Fusion]
+DebugLevelvBrain = 2                    ; Debug level of vBrain. Default: 0
+DebugFileName = <stdout>                ; Debug output filename. Default: '<stdout>'
+; vBrain directory search path for python plugins. Default: None
+BrainPluginPath = /prj/khepera/KheDemo/KheGP2D120:~/src/robots
+; vRobot directory search path for python plugins. Default: None
+RobotPluginPath = /prj/khepera/KheDemo/KheGP2D120:/prj/khepera/KheDemo/tests/fish:~/src/robots
+DebugLevelvRobot = 2                    ; Debug level of vRobot. Default: 0
+DebugLevelFusion = 2                    ; Debug level of Fusion. Default: 0
+
+; 
+; Khepera II robot connection settings
+; 
+[robot/KheperaII/connection]
+parity = N                              ; Connection parity. Default: 'N'
+baudrate = 9600                         ; Connection baudrate. Default: 9600
+bytesize = 8                            ; Connection bytesize. Default: 8
+port = /dev/ttyS0                       ; Connection port (device). Default: None
+stopbits = 1                            ; Connection stopbits. Default: 1
+port2 = /dev/ttyS1
+port3 = /dev/ttyUB1
+port0 = /dev/ttyS0
+port1 = /dev/ttyUB0
+
+; 
+; Khepera II robot options
+; 
+[robot/KheperaII/options]
+UseProximitySensors = True              ; Do [not] use proximity sensors. Default: True
+ExecCycle = 0.10                        ; Execution sense/track cycle time (seconds). Default: 0.10000000000000001
+ExecStepSize = 0.25                     ; Execution 'Step' size (seconds). Default: 0.25
+AutoConnect = True                      ; Do [not] autoconnect after loading. Default: False
+UseSpeedometerSensors = True            ; Do [not] use speedometer sensors. Default: True
+UseAmbientSensors = False               ; Do [not] use ambient sensors. Default: False
+UseDistMeasSensors = True               ; Do [not] use dist. measuring sensors. Default: True
+UseOdometrySensors = True               ; Do [not] use odometry sensors. Default: True
+

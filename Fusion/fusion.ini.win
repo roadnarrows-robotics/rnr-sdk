@@ -1,0 +1,22 @@
+; 
+; Fusion Configuration File v0.8 (Windows Version)
+; 2005.03.03
+; 
+
+; 
+; Fusion settings
+; 
+[Fusion]
+; vBrain directory search path for python plugins
+BrainPluginPath = $FUSION\Khepera;$FUSION\Hemisson;$FUSION\KHR1;$FUSION\KHR2
+; vRobot directory search path for python plugins
+RobotPluginPath = $FUSION\Khepera;$FUSION\Hemisson;$FUSION\KHR1;$FUSION\KHR2
+AutoSavePlugins = False   ; Do [not] autosave the last plugins of the session.
+AutoPlugin = False        ; Do [not] auto-plugin the <x>Plugins.
+BrainPlugin = None        ; vBrain auto-plugin
+RobotPlugin = None        ; vRobot auto-plugin
+DebugLevelFusion = 2      ; Debug level of Fusion
+DebugLevelRobot = 2       ; Debug level of vRobot
+DebugLevelBrain = 2       ; Debug level of vBrain
+DebugFileName = <stdout>  ; Debug output filename
+AutoSave = True           ; Do [not] autosave ini on exit

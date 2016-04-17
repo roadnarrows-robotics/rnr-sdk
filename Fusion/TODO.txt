@@ -1,0 +1,122 @@
+DONE 1.  for vRobot:
+DONE   NullGoals()  -> zero's goals, odometry, etc
+DONE   HoldGoals()  -> keeps goals, but stops acting on them
+
+DONE 2.  for vRobotThreaded:
+DONE  SenseInit()     exec start
+DONE  SenseDeinit()    exec stop
+DONE  Sense()         bot thread
+DONE  ReactInit()     exec start
+DONE  ReactDeinit()   exec stop
+DONE  React()         bot thread
+
+DONE 3.  vBrainThreaded:
+DONE   Thread names Think -> Cog
+DONE   ThinkInit()     exec start
+DONE   ThinkDeinit()    exec stop
+DONE   Think()         bot thread
+DONE   ActInit()     exec start
+DONE   ActDeinit()    exec stop
+DONE   Act()         bot thread
+
+DONE 4. Threaded
+DONE   DoStartInit()   - called in ExecStart(), first ExecStep()
+DONE     xInit()
+DONE     yInit()
+DONE   DoStopDeint()   - called in ExecStop()
+DONE     xDeinit()
+DONE     yDeinit()
+DONE   DoHold()        - called in thread prior to pause, stop, etc
+DONE     stop the bot, hold your thoughts, actions, and reactions
+    
+DONE 5. vKhepera
+DONE   Conform to vRobotThreaded
+
+DONE 6. vBrainDynaAvoid
+DONE  Conform to vBrainThreaded
+
+7. Status etc, in GuiUtils and make all dlg, win use it
+
+DONE 8. KheSerial.py
+DONE   add standard PyDebug debugging 
+DONE   add better sendcmd write/read control for mismatched rsp messages
+
+DONE 9. vBrainLoopy.py
+DONE   Add this brain to do the standard circle
+
+DONE 10. PyDebug.py
+DONE   delelte the dxprintf() functions
+
+DONE 11. vKhepera, vRobot
+DONE   ReadSensors() - reads all enabled sensors if open()
+DONE   Can be used in dialogs, etc
+
+12 Tools|Perf Meter
+  server performance meter
+  % of total exec cycle time used 
+  need gluon hooks to server
+  Help menubar
+    measures actual execution time as a percentage of Execution Cycle time.
+    Any sustained execution occupancy over 80% could adversely effect
+    the robot control dynamics.
+
+
+DONE 13. Robot/KheMimeTypes.py
+
+14. PyDebug.py
+  investigate inspect module for dprintcall() functions
+  investigate traceback module for error trace backs for plugin actions
+
+DONE 15. vRobot.py
+DONE   HasPhysicalProperties()
+DONE     dim: `weight, length, etc
+DONE     hw, etc
+
+DONE 16. Proximity/Ambient Sensor calibration dialogs: add effective ranges
+DONE     computations to generate y data.
+
+DONE 17. Move _guiUtils to GuiUtils
+
+18. GuiXYGraph.py
+DONE   Add newdata() to replace existing graph, keeping same labels
+  Add overlay() - support for multiple graphs on one graph
+DONE   Add parameter support to specify domain and range
+DONE   Add interpolation for points outside of domain and range
+DONE   Add parameter to supress point discs
+
+DONE 19. Add x,y to vKhepera 'loc' sensor
+DONE   Redo vKhepera 'Trip' with new 'loc'
+DONE   Other *.py's?
+
+DONE 20. Add VERSION.py for Fusion.
+DONE   Add Makefile support for this file
+DONE   Add Fusion support for this file
+DONE   Version 0.9
+
+DONE 21. Move demos to Demos
+DONE   Update khepera.ini
+
+22. Templates
+DONE  TRobot.py
+DONE  TBrain.py
+DONE  TShell.py
+  TWin.py
+  
+23. Package 0.9 preps
+DONE  Include Templates in build
+DONE  Exclude Acc subpackage
+  Update README.txt
+DONE  Update all __init__.py
+  pydoc help
+
+24. HasPhysicalProperties() 
+  Convert to MIME type 'physical' so that tree can be printed
+
+25. Add support for toolbar items to have various images based on state.
+  Eg. Serial Connect/Disconnect
+
+26. Add better current state display graphics. 
+  can't easily tell if running, paused, etc
+
+27. Move all <x>Cmd subdirectories to Cmd
+

@@ -1,0 +1,8 @@
+#
+# Khepera shell script file demonstration
+#
+open /dev/ttyS0 9600
+wait 1
+rawcmd B  # get version
+wait 1.5
+close

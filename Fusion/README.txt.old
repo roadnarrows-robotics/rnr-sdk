@@ -1,0 +1,461 @@
+################################################################################
+#
+# README.txt
+#
+# Description:
+#  Fusion Package README file. 
+#  Contains installation instructions. 
+#
+# Robotic Fusion fuses the physical/simulated robot, its brain, the GUI,
+# and all types of reporting into a coherent whole.
+#
+# Author: Kim Wheeler-Smith
+# Email:  kim.wheeler@roadnarrowsrobotics.com
+# URL:    http://www.roadnarrowsrobotics.com
+# Date:   2007.01.08
+#
+# Copyright (C) 2005-2009.  RoadNarrows LLC.
+# All Rights Reserved by RoadNarrows LLC
+#
+# Fusion End-User License Agreement (EULA)
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that
+# (1) The above copyright notice and the following two paragraphs
+# appear in all copies of the source code and (2) redistributions
+# including binaries reproduces these notices in the supporting
+# documentation.   Substantial modifications to this software may be
+# copyrighted by their authors and need not follow the licensing terms
+# described here, provided that the new terms are clearly indicated in
+# all files where they apply.
+#
+# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+#
+#
+# About RoadNarrows LLC
+#
+# RoadNarrows LLC is a small robotics company based in Colorado, U.S.A.
+# 
+# RoadNarrows specializes in the sells and support of robots for the
+# Research and Education markets. RoadNarrows is actively in the process
+# of designing new hardware and software for the next generation of
+# Research and Education robots.
+# 
+# RoadNarrows LLC
+# 1151 Eagle Dr. #140
+# Loveland, Colorado
+# U.S.A. 80537
+# ph: +1 970.593.0370
+# fax: +1 970.461.9969
+# url: www.roadnarrowsrobotics.com
+# email: oneway@roadnarrowsrobotics.com
+# support questions and bug reports: support@roadnarrowsrobotics.com
+#
+################################################################################
+
+Contents:
+---------
+---------
+
+This README file consists of the following sections:
+
+Contents
+Overview
+  Description
+  Supported Packages
+  System Requirements
+  Supported Robots
+  Brains
+  Documentation
+  Configuration Files and Environment Variables
+Installation Notes
+  Windows XP
+  Linux
+Operation
+Tutorial
+  Khepera Example
+Known Problems and Work-Arounds
+
+
+
+Overview:
+---------
+---------
+
+
+
+Description:
+------------
+Fusion is a RoadNarrows-developed robotics demonstration application. 
+It is free to use, modify, and distribute. See EULA for more details.
+
+Fusion is a Gluon Client that fuses a vRobot Gluon Server and/or a vBrain 
+Gluon Server into one controlling structure. Gluon is the simple control
+and information exchange interface between the client and server.
+
+Both the vBrains and vRobots are plugable python modules. Any derived
+application conforming to the vBrain and vRobot interface will work within
+the Fusion construct. 
+
+Supported client-server models are:
+ Fusion(client) <--Gluon--> vRobot(server)
+ Fusion(client) <--Gluon--> vBrain(server)
+ Fusion(client) <--Gluon(2)--> [vBrain(server) <--peer--> vRobot(server)]
+
+Supported Subpackages:
+----------------------
+
+  Core      - Fusion core subpackage including the Reactor.
+  Utils     - Fusion genera purpose utilities subpackage.
+  Gui       - Fusion Graphical User Interface windows, dialogs,
+              and utilities.
+  Hemisson  - K-Team Hemisson robot subpackage.
+  Khepera   - K-Team KheperaII robot subpackage.
+  KHR1      - Kondo KHR-1 humanoid robot subpackage.
+  Templates - User development templates.
+  Demos     - Simple Fusion demos.
+
+System Requirements:
+--------------------
+
+Windows XP or Linux. 
+It requires a Python installation, Python 2.4 or better. 
+
+Tested Platforms: Linux Fedora Core 5, Windows XP
+    Although not tested on other host platforms, if the above python 
+    requirements are met, it should still work...
+RS232 cabled serial or Bluetooth serial port for connection to Hemisson and
+Khepera robots.
+Kondo hacked TTL-RS232 cabled serial port for KHR-1 robot.
+
+**  WARNING WARNING WARNING  **
+Fusion 0.10.0 does not work very well on Windows XP with Python 2.4. There
+are unexpected interactions between the threading module and the Tkinter
+mainloop() which causes window management to fail and lock. Hopefully,
+this can be fixed in an upcoming dot release.
+
+Supported Robots:
+-----------------
+
+K-Team Robots: Hemisson and KheperaI, KheperaII
+Kondo Robots:  KHR-1
+
+Fusion 0.10.0 includes support for the Hemisson and the Khepera robots by
+K-Team and the KHR-1 robot by Kondo.
+See the following sites for more information about these robots.
+  http://www.roadnarrowsrobotics.com
+  http://www.k-team.com
+  http://www.kondo-robot.com/html/Info_En.html
+
+The Hemisson modules supported include the Linear Camera, Text-to-Speech,
+and the Ultra-Sonic Sensor. If you use these modules it is required that you
+use the modified Hemisson OS HemiOs-1.50RNf.HEX available from 
+http://roadnarrowsrobotics.com/support/hemisson/supHem-Base.html.
+To update the Hemisson with this OS, please see the Hemisson User Guide. 
+
+Future: 
+
+Robots that are planned to be supported in the future include:
+  KHR-2HV humanoid robot by Kondo
+  KheperaIII wheeled robot by K-Team
+  e-puck wheeled robot by GCtronic
+  MANOI AT01 humanoid robot by Kyosho
+  All future robots built by RoadNarrows LLC. 
+Please contact us at oneway@roadnarrowsrobotics.com if you have any requests or 
+code for additional robots or brains to be included in the Fusion package. 
+
+Brains:
+-------
+
+There are also some example "brains" included in Fusion for both the Hemisson
+and the Khepera robots. 
+See the Khepera and Hemisson directories under Fusion for more information.
+
+Documentation:
+--------------
+
+Use a web-browser to view the index.html file in the main Fusion-x.y directory.
+The Fusion Application Programming Interface (API) is documented here.
+The subpackages are also described here. 
+ 
+
+Configuration Files and Environment Variables:
+----------------------------------------------
+
+fusion.ini  - fusion 'ini' file specifying fusion start-up configuration.
+fusion.pth  - python file to specify fusion location (Use this or PYTHONPATH).
+
+PYTHONPATH    - Alternative to the fusion.pth file. Modify this variable 
+                to include the Fusion path. 
+FUSIONSTARTUP - ini file that specifies site installation, group parameters. 
+                It isn't necessary to define this for Fusion to run properly.
+FUSION        - Isn't necessary to modify this. 
+                Only use this to override where Fusion exists.
+
+Installation Notes:
+------------------- 
+-------------------
+
+Windows XP
+----------
+
+
+First-time Installation Instructions:
+
+
+1. Python 2.4.x, "Python for Windows extensions", and the pyserial package 
+must be installed.  Skip this step if you've done this for other tools.
+
+If you need to upgrade your python installation, it is recommended that you
+first uninstall your old python installation. Don't forget to uninstall all
+three packages.  The pyserial package and the Python for Windows extensions
+package can be uninstalled through your Control Panel's Add/Remove Programs. 
+
+
+The original source of these files can be found on python.org, 
+sourceforge.net/projects/pywin32/, and pyserial.sourceforge.net, 
+however, copies are available at roadnarrowsrobotics.com for your convenience.
+
+Eg. install the python packages in the following order and it is recommended to
+accept the default installation locations:
+
+python-2.4.2.msi
+pywin32-207.win32-py2.4.exe
+pyserial-2.2.win32.exe
+
+Verify that python was installed correctly. You can go to your Start Menu, 
+Program Files, and open up IDLE from the python 2.4 path. 
+
+
+2. Copy the Fusion-x.y.tar.gz  file to your destination directory. For example,
+
+c:\src
+
+and untar the Fusion-x.y.tar.gz in this directory. 
+We use WinZip as an extraction tool. ("Extract to here" option). 
+Ignore any trailing garbage errors. 
+
+
+3. There are two mechanisms for Fusion to find Python. Either one should work.
+
+The first way is using ".pth" files. 
+Open c:\src\Fusion-x.y\Fusion\Fusion.pth with notepad and edit 
+it to specify the location of the top-level installation directory of Fusion 
+from step 2. 
+
+Eg: c:\src\Fusion-0.10.0
+
+Copy this pth file to the site-packages directory under your python
+installation.
+Eg. to : c:\Python24\Lib\site-packages
+
+The second way is by adding the above path to the PYTHONPATH environment
+variable.
+ 
+4. In the Fusion\bin directory, double-click on Fusion.bat . Have fun!
+
+
+Upgrade Instructions: 
+
+
+A. Follow steps 2, 3 and 4 with the new version of Fusion. 
+
+B. Your home directory has a fusion.ini file with defaults, settings, robot
+paths, etc. that have been created by the previous version of Fusion. 
+You must delete this file in order to pick up any new changes, such as new
+robots and new brains. A new fusion.ini file is automatically created for you
+by Fusion. 
+
+However, if you have modified this file with special user preferences, you may
+want to keep your changes, do not delete this file. 
+It is recommended that you rename the old fusion.ini file and then let Fusion
+generate a new fusion.ini for you. Then add your changes back to the new
+fusion.ini. 
+
+In Windows, the fusion.ini file is saved to 
+C:\Documents and Settings\<user>\fusion.ini
+
+
+
+Linux 
+-----
+
+1. It is most likely that your Linux installation has Python2.4 or greater
+installed.  Type "which python" to verify you have your python environment in
+your path.  You may, however, need to install pyserial to support the
+Serial Port functions. This module is available from pyserial.sourceforge.net . 
+
+2. Copy the Fusion-x.y.tar.gz  file to your destination directory. For example,
+
+/usr/local
+
+and untar the Fusion-x.y.tar.gz in this directory. You probably need root
+privileges for the /usr/local directory. 
+
+For example: 
+   cd /usr/local
+   tar xzvf Fusion-0.10.0.tar.gz 
+
+
+3. There are two mechanisms for Fusion to find Python. Either one should work.
+
+The first way is using ".pth" files. 
+
+Edit /<destination direcory>/Fusion-x.y/Fusion/Fusion.pth to specify the 
+location of the top-level installation directory of Fusion from step 2.
+
+Eg: vi /usr/local/Fusion-0.10.0/Fusion/Fusion.pth
+
+Copy this pth file to the site-packages directory under your python
+installation. 
+
+Eg: cp Fusion.pth /usr/lib/python2.4/site-packages
+
+If you don't want to use a ".pth" file, the second way for Fusion to find
+Python is to modify your PYTHONPATH environment variable. 
+
+4. In the Fusion/bin directory, invoke the Fusion executable.
+
+Eg: cd /usr/local/Fusion-0.10.0/Fusion/bin
+    ./Fusion
+
+Have fun! 
+
+
+Upgrade Instructions: 
+
+
+A. Follow steps 2, 3 and 4 with the new version of Fusion. 
+
+B. Your home directory has a .fusion file with defaults, settings,
+robot paths, etc.  that have been created by the previous version of Fusion. 
+You must delete this file in order to pick up any new changes, such as new
+robots and new brains. A new .fusion file is automatically created for you by
+Fusion. 
+
+However, if you have modified this file with special user preferences, you may
+want to keep your changes, do not delete this file. 
+It is recommended that you rename the old .fusion file and then let Fusion
+generate a new .fusion file for you.  Then add your changes back to the
+new .fusion . 
+
+
+In Linux, the .fusion file is saved to your home directory.
+
+
+Operation:
+----------
+----------
+
+Linux - In the Fusion/bin directory, invoke the Fusion executable.
+
+Eg: cd /usr/local/Fusion-x.y/Fusion/bin
+    ./Fusion
+
+Windows - Double click on Fusion.bat in the 
+<installation dir>\Fusion-x.y\Fusion\bin directory 
+
+
+Tutorial:
+---------
+----------
+
+Khepera Example:
+----------------
+
+This is a typical scenerio for loading and connecting to a robot and then 
+loading and running a brain on the robot. You may either use the image icons to
+select the functions, or use the Top-level menu bar. These instructions
+describe using the menu bar. 
+
+Have the Khepera turned on, and connected to your computer via a serial
+connection, such as COM1. A COM port that was created by a Bluetooth connection
+is fine too.  Make sure no other application such as Hyperterminal is connected
+to the Khepera.
+
+1. Select a robot plugin. 
+Select "Robot", then "Select ...".
+Select a vRobots Plugin Directory, and a specific Plugin Module. 
+Press "OK". 
+
+2. Load the robot plugin into Fusion. 
+Select "Exec", then "Load/Unload".
+(Note - if a brain was previously selected and found to be incompatible with
+the robot, you will get an error. You must deselect the brain first, or select
+a new brain.  You can do this through the "brain" menu). 
+
+3. Go back into the Robot menu. Notice now there are more choices.
+Select "Robot" --- "Options". Unselect the Sensor group "GP2D120IR Sensors". 
+Select all the other Sensors listed. Press "Okay".
+
+4. In the main Fusion window, select "Robot" -- "Connect". 
+Type in your COM port (e.g. COM1), and choose the baud rate that the Khepera is
+set to. Click "Okay". 
+
+5. Bring up the robot's shell window. Go to "Robot" --- "Shell". 
+Type "help". Invoke various commands in the Shell to verify communication and
+response with the robot. For example "version" and "moveto 30 30" .
+Familiar Khepera commands can be done using "rawcmd", eg. "rawcmd D,10,-10"
+
+6. From the "robot" menu, select the "Navigator" and the "Trip" windows.
+
+7. Begin execution of the robot. Go to "Exec" --- "Play". 
+
+8. Try driving the robot with the Nav window, and observe the updates in the
+Trip window.
+
+9. Stop execution through "Exec" --- "Stop".
+Unload the robot: "Robot" --- "Load/Unload".
+Observe that the COM port is disconnected and the robot-associated windows
+close.  
+
+10. Select a brain to demonstrate. Select "Brain" --- "Select ..." and select
+Khepera's vBrainLoopy. 
+
+11. Press Load/Unload. ("Exec" --- "Load/Unload"). Notice now under "Brain"
+you may select and modify "Brain Options...".  For a description of the loaded
+brain, go to "Help" --- "About Brain".  
+
+12. Open up all of your robot windows again ("Robot" --- "Trip", "Navigator",
+"Shell")
+
+13. Connect to the robot through the serial port ("Robot" --- "Connect").
+
+14. Play or run the Brain on the Robot. "Exec" --- "Play". You should see the
+robot follow a path which is a virtual circle as specified by the options. 
+The Trip window should show the path that the robot follows as returned by the
+robot's odometry.  
+
+15. Stop execution. "Exec" --- "Stop". 
+
+16. Exit Fusion. "File" --- "Exit". 
+
+
+
+Known Problems and Work-arounds
+-------------------------------
+-------------------------------
+
+1. 06-March-09 
+A fatal error occurs if you have a Fusion window which has part of it outside of the
+visible screen and updates (text or graphics) are made to that window by Fusion.
+This occurs both in Windows and Linux. The work-around is to make sure your windows
+are entirely visible on your computer screen. It is suggested that if you want to
+move or resize your windows, first "pause" your robot execution, if it is currently 
+running, then move/resize your windows, and finally resume/run your program. 
+
+
+Please report any problems, suggestions, or questions to:
+support@roadnarrowsrobotics.com 

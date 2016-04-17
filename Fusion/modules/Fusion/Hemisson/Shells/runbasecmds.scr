@@ -1,0 +1,51 @@
+#
+# HemiBaseShell script to run through all of the shell commands
+#
+help
+wait 0.5
+
+open /dev/ttyUB0    # edit port or delete and specify port on command line
+wait 1
+
+ambient
+wait 1
+
+backward 6
+wait 0.5
+stop
+wait 0.5
+
+beep on
+wait 0.4
+beep off
+
+forward 7
+speed
+wait 0.5
+stop
+wait 0.5
+
+ver
+wait 1
+
+go 8 3
+wait 0.5
+stop
+wait 0.5
+
+led on on
+wait 1
+led off off
+
+proximity incraw
+wait 1.
+
+twirl 9
+wait 0.5
+stop
+wait 0.5
+
+close
+wait 1.0
+
+quit
