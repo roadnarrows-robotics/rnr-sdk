@@ -43,7 +43,6 @@
 ################################################################################
 
 scripts = \
-	bfg \
 	dpkg_repro_status \
 	dpkg_repro_update \
 	eula_update.py \
@@ -63,7 +62,7 @@ scripts = \
 	sgrep \
 	svn_co_sw \
 	svn_pkg_status.sh \
-	svn_update_all.sh
+	svn_update_all.sh \
 	unsvn.sh
 
 
