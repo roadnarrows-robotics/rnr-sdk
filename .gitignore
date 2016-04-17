@@ -25,3 +25,11 @@ botsense/bsPython/modules/BotSense/BotSenseCore.py
 botsense/bsPython/modules/BotSense/bsI2C.py
 botsense/bsPython/modules/BotSense/bsNull.py
 botsense/bsPython/modules/BotSense/bsSerial.py
+
+# Dynamixel
+Dynamixel/bsMsgs/bsDynaCore_wrap.c
+Dynamixel/bsMsgs/bsDynaMsgs.c
+Dynamixel/bsMsgs/x86_64.done
+Dynamixel/bsPython/modules/
+Dynamixel/include/botsense/bsDynaMsgs.h
+Dynamixel/share/msgs/
