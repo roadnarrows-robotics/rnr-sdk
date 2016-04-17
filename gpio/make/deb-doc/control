@@ -1,0 +1,7 @@
+Package:rnr-gpio-doc
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Maintainer: Robin Knight <robin.knight@roadnarrows.com>
+Description: Utilities for communicating over GPIO interface. Documentation
