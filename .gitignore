@@ -29,7 +29,12 @@ botsense/bsPython/modules/BotSense/bsSerial.py
 # Dynamixel
 Dynamixel/bsMsgs/bsDynaCore_wrap.c
 Dynamixel/bsMsgs/bsDynaMsgs.c
-Dynamixel/bsMsgs/x86_64.done
+Dynamixel/bsMsgs/*.done
 Dynamixel/bsPython/modules/
 Dynamixel/include/botsense/bsDynaMsgs.h
 Dynamixel/share/msgs/
+
+# Hekateros
+Hekateros/sw/pyModules/build
+Hekateros/sw/pyModules/build.*/
+Hekateros/sw/pyModules/src/*.done
