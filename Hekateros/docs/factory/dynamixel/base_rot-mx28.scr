@@ -1,0 +1,38 @@
+#
+# Hekateros 4L/5L base rotation servo EEPROM factory configuration
+#
+# Servo Id:     1
+# Servo Model:  MX-28
+#
+# Copyright:
+#   (C) 2013.  RoadNarrows LLC.
+#   (http://www.roadnarrows.com)
+#   All Rights Reserved
+# 
+
+wait 0.5
+
+scan
+
+# return delay time (val * 2 = delay in usec)
+write byte 5 1 10
+
+# continuous mode cw and ccw rotation limits
+write word 6 1 0
+write word 8 1 0
+
+# lowest and highest voltage limits
+write byte 12 1 60
+write byte 13 1 160
+
+# max torque 
+write word 14 1 1023
+
+# status return level
+write byte 16 1 2
+
+# alarm LED: overload, command range error
+write byte 17 1 0x24
+
+# alarm shutdown: overload, temperature, voltage
+write byte 18 1 0x25

@@ -1,0 +1,41 @@
+#
+# Hekateros 4S/4L/5S/5L elbow servo EEPROM factory configuration
+#
+# Servo Id:     4
+# Servo Model:  MX-106
+#
+# Copyright:
+#   (C) 2013.  RoadNarrows LLC.
+#   (http://www.roadnarrows.com)
+#   All Rights Reserved
+# 
+
+wait 0.5
+
+scan
+
+# return delay time (val * 2 = delay in usec)
+write byte 5 4 10
+
+# continuous mode cw and ccw rotation limits
+write word 6 4 0
+write word 8 4 0
+
+# drive mode (master)
+write byte 10 4 0
+
+# lowest and highest voltage limits
+write byte 12 4 60
+write byte 13 4 160
+
+# max torque 
+write word 14 4 1023
+
+# status return level
+write byte 16 4 2
+
+# alarm LED: overload, command range error
+write byte 17 4 0x24
+
+# alarm shutdown: overload, temperature, voltage
+write byte 18 4 0x25

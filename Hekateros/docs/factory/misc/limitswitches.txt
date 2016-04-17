@@ -1,0 +1,48 @@
+================================================================================
+Limit Switche Information
+================================================================================
+
+--------------------------------------------------------------------------------
+Arduino Digital I/O
+--------------------------------------------------------------------------------
+D4 Wrist rotation at 0 degree position
+D5 Wrist pitch
+D6 Elbow
+D7 Shoulder
+D8 Base rotation at 180 degree position
+D9 Base rotation at 0 degree position
+
+
+--------------------------------------------------------------------------------
+FW/SW Interface Bits 
+--------------------------------------------------------------------------------
+
+Bit          Blocked Pattern    Limit Switch
+----------   ---------------    ------------
+Bit 0 0x01    0011 1110 0x3e    Base rotation at 0 degree position
+Bit 1 0x02    0011 1101 0x3d    Base rotation at 180 degree position
+Bit 2 0x04    0011 1011 0x3b    Shoulder
+Bit 3 0x08    0011 0111 0x37    Elbow
+Bit 4 0x10    0010 1111 0x2f    Wrist pitch
+Bit 5 0x20    0001 1111 0x1f    Wrist rotation at 0 degree position
+
+All bits      0011 1111 0x3f
+
+Zero Point Position: 0x1e 
+
+--------------------------------------------------------------------------------
+Cable Color Shrink Wrapped Tags
+--------------------------------------------------------------------------------
+red     Base rotation at 0 degree position
+yellow  Base rotation at 180 degree position
+green   Shoulder
+blue    Elbow
+white   Wrist pitch
+black   Wrist rotation at 0 degree position
+
+
+--------------------------------------------------------------------------------
+** Notes **
+--------------------------------------------------------------------------------
+* The first delivered arm to Generations had cables to pins D8 and D9 reversed.
+  So it has a specical firmware load. Take care of firmware updates to this arm.

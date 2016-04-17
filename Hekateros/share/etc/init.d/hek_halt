@@ -1,0 +1,46 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:          hek_halt
+# Required-Start:
+# Required-Stop:
+# Default-Start:
+# Default-Stop:      0
+# Short-Description: Execute the Hekateros halt sequence.
+# Description:    The Hekateros halt sequence is the last system shutdown
+#                 script executed prior the the halt script. It signals the 
+#                 monitor subprocessor that the system shutdown is immenent.
+### END INIT INFO
+
+### THiS SERVICE IS NOT USED YET
+
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+
+. /lib/lsb/init-functions
+
+do_stop ()
+{
+  gpiodir="/sys/class/gpio/gpio174"
+
+	log_action_msg "Signalling monitor subprocessor to power-off on GPIO 174."
+  
+  echo 1 > ${gpiodir}/value
+}
+
+case "$1" in
+  start)
+	  # No-op
+	  ;;
+  restart|reload|force-reload)
+	  echo "Error: argument '$1' not supported" >&2
+	  exit 3
+	  ;;
+  stop)
+	  do_stop
+	  ;;
+  *)
+	  echo "Usage: $0 start|stop" >&2
+	  exit 3
+	  ;;
+esac
+
+:

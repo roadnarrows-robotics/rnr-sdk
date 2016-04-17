@@ -1,0 +1,9 @@
+# 
+# RoadNarrows Robotics Hekateros Dynamixel udev rules
+#
+
+# USB dynabus device
+ATTRS{manufacturer}=="RoadNarrows",ATTRS{product}=="Dynamixel_Bus",ATTRS{idProduct}=="6001",ATTRS{idVendor}=="0403",MODE="666",SYMLINK+="dynabus"
+
+# USB dynabus device (alternate name)
+ATTRS{manufacturer}=="RoadNarrows",ATTRS{product}=="Dynamixel_Chain",ATTRS{idProduct}=="6001",ATTRS{idVendor}=="0403",MODE="666",SYMLINK+="dynabus"

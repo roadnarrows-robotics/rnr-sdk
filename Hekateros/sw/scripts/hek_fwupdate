@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# Script: hek_fwupdate
+#
+#
+## \file
+##
+## $LastChangedDate: 2013-09-25 09:39:14 -0600 (Wed, 25 Sep 2013) $  
+## $Rev: 3338 $ 
+## 
+## \brief Hekateros arduino subprocess firmware update utility.
+##
+## Usage: hek_fwupdate HEXFILE
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2014.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+_usage="Usage: hek_fwupdate HEXFILE"
+
+if [[ $# -lt 1 ]]
+then
+  echo "Error: No hex file specified."
+  echo ""
+  echo "${_usage}"
+  exit 2
+fi
+
+hexfile="$1"
+
+if [[ ! -r ${hexfile} ]]
+then
+  echo "Error: ${hexfile}: Cannot read hex file."
+  echo ""
+  echo "${_usage}"
+  exit 2
+fi
+
+ttyusb="/dev/$(readlink /dev/arduino)"
+
+if [[ ! -c ${ttyusb} ]]
+then 
+  echo "Error: Cannot find tty associated with /dev/arduino." 
+  exit 4
+fi
+
+#
+# Upload the firmware
+#
+# Arduino Pro Mini 5V with Atmega 328p
+#
+avrdude \
+    -P ${ttyusb} -b 57600 \
+    -c avrisp \
+    -p atmega328p \
+    -v -v -v -v \
+    -e -D \
+    -U flash:w:${hexfile}
+
+# not needed    -C /usr/share/arduino/hardware/tools/avrdude.conf \

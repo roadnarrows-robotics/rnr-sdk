@@ -1,0 +1,18 @@
+<?xml-stylesheet
+  href="http://www.roadnarrows.com/xml/readme/1.0/readme.css"
+  type="text/css"?>
+<!--
+ - README.xml
+ -
+ - $LastChangedDate: 2010-04-22 09:28:44 -0600 (Thu, 22 Apr 2010) $
+ - $Rev: 330 $
+ -->
+<readme>
+  <package>Hekateros</package>
+  <synopsis>RoadNarrows Robotics Robot Arm Project</synopsis>
+  <description>
+    The Hekateros package provides the full set of project architecture, design,
+    firmware, and software for the RoadNarrows Robotic Arm product. 
+  </description>
+  <seealso>See documentation for more details.</seealso>
+</readme>

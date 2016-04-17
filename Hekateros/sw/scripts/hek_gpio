@@ -1,0 +1,138 @@
+#!/bin/sh
+#
+# Script: hek_gpio
+#
+
+## \file
+##
+## $LastChangedDate: 2013-09-25 09:39:14 -0600 (Wed, 25 Sep 2013) $  
+## $Rev: 3338 $ 
+## 
+## \brief Hekateros GPIO setup and monitor.
+##
+## Usage: hek_gpio [logfile]
+##
+## \author: Brent Wilkens (brent@roadnarrows.com)
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2014.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+# common environment
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+
+# GPIO system base path
+gpiobasepath="/sys/class/gpio"
+
+logfile="${1}"
+
+if [ -z "${logfile}" ]
+then
+  logfile="/dev/stdout"
+elif [ ! -f "${logfile}" ]
+then
+  echo "** Start ${0} logging." >${logfile} 2>/dev/null
+fi
+
+if [ ! -w "${logfile}" ]
+then
+  logfile="/dev/stdout"
+fi
+
+# Log messages to log file.
+#
+# $* message(s) to log
+#
+log()
+{
+  echo $* >>${logfile}
+}
+
+#
+# Set OMAP device memory to configure GPIO.
+#
+# $1    device memory address
+# $2    device configuration
+#
+setDevMem()
+{
+  addr=${1}
+  cfg=${2}
+  o=$(/usr/bin/devmem2 ${addr} h)
+  curcfg=${o##*: }
+  log "Device memory ${addr} current and target configuration: ${curcfg} ${cfg}"
+  if [ "${cfg}" != "${curcfg}" ]
+  then
+    log "Configure device memory ${addr} ${cfg}"
+    /usr/bin/devmem2 ${addr} h ${cfg} >>${logfile}
+  fi
+}
+
+# 
+# GPIO:         174
+# Direction:    output
+# Active:       low
+# Description:  Signal monitor subprocessor that main processor is (nearly)
+#               halted.
+#
+gpiodir=${gpiobasepath}"/gpio174"
+gpioaddr="0x480021CE"
+gpiocfg="0x4"
+
+setDevMem ${gpioaddr} ${gpiocfg}
+
+if [ ! -d "${gpiodir}" ]
+then
+  echo 174 >/sys/class/gpio/export
+fi
+echo 1   >${gpiodir}/active_low
+echo out >${gpiodir}/direction
+echo 0   >${gpiodir}/value
+
+# 
+# GPIO:         170
+# Direction:    input
+# Active:       low
+# Description:  Signal from monitor subprocessor to begin shutdown of main
+#               processor.
+#
+gpiodir=${gpiobasepath}"/gpio170"
+gpioaddr="0x480021C6"
+gpiocfg="0x11C"
+
+setDevMem ${gpioaddr} ${gpiocfg}
+
+if [ ! -d "${gpiodir}" ]
+then
+  echo 170 >/sys/class/gpio/export
+fi
+echo 1  >${gpiodir}/active_low
+echo in >${gpiodir}/direction
+
+#
+# Watch input gpio signal.
+#
+# -m              Continuously monitor file.
+# -e <event>      Event to watch.
+# --format <fmt>  Output file,event on event.
+#
+while :
+do
+  log 'Waiting on Halt signal from monitor subprocessor.'
+  inotifywait -m -e modify --format="%w,%e" ${gpiodir}/value >>${logfile} 2>&1
+  v=$(cat ${gpiodir}/value)
+  if [ "${v}" == "1" ]
+  then
+    log 'Shutdown and halt now.'
+    #'shutdown -h now'
+  fi
+done
+
+exit 0

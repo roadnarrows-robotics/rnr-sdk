@@ -1,0 +1,47 @@
+Passwords:
+==========
+buckleup password: FCBB1@ck1P@
+Repo passphrase:   masterthief
+
+PKG
+=========
+rnr-appkit-dev
+rnr-botsense-dev
+rnr-dynamixel-dev
+rnr-hekateros-dev
+rnr-i2c-dev
+rnr-librnr-dev
+rnr-libserial-dev
+rnr-gpio-dev
+rnr-netmsgs-dev
+rnr-peripherals-dev
+
+Make
+=====
+make deb-pkg-dev
+
+APTTGT:
+========
+apt (or apt-ubuntu-x86_64)  # Ubuntu 12.04 precise x86_64 amd64
+apt-linaro-omap             # Linaro 3.+ stable arm armhf
+apt-ubuntu-trusty-odroid    # Ubuntu 14.04 trusty arm armhf
+apt-ubuntu-trusty-x86_64    # Ubuntu 14.04 trusty x86_64 amd64
+
+Make:
+=====
+rnmake_deb_all 
+
+Upload:
+=======
+$ rnupload-dpkg --help
+$ rnupload-dpkg --verbose [--arch=RNARCH] [--pkg="PKG PKG"]
+
+or 
+$ cd /prj/pkg/PKG/dist/dist.ARCH
+$ scp X-dev.deb \
+buckleup@roadnarrows.com:/home/buckleup/roadnarrows.com/distro/APTTGT/incoming/.
+
+Update:
+=======
+dpkg_repo_update --help
+dpkg_repo_update --verbose --repo=APTTGT

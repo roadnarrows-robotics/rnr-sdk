@@ -1,0 +1,148 @@
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Hekateros
+//
+// File:      zModDoxyIncludes.doxy
+//
+// Version:
+// $LastChangedDate: 2014-02-10 08:51:10 -0700 (Mon, 10 Feb 2014) $
+// $Rev: 3518 $
+//
+// Description:
+// Useful Documentation Include Blocks (see \copydoc)
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * \file
+ * \dontinclude
+ */
+
+/*!
+ * \defgroup doxy_includes Doxygen Includes
+ * Useful doxygen documentation blocks that can be included into other
+ * documentation with the <b>\\copydoc</b> command.
+ * \{
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_param_ecode doc_param_ecode
+ * \{
+One of \ref hek_ecodes  "Hekateros Error Codes".
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_ecode doc_return_ecode
+ * \{
+On error, the appropriate \h_lt 0 negated \ref hek_ecodes 
+"Hekateros Error Code" is returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_std doc_return_std
+ * \{
+\return
+On success, \ref hekateros::HEK_OK "HEK_OK" is returned.\n
+On error, the appropriate \h_lt 0 negated \ref hek_ecodes 
+"Hekateros Error Code" is returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_py_ecode doc_return_py_ecode
+ * \{
+On error, the appropriate \h_lt 0 negated Hekateros.HekCore error code is
+returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_py_std doc_return_py_std
+ * \{
+\return
+On success, Hekateros.HekCore.HEK_OK is returned.\n
+On error, the appropriate \h_lt 0 negated Hekateros.HekCore error code is
+returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_bs_ecode doc_return_bs_ecode
+ * \{
+On error, the appropriate \h_lt 0 negated BotSense error code is returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_bs_std doc_return_bs_std
+ * \{
+\return
+On success, BS_OK is returned.\n
+On error, the appropriate \h_lt 0 negated BotSense error code is returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_args_std doc_args_std
+ * \{
+ *
+ *  \termblock
+ *  \term \n Standard Options: \endterm
+ *  \term -l, --log=<level> 
+ *    \termdata Set logging threshold level.\n
+ *      All logging events with priority <= <em>level</em> \n will be logged.
+ *      All others will be ignored.\n Error events are always logged.\n
+ *        <em>level</em> is one of:
+ *        \termblock
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; '\b off' or 0   
+ *            \termdata Disable all logging.
+ *          \endterm
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; '\b error' or 1 
+ *            \termdata Enable error logging.
+ *          \endterm
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; '\b diag1' or 2 
+ *            \termdata Enable diagnostics 1 logging.
+ *          \endterm
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; '\b diag2' or 3 
+ *            \termdata Enable diagnostics 2 logging.
+ *          \endterm
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; '\b diag3' or 4 
+ *            \termdata Enable diagnostics 3 logging.
+ *          \endterm
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; '\b diag4' or 5 
+ *            \termdata Enable diagnostics 4 logging.
+ *          \endterm
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; '\b diag5' or 6 
+ *            \termdata Enable diagnostics 5 logging.
+ *          \endterm
+ *          \term &nbsp;&nbsp;&nbsp;&nbsp; \b >6           
+ *            \termdata Enable user-defined logging.
+ *          \endterm
+ *        \endtermblock
+ *    \termdata DEFAULT: off
+ *  \endterm
+ *  \term &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--logfile=<file> 
+ *    \termdata Set logfile <em>file</em>.
+ *    \termdata DEFAULT: stderr
+ *  \endterm
+ *  \term &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--help
+ *    \termdata Display help and exit.
+ *  \endterm
+ *  \term &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--version
+ *    \termdata Display hek version number and exit.
+ *  \endterm
+ * \}
+ */
+
+/*! \} end of doxy_includes */

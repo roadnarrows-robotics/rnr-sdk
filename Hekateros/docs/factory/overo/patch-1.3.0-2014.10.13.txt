@@ -1,0 +1,29 @@
+Patches for hek-1.3.0-2014.10.13.img Image
+==========================================
+root@hekateros$ apt-get install avrdude
+
+rknight@host$ cd /prj/pkg/Hekateros/sw/scripts
+rknight@host$ scp hek_fwupdate root@hekateros:/usr/local/bin/.
+rknight@host$ scp hek_eecam_udp root@hekateros:/usr/local/bin/.
+rknight@host$ scp hek_service root@hekateros:/usr/local/bin/.
+
+root@hekateros$ rm /usr/local/bin/eecam-udp.sh
+root@hekateros$ chmod 755 /usr/local/bin/hek_gpio
+
+root@hekateros$ apt-get install gstreamer0.10-tools
+root@hekateros$ apt-get install gstreamer-dbus-media-service
+root@hekateros$ apt-get install gstreamer0.10-plugins-base
+root@hekateros$ apt-get install gstreamer0.10-plugins-good
+
+root@hekateros$ apt-get install v4l-utils
+
+rknight@host$ cd /prj/pkg/Hekateros/etc/init.d
+rknight@host$ scp hek_bsproxy root@hekateros:/etc/init.d/.
+
+rknight@host$ cd /prj/pkg/Hekateros/etc/udev/rules.d
+rknight@host$ scp 55-rn-cam.rules root@hekateros:/etc/udev/rules.d/.
+rknight@host$ scp 55-rn-dyna.rules root@hekateros:/etc/udev/rules.d/.
+
+
+rknight@host$ cd /prj/ros/groovy/src/hekateros/hekateros_control/scripts
+rknight@host$ scp calibrate root@hekateros:/opt/hekateros_ros/src/hekateros/hekateros_control/scripts/.

@@ -1,0 +1,144 @@
+================================================================================
+Hekaterors 1.3.0, 1.2.0 Dimensions
+================================================================================
+
+--------------------------------------------------------------------------------
+Standard 5L
+--------------------------------------------------------------------------------
+
+Shipping
+--------
+Arm Weight:             4.7kg
+Box Weight:             3.7kg
+Total Shipping Weight:  9.0kg
+Box Dimensions:         24" x 24" x 13"
+
+Mechanical
+----------
+DoF:      5
+Reach     0.9 meters
+Payload:  0.5kg
+
+Workspace (Side View)
+---------------------
+Surface Base:             182mm
+Shoulder to Elbow:        405mm
+Elbow to Tool Zero Point: 461mm
+
+Workspace (Top View)
+---------------------
+Reach to Tool Zero Point: 866
+
+Joints
+------
+Base Rotation:    360 degrees continuous
+Shoulder:         197 degrees
+Elbow:            270 degrees
+Wrist Pitch:      228 degrees
+Wrist Rotation:   360 degrees continuous
+
+
+--------------------------------------------------------------------------------
+Standard 5S
+--------------------------------------------------------------------------------
+
+Shipping
+--------
+Arm Weight:             ?? <4.7kg
+Box Weight:             3.7kg
+Total Shipping Weight:  9.0kg
+Box Dimensions:         24" x 24" x 13"
+
+Mechanical
+----------
+DoF:      5
+Reach     0.6 meters
+Payload:  0.75kg
+
+Workspace (Side View)
+---------------------
+Surface Base:             182mm
+Shoulder to Elbow:        263mm
+Elbow to Tool Zero Point: 319mm
+
+Workspace (Top View)
+---------------------
+Reach to Tool Zero Point: 579
+
+Joints
+------
+Base Rotation:    360 degrees continuous
+Shoulder:         197 degrees
+Elbow:            270 degrees
+Wrist Pitch:      228 degrees
+Wrist Rotation:   360 degrees continuous
+
+
+--------------------------------------------------------------------------------
+Standard 4L
+--------------------------------------------------------------------------------
+
+Shipping
+--------
+Arm Weight:             ?? <4.0kg
+Box Weight:             3.7kg
+Total Shipping Weight:  9.0kg
+Box Dimensions:         24" x 24" x 13"
+
+Mechanical
+----------
+DoF:      4
+Reach     0.9 meters
+Payload:  0.5kg
+
+Workspace (Side View)
+---------------------
+Surface Base:             139mm
+Shoulder to Elbow:        405mm
+Elbow to Tool Zero Point: 461mm
+
+Workspace (Top View)
+---------------------
+Reach to Tool Zero Point: 866
+
+Joints
+------
+Shoulder:         197 degrees
+Elbow:            270 degrees
+Wrist Pitch:      228 degrees
+Wrist Rotation:   360 degrees continuous
+
+
+--------------------------------------------------------------------------------
+Standard 4S
+--------------------------------------------------------------------------------
+
+Shipping
+--------
+Arm Weight:             ?? <4.0kg
+Box Weight:             3.7kg
+Total Shipping Weight:  9.0kg
+Box Dimensions:         24" x 24" x 13"
+
+Mechanical
+----------
+DoF:      4
+Reach     0.6 meters
+Payload:  0.75kg
+
+Workspace (Side View)
+---------------------
+Surface Base:             139mm
+Shoulder to Elbow:        263mm
+Elbow to Tool Zero Point: 319mm
+
+Workspace (Top View)
+---------------------
+Reach to Tool Zero Point: 579
+
+Joints
+------
+Shoulder:         197 degrees
+Elbow:            270 degrees
+Wrist Pitch:      228 degrees
+Wrist Rotation:   360 degrees continuous

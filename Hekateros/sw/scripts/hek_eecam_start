@@ -1,0 +1,189 @@
+#!/bin/bash
+#
+# Script: hek_eecam_start
+#
+
+## \file
+##
+## $LastChangedDate: 2013-09-24 16:56:04 +0000 (Tue, 24 Sep 2013) $  
+## $Rev: 3325 $ 
+## 
+## \brief Start end-to-end video streaming of Hekateros end effector camera.
+##
+## GSreamer pipeline.
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2015.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+_Cmd="hek_eecam_start"
+
+_Synopsis="\
+${_Cmd} [OPTION]...
+       ${_Cmd} --help | -?
+"
+
+_Desc="\
+Start end-to-end video streaming of the Hekateros end effector camera.
+
+If hek_eecam_start is executed on a host different from the Hekateros, the
+video stream over UDP will first be started remotely on the source Hekateros.
+
+For on-target Hekateros invocations, the video stream both originates and
+terminates on the Hekateros. Note the a GUI is required to see the video.
+
+OPTIONS
+  -s, --src=HEK     The Hekateros network name or address to source the video. 
+                      Default: Location of ROS master ROS_MASTER_URI.
+  -p, --port=PORT   The port to send the video packets to. Only applicable if
+                    Hekateros is remote. Ignored otherwise.
+                      Default: 4951
+  -r, --res=RES     Video resolution: One of qvga vga 720p WxH
+                      Default: vga
+  -f, --fps=FPS     Frames per second.
+                      Default: 15
+
+      --help        Print this help.
+
+NOTES
+  o Local end-to-end streaming requires GUI access. 
+  o Remote command execution is done using the robot user id. This may require
+    a password.
+  o Quiting the video window will not stop the remote streaming. Use
+    hek_eecam_stop to terminate the remote video streaming.
+"
+
+rosmaster="${ROS_MASTER_URI##http://}"
+rosmaster="${rosmaster%%:*}"
+
+# defaults
+hekateros=${rosmaster}
+hekusr=robot
+host=$(/bin/hostname)
+host=${host:-localhost}
+port=4951
+res=vga
+width=640
+height=480
+fps=15
+
+# _usage [emsg1 [emsg2...]]
+_usage()
+{
+  ec=0
+  if [ $# -gt 0 ]
+  then
+    ec=2
+    echo -n "${_Cmd}: $1" 1>&2
+    shift
+    while [ $# -gt 0 ]
+    do
+      echo -n ": $1"  1>&2
+      shift
+    done
+    echo "\n" 1>&2
+  fi
+  echo "usage: ${_Synopsis}" 1>&2
+  echo "${_Desc}" 1>&2
+  exit ${ec}
+}
+
+opts=`getopt --long=src:,port:,res:,fps:,help --options=s:p:r:f: --name=${_Cmd} -- "$@"`
+
+if [ $? != 0 ]
+then
+  _usage "Bad options."
+  exit 1
+fi
+
+eval set -- "${opts}"
+
+while true
+do
+  case "$1" in
+    -s|--src) hekateros="$2"; shift 2;;
+    -p|--port) port="$2"; shift 2;;
+    -r|--res) res="$2";
+              case "$res" in
+                qvga) width=320; height=240;;
+                vga)  width=640; height=480;;
+                720p) width=1280; height=720;;
+                *) width=${res%%x*}; height=${res##*x}
+              esac
+              shift 2;;
+    -f|--fps) fps="$2"; shift 2;;
+    --help) _usage; shift 1;;
+    --) shift; break;;
+    *) break;;
+  esac
+done
+
+if [[ ${hekateros} = "" ]]
+then
+  echo "Cannot determine source Hekateros." 1>&2
+  exit 4
+fi
+
+if [[ "${hekateros}" = "${host}" || \
+      "${hekateros}" = "localhost" || \
+      "${hekateros}" = "127.0.1.1" || \
+      "${hekateros}" = "127.0.0.1" ]]
+then
+  remote=false
+else
+  remote=true
+fi
+
+if [[ ${remote} = true ]]
+then
+  rcmd="{ \
+trap "" SIGHUP; \
+export PATH=/prj/bin:/usr/local/bin:${PATH}; \
+hek_eecam_udp --host=${host} --port=${port} --res=${res} --fps=${fps}; \
+}"
+
+  echo "Remote launching Hekateros video streaming."
+  echo "  Source ${hekateros} on port ${port}."
+  echo "  Video resolution ${width}x${height} at ${fps} fps."
+
+  ssh -f ${hekusr}@${hekateros} "${rcmd}"
+
+  sleep 1
+
+  #res=$(ssh ${hekusr}@${hekateros} 'pgrep -f "gst-launch.*"')
+
+  if [[ $? != 0 ]]
+  then
+    echo "Failed remote execution." 1>&2
+    sleep 1
+    exit 4
+  fi
+
+  lcmd="{ \
+gst-launch udpsrc name=eecam port=${port} ! smokedec ! autovideosink; \
+}"
+
+  sleep 1
+
+  echo "Launching video window."
+  echo ""
+
+  eval ${lcmd} &
+
+else
+
+  lcmd="{ \
+hek_eecam_win --res=${res} --fps=${fps};
+}"
+
+  eval ${lcmd} &
+
+fi

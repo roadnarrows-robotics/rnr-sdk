@@ -1,0 +1,38 @@
+#
+# Hekateros default end effector gripper servo EEPROM factory configuration
+#
+# Servo Id:     10
+# Servo Model:  MX-28
+#
+# Copyright:
+#   (C) 2013.  RoadNarrows LLC.
+#   (http://www.roadnarrows.com)
+#   All Rights Reserved
+# 
+
+wait 0.5
+
+scan
+
+# return delay time (val * 2 = delay in usec)
+write byte 5 10 10
+
+# servo mode cw and ccw limits
+write word 6 10 0
+write word 8 10 0
+
+# lowest and highest voltage limits
+write byte 12 10 60
+write byte 13 10 140
+
+# max torque 
+write word 14 10 1023
+
+# status return level
+write byte 16 10 2
+
+# alarm LED: overload, command range error
+write byte 17 10 0x24
+
+# alarm shutdown: overload, temperature, angle limit, voltage
+write byte 18 10 0x25

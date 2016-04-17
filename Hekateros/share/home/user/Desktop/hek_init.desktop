@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=hek_init
+Icon=/usr/local/share/Hekateros/images/icons/HekaterosInitIcon.png
+Exec=gksudo /usr/local/bin/hek_init.d.py
+#Icon=/prj/share/Hekateros/images/icons/HekaterosInitIcon.png
+#Exec=gksudo /prj/bin/hek_init.d.py

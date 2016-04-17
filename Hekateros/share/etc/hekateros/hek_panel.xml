@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="http://roadnarrows.com/xml/Hekateros/1.0/hekateros.xsl"?>
+
+<!-- RoadNarrows Hekateros Top-Level Configuration -->
+<hekateros xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://roadnarrows.com/xml/Hekateros/1.0/hekateros.xsd">
+
+  <!-- Hekateros panel configuration. -->
+  <hek_panel>
+    <warn_on_calib>True</warn_on_calib>
+    <force_recalib>True</force_recalib>
+    <warn_on_release>True</warn_on_release>
+  </hek_panel>
+
+</hekateros>

@@ -1,0 +1,25 @@
+Little Finger (Idas)
+=====================
+Needed before branch.
+1. linaro uses Upstart and /etc/init to start scripts
+2. rnr-config.cmake needed new parameters
+3. lightdm and openbox window managings system auto start
+4. init.d scripts
+    use /bin/sh
+5. DONE fixed agent bug in dynamixel lib. disabled training cmds in dynashell
+6. NOCHANGE fix shm.c
+7. NOCHANGE From roscore
+[  591.236358] irq 10: nobody cared (try booting with the "irqpoll" option)
+[  591.243713] handlers:
+[  591.246093] [<c0026988>] omap3_l3_app_irq
+[  591.250274] Disabling IRQ #10
+  Cleared up.
+8. hosts file and Network doc
+
+Ring Finger (Jasius)
+=====================
+1. ROS Indigo, Ubuntu 14.04
+2. Calibration AS feedback is list of joint op states, not joint states.
+3. Need EE gpio cfg message and service
+4. Need EE gpio state service and publication.
+5. Need to add hekateros name == hostname to ProductInfo.msg

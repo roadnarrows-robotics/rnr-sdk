@@ -1,0 +1,9 @@
+# 
+# RoadNarrows Robotics Hekateros camera udev rules
+#
+
+# End Effector's Creative USB 2.0 720p web camera with microphone.
+KERNEL=="video[0-9]*",ATTRS{idProduct}=="4097",ATTRS{idVendor}=="041e",MODE="666",SYMLINK+="eecam"
+
+# End Effector's Creative USB 1.1 VGA web camera.
+KERNEL=="video[0-9]*",ATTRS{idProduct}=="4051",ATTRS{idVendor}=="041e",MODE="666",SYMLINK+="eecam"

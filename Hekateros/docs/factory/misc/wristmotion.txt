@@ -1,0 +1,68 @@
+Hekateros Wrist Coupled Movements
+=================================
+
+Info
+----
+NOT COMPLETE
+
+The wrist pitch effects wrist rotation, but 
+
+
+Variables: 
+----------
+p_pit_goal    ::= new wrist pitch goal position (radians)
+v_pit_goal    ::= new wrist pitch goal velocity (%)
+p_rot_goal    ::= new wrist rotation goal position (radians)
+v_rot_goal    ::= new wrist rotation goal velocity (%)
+
+p_pit_cur     ::= wrist pitch current position (radians)
+v_pit_cur     ::= wrist pitch current velocity (%)
+p_rot_cur     ::= wrist rotation current position (radians)
+v_rot_cur     ::= wrist rotation current velocity (%)
+
+p_rot_goal_s  ::= saved current wrist rotation goal position (radians)
+
+dp_pit        ::= wrist pitch delta position
+dp_rot        ::= wrist rotation deltat position
+s_rot         ::= sign of wrist rotation delta position
+b_counter     ::= [not] a counter rotation
+
+p_tgt         ::= calculated internal wrist rotation position (radians)
+v_tgt         ::= calculated wrist rotation velocity (%)
+
+
+Coupled Movements:
+------------------
+Case 1: Wrist Pitch, Wrist Rotation
+  p_rot_goal_s  = p_rot_goal
+
+  dp_pit    = p_pit_goal - p_pit_cur
+  dp_rot    = p_rot_goal - p_rot_cur
+  s_rot     = dp_rot >= 0.0? 1.0: -1.0
+  b_counter = dp_pit * dp_rot >= 0.0? true: false
+
+  if( fabs(dp_pit) < fabs(dp_rot) )
+  {
+    p_tgt   = p_pit_cur + p_rot_goal_s
+    p_tgt_1 = p_rot_cur + s_rot * fabs(dp_pit);
+    v_tgt_1 = b_counter? v_pit_goal + v_rot_goal: fabs(v_pit_goal - f_rot_goal)
+    p_tgt_2 = p_rot_goal
+    v_tgt_2 = v_rot_goal
+  }
+  else
+  {
+    p_tgt_1 = p_rot_cur + s_rot * fabs(dp_rot);
+    v_tgt_1 = b_counter? v_pit_goal + v_rot_goal: fabs(v_pit_goal - f_rot_goal)
+    p_tgt_2 = p_rot_goal
+    v_tgt_2 = v_rot_goal
+  }
+
+Case 2: Wrist Pitch, No Wrist Rotation
+  p_tgt = p_pit_goal + p_rot_goal_s
+  v_tgt = v_pit_goal
+
+
+Case 3: No Wrist Pitch, Wrist Rotation
+  p_rot_goal_s = p_rot_goal
+  p_tgt        = p_pit_cur + p_rot_goal_s
+  v_tgt        = v_rot_goal

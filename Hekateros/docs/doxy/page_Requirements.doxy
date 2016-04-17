@@ -1,0 +1,50 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Hekateros
+//
+// File:      page_Requirements.doxy
+//
+// $LastChangedDate: 2014-02-10 08:51:10 -0700 (Mon, 10 Feb 2014) $
+// $Rev: 3518 $
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! 
+  \page page_req Requirements and Dependencies 
+  \section req_rn RoadNarrows Required Packages
+  \termblock
+    \term <b><i>Package</i></b>\termdata <b><i>Description</i></b>\endterm
+    \term rnmake
+      \termdata RoadNarrows make system package. \endterm
+    \term librnr
+      \termdata RoadNarrows Robotics common library package. \endterm
+    \term librnr_appkit
+      \termdata RoadNarrows Robotics C++ application kit library package.
+      \endterm
+    \term libserial
+      \termdata RoadNarrows Robotics serial library package. \endterm
+    \term libi2c
+      \termdata RoadNarrows Robotics \h_i2c library package. \endterm
+    \term netmsgs
+      \termdata RoadNarrows Robotics net messaging library package. \endterm
+    \term botsense
+      \termdata RoadNarrows Robotics botsense net proxy library package.
+      \endterm
+    \term Dynamixel
+      \termdata RoadNarrows Robotics Dynamixel servo library package. \endterm
+  \endtermblock
+
+  \section req_open Third Party Open-Source Required Packages
+  \termblock
+    \term <b><i>Package</i></b>\termdata <b><i>Description</i></b>\endterm
+    \term tinyxml
+      \termdata Tiny XML parser library. \endterm
+    \term stdc++
+      \termdata GNU standard C++ library. \endterm
+  \endtermblock
+*/

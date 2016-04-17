@@ -1,0 +1,183 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Hekateros
+//
+// File:      uno.doxy
+//
+// Description:
+//  This file contains the doxygen directives to document the Arduino firmware
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * \file 
+ */
+
+/*!
+ * \ingroup hek_fw
+ * \defgroup hek_fw_arduino Hekateros Arduino Firmware
+ * \{
+
+The Arduino compatible firmware provides a low-level access to I/O to
+control power-on, power-off and watchdog functions, plus provide pin interfaces
+to LEDs, End Effector GPIO, and joint limit switches.
+ 
+For the original version of the Hekateros, an Arduino Uno was used.
+The current hardware releases use the Arduino Mini Pro.
+
+\section hek_fw_ard_pin Pin Out
+The firmware map of the Arduino digital I/O.
+\termblock
+\term <b><i>Pin</i></b> \termdata <b><i>Direction</i></b>
+  \termdata <b><i>Purpose</i></b> \endterm
+
+\term D2 \termdata output \termdata Main processor halt signal. \endterm
+\term D3 \termdata input \termdata Main processor has halted signal. \endterm
+\term D4 \termdata input \termdata Wrist rotation 0\h_deg optical limit switch.
+  \endterm
+\term D5 \termdata input \termdata Wrist pitch optical limit switch. \endterm
+\term D6 \termdata input \termdata Elbow optical limit switch. \endterm
+\term D7 \termdata input \termdata Shoulder optical limit switch. \endterm
+\term D8 \termdata input \termdata Base rotation 180\h_deg optical limit switch.
+  \endterm
+\term D9 \termdata input \termdata Base rotation 0\h_deg optical limit switch.
+  \endterm
+\term D10 \termdata configurable \termdata End Effector GPIO 2. \endterm
+\term D11 \termdata configurable \termdata End Effector GPIO 1. \endterm
+\term D12 \termdata output \termdata Alarm LED. \endterm
+\term D13 \termdata output \termdata Status LED. \endterm
+\term A1 \termdata input \termdata Power module shutdown signal. \endterm
+\term A2 \termdata output \termdata Power module kill power. \endterm
+\term A3 \termdata output \termdata Power module watchdog strobe. \endterm
+\endtermblock
+
+\section hek_fw_ard_com Communication
+The messaging interface between the main processor and the Arduino firmware is 
+transmitted over a serial USB link. The main processor sends commands and
+the firmware sends responses. The interface is ASCII.
+
+Comands start with '!' and are terminated by '\\r'.
+All commands have responses. 
+
+Success responses start with '@'.
+Failure responses start with '#'.
+All responses are terminated by '\\n\\r'.
+
+\section hek_fw_ard_sm State Machine
+\verbatim
+                  |
+                  |power
+                  |
+                  v
+              [power-on]
+                  |
+                  |auto-transition
+                  |
+                  |
+                  v            pm start shutdown
+    -------[init/no-service]----------o--------->[halting]
+    |            |  ^                 ^            |  |
+    |    received|  |                 |            |  |
+    |     command|  |fw watchdog      |            |  |fw halting
+    |            |  |  timeout        |            |  |timeout
+    |            v  |                 |            |  |
+    |  ------->[running]---------------            |  |
+    |  |received |  |                              |  |
+    |  |command  |  |                              |  |
+    |  -----------  |                              |  |
+    |               v                        halted|  |
+    --------------->o----------------------------->o  |
+                                                   |  |
+                                                   |  |
+                                                   v  v
+                                                [power-off]
+\endverbatim
+
+\par Description:
+\termblock
+\term [power-on]
+  \termdata Transient state entered on power up.
+\endterm
+\term [init/no-service]
+  \termdata The firmware is initalized. However, the main processor has not
+  initiated communication or the firmware watchdog has timed out waiting
+  for the next main processor command. This lack of active communication
+  indicates that no services are provided by the robot.
+\endterm
+\term [running]
+  \termdata The robot is providing services. Both normal and robot alarmed
+  conditions are supported in this state.
+\endterm
+\term [halting]
+  \termdata The firmware has recieved a shutdown signal from the power module.
+  This signal initiates a sequence of event to halt the system in a good way.
+\endterm
+\term [power-off]
+  \termdata The power-off state ceases strobing the power module watchdog line.
+  This causes the power module to shut off power to the robot after its
+  watchdog timer times out.
+\endterm
+\endtermblock
+
+\section hek_fw_ard_op Operation
+\li [power-on]
+  -# Configure digital I/O and initialize data.
+  -# Enter the [init] state.
+\li [init/no-service]
+  -# Loop over:
+    -# Strobe the power module watchdog line every <i>n</i> cycles \h_lt
+        400 msec.
+    -# Fast flash the Alarm and Status LEDs.
+    -# If main processor halt signal is received:
+      -# Enter the [power-off] state.
+    -# If the power module shutdown signal is received:
+      -# Enter the [halting] state.
+    -# If a command is received from the main processor:
+      -# If command is the halt command:
+        -# Send reply
+        -# Enter the [power-off] state.
+      -# Else:
+        -# Process command and send reply.
+        -# Enter the [running] state.
+\li [running]
+  -# Turn off the Alarm LED and turn on the Status LED (solid).
+  -# Zero the firmware watchdog counter (not to be confused with the power
+      module watchdog strobe).
+  -# Loop over:
+    -# Strobe the power module watchdog line every <i>n</i> cycles \h_lt
+        400 msec.
+    -# If main processor halt signal is received:
+      -# Enter the [power-off] state.
+    -# If the power module shutdown signal is received:
+      -# Enter the [halting] state.
+    -# If command received from main processor:
+      -# If command is the halt command:
+        -# Send reply
+        -# Enter the [power-off] state.
+      -# Else:
+        -# Process command and send reply.
+        -# Zero firmware watchdog counter.
+    -# If firmware watchdog counter exceeds threshold (~5 seconds):
+      -# Enter [no-service] state. 
+    -# Increment firmware watchdog counter.
+\li [halting]
+  -# Send main processor halt signal.
+  -# Zero firmware halt counter.
+  -# Loop over:
+    -# Strobe the power module watchdog line every <i>n</i> cycles \h_lt
+         400 msec.
+    -# Slow flash the Alarm and Status LEDs.
+    -# If main processor halt signal received:
+      -# Enter the [power-off] state.
+    -# If halt command received from main processor:
+      -# Send response.
+      -# Enter the [power-off] state.
+    -# If firmware halt counter exceeds threshold (~30 seconds):
+      -# Enter the [power-off] state.
+    -# Increment firmware halt counter.
+\li [power-off]
+  -# Send kill signal to power module. The power moduel will kill the 5V supply.
+  -# Stop strobing power module watchdog. The power module, in the button press
+     state, will automatcally turn off power to the system in \h_le 400 msec.
+ * \}
+ */

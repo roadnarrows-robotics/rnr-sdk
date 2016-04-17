@@ -1,0 +1,100 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:       hek_init
+# Required-Start: $remote_fs $syslog
+# Required-Stop:  $remote_fs $syslog
+# Default-Start:  1 2 3 4 5
+# Default-Stop:   0 6
+# Short-Description: Hekateros init services.
+# Description:    Hekateros basic initialization and GPIO monitoring.
+### END INIT INFO
+
+### THiS SERVICE IS NOT USED YET
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+
+if [[ -f /etc/profile.d/hekateros.sh ]]
+then
+  . /etc/profile.d/hekateros.sh
+elif [[ -f /prj/etc/profile.d/hekateros.sh ]]
+then
+  . /prj/etc/profile.d/hekateros.sh
+fi
+
+# Hekateros initialization program
+SERVICE=hek_gpio
+DAEMON=$(which ${SERVICE})
+PIDFILE=/var/run/${SERVICE}.pid
+LOGFILE=/var/log/${SERVICE}.log
+
+test -n "${DAEMON}" || exit 0
+test -x "${DAEMON}" || exit 0
+
+#
+# Start service
+#
+startdaemon()
+{
+  echo -n "Starting ${SERVICE} "
+  start-stop-daemon --start -x ${DAEMON} --pidfile ${PIDFILE} --make-pidfile --background -- ${LOGFILE}
+  echo "  done"
+}
+
+#
+# Stop service
+#
+stopdaemon()
+{
+  echo -n "Stopping ${SERVICE} "
+  start-stop-daemon --stop --pidfile ${PIDFILE}
+  echo "done"
+}
+
+#
+# Status
+#
+# roscore is a set of processes started by python. Cannot simply do the pidof
+# approach.
+#
+pidof_daemon()
+{
+  if [ -e "${PIDFILE}" ]
+  then
+    PID=$(cat ${PIDFILE})
+    ps ${PID} | grep -q ${SERVICE}
+    return $?
+  fi
+  return 1
+}
+
+case $1 in
+  start)
+    startdaemon
+    ;;
+  stop)
+    stopdaemon
+    ;;
+  restart|force-reload)
+    $0 stop && sleep 2 && $0 start
+    ;;
+  status)
+    if pidof_daemon
+    then
+      echo "${SERVICE} running, process ${PID}"
+    else
+      echo "${SERVICE} not running"
+      if [ -e "${PIDFILE}" ]
+      then
+        exit 1  # program is dead and pid file exists.
+      else
+        exit 3  # program is not running
+      fi
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|force-reload|status}"
+    exit 1
+    ;;
+esac
+
+exit 0 # good

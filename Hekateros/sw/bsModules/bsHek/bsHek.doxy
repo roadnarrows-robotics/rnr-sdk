@@ -1,0 +1,622 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   hekateros
+//
+// File:      bsK3.doxy
+//
+// Description:
+//  This file contains the doxygen directives to document the BotSense
+//  /hekateros Module.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/* ---------------------------------------------------------------------------
+ * Hekateros
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \defgroup bsmod_k3 BotSense Hekateros PlugIn
+ *
+ * The \h_botsense Hekateros robot components.
+ *
+ * The hekateros module provides \h_botsense proxied functionallity for the
+ * K-Team Hekateros robot.
+ *
+ * \section bsmod_intro Introduction
+ * \subsection bsmod_intro_c BotSense C/C++ Client
+ * The client side C/C++ hekateros add-on interfaces are defined by the header
+ * files:
+ * \termblock
+ * \term \ref include/hekateros.h "hekateros.h"
+ *   \termdata Defines the Hekateros robot and the libhekateros.[a|so]
+ *   functional interface.
+ * \endterm
+ * \term \ref include/botsense/bsK3.h "botsense/bsK3.h"
+ *   \termdata Defines the \h_botsense client libbsclient_k3.[a|so]
+ *   functional interface.
+ * \endterm
+ * \endtermblock
+ *
+ * \subsection bsmod_intro_py BotSense Python Client
+ * For python clients, the python \h_botsense subpackage
+ * \ref BotSense.hekateros "BotSense.hekateros"
+ * provides wrapper functions for the C libraries.
+ * \termblock
+ * \term BotSense.hekateros.bsK3Core
+ *    \termdata Swigged client C library interface.
+ * \endterm
+ * \term \ref bsPython/modules/BotSense/hekateros/bsK3Msgs.py "BotSense.hekateros.bsK3Msgs"
+ *    \termdata Client - Server messages.
+ * \endterm
+ * \term BotSense.hekateros.bsK3Types
+ *    \termdata Hekateros data types.
+ * \endterm
+ * \term BotSense.hekateros.bsK3
+ *    \termdata Hekateros top-level interface.
+ * \endterm
+ * \endtermblock
+ *
+ * \subsection bsmod_intro_srv BotSense bsProxy Plug-In
+ * The server side bsProxy plug-in is the Dynamic Link
+ * Library (DLL) libbsserver_k3.so.
+ *
+ * \subsection bsmod_intro_src Source Subdirectories: 
+ * bsModules/bsK3\n
+ * bsPython/modules/BotSense/hekateros
+ * \{
+ */
+
+/*! \} */ /* end bsmod_k3 */
+
+
+/* ---------------------------------------------------------------------------
+ * Hekateros Client
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_k3
+ * \defgroup bsmod_k3_cli Client Interfaces
+ *
+ * The BotSense Hekateros robot /hekateros client side interfaces provide APIs
+ * for C/C++ and python applications.
+ *
+ * \{
+ */
+
+/*! \} */ /* end bsmod_k3_cli */
+
+/*!
+ * \ingroup bsmod_k3_cli
+ * \defgroup man_libbsclient_k3 libbsclient_k3 Man Pages
+ *
+ * The libbsclient_k3 library provides the functional API between 
+ * client applications on one side and request-response messages to/from
+ * the BotSense bsProxy server on the other side.
+ * The libbotsense.[a|so] client library mediates the 
+ * client-server session.
+ *
+ * \{
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3GetMsgName bsK3GetMsgName
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+const char * \ref bsK3GetMsgName(BsClient_P   pClient,
+                                 BsVConnHnd_T hndVConn,
+                                 uint_t       uMsgId);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3GetMsgName
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqClose bsK3ReqClose
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqClose(BsClient_P   pClient,
+                      BsVConnHnd_T hndVConn);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqClose
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetFwVer bsK3ReqGetFwVer
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetFwVer(BsClient_P    pClient,
+                         BsVConnHnd_T  hndVConn,
+                         uint_t       *puVersion,
+                         uint_t       *puRevision);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetFwVer
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetIrAmbient bsK3ReqGetIrAmbient
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetIrAmbient(BsClient_P   pClient,
+                             BsVConnHnd_T hndVConn,
+                             uint_t       bufIr[]);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetIrAmbient
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetIrProximity bsK3ReqGetIrProximity
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetIrProximity(BsClient_P   pClient,
+                               BsVConnHnd_T hndVConn,
+                               uint_t       bufIr[]);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetIrProximity
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetMotorCfg bsK3ReqGetMotorCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetMotorCfg(BsClient_P         pClient,
+                            BsVConnHnd_T       hndVConn,
+                            uint_t             uWhich,
+                            \ref K3MotorCfg_T *pMotorCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetMotorCfg
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetMotorSpeeds bsK3ReqGetMotorSpeeds
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetMotorSpeeds(BsClient_P     pClient,
+                               hBsVConnHnd_T  hndVConn,
+                               int           *pnSpeedLeft,
+                               int           *pnSpeedRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetMotorSpeeds
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetOdometry bsK3ReqGetOdometry
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetOdometry(BsClient_P    pClient,
+                            BsVConnHnd_T  hndVConn,
+                            int          *pnOdPosLeft,
+                            int          *pnOdPosRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetOdometry
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetUnits bsK3ReqGetUnits
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "rnr/units.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetUnits(BsClient_P          pClient,
+                         BsVConnHnd_T        hndVConn,
+                         \ref K3AttrUnits_T *pAttrUnits);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetUnits
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqGetUssCfg bsK3ReqGetUssCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqGetUssCfg(BsClient_P       pClient,
+                          BsVConnHnd_T     hndVConn,
+                          \ref K3UssCfg_T *pUssCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqGetUssCfg
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqMoveTo bsK3ReqMoveTo
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqMoveTo(BsClient_P   pClient,
+                       BsVConnHnd_T hndVConn,
+                       int          nSpeed,
+                       int          nOdPosLeft,
+                       int          nOdPosRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqMoveTo
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqOpen bsK3ReqOpen
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqOpen(BsClient_P  pClient,
+                     const char *sDevName,
+                     bool_t      bInitTrace);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqOpen
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqPingUss bsK3ReqPingUss
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqPingUss(BsClient_P        pClient,
+                        BsVConnHnd_T      hndVConn,
+                        \ref K3UssMeas_T *pUssMeas);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqPingUss
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqResetOdometry bsK3ReqResetOdometry
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqResetOdometry(BsClient_P pClient, BsVConnHnd_T hndVConn);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqResetOdometry
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqSetMotorCfg bsK3ReqSetMotorCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqSetMotorCfg(BsClient_P         pClient,
+                            BsVConnHnd_T       hndVConn,
+                            uint_t             uWhich,
+                            \ref K3MotorCfg_T *pMotorCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqSetMotorCfg
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqSetMotorSpeeds bsK3ReqSetMotorSpeeds
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqSetMotorSpeeds(BsClient_P    pClient,
+                               BsVConnHnd_T  hndVConn,
+                               int           nSpeedLeft,
+                               int           nSpeedRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqSetMotorSpeeds
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqSetUnits bsK3ReqSetUnits
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "rnr/units.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqSetUnits(BsClient_P          pClient,
+                         BsVConnHnd_T        hndVConn,
+                         \ref K3AttrUnits_T *pAttrUnits);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqSetUnits
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqSetUssCfg bsK3ReqSetUssCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqSetUssCfg(BsClient_P       pClient,
+                          BsVConnHnd_T     hndVConn,
+                          \ref K3UssCfg_T *pUssCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqSetUssCfg
+ */
+
+/*!
+\ingroup man_libbsclient_k3
+\defgroup man_bsK3ReqStop bsK3ReqStop
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "hekateros.h"\n
+\#include "botsense/bsK3.h"\n\n
+int \ref bsK3ReqStop (BsClient_P pClient, BsVConnHnd_T  hndVConn);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsK3ReqStop
+ */
+
+/*! \} */ /* end bsmod_libbsclient_k3 */
+
+
+/*!
+ * \ingroup bsmod_k3_cli
+ * \defgroup hekateros BotSense.hekateros Python Subpackage
+ *
+ * \{
+The hekateros subpackage under the \h_botsense python package provides python
+applications an interface to communicate with proxied /hekateros devices.
+The underlining compiled extension module _bsK3Core.so library provides the  
+provides the shim between python calling conventions and the C
+libbsclient_k3.[a,so] library.
+
+\sa \ref BotSense.hekateros "BotSense.hekateros"
+
+\par Example:
+\code
+#
+# Example use of BotSense.hekateros Subpackage
+#
+
+import sys
+
+import BotSense.BotSenseTypes as bsTypes
+import BotSense.BotSenseError as bsError
+import BotSense.BotSenseServer as bsServer
+import BotSense.hekateros.bsK3Types as bsK3Types
+import BotSense.hekateros.bsK3  as bsK3
+
+# create a BotSense client 
+cli = bsTypes.BsClient('hekateros-one')
+
+# connect to the bsProxy server using default IP address and port
+try:
+  bsServer.ServerConnect(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# open a virtual connection to the proxied Hekateros robot
+try:
+  hndVConn = bsK3.K3ReqOpen(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+print "Example: established virtual connection %d" % (hndVConn)
+
+# reset the odometers to 0
+try:
+  bsK3.K3ReqResetOdometry(cli, hndVConn)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# move robot straight forward 500mm at 30% speed
+try:
+  bsK3.K3ReqMoveTo(cli, hndVConn, 300, 500, 500)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# monitor progress
+done = False
+while not done:
+  # read odometers
+  try:
+    odPosLeft, odPosRight = bsK3.K3ReqGetOdometry(cli, hndVConn)
+  except bsError.BotSenseError, inst:
+    print inst
+    sys.exit(8)
+  if odPosLeft >= 495 and odPosRight >= 495:
+    done = True
+
+# safe the robot
+try:
+  bsK3.K3ReqStop(cli, hndVConn)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# close the virtual connection
+try:
+  bsK3.K3ReqClose(cli, hndVConn)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# close the connection to the bsProxy server
+try:
+  bsServer.ServerDisconnect(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# delete the client
+del cli
+\endcode
+ */
+
+/*! \} */ /* end bsK3_py */
+
+
+/* ---------------------------------------------------------------------------
+ * Hekateros Server
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_k3
+ * \defgroup bsmod_k3_srv Server Plug-In
+ *
+ * \h_botsense bsProxy server plug-in DLL for the Hekateros robot
+ * /hekateros device.
+ *
+ * See \ref bsModules/bsK3/bsK3Server.c
+ *
+ * \{
+ */
+
+/*! \} */ /* end bsmod_k3_srv */
+
+/*!
+ * \ingroup bsmod_k3_srv
+ * \defgroup bsmod_k3_srv_cfg K3 Configuration
+ *
+ * The /hekateros plug-in XML configuration will be supported in BotSense v3.1.0.
+ * \{
+ */
+
+/*! \} */ /* end bsmod_k3_srv_cfg */
+
+
+/* ---------------------------------------------------------------------------
+ * K3 XML
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_k3
+ * \defgroup bsmod_k3_xml XML Message Set
+
+The bsK3Msgs.xml specification defines the set of messages exchanged
+between BotSense clients and the bsProxy server for proxied Hekateros robot
+/hekateros virtual device.
+
+The /hekateros messages are terminated between the BotSense client
+libbsclient_k3.so shared library or libbsclient_k3.a static library
+and the bsProxy plug-in libbsserver_k3.so interface module DLL.
+
+The message encoding is 8-bit Id-Type-Value (itv). All message fields are 
+packed in big-endian order.
+
+\include bsModules/bsK3/bsK3Msgs.xml
+
+ */

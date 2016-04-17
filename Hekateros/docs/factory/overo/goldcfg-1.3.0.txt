@@ -1,0 +1,364 @@
+================================================================================
+** Hekateros 1.3.0 Gold Software Configuration
+** Required Target Hekateros Configuration
+================================================================================
+
+--------------------------------------------------------------------------------
+* OS and Drivers ***
+--------------------------------------------------------------------------------
+$ uname -a
+Linux linaro-alip 3.5.0-2-linaro-omap #2~ci+121210190143 PREEMPT Mon Dec 10 11:03:27 PST 2012 armv7l armv7l armv7l GNU/Linux
+
+$ lsmod
+...
+
+if mt94032 is shown (for the Caspa camera), disable it by:
+$ cd /etc/modprobe.d
+$ vi blacklist.conf
+<insert>
+# caspa driver
+blacklist mt9v032
+
+# OMAP3 Image Signal Processor (ISP)
+blacklist omap3_isp
+<:wq>
+
+
+--------------------------------------------------------------------------------
+* Network
+--------------------------------------------------------------------------------
+
+# /etc/dhcp
+#--------
+$ vi dhclient.conf
+send host-name "hekateros";
+
+# /etc/network
+#-------------
+$ vi interfaces
+# interfaces(5) file used by ifup(8) and ifdown(8)
+#allow-hotplug wlan0
+
+auto eth0
+iface eth0 inet dhcp
+
+#auto wlan0
+#iface wlan0 inet dhcp
+#      pre-up wpa_supplicant -Dwext -iwlan0 -c/etc/wpa_supplicant.conf -B
+#      down killall wpa_supplicant
+
+# /etc/udev/rules.d
+#------------------
+$ rm 70-persistent-net.rules
+
+# /etc
+$ echo "hekateros" >/etc/hostname
+
+$ cat /etc/hosts
+# make sure all is good
+
+$ reboot
+
+$ hostname
+hekateros
+
+$ ifconfig
+# show networking over Ethernet
+
+$ apt-get install ssh
+
+
+--------------------------------------------------------------------------------
+* Users
+--------------------------------------------------------------------------------
+
+# make sure root has password toor
+$ passwd root
+
+# groups
+$ addgroup --gid 1111 hekateros
+
+# add user robot
+$ adduser --gid <gid_of_hekateros> robot # (password tobor)
+
+# give sudo to robot
+$ usermod --groups hekateros,admin robot
+
+# add hekateros to root groups
+$ usermod --groups root,hekateros root
+
+# verify
+$ id root
+uid=0(root) gid=0(root) groups=0(root),1111(hekateros)
+
+$ id robot
+uid=1001(robot) gid=1111(hekateros) groups=1111(hekateros),1001(admin)
+
+
+--------------------------------------------------------------------------------
+* Linux
+--------------------------------------------------------------------------------
+
+# Welcome to Linaro 12.11 (GNU/Linux 3.5.0-2-linaro-omap armv7l)
+$ apt-get update
+$ apt-get upgrade
+
+
+--------------------------------------------------------------------------------
+* Run-Time Shell Env
+--------------------------------------------------------------------------------
+
+# /etc/profile.d
+$ scp root@HOST:<root>/etc/profile.d/linaro.sh .
+$ scp root@HOST:<root>/etc/profile.d/hekateros.sh .
+
+# umask
+$ vi /etc/login.defs
+UMASK 002
+
+
+--------------------------------------------------------------------------------
+* ROS Packages
+--------------------------------------------------------------------------------
+
+# See http://wiki.ros.org/groovy/Installation/UbuntuARM
+
+# cd /etc/apt/sources.list.d
+sudo sh -c 'echo "deb http://packages.namniart.com/repos/ros precise main" > /etc/apt/sources.list.d/ros-latest.list'
+
+# Set up keys
+$ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+$ wget http://packages.namniart.com/repos/namniart.key -O - | sudo apt-key add -
+
+# Update apt
+$ apt-get update
+
+# Install bare bones ROS
+$ apt-get install ros-groovy-ros-base
+$ apt-get install ros-groovy-actionlib
+$ apt-get install ros-groovy-sensor-msgs
+$ apt-get install ros-groovy-control-msgs
+$ apt-get install ros-groovy-opencv2
+$ apt-get install ros-groovy-rosconsole-bridge
+$ apt-get install ros-groovy-console-bridge
+$ apt-get install ros-groovy-urdf
+
+
+--------------------------------------------------------------------------------
+* Other Packages
+--------------------------------------------------------------------------------
+
+# gstreamer
+$ apt-get install libgstreamer0.10-dev
+$ apt-get install libgstreamer-plugins-base0.10-dev
+$ apt-get install gstreamer0.10-tools
+$ apt-get install gstreamer-dbus-media-service
+$ apt-get install gstreamer0.10-plugins-base
+$ apt-get install gstreamer0.10-plugins-good
+
+# opencv - use ROS version unless otherwise needed
+
+# python
+$ apt-get install python-gi
+$ apt-get install python-gobject
+$ apt-get install python-gst0.10
+
+# misc
+$ apt-get install libusb-1.0-0-dev
+$ apt-get install picocom
+$ apt-get install v4l-utils
+
+
+--------------------------------------------------------------------------------
+* RoadNarrows SDK Packages
+--------------------------------------------------------------------------------
+
+# See https://github.com/roadnarrows-robotics/hekateros/wiki/Hekateros-Target-Installation-Guide
+
+# Add keys
+$ wget -O - http://roadnarrows.com/packages.roadnarrows.key | sudo apt-key add -
+
+# Add apt-get source list
+$ sh -c "echo 'deb [arch=armhf] http://roadnarrows.com/distro/apt-linaro-omap stable main' > /etc/apt/sources.list.d/rnr.sources.list" 
+
+# Update apt
+$ apt-get update
+
+# SDKs
+$ apt-get install rnr-hekateros-dev rnr-peripherals-dev
+
+# ld cache
+$ wget -P /etc/ld.so.conf.d http://roadnarrows.com/distro/extras/rnr.conf
+$ ldconfig
+
+# ROS - cmake 
+$ wget -P /usr/local/lib/cmake/rnr http://roadnarrows.com/distro/extras/rnr-config.cmake
+
+
+--------------------------------------------------------------------------------
+* Hekateros ROS Packages
+--------------------------------------------------------------------------------
+
+# See Also
+# https://github.com/roadnarrows-robotics/hekateros/wiki/Hekateros-Target-Installation-Guide
+# https://github.com/roadnarrows-robotics/hekateros/wiki/Hekateros-Host-Installation-Guide
+
+# Make location
+$ cd /opt
+$ mkdir hekateros_ros
+$ chmod 775 hekateros_ros/
+$ chgrp hekateros hekateros_ros/
+$ cd hekaterso_ros
+$ mkdir src
+$ cd src
+
+# git packages
+$ git clone https://github.com/roadnarrows-robotics/hekateros
+$ git clone https://github.com/roadnarrows-robotics/peripherals
+$ git clone https://github.com/ros-industrial/industrial_core --branch groovy-devel
+
+# make 
+$ cd /opt/hekateros_ros
+$ catkin_make
+
+# Note 1. catkin_make has the error:
+
+ImportError: "from catkin_pkg.topological_order import topological_order" failed: No module named catkin_pkg.packages
+Make sure that you have installed "catkin_pkg", it is up to date and on the PYTHONPATH.
+
+Fix by removing conflicted package:
+$ rm -fr /usr/local/lib/python2.7/dist-packages/catkin*
+
+
+--------------------------------------------------------------------------------
+* Hekateros Etc Configuration
+--------------------------------------------------------------------------------
+
+/etc
+----
+$ scp /prj/pkg/Hekateros/share/etc/hekM_X.Y.Z.conf root@hekateros:/etc/hekateros.conf
+
+/etc/init.d
+-----------
+$ scp hek_* root@hekateros:/etc/init.d/.
+$ cd /etc/init.d
+# future $ update-rc.d hek_init start 2 1 2 3 4 5 . stop 2 0 6 .
+$ update-rc.d hek_bsproxy defaults 90
+$ update-rc.d hek_roscore defaults 91
+$ update-rc.d hek_control defaults 92
+$ update-rc.d hek_xbox defaults 93
+$ update-rc.d hek_teleop defaults 94
+# future $ update-rc.d hek_halt start 0 89 .
+
+/etc/udev/rules.d
+-----------------
+# Note: Should be all present from updating RoadNarrows SDK Packages above.
+$ ls /etc/udev/rules.d
+55-rn-arduino.rules
+55-rn-dyna.rules
+55-rn-cam.rules
+55-rn-hid.rules
+...
+$
+
+/etc/ld.so.conf.d
+-----------------
+$ ls /etc/ld.so.conf.d
+rnr.conf
+
+/etc/profile.d
+--------------
+# Note: Should be all present from updating RoadNarrows SDK Packages above.
+$ ls /etc/profile.d
+hekateros.sh
+linaro.sh
+
+
+--------------------------------------------------------------------------------
+* RoadNarrows Packages For RoadNarrows Hekateros
+--------------------------------------------------------------------------------
+
+# project top-level directories
+-------------------------------
+$ mkdir /prj
+$ mkdir /xinstall
+$ mkdir /prj/pkg
+
+# subversion checkout
+#--------------------
+$ cd /prj/pkg
+$ svn checkout http://roadnarrows.net/RN/trunk/rnmake
+$ svn checkout http://roadnarrows.net/RN/trunk/tools
+$ cd tools
+$ make install
+$ cd ..
+$ svn checkout http://roadnarrows.net/RN/trunk/librnr
+$ svn checkout http://roadnarrows.net/RN/trunk/libserial
+$ svn checkout http://roadnarrows.net/RN/trunk/i2c
+$ svn checkout http://roadnarrows.net/RN/trunk/netmsgs
+$ svn checkout http://roadnarrows.net/RN/trunk/appkit
+$ svn checkout http://roadnarrows.net/RN/trunk/botsense
+$ svn checkout http://roadnarrows.net/RN/trunk/peripherals
+$ svn checkout http://roadnarrows.net/RN/trunk/Dynamixel
+$ svn_co_sw http://roadnarrows.net/RN/trunk/Hekateros
+
+#----
+# make install packages in the following order:
+# librnr libserial i2c netmsgs appkit botsense peripheral Dynamixel Hekateros
+
+# soft link xinstall
+#-------------------
+$ cd /prj
+$ ln -s /prj/xinstall/linaro/bin bin
+$ ln -s /prj/xinstall/linaro/lib lib
+$ ln -s /prj/xinstall/linaro/include include
+$ ln -s /prj/xinstall/linaro/share share
+$ scp /prj/pkg/Hekateros/rnr-config.cmake  root@hekateros:/prj/lib/rnr/.
+
+# update system cache
+$ ldconf
+
+
+--------------------------------------------------------------------------------
+* Hekateros ROS Package Updates
+--------------------------------------------------------------------------------
+
+# /opt/hekateros_ros
+#-------------------
+$ cd /opt/hekateros_ros/src
+$ cd industrial_core
+$ git pull
+$ cd ../peripherals
+$ git pull
+$ cd ../hekateros
+$ git pull
+$ cd /opt/hekateros_ros
+$ catkin_make
+
+
+--------------------------------------------------------------------------------
+* Miscellaneous
+--------------------------------------------------------------------------------
+
+# Make directory framework for user's ROS devel
+$ mkdir -p /prj/ros/groovy/src
+$ chmod 775 /prj
+$ chgrp hekateros /prj
+$ cd /prj
+$ chmod -R 775 ros
+$ chown -R robot:hekateros ros
+
+# Serial Number File 
+$ mkdir -p /usr/local/share/misc
+$ chmod 755
+$ echo 'yymmppp' >/usr/local/share/misc/.sn
+
+# /root/.vimrc
+$ vi /root/.vimrc
+set ts=2
+set et
+
+# /home/robot/.vimrc
+$ vi /root/.vimrc
+set ts=2
+set et

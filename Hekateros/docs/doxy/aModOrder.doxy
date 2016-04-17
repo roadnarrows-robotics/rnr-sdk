@@ -1,0 +1,41 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Hekateros
+//
+// File:      aModOrder.doxy
+//
+// Description:
+//  This file contains the doxygen directives to define module order.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file 
+ *  \dontinclude
+ */
+
+/*! \defgroup hek_h Top-Level Package Defines
+ *  \brief The \h_hek unifying package definitions and type declarations. 
+ *
+ *  \details These provide a unified interface for error reporting and resource 
+ *           allocation. 
+ *
+ *  \sa hekateros.h
+ *
+ * \{
+ * \} 
+ */
+
+/*! \defgroup hek_spec Hekateros Specifications
+ * \{
+ * \}
+ */
+
+/*! \defgroup hek_fw Hekateros Firmware
+ * \{
+ * \}
+ */
+
+/*! \defgroup hek_ut Hekateros Unit Tests
+ * \{
+ * \}
+ */

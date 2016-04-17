@@ -1,0 +1,40 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Hekateros
+//
+// File:      main.doxy
+//
+// $LastChangedDate: 2014-02-10 08:51:10 -0700 (Mon, 10 Feb 2014) $
+// $Rev: 3518 $
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! 
+\mainpage RoadNarrows Robotics Hekateros Robotic Manipulator
+
+\htmlonly
+<div style="float:right; border:1px solid; padding:0; width: 500px; margin:10px; text-align:center;">
+\endhtmlonly
+\image html Hekateros.png Figure 1: Hekateros 5 DOF Large
+\htmlonly
+</div>
+\endhtmlonly
+
+\section intro Introduction
+
+\section See Also
+Package requirements, supported platforms, and legalese.
+\li \ref page_req 
+\li \ref page_platforms
+\li \ref page_eula
+
+\htmlonly
+<div style="clear:both;" />
+\endhtmlonly
+
+*/

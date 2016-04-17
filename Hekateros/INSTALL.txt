@@ -1,0 +1,164 @@
+================================================================================
+** Required Target Hekateros Configuration **
+================================================================================
+
+DEFUNC DEFUNC DEFUNC DEFUNC DEFUNC DEFUNC DEFUNC DEFUNC DEFUNC DEFUNC DEFUNC
+
+SEE docs/factory/overo/goldcfg-X.Y.Z.txt FOR THE LATEST AND BESTEST
+
+
+
+--------------------------------------------------------------------------------
+* Network
+--------------------------------------------------------------------------------
+
+# /etc/dhcp
+#--------
+$ vi dhclient.conf
+send host-name "hekateros";
+
+# /etc/network
+#-------------
+$ vi interfaces
+auto eth0
+iface eth0 inet dhcp
+
+# /etc/udev/rules.d
+#------------------
+$ rm 70-persistent-net.rules
+
+# /etc
+$ echo "hekateros" >/etc/hostname
+
+$ reboot
+
+
+--------------------------------------------------------------------------------
+* Users
+--------------------------------------------------------------------------------
+
+# make sure root has password toor
+$ passwd root
+
+# groups
+$ addgroup hekateros
+
+# user robot
+$ adduser --gid <gid_of_hekateros> robot # (password tobor)
+
+
+--------------------------------------------------------------------------------
+* Linux
+--------------------------------------------------------------------------------
+
+# Welcome to Linaro 12.11 (GNU/Linux 3.5.0-2-linaro-omap armv7l)
+$ apt-get update
+$ apt-get upgrade
+
+
+--------------------------------------------------------------------------------
+* Hekateros Etc Configuration
+--------------------------------------------------------------------------------
+
+/etc
+----
+$ scp hekX.conf root@hekateros:/etc/hekateros.conf
+
+/etc/init.d
+-----------
+$ scp hek_* root@hekateros:/etc/init.d/.
+$ cd /etc/init.d
+$ update-rc.d hek_init start 2 1 2 3 4 5 . stop 2 0 6 .
+$ update-rc.d hek_bsproxy defaults 90
+$ update-rc.d hek_roscore defaults 91
+$ update-rc.d hek_control defaults 92
+$ update-rc.d hek_xbox defaults 93
+$ update-rc.d hek_teleop defaults 94
+$ update-rc.d hek_halt start 0 89 .
+
+/etc/udev/rules.d
+-----------------
+$ scp 55-rn-*.rules root@hekateros:/etc/udev/rules.d/.
+
+/etc/ld.so.conf.d
+-----------------
+$ scp 00local.conf root@hekateros:/etc/ld.so.conf.d/.
+
+/etc/profile.d
+--------------
+$ scp *.sh root@hekateros:/etc/profle.d/.
+
+
+--------------------------------------------------------------------------------
+* RoadNarrows Packages
+--------------------------------------------------------------------------------
+
+# project top-level directories
+-------------------------------
+$ mkdir /prj
+$ mkdir /xinstall
+$ mkdir /prj/pkg
+
+# subversion checkout
+#--------------------
+$ cd /prj/pkg
+$ svn checkout http://roadnarrows.net/RN/trunk/rnmake
+$ svn checkout http://roadnarrows.net/RN/trunk/tools
+$ cd tools
+$ make install
+$ cd ..
+$ svn checkout http://roadnarrows.net/RN/trunk/librnr
+$ svn checkout http://roadnarrows.net/RN/trunk/libserial
+$ svn checkout http://roadnarrows.net/RN/trunk/i2c
+$ svn checkout http://roadnarrows.net/RN/trunk/netmsgs
+$ svn checkout http://roadnarrows.net/RN/trunk/appkit
+$ svn checkout http://roadnarrows.net/RN/trunk/botsense
+$ svn checkout http://roadnarrows.net/RN/trunk/peripherals
+$ svn checkout http://roadnarrows.net/RN/trunk/Dynamixel
+$ svn_co_sw http://roadnarrows.net/RN/trunk/Hekateros
+
+#----
+# make install packages in the following order:
+# librnr libserial i2c netmsgs appkit botsense peripheral Dynamixel Hekateros
+
+# soft link xinstall
+#-------------------
+$ cd /prj
+$ ln -s /prj/xinstall/linaro/bin bin
+$ ln -s /prj/xinstall/linaro/lib lib
+$ ln -s /prj/xinstall/linaro/include include
+$ ln -s /prj/xinstall/linaro/share share
+$ scp /prj/pkg/Hekateros/rnr-config.cmake  root@hekateros:/prj/lib/rnr/.
+
+# update system cache
+$ ldconf
+
+
+--------------------------------------------------------------------------------
+* ROS Packages
+--------------------------------------------------------------------------------
+
+#/opt/ros/groovy
+#---------------
+
+# /opt/hekateros_ros
+#-------------------
+$ cd /opt/hekateros_ros/src
+$ cd industrial_core
+$ git pull
+$ cd ../peripherals
+$ git pull
+$ cd ../hekateros
+$ git pull
+$ cd /opt/hekateros_ros
+$ catkin_make
+
+
+--------------------------------------------------------------------------------
+* Miscellaneous
+--------------------------------------------------------------------------------
+
+# /root/.vimrc
+$ cat /root/.vimrc
+set ts=2
+set et

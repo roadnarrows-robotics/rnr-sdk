@@ -1,0 +1,54 @@
+Description
+-----------
+Both USB ports to the Dynamixel Bus and the Arduino use FTDI chips. To
+differentiate the ports, the manufacturer and product fields are programmed.
+Moreover, the FTDI serial numbers are auto-generated with prefix 'RN'.
+
+Ports
+-----
+Looking at the RoadNarrows Hub System Board with the USB Standard A ports
+facing out, the RJ-45 Connectors on the left, and the Arduino right of bottom
+center, the USB ports are:
+
+  0     1     2     3     4     5     6 
+ ___   ___   ___   ___   ___   ___   ___
+ | |   | |   | |   | |   | |   | |   | |
+
+  E     B     D     D     C     D     A
+  n     a     e     e     o     y     r
+  d     s     c     c     n     n     d
+        e     k     k     s     a     u
+  E                       o     m     i
+  f           0     1     l     i     n
+  f                       e     x     o
+  .                             e
+                                l
+
+Programming
+-----------
+To program, use Windows application FT_Prog. On SpeedBump FT_Prog XML
+templates can be found in the shared folder under user rknight:
+  \\SPEEDBUMP\User\rknight\Documents\Hekateros
+
+For Ubuntu, use ftx_prog (work in progress)
+
+Port 5: Dynamixel Bus
+. . . . . . . . . . .
+Template:                       FTDI_Dynamixel
+Manufacturer (manufacturer):    RoadNarrows
+Product Description (product):  Dynamixel_Bus
+(Serial Number) Prefix:         RN
+
+Ubuntu
+sudo ./ftx_prog --verbose --old-pid 0x6001 ...
+
+
+Port 6: Arduino Pro Mini
+. . . . . . . . . . . .
+Template:                       FTDI_Arduino
+Manufacturer (manufacturer):    RoadNarrows
+Product Description (product):  Arduino_Pro_Mini_328
+(Serial Number) Prefix:         RN
+
+Ubuntu
+sudo ./ftx_prog --verbose --old-pid 0x6001 ...

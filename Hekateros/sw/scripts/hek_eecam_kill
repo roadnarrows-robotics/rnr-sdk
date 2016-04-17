@@ -1,0 +1,81 @@
+#!/bin/bash
+#
+# Script: hek_eecam_kill
+#
+
+## \file
+##
+## $LastChangedDate: 2013-09-24 16:56:04 +0000 (Tue, 24 Sep 2013) $  
+## $Rev: 3325 $ 
+## 
+## \brief Kill any existing video stream from Hekateros end effector camera.
+##
+## GSreamer pipeline.
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2015.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+_Cmd="hek_eecam_kill"
+
+_Synopsis="\
+${_Cmd} [OPTION]...
+       ${_Cmd} --help | -?
+"
+
+_Desc="\
+Kill any existing video stream from Hekateros end effector camera.
+
+OPTIONS
+      --help       Print this help.
+"
+
+# _usage [emsg1 [emsg2...]]
+_usage()
+{
+  ec=0
+  if [ $# -gt 0 ]
+  then
+    ec=2
+    echo -n "${_Cmd}: $1" 1>&2
+    shift
+    while [ $# -gt 0 ]
+    do
+      echo -n ": $1" 1>&2
+      shift
+    done
+    echo "\n" 1>&2
+  fi
+  echo "usage: ${_Synopsis}" 1>&2
+  echo "${_Desc}" 1>&2
+  exit ${ec}
+}
+
+opts=`getopt --long=help --options="" --name=${_Cmd} -- "$@"`
+
+if [ $? != 0 ]
+then
+  _usage "Bad options."
+  exit 1
+fi
+
+eval set -- "${opts}"
+
+while true
+do
+  case "$1" in
+    --help) _usage; shift 1;;
+    --) shift; break;;
+    *) break;;
+  esac
+done
+
+pkill -f "gst-launch.*name=eecam"

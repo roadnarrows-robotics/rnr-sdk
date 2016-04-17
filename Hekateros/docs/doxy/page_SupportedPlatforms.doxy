@@ -1,0 +1,58 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Hekateros
+//
+// File:      page_SupportedPlatforms.doxy
+//
+// $LastChangedDate: 2014-02-10 08:51:10 -0700 (Mon, 10 Feb 2014) $
+// $Rev: 3518 $
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+  \li Ubuntu 12.04 Linux - x86_64
+  \li Ubuntu 12.04 Linux - i386
+  \li Embedded Angstrom Linux - OMAP Arm 
+  \li Embedded Linaro Linux - OMAP Arm 
+
+/*! 
+  \page page_platforms Supported Platforms
+
+The dynashell is support on all of the following platforms. The libhekateros
+library is only supported on the embedded architectures.
+
+  \section platform_arch Supported Target Architectures
+  \termblock
+    \term Ubuntu 12.04+
+      \termdata x86_64
+      \termdata dynashell
+    \endterm
+    \term Ubuntu 12.04+
+      \termdata i386
+      \termdata dynashell
+    \endterm
+    \term Embedded Angstrom Linux
+      \termdata OMAP Arm
+      \termdata dynashell, libhekateros
+    \endterm
+    \term Embedded Linaro Linux
+      \termdata OMAP Arm
+      \termdata dynashell, libhekateros
+    \endterm
+  \endtermblock
+
+  \section platform_tested Tested Systems
+  The list of tested architecures are listed below. 
+  \termblock
+    \term Ubuntu 12.04
+      \termdata x86_64
+    \endterm
+    \term Linaro
+      \termdata OMAP Arm
+    \endterm
+  \endtermblock
+*/

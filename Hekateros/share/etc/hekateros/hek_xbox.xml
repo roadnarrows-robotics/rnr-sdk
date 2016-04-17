@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="http://roadnarrows.com/xml/Hekateros/1.0/hekateros.xsl"?>
+
+<!-- RoadNarrows Hekateros Top-Level Configuration -->
+<hekateros xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="http://roadnarrows.com/xml/Hekateros/1.0/hekateros.xsd">
+
+  <!-- Hekateros Xbox360 teleoperation configuration -->
+  <hek_xbox>
+    <left_joy_deadzone>8191</left_joy_deadzone>
+    <right_joy_deadzone>8191</right_joy_deadzone>
+  </hek_xbox>
+
+</hekateros>

@@ -1,0 +1,9 @@
+# 
+# RoadNarrows Robotics Hekateros Arduino udev rules
+#
+
+# USB arduino uno device
+ATTRS{idProduct}=="0043",ATTRS{idVendor}=="2341",MODE="666",SYMLINK+="arduino"
+
+# USB arduino pro mini device
+ATTRS{manufacturer}=="RoadNarrows",ATTRS{product}=="Arduino_Pro_Mini_328",ATTRS{idProduct}=="6001",ATTRS{idVendor}=="0403",MODE="666",SYMLINK+="arduino"

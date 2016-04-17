@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=hek_panel
+Icon=/opt/rnr_ros/indigo/src/hekateros/hekateros_control/src/hekateros_control/images/icons/HekPanelIcon.png
+Exec=rosrun hekateros_control hek_panel

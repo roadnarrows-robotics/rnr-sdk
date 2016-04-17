@@ -1,0 +1,21 @@
+Hekateros Embedded Overo USB List
+=================================
+
+Purpose                 String          VendorId  ProductId   Device
+-------                 ------          --------  ---------   ------
+Powered USB hub.        ActionStar      2101      8500
+                                        2101      8501
+
+Optical limits, alarm   no string       2341      0043        /dev/arduino ->
+LED, EE gpio and I2C.   (Aduino Uno)                          /dev/ACM<n>
+
+
+RN Dynamixel USB to     Future Tech     0403      6001        /dev/dynabus ->
+serial dongle.                                                /dev/ttyUSB<n>
+
+End effector camera.    Creative Tech   041e      4051        /dev/eecam ->
+                        LTD Live                              /dev/video<n>
+
+Xbox360 (external)      Microsoft       045e      028e        /dev/xbox360 ->
+                                        045e      028f        /dev/xbox360 ->
+                                        045e      0291        /dev/xbox360 ->

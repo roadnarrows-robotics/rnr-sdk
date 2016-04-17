@@ -1,0 +1,22 @@
+================================================================================
+=       Idas v1.1.0 Release
+================================================================================
+
+RNR Packages
+------------
+rnr-appkit-dev          1.1.1
+rnr-botsense-dev        3.0.4
+rnr-dynamixel-dev       2.8.0
+rnr-gpio-dev            1.2.0
+rnr-hekateros-dev       3.2.4
+rnr-i2c-dev             1.2.2
+rnr-librnr-dev          1.13.0
+rnr-libserial-dev       1.13.0
+rnr-netmsgs-dev         1.1.2
+rnr-peripherals-dev     1.2.3
+
+RNR ROS Groovy Packages
+-----------------------
+hekateros               idas-1.1.0
+industrial_core         groovy-devel
+peripherals             idas-1.1.0
