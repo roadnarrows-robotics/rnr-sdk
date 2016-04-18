@@ -1,0 +1,26 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   peripherals
+//
+// File:      xbox360diag.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate xbox360diag
+//  definitions.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * \file 
+ * \dontinclude
+ */
+
+/*!
+ * \ingroup peri_apps
+ * \defgroup peri_app_xbox360diag xbox360diag
+ * \{
+
+\brief Xbox360 controller diagnostic tool.
+ 
+ * \}
+ */

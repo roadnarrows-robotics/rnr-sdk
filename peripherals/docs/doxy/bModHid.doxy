@@ -1,0 +1,30 @@
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   peripherals
+//
+// File:      bModHid.doxy
+//
+/*!
+  \file
+  $LastChangedDate: 2013-01-29 16:09:48 -0700 (Tue, 29 Jan 2013) $
+  $Rev: 2649 $
+*/
+
+//
+// Description:
+// HID specific module interface.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*!
+ * \defgroup periph_hid Human Interface Devices
+ * The RoadNarrows HID interface provides basic, uniform interfaces across
+ * different types in HID hardware. 
+ *
+ * \{
+ */
+
+/*!
+ * \}
+ */

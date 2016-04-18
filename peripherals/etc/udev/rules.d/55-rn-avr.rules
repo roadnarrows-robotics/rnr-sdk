@@ -1,0 +1,6 @@
+# 
+# RoadNarrows Robotics AVR programmer rules.
+#
+
+# Atmel AVR ISP mkII
+ATTRS{idVendor}=="03eb",ATTRS{idProduct}=="2104",MODE="666",SYMLINK+="avrispmkii"

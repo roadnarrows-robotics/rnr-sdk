@@ -1,0 +1,13 @@
+# 
+# RoadNarrows Robotics Human Interface Device rules.
+#
+
+# Microsoft tethered Xbox360 game controller
+ATTRS{idProduct}=="028e",ATTRS{idVendor}=="045e",MODE="666",SYMLINK+="xbox360-%n"
+
+# Microsoft wireless Xbox360 game controller
+ATTRS{idProduct}=="028f",ATTRS{idVendor}=="045e",MODE="666",SYMLINK+="xbox360-%n"
+
+# Microsof wireless dongle
+ATTRS{idProduct}=="0291",ATTRS{idVendor}=="045e",MODE="666",SYMLINK+="xbox360wireless-%n"
+ATTRS{idProduct}=="0719",ATTRS{idVendor}=="045e",MODE="666",SYMLINK+="xbox360wireless-%n"

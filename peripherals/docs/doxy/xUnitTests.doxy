@@ -1,0 +1,21 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows peripherals Library
+//
+// File:      xUnitTests.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the unit test modules
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*!
+ * \defgroup periphs_ut Unit Tests
+ * \brief Fully documented unit tests.
+ * \{ 
+ */
+
+/*!
+ * \}
+ */
