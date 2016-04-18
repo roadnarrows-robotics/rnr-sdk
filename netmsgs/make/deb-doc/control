@@ -1,0 +1,7 @@
+Package:rnr-netmsgs-doc
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Maintainer: Robin Knight <robin.knight@roadnarrows.com>
+Description: RoadNarrows network messaging packing/unpacking library docs.

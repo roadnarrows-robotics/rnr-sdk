@@ -1,0 +1,160 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   netmsgs
+//
+// File:      nmexample.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the RoadNarrows
+//  nmExample information.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup man_nmexample nmExample Man Page
+ * \{
+ *
+
+\par Name:
+nmExample - Simple example program to pack, unpack, and validate NetMsgs
+messages.
+
+\par Synopsis:
+<tt>
+nmExample [OPTIONS]\n
+\n
+netmsgsgen --version\n
+netmsgsgen --help
+</tt>
+
+\par Description:
+The example program <b>nmExample</b> under the examples/ package subdirectory
+is a simple packing and unpacking test application.
+Both pre-packed and post-unpacked messages are
+compared for consistency. Tracing is also available.\n
+\n
+No messages are actually transmitted and received. So message validation
+accross disparate architectures is not performed.\n
+\n
+The message encoding and byte ordering can be define with make arguments.
+Defaults are <em>itv</em> encoding and <em>big</em> endian.\n
+\code
+$ make [encoding=<val>] [endian=<val>] ...
+\endcode
+\n
+AstroMsgs.xml provides the NetMsgs XML message specification for
+<b>nmExample</b>.
+
+\par Options:
+Mandatory arguments to long options are also mandatory for short options.
+\htmlonly
+<table class="rnr-opts">
+<tr><td class="rnr-opts-grp">Trace</td></tr>
+
+<tr><td class="rnr-opts-opt">
+  -t, --trace
+</td></tr>
+<tr><td>
+Do [not] enable tracing of packing and unpacking operations. If enabled,
+tracing is printed to stderr.\n
+Default: false
+</td></tr>
+
+<tr><td class="rnr-opts-grp">Logging</td></tr>
+<tr><td class="rnr-opts-opt">
+  -l <em>level</em>, --log=<em>level</em>
+</td></tr>
+<tr><td>
+  Set logging threshold level. All logging events 
+  with priority &le; <em>level</em> will be logged. All 
+  others will be ignored. Error events are 
+  always logged. The <em>level</em> is one of:<br>
+  <table class="rnr-opts" style="text-align:left">
+  <tr>
+    <td>'off' or 0</td>
+   <td>Disable all logging.</td>
+  </tr>
+  <tr>
+    <td>'error' or 1</td>
+    <td>Enable error logging.</td>
+  </tr>
+  <tr>
+    <td>'diag1' or 2</td>
+    <td>Enable diagnostics 1 logging.</td>
+  </tr>
+  <tr>
+    <td>'diag2' or 3</td>
+    <td>Enable diagnostics 2 logging.</td>
+  </tr>
+  <tr>
+    <td>'diag3' or 4</td>
+    <td>Enable diagnostics 3 logging.<br>
+    The libSkewlZone library logs at this level</td>
+  </tr>
+  <tr>
+    <td>'diag4' or 5</td>
+    <td>Enable diagnostics 4 logging.</td>
+  </tr>
+  <tr>
+    <td>'diag5' or 6</td>
+    <td>Enable diagnostics 5 logging.</td>
+  </tr>
+  <tr>
+    <td>&gt;6</td>
+    <td>Enable user-defined logging.</td>
+  </tr>
+  </table>
+   DEFAULT: off
+</td></tr>
+<tr><td class="rnr-opts-opt">
+  --logfile=<em>file</em>
+</td></tr>
+<tr><td>
+  Set log output file to <em>file</em>.
+  Special <em>file</em> names are:
+  <table class="rnr-opts" style="text-align:left">
+  <tr>
+    <td>'stderr'</td>
+    <td>log to standard error.</td>
+  </tr>
+  <tr>
+    <td>'stdout'</td>
+    <td>log to standard output.</td>
+  </tr>
+  </table>
+  DEFAULT: stderr
+</td></tr>
+
+<tr><td class="rnr-opts-grp">Information</td></tr>
+<tr><td class="rnr-opts-opt">
+  --help
+</td></tr>
+<tr><td>
+  Display command help and exit.
+</td></tr>
+<tr><td class="rnr-opts-opt">
+  --version
+</td></tr>
+<tr><td>
+  Output version information and exit.
+</td></tr>
+</table>
+\endhtmlonly
+
+\par Examples:
+\htmlonly
+<pre class="fragment"><div class="fragment"><span
+class="comment"># Example 1
+# Run with tracing
+$
+$  nmExample --trace --log=diag1
+
+<em>beaucoup output here</em>
+
+$
+</div></pre>
+\endhtmlonly
+
+\} */

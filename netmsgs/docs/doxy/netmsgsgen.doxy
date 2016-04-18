@@ -1,0 +1,152 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   NetMsgs
+//
+// File:      netmsgsgen.doxy
+//
+// $LastChangedDate: 2012-02-14 17:00:34 -0700 (Tue, 14 Feb 2012) $
+// $Rev: 1805 $
+//
+// Description:
+//  This file contains the doxygen directives to generate the standard
+//  man pages for the netmsgsgen executable python script.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup man_netmsgsgen netmsgsgen Man Page
+ * \{
+ *
+
+\par Name:
+netmsgsgen - Generate source files from NetMsgs XML specification.
+
+\par Synopsis:
+<tt>
+netmsgsgen [OPTIONS] --lang=c --xml=<em>xmlfile hfile cfile</em>\n
+netmsgsgen [OPTIONS] --lang=python --xml=<em>xmlfile pyfile</em>\n
+\n
+netmsgsgen --version\n
+netmsgsgen --help
+</tt>
+
+\par Description:
+The <b>netmsgsgen</b> executable Python scrip generates source files from
+a NetMsgs XML specfication. 
+Output languages supported are:\n
+\li C
+\li python
+
+\par Options:
+Mandatory arguments to long options are also mandatory for short options.
+\htmlonly
+<table class="rnr-opts">
+<tr><td class="rnr-opts-grp">Generate</td></tr>
+
+<tr><td class="rnr-opts-opt">
+  -d, --debug=<em>level</em>
+</td></tr>
+<tr><td>
+Print debugging information while parsing the XML file and generating source
+output.<br>
+Debug <em>level</em> is one of: 0 1 2 3.<br>
+Default: 0 (off).
+</td></tr>
+
+<tr><td class="rnr-opts-opt">
+  -i, --incprefix=<em>path</em>
+</td></tr>
+<tr><td>
+Include prefix for '#include' in .c source file for generated .h header
+file.<br>
+Default: ''
+</td></tr>
+
+<tr><td class="rnr-opts-opt">
+  -l, --lang=<em>lang</em>
+</td></tr>
+<tr><td>
+Output language generations.<br>
+One of: c python.
+</td></tr>
+
+<tr><td class="rnr-opts-opt">
+  -o, --overrides=<em>list</em>
+</td></tr>
+<tr><td>
+XML overrides. <em>List</em> in form of: name=value[,...]<br>
+Supported overrides: encoding, endian, ns, brief
+</td></tr>
+
+<tr><td class="rnr-opts-opt">
+  -x, --xml=<em>xmlfile</em>
+</td></tr>
+<tr><td>
+  Input NetMsgs XML file relative or absolute path name.
+</tr>
+</td></tr>
+
+<tr><td class="rnr-opts-grp">Information</td></tr>
+<tr><td class="rnr-opts-opt">
+  --help
+</td></tr>
+<tr><td>
+  Display command help and exit.
+</td></tr>
+<tr><td class="rnr-opts-opt">
+  --version
+</td></tr>
+<tr><td>
+  Output version information and exit.
+</td></tr>
+</table>
+\endhtmlonly
+
+\par Arguments:
+\htmlonly
+<table class="rnr-opts">
+<tr>
+  <td class="rnr-opts-opt"><em>hfile</em></td>
+  <td>Generated output C .h file relative or absolute path name.</td>
+</tr>
+<tr>
+  <td class="rnr-opts-opt"><em>cfile</em></td>
+  <td>Generated output C .c file relative or absolute path name.</td>
+</tr>
+<tr>
+  <td class="rnr-opts-opt"><em>pyfile</em></td>
+  <td>Generated output Python .py file relative or absolute path name.</td>
+</tr>
+</table>
+\endhtmlonly
+
+\par Notes:
+The <b>netmsgsgen</b> script uses the NetMsgs python package. This package
+must be installed and the python path environment must point to the installed 
+location.
+
+\par Examples:
+\htmlonly
+<pre class="fragment"><div class="fragment"><span
+class="comment"># Example 1
+# Generate C source files relative to current working directory.
+$
+$  netmsgsgen --lang=c --xml=AstroMsgs.xml include/AstroMsgs.h AstroMsgs.c
+$
+</div></pre>
+\endhtmlonly
+\n
+\htmlonly
+<pre class="fragment"><div class="fragment"><span
+class="comment"># Example 2
+# Generate Python source file overriding message encoding and namespace.
+$
+$  netmsgsgen --overrides="encoding=flat,ns=Cosmo" --lang=python \
+              --xml=/myprj/AstroMsgs.xml /myprj/modules/Cosmo/ComosMsgs.py
+$
+</div></pre>
+\endhtmlonly
+
+\} */ /* end of man_netmsgsgen */

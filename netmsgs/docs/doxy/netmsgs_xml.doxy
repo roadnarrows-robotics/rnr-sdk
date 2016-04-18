@@ -1,0 +1,218 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   netmsgs
+//
+// File:      netmsgs_xml.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the RoadNarrows
+//  NetMsgs XML format.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup nmxml NetMsgs XML Format
+ * \{
+
+\section nmxml_intro Introduction
+The RoadNarrows NetMsgs XML specification defines the message set in XML format.
+The \<netmsgs\> element is the root element for XML file. Under it, are three
+major element sections contains elements to define the format.
+
+\subsection nmxml_layout XML Basic Layout
+Below is the high-level structure of a NetMsgs XML specification.
+\verbatim
+<netmsgs>
+  <meta>
+  ...
+  </meta>
+  <field_types>
+  ...
+  </field_types>
+  <msg_types>
+  ...
+  </msg_types>
+</netmsgs>
+\endverbatim
+
+\section nmxml_root \<NETMSGS\> Root Element
+The requiried, top-level root element.
+<div style="padding: 5px 20px 0 20px;">
+<table class="rnr-def">
+<tr style="color:#0033aa;">
+  <td>Attribute</td><td>Description</td><td>Default</td>
+</tr>
+<tr>
+  <td>encoding</td>
+  <td>Message encoding. One of: itv flat.</td>
+  <td>itv</td>
+</tr>
+<tr>
+  <td>endian</td>
+  <td>Byte ordering. One of: big little native.</td>
+  <td>big</td>
+</tr>
+</table>
+</div>
+
+\section nmxml_meta \<META\> Main Section Element
+This section defines the meta data needed to generate the language specific
+source files correctly.
+\subsection nmxml_meta_brief \<BRIEF\>
+Brief description of the messages. Comment including in doxygen file brief
+comment.
+\subsection nmxml_meta_ns \<NS\>
+Namespace identifier. The namespace id is appended to source generated 
+declarations and definitions.
+\subsection nmxml_meta_prologue \<PROLOGUE\>
+The prologue data is appended to the generated output source file of the
+given language (sub)type after the file comment block and core include files,
+and prior to any generated source code.
+<div style="padding: 5px 20px 0 20px;">
+<table class="rnr-def">
+<tr style="color:#0033aa;">
+  <td>Attribute</td><td>Description</td><td>Default</td>
+</tr>
+<tr>
+  <td>lang</td>
+  <td>Source (sub)language: One of: h c python.</td>
+  <td>REQUIRED</td>
+</tr>
+</table>
+</div>
+\subsection nmxml_meta_epilogue \<EPILOGUE\>
+The epilogue data is appended to the end of the generated output source file.
+<div style="padding: 5px 20px 0 20px;">
+<table class="rnr-def">
+<tr style="color:#0033aa;">
+  <td>Attribute</td><td>Description</td><td>Default</td>
+</tr>
+<tr>
+  <td>lang</td>
+  <td>Source (sub)language: One of: h c python.</td>
+  <td>REQUIRED</td>
+</tr>
+</table>
+</div>
+
+\section nmxml_field_types \<FIELD_TYPES\> Main Section Element
+The field_types section defines ftype extensions to the built-in ftypes.
+For C, ftype extension are equivalent to typedef's.
+For python and C++, extensions are derived classes.
+\subsection nmxml_field_types_ftypedef \<FTYPEDEF\>
+This element defines a extended field type.
+For ftype=struct ftypedef elements, one or more \ref nmxml_fielddef "fielddef"
+subelements are required.
+<div style="padding: 5px 20px 0 20px;">
+<table class="rnr-def">
+<tr style="color:#0033aa;">
+  <td>Attribute</td><td>Description</td><td>Default</td>
+</tr>
+<tr>
+  <td>ftid</td>
+  <td>Unique extended field type identifier.</td>
+  <td>REQUIRED</td>
+</tr>
+<tr>
+  <td>ftype</td>
+  <td>Derived or built-in field type value or alias. If '[]' appends the ftype
+      value, then it is vector.
+  <td>REQUIRED</td>
+</tr>
+<tr><td>size</td>
+  <td>Maximum number of elements for string or vector type.</td>
+  <td>string: NMFVAL_LEN_MAX_STRING<br>
+      vector: NMFVAL_LEN_MAX_VECTOR</td>
+</tr>
+</table>
+</div>
+
+\section nmxml_msg_types \<MSG_TYPES\> Main Section Element
+The msg_types section defines the message set.
+
+\subsection nmxml_msg_types_msgdef \<MSGDEF\>
+The msgdef element defines a specific message.
+Zero or more \ref nmxml_fielddef "fielddef" subelements may be specified.
+<div style="padding: 5px 20px 0 20px;">
+<table class="rnr-def">
+<tr style="color:#0033aa;">
+  <td>Attribute</td><td>Description</td><td>Default</td>
+</tr>
+<tr>
+  <td>msgid</td>
+  <td>Unique message identifier.</td>
+  <td>REQUIRED</td>
+</tr>
+</table>
+</div>
+
+\section nmxml_fielddef \<FIELDDEF\> Element
+The fielddef element defines a field within a
+\ref nmxml_field_types_ftypedef "ftypedef"
+element or a \ref nmxml_msg_types_msgdef "msgdef" element.
+<div style="padding: 5px 20px 0 20px;">
+<table class="rnr-def">
+<tr style="color:#0033aa;">
+  <td>Attribute</td><td>Description</td><td>Default</td>
+</tr>
+<tr>
+  <td>fname</td>
+  <td>(Sub)message unique field name identifier.
+  </td>
+  <td>REQUIRED</td>
+</tr>
+<tr>
+  <td>ftype</td>
+  <td>Derived or built-in field type value or alias. If '[]' appends the ftype
+      value, then it is vector.
+  </td>
+  <td>REQUIRED</td>
+</tr>
+<tr><td>size</td>
+  <td>Maximum number of elements for string or vector type.</td>
+  <td>string: NMFVAL_LEN_MAX_STRING<br>
+      vector: NMFVAL_LEN_MAX_VECTOR</td>
+</tr>
+<tr>
+  <td>disposition</td>
+  <td>Disppositon of this field. One of: active deprecated</td>
+  <td>active</td>
+</tr>
+</table>
+</div>
+\subsection nmxml_fielddef_const \<CONST\>
+The data defines the constant value for this field. Applicable only for
+number or string base field types.
+\subsection nmxml_fielddef_min \<MIN\>
+The data defines the minimum value for this field. Applicable only for
+number base field types.
+\subsection nmxml_fielddef_max \<MAX\>
+The data defines the maximum value for this field. Applicable only for
+number base field types.
+
+\section nmxml_dtd_sect NetMsgs XML DTD
+\ref nmxml_dtd
+
+\section nmxml_ex_sect XML Example
+\ref nmxml_example
+ */
+
+/*!
+ *\ingroup nmxml
+ *\defgroup nmxml_dtd DTD
+ *\{
+The RoadNarrows Document Type Definition for NetMsgs XML is as follows.
+\include netmsgs.dtd
+ * \} */
+
+/*!
+ *\ingroup nmxml
+ *\defgroup nmxml_example AstroMsgs.xml XML Example
+ *\{
+The AstroMsgs.xml example.
+\include AstroMsgs.xml
+ * \} */
+
+/* \} */

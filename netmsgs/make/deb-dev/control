@@ -1,0 +1,14 @@
+Package:rnr-netmsgs-dev
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Depends: rnr-librnr-dev (>=1.13.0)
+Maintainer: Robin Knight <robin.knight@roadnarrows.com>
+Description: RoadNarrows network messaging packing/unpacking library.
+  The NetMsgs package provides both build-time and run-time support of
+  networked messaging presented in a format that is both machine architecture
+  independent and language independent. The messages can sent between
+  networked nodes over a communication channel. In the OSI Model, the NetMsgs
+  package supports the Presentation Layer. The lower communication levels
+  and the Application Layer are not in the scope of NetMsgs.

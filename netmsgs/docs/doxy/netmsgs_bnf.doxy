@@ -1,0 +1,184 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   netmsgs
+//
+// File:      netmsgs_bnf.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the packed message
+//  format in an Extended Backus-Naur Form.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup man_netmsgs_bnf Packed Message Backus-Naur Form
+ *
+
+\verbatim
+
+(* message body *)
+msg_body ::=
+    flat_msg_body
+  | itv_msg_body
+
+(* flat message body: no field headers and all fields have fixed size *)
+flat_msg_body ::=
+  flat_field_stream
+
+(* flat field byte stream *)
+flat_field_stream ::=
+    flat_field
+  | flat_field flat_field_stream
+
+(* flat field *)
+flat_field ::=
+    fval
+  | flat_string_field
+  | flat_struct_field
+  | flat_vector_field
+
+(* flat string fixed length field *)
+flat_string_field ::=
+  char_count*{string_fval},  (MAX_DEFINED_LEN-char_count)*{0}
+
+(* flat structure field is essential an embedded stream *)
+flat_struct_field ::=
+  flat_field_stream
+
+(* flat victor fixed length field *)
+flat_vector_field ::=
+  vector_count*{fval}, (MAX_DEFINED_LEN-vector_count)*{zero_fval}
+
+(* Id-Type-Value message body: fields have headers and variable sizes *)
+itv_msg_body ::=
+  msgid field_count itv_field_stream
+
+(* two-byte message id *)
+msgid ::= uint16_fval
+
+(* ITV field byte stream *)
+itv_field_stream ::=
+    itv_field
+  | itv_field itv_field_stream
+
+(* ITV field *)
+itv_field ::=
+    pad_id
+  | simple_itv_field
+  | string_itv_field
+  | struct_itv_field
+  | vector_itv_field
+
+(* field id *)
+pad_id  ::= 0
+fid     ::= 1-255
+
+(* simple ITV field *)
+simple_itv_field ::=
+  fid simple_ftype fval
+
+(* string compound ITV field *)
+string_itv_field ::=
+  fid string_ftype char_count char_count*{char_fval}
+
+(* structure compound ITV field *)
+struct_itv_field ::=
+  fid struct_ftype field_count field_count*{itv_field}
+
+(* vector compound ITV field *)
+vector_itv_field ::=
+    fid vector_ftype vector_count simple_ftype vector_count*{fval}
+  | fid vector_ftype vector_count string_ftype vector_count*{string_itv_field}
+  | fid vector_ftype vector_count struct_ftype vector_count*{struct_itv_field}
+  | fid vector_ftype vector_count vector_ftype vector_count*{vector_itv_field}
+
+(* simple field type code enumeration *)
+simple_ftype ::=
+    bool_ftype
+  | char_ftype
+  | s8_ftype
+  | u8_ftype
+  | s16_ftype
+  | u16_ftype
+  | s32_ftype
+  | u32_ftype
+  | s64_ftype
+  | u64_ftype
+  | f32_ftype
+  | f64_ftype
+  | p32_ftype
+  | p64_ftype
+  
+(* compound field type code enumeration *)
+compound_ftype ::=
+    string_ftype
+  | struct_ftype
+  | vector_ftype
+
+(* field type codes *)
+bool_ftype      ::= '?'
+char_ftype      ::= 'c'
+s8_ftype        ::= 'b'
+u8_ftype        ::= 'B'
+s16_ftype       ::= 'h'
+u16_ftype       ::= 'H'
+s32_ftype       ::= 'i'
+u32_ftype       ::= 'I'
+s64_ftype       ::= 'l'
+u64_ftype       ::= 'L'
+f32_ftype       ::= 'q'
+f64_ftype       ::= 'Q'
+p32_ftype       ::= 'p'
+p64_ftype       ::= 'P'
+string_ftype    ::= 's'
+struct_ftype    ::= '{'
+vector_ftype    ::= '['
+
+(* variable field count subheaders *)
+char_count    ::= 0-255
+field_count   ::= 0-255
+vector_count  ::= 1-255
+
+(* simple field value enumeration *)
+fval ::=
+    bool_fval
+  | char_fval
+  | s8_fval
+  | u8_fval
+  | s16_fval
+  | u16_fval
+  | s32_fval
+  | u32_fval
+  | s64_fval
+  | u64_fval
+  | f32_fval
+  | f64_fval
+  | p32_fval
+  | p64_fval
+
+(* simple field values *)
+bool_fval   ::= BINARY_NUM_8BIT
+char_fval   ::= ASCII_8BIT
+s8_fval     ::= TWOS_COMP_NUM_8BIT
+u8_fval     ::= BINARY_NUM_8BIT
+s16_fval    ::= TWOS_COMP_NUM_16BIT
+u16_fval    ::= BINARY_NUM_16BIT
+s32_fval    ::= TWOS_COMP_NUM_32BIT
+u64_fval    ::= BINARY_NUM_32BIT
+s64_fval    ::= TWOS_COMP_NUM_64BIT
+u32_fval    ::= BINARY_NUM_64BIT
+f32_fval    ::= IEEE754_32BIT
+f64_fval    ::= IEEE754_64BIT
+p32_fval    ::= NATIVE_VOID_POINTER_32BIT
+p64_fval    ::= NATIVE_VOID_POINTER_64BIT
+
+(* field zero value enumeration *)
+zero_fval ::=
+    0
+  | 0.0
+  | NULL
+
+\endverbatim
+*/

@@ -1,0 +1,476 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows Network Messages Package
+//
+// File:      main.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! \mainpage RoadNarrows Network Messages Package
+
+\section main_intro Introduction
+The NetMsgs package provides both build-time and run-time support of networked
+messaging presented in a format that is both machine architecture independent
+and language independent.
+The messages can sent between networked nodes over a communication channel.
+In the OSI Model, the NetMsgs package supports the Presentation Layer.
+The lower communication levels and the Application Layer are not in the scope
+of NetMsgs.
+
+Each packed transmitted and unpacked received message may have an application-
+layer header followed by a series of zero or more message fields. The
+message header semantics are not defined here, may contain
+fields specifying message length, addressing, transaction ids, sequencing, and
+synchronization fields.
+
+Communicating networked nodes can reside on separate, phyisically distinct
+hardware, different processor cores on one the physical node,
+or separate processing threads. The applcation defines the interconnects.
+
+The NetMsgs package provides support for various message encodings and byte
+orderings as described in following sections.
+
+The NetMsgs package comprises of of three major subpackages detailed below:
+\li NetMsgs XML Specification
+\li Run-Time C Library
+\li NetMsgs Python Package
+
+\subsection main_arch_req Minimum Node Architecture
+The node architecture may be either a big-endian or little-endian architecture. Other, exotic byte-ordering architectures are not currently supported.
+It is required that 1, 2, and 4 byte (unsigned) integers and 4 byte floats be
+supported. For systems that do not support 8 byte (unsigned) integers, 8 byte
+floating-point numbers, or 8-byte pointers,
+promotion will be done in software. However,
+on unpacking, rounding or truncation will occur if the unpacked element exceeds
+the 4 byte limits.
+
+Floats are expected to be in IEEE 754 32-bit or 64-bit format. 
+
+The implementation of the NetMsgs code is light-weight. 
+Therefore, it can be readily ported to embedded
+processors that may have only 8, 14, or 16 bit word sizes and may only have
+floating-point emulation.
+
+\section main_msg_enc Messsage Encodings
+The NetMsgs package provides support for following message encodings.
+
+\subsection main_msg_enc_itv Id-Type-Value Messsage Encoding
+The Id-Type-Value message encoding is a structured, binary message encoding.
+The ITV encoding provides a message header plus a field header for each packed
+field. Fields can be in any order and are identified by a 1 byte id. On the
+message packing node, any deprecated fields will be skipped. On the unpacking
+node, any unrecognized fields will be ignored. Deprected field ids should not
+be reused to avoid misidentification, unless the application implements a 
+message versioning protocol (outside the scope of NetMsgs).
+See \ref man_netmsgs_bnf for more details on the ITV message encoding.
+
+Both big and small endian byte orderings are supported.
+
+\htmlonly
+<div style="padding-left: 20px;">
+<table class="rnr-std">
+<tr><th colspan="2">ITV Field Format</th></tr>
+<tr>
+  <td>Identifier</td><td>A 1 byte, (sub)message-unique field id.</td>
+</tr>
+ <tr>
+  <td>Type</td><td>A 1 byte, field type (see below)</td>
+</tr>
+ <tr>
+  <td>Value</td><td>An n byte field value. Value may contain a subheader</td>
+</tr>
+</table>
+<br>
+</div>
+\endhtmlonly
+
+\subsection main_msg_enc_flat Flat Messsage Encoding
+The Flat message encoding is a binary message encoding with the message fields
+formatted in a fixed order without any identification or type tagging.
+The fields are all of fixed length. Flat message encodings are idea for 
+communication with embedded nodes over channels such as \h_i2c and serial.
+See \ref man_netmsgs_bnf for more details on the Flat message encoding.
+
+Both big and small endian byte orderings are supported.
+
+\subsection main_msg_enc_cli CLI Messsage Encoding
+The Command-Line Interface encoding is an ASCII message encoding with messages
+fields separatated by Inter-Field Separators (usually white space) and
+terminated by End-Of-Line sequences (usually CR, LF, or CR-LF).
+
+The CLI encoding is planned to be supported at some future time.
+
+\section main_msg_endian Byte Orderings
+The NetMsgs package provides support for following message field byte
+orderings:
+
+\htmlonly
+<div style="padding-left: 20px;">
+<table class="rnr-std">
+<tr><th colspan="2">Field Byte Orderings</th></tr>
+<tr>
+  <td>big endian</td>
+  <td>Field bytes are packed/unpacked Most-Significant Byte first.</td>
+</tr>
+ <tr>
+  <td>little endian</td>
+  <td>Field bytes are packed/unpacked Least-Significant Byte first.</td>
+</tr>
+ <tr>
+  <td>native</td>
+  <td>Field bytes are packed/unpacked native node architecture order.</td>
+</tr>
+</table>
+<br>
+</div>
+\endhtmlonly
+
+\section main_subpkg_xml The NetMsgs XML Specification
+The application message set is defined from a RoadNarrows NetMsgs XML 
+specification file. NetMsgs XML provides a tight, language-independent mechanism
+to extend NetMsgs built-in field types and define messsages.
+Meta-data elements are
+also available to supply information for language-dependent build-time
+generation. See \ref nmxml more details.
+
+\section main_subpkg_c The Run-Time C library
+The libnetmsgs library provides run-time support for applications to
+provide packing, unpacking, and tracing operations for NetMsgs generated
+messages.
+
+The library interface is defined in the rnr/netmsgs.h header file.
+
+All libnetmsgs diagnostics logging is at diagnostics level 3.
+
+\section main_subpkg_py The NetMsgs Python Package.
+The NetMsgs python package serves two functions:
+
+\subsection main_subpkg_py_bt Source Code Generation
+From a NetMsgs XML file, language-specific source file(s) can be generated.
+The executable python script netmsgsgent provides a command-line interface
+to the NetMsgs modules that generate the source code.
+See \ref man_netmsgsgen for the NetMsg language generation tool manpage.
+
+Typically, the source code dependencies are made in a makefile. An example
+makefile target:
+
+\code
+# NetMsgs XML pattern rule
+include/%.h: %.xml
+  netmsgsgen --lang=c --xml=$(<) $(@) $(addsuffix .c,$(basename $(<)))
+\endcode
+
+A summary of the supported and planned language-specific source code generation
+is listed in the table below.
+\htmlonly
+<div style="padding-left: 20px;">
+<table class="rnr-std">
+<tr><th colspan="3">Generated Source Code</th></tr>
+<tr><th>Language</th><th>Supported</th><th>Generated Files</th></tr>
+<tr>
+  <td>c</td><td>yes</td><td>xmlfile -&gt; hfile,cfile</td>
+</tr>
+<tr>
+  <td>python</td><td>yes</td><td>xmlfile -&gt; pyfile</td>
+</tr>
+<tr>
+  <td>C++</td><td>future</td><td>xmlfile -&gt; hfile,cppfile</td>
+</tr>
+</table>
+<br>
+</div>
+\endhtmlonly
+
+\subsection main_subpkg_py_rt Run-Time Support
+The NetMsgs.NetMsgsLib module supports run-time python packing, unpacking, and
+tracing operations.
+See \ref nmPython/modules/NetMsgs/NetMsgsLib.py "NetMsgs.NetMsgsLib".
+
+\section man_ftypes Message Built-In Field Types.
+NetMsgs built-in field types can be divided into two classes:
+simple and compound. Simple field types have solitary values (e.g. an integer),
+while compound types have mulitple fields and/or have extended lengths.
+Compound types can be nested. Messages are compound types.
+
+Supported built-in field types are detailed below. Developers may readily extend
+the types by defining them under the <b>\<field_types\></b> section element in
+the XML file.
+
+\subsection msg_simple Simple Types:
+<table class="rnr-std">
+<tr>
+  <th colspan="2">XML Ftype Attr</th>
+  <th colspan="2">ITV Type</th>
+  <th colspan="2">Value</th>
+  <th colspan="2">C Mapped Type</th>
+  <th rowspan="2">Comments</th>
+</tr>
+<tr>
+  <th>Value</th><th>Alias</th>
+  <th>Code</th><th>Hex</th>
+  <th>IsA</th><th>Bytes</th>
+  <th>Type Specifier</th><th>RNR Typedef</th>
+</tr>
+<tr>
+ <td>pad</td><td></td>
+ <td>x</td><td>0x77</td>
+ <td>0</td><td>1</td>
+ <td>N/A</td><td></td>
+ <td>Message buffer padded with 0's (see \ref NMFVAL_PAD).
+ No field id or type is present in the buffer.
+ No underlining variable is mapped.
+</tr>
+<tr>
+ <td>bool</td><td></td>
+ <td>?</td><td>0x3f</td>
+ <td>boolean</td><td>1</td>
+ <td>int</td><td>bool_t</td> 
+ <td>0 is false, 1 (non-zero) is true.</td>
+</tr>
+<tr>
+ <td>char</td><td></td>
+ <td>c</td><td>0x63</td>
+ <td>character</td><td>1</td>
+ <td>char</td><td></td>
+ <td>8-bit ASCII character.</td>
+</tr>
+<tr>
+ <td>s8</td><td>schar</td>
+ <td>b</td><td>0x62</td>
+ <td>integer</td><td>1</td>
+ <td>signed char</td><td></td>
+ <td>8-bit signed integer.</td>
+</tr>
+<tr>
+ <td>u8</td><td>byte</td>
+ <td>B</td><td>0x42</td>
+ <td>integer</td><td>1</td>
+ <td>unsigned char</td><td>byte_t</td> 
+ <td>8-bit unsigned integer</td>
+</tr>
+<tr>
+ <td>s16</td><td>short</td>
+ <td>h</td><td>0x68</td>
+ <td>integer</td><td>2</td>
+ <td>short</td><td></td>
+ <td>16-bit signed integer.</td>
+</tr>
+<tr>
+ <td>u16</td><td>ushort</td>
+ <td>H</td><td>0x48</td>
+ <td>integer</td><td>2</td>
+ <td>unsigned short</td><td>ushort_t</td> 
+ <td>16-bit unsigned integer.</td>
+</tr>
+<tr>
+ <td>s32</td><td>int</td>
+ <td>i</td><td>0x69</td>
+ <td>integer</td><td>4</td>
+ <td>int</td><td></td>
+ <td>32-bit signed integer.</td>
+</tr>
+<tr>
+ <td>u32</td><td>uint</td>
+ <td>I</td><td>0x49</td>
+ <td>integer</td><td>4</td>
+ <td>unsigned int</td><td>uint_t</td> 
+ <td>32-bit unsigned integer.</td>
+</tr>
+<tr>
+ <td>s64</td><td>longlong</td>
+ <td>q</td><td>0x71</td>
+ <td>integer</td><td>8</td>
+ <td>long long</td><td></td>
+ <td>64-bit signed long long integer.
+ On 32-bit long long machines, the 4 MSB's are padded with zero's
+ when packed, and truncated when unpacked.
+ </td>
+</tr>
+<tr>
+ <td>u64</td><td>ulonglong</td>
+ <td>Q</td><td>0x51</td>
+ <td>integer</td><td>8</td>
+ <td>unsigned long long</td><td>ulonglong_t</td> 
+ <td>64-bit unsigned long long integer.
+ On 32-bit long long machines, the 4 MSB's are padded with zero's
+ when packed, and truncated when unpacked.
+ </td>
+</tr>
+<tr>
+ <td>f32</td><td>float</td>
+ <td>f</td><td>0x66</td>
+ <td>floating-point number</td><td>4</td>
+ <td>float</td><td></td>
+ <td>32-bit IEEE 754 floating-point number.
+ On 64-bit FPN machines, the 32-bit FPN is rounded down when packed and
+ converted to IEEE 754 64-bit standard when unpacked.
+ </td>
+</tr>
+<tr>
+ <td>f64</td><td>double</td>
+ <td>F</td><td>0x46</td>
+ <td>floating-point number</td><td>8</td>
+ <td>double</td><td></td>
+ <td>64-bit IEEE 754 floating-pointer number.
+ On 32-bit FPN machines, the 32-bit FPN is converted to IEEE 754 64-bit standard
+ when packed and rounded down when unpacked.
+ </td>
+</tr>
+<tr>
+ <td>p32</td><td>pointer</td>
+ <td>p</td><td>0x6c</td>
+ <td>pointer</td><td>4</td>
+ <td>(typecasted) void *</td><td></td>
+ <td>32-bit native pointer.
+ On 64-bit pointer machines, the 4 MSB's are truncated when packed and
+ padded with zero's when unpacked.
+ </td>
+</tr>
+<tr>
+ <td>p64</td><td>longpointer</td>
+ <td>P</td><td>0x4c</td>
+ <td>pointer</td><td>8</td>
+ <td>(typecasted) void *</td><td></td>
+ <td>64-bit native pointer.
+ On 32-bit pointer machines, the 4 MSB's are padded with zero's
+ when packed, and truncated when unpacked.
+ </td>
+</tr>
+</table>
+
+\subsection msg_complex Compound Types:
+<table class="rnr-std">
+<tr>
+  <th colspan="2">XML Ftype Attr</th>
+  <th colspan="2">ITV Type</th>
+  <th colspan="2">Value</th>
+  <th colspan="2">C Mapped Type</th>
+  <th rowspan="2">Comments</th>
+</tr>
+<tr>
+  <th>Value</th><th>Alias</th>
+  <th>Code</th><th>Hex</th>
+  <th>SubHeader</th><th>Bytes</th>
+  <th>Type Specifier</th><th>RNR Typedef</th>
+</tr>
+<tr>
+ <td>string</td><td></td>
+ <td>s</td><td>0x73</td>
+ <td>count</td><td>variable</td>
+ <td>char[]</td><td></td>
+ <td>Field of <em>count</em> ASCII bytes. The terminating null is not packed.
+ A terminating null is appended to the unpacked variable.</td>
+</tr>
+<tr>
+ <td>struct</td><td></td>
+ <td>{</td><td>0x7b</td>
+ <td>count</td><td>variable</td>
+ <td>struct</td><td></td>
+ <td>Extended or inline structure of <em>count</em> fields.</td>
+</tr>
+<tr>
+ <td>vtype[]</td><td></td>
+ <td>[</td><td>0x5b</td>
+ <td>count vtype</td><td>variable</td>
+ <td><em>vtype</em>[]</td><td></td>
+ <td>One-dimensional array of <em>count</em> items of <em>vtype</em> type.</td>
+</tr>
+</table>
+
+\section req Requirements
+\termblock
+\term <b>librnr</b> \termdata  RNR standard libray 1. \endterm
+\term <b>xml</b>    \termdata  Python XML package. \endterm
+\term <b>struct</b>  \termdata  Python packing package. \endterm
+\endtermblock
+
+\section platforms Supported Platforms
+\termblock
+  \term i386
+    \termdata any Linux Intel (backwards) compatible 32-bit architecures
+  \endterm
+  \term x86_64
+    \termdata any Linux AMD 64-bit architectures
+  \endterm
+  \term armang
+    \termdata Angstrom Linux Intel XScale PXA Arm architecures.
+  \endterm
+  \term armpxa
+    \termdata Familiar Linux Intel XScale PXA Arm architecures.
+  \endterm
+  \term cygwin
+    \termdata Windows systems with installed cygwin.
+  \endterm
+  \term osx
+    \termdata Mac OS-X architectures
+  \endterm
+\endtermblock
+
+\section tested Tested Systems
+\termblock
+  \term Fedora Core
+    \termdata Fedora Core 5 and 6 Linux for the i386 and x86_64 architectures.
+  \endterm
+  \term Ubuntu
+    \termdata Ubuntus 9.10 Linux for the i386 and x86_64 architectures.
+  \endterm
+  \term Angstrom 
+    \termdata Angstrom Linux 2.6 (K-Team KoreBot2 version) for the XScale PXA
+    255 Arm.
+  \endterm
+  \term Familiar
+    \termdata Familiar Linux 2.4 (K-Team KoreBot version) for the XScale PXA
+    255 Arm.
+  \endterm
+  \term Windows
+    \termdata Windows XP with Cygwin for Intel processors.
+  \endterm
+  \term Mac
+    \termdata Mac OS-X 10.x for Intel processors.
+  \endterm
+\endtermblock
+
+\todo Cross-field conditional field packing/unpacking.
+\todo Support disposition deprecated/active at the fielddef level.
+\todo Support disposition deprecated/active at the msgdev level.
+
+\page page_eula EULA
+\section eula_txt RoadNarrows Robotics librnr Package End User Licence Agreement
+
+\subsection eula_permissions Permissions
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that
+(1) The above copyright notice and the following two paragraphs
+appear in all copies of the source code and (2) redistributions
+including binaries reproduces these notices in the supporting
+documentation.   Substantial modifications to this software may be
+copyrighted by their authors and need not follow the licensing terms
+described here, provided that the new terms are clearly indicated in
+all files where they apply.
+
+\subsection eula_warranties Warranties
+In no event shall the author, RoadNarrows Robotics or any members/employees
+of RoadNarrows Robotics or distributors of this software be liable to any
+party for direct, indirect, special, incidental, or consequential
+damages arising out of the use of this software and its documentation,
+even if the authors or any of the above parties have been advised of
+the possibility of such damage.
+
+The author and RoadNarrows Robotics specifically disclaim any warranties,
+including, but not limited to, the implied warranties of merchantability anD
+fitness for a particular purpose. the software provided hereunder is on an
+"as is" basis, and the authors and distributors have no obligation tO
+provide maintenance, support, updates, enhancements, or modifications.
+
+\subsection eula_copyright Copyright
+All Rights Reserved by RoadNarrows Robotics
+\n (C) 2005-2009
+\n http://www.roadnarrowsrobotics.com
+
+*/

@@ -1,0 +1,95 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   netmsgs
+//
+// File:      zModDoxyIncludes.doxy
+//
+// Version:
+// $LastChangedDate%
+// $Rev%
+//
+// Description:
+// Useful Documentation Include Blocks (see \copydoc)
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup doxy_includes Doxygen Includes
+ * Useful doxygen documentation blocks that can be included into other
+ * documentation with the <b>\\copydoc</b> command.
+ * \{
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_params_pack_std doc_params_pack_std
+ * \{
+\param [in] val    Value to pack.
+\param [out] buf   Output message buffer.
+\param bufSize     Size of output buffer.
+\param eEndian     Packing order. See \ref NMEndian_T.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_params_pack_fdef doc_params_pack_fdef
+ * \{
+\param pFieldDef   Pointer to message field definition.
+\param [in] pVal   Pointer to (typecasted) value to pack.
+\param [out] buf   Output message buffer.
+\param bufSize     Size of output buffer.
+\param eEndian     Packing order. See \ref NMEndian_T.
+\param pCtl        Internal control.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_pack_std doc_return_pack_std
+ * \{
+\return
+On success, returns the number of bytes packed.
+On error, the appropriate negated
+\ref man_libnetmsgs_ecodes "netmsgs error code" (\h_lt 0) is returned.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_params_unpack_std doc_params_unpack_std
+ * \{
+\param [in] buf    Input message buffer.
+\param bufSize     Size of input buffer.
+\param [out] pVal  Pointer to value to unpack (set).
+\param eEndian     Unpacking order. See \ref NMEndian_T.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_params_unpack_fdef doc_params_unpack_fdef
+ * \{
+\param pFieldDef   Pointer to message field definition.
+\param [in] buf    Input message buffer.
+\param bufSize     Size of input buffer.
+\param [out] pVal  Pointer to value to unpack (set).
+\param eEndian     Unpacking order. See \ref NMEndian_T.
+\param pCtl        Internal control.
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_unpack_std doc_return_unpack_std
+ * \{
+\return
+On success, returns the number of bytes unpacked.
+On error, the appropriate negated
+\ref man_libnetmsgs_ecodes "netmsgs error code" (\h_lt 0) is returned.
+ * \}
+ */
+
+/*! \} end of doxy_includes */

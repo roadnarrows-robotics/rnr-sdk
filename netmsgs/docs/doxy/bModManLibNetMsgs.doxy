@@ -1,0 +1,1098 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   NetMsgs
+//
+// File:      bModManLibNetMsgs.doxy
+//
+// $LastChangedDate: 2012-02-14 17:00:34 -0700 (Tue, 14 Feb 2012) $
+// $Rev: 1805 $
+//
+// Description:
+//  This file contains the doxygen directives to generate the standard
+//  man pages for the libnetmsgs library.
+//
+// Note: Need a way to pre-process to take the "man"ual out of the man pages.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \defgroup man_libnetmsgs Library libnetmsgs Man Pages
+ *
+
+\section man_libnetmsgs_intro Intro
+The library libnetmsgs provides the packing and unpacking routines for 
+RoadNarrows NetMsgs inter-application comunication.
+
+All libnetmsgs diagnostics logging is at diagnostics level 3.
+
+ * \{
+ */
+
+/*!
+ * \ingroup man_libnetmsgs
+ * \defgroup man_libnetmsgs_ecodes NetMsgs Error Codes
+ * \{
+ */
+
+/*! \}  end man_libnetmsgs_ecodes */
+
+
+/* keep the following sorted within each subgroup */
+
+
+// ...........................................................................
+// Library libnetmsgs Macros and Utility Functions
+// ...........................................................................
+
+/*!
+ * \ingroup man_libnetmsgs
+ * \defgroup man_libnetmsgs_util Macros and Utilities
+The libnetmsgs library \#define's, helper macros and utility functions.
+ * \{
+ */
+
+/*!
+\ingroup man_libnetmsgs_util
+\defgroup man_nmFindFieldDef nmFindFieldDef
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern const \ref NMFieldDef_T *nmFindFieldDef(const NMMsgDef_T *pMsgDef,
+                                          byte_t            byFId);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmFindFieldDef
+ */
+
+/*!
+\ingroup man_libnetmsgs_util
+\defgroup man_nmGetFieldValSize nmGetFieldValSize
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern size_t \ref nmGetFieldValSize(NMFType_T eFType);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmGetFieldValSize
+ */
+
+/*!
+\ingroup man_libnetmsgs_util
+\defgroup man_nmPrintBits nmPrintBits
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern void \ref nmPrintBits(FILE         *fp,
+                        const char   *sPreface,
+                        ulonglong_t   uVal,
+                        uint_t        uMsb,
+                        uint_t        uCnt);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPrintBits
+ */
+
+/*!
+\ingroup man_libnetmsgs_util
+\defgroup man_nmPrintBuf nmPrintBuf
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern void \ref nmPrintBuf(FILE        *fp,
+                       const char  *sPreface,
+                       byte_t       buf[],
+                       size_t       bufSize,
+                       size_t       uNLFreq,
+                       uint_t       uCol);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPrintBuf
+ */
+
+/*!
+\ingroup man_libnetmsgs_util
+\defgroup man_nmStrError nmStrError
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+const char *\ref nmStrError(int ecode);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmStrError
+ */
+
+/*! \}  end of man_libnetmsgs_util */
+
+
+// ...........................................................................
+// Library libnetmsgs Base Packing Function Prototypes
+// ...........................................................................
+
+/*!
+ * \ingroup man_libnetmsgs
+ * \defgroup man_libnetmsgs_base Base Functions
+The set of libnetmsgs base packing and unpacking functions.
+ * \{
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackBool nmPackBool
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackBool(bool_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackBool
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackBuf nmPackBuf
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackBuf(byte_t bufSrc, size_t uCount,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackBuf
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackByte nmPackByte
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackByte(byte_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackByte
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackChar nmPackChar
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackChar(char val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackChar
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackF32 nmPackF32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackF32(float val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackF32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackF64 nmPackF64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackF64(double val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackF64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackLong nmPackLong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackLong(long val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackLong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackLongLong nmPackLongLong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackLongLong(long long val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackLongLong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackP32 nmPackP32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackP32(void *val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackP32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackP64 nmPackP64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackP64(void *val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackP64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackPointer nmPackPointer
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackPointer(void *val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackPointer
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackS8 nmPackS8
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackS8(signed char val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackS8
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackS16 nmPackS16
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackS16(short val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackS16
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackS32 nmPackS32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackS32(int val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackS32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackS64 nmPackS64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackS64(long long val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackS64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackInt nmPackInt
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackInt(int val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackInt
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackSChar nmPackSChar
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackSChar(signed char val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackSChar
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackShort nmPackShort
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackShort(short val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackShort
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackU8 nmPackU8
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackU8(byte_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackU8
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackU16 nmPackU16
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackU16(ushort_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackU16
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackU32 nmPackU32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackU32(uint_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackU32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackU64 nmPackU64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackU64(ulonglong_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackU64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackUInt nmPackUInt
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackUInt(uint_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackUInt
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackULong nmPackULong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackULong(ulong_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackULong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackULongLong nmPackULongLong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackULongLong(ulonglong_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackULongLong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmPackUShort nmPackUShort
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackUShort(ushort_t val,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackUShort
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackBool nmUnpackBool
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackBool(byte_t buf[], size_t bufSize,
+                    bool_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackBool
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackBuf nmUnpackBuf
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackBuf(byte_t buf[], size_t bufSize, 
+                    byte_t bufDst[], size_t uCount, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackBuf
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackByte nmUnpackByte
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackByte(byte_t buf[], size_t bufSize,
+                    byte_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackByte
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackChar nmUnpackChar
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackChar(byte_t buf[], size_t bufSize,
+                    char *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackChar
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackF32 nmUnpackF32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackF32(byte_t buf[], size_t bufSize,
+                    float *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackF32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackF64 nmUnpackF64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackF64(byte_t buf[], size_t bufSize,
+                    double *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackF64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackLong nmUnpackLong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackLong(byte_t buf[], size_t bufSize,
+                    long *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackLong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackLongLong nmUnpackLongLong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackLongLong(byte_t buf[], size_t bufSize,
+                    long long *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackLongLong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackP32 nmUnpackP32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackP32(byte_t buf[], size_t bufSize,
+                    void *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackP32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackP64 nmUnpackP64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackP64(byte_t buf[], size_t bufSize,
+                    void *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackP64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackPointer nmUnpackPointer
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackPointer(byte_t buf[], size_t bufSize,
+                    void *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackPointer
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackS8 nmUnpackS8
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackS8(byte_t buf[], size_t bufSize,
+                    signed char *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackS8
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackS16 nmUnpackS16
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackS16(byte_t buf[], size_t bufSize,
+                    short *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackS16
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackS32 nmUnpackS32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackS32(byte_t buf[], size_t bufSize,
+                    int *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackS32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackS64 nmUnpackS64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackS64(byte_t buf[], size_t bufSize,
+                    long long *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackS64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackInt nmUnpackInt
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackInt(byte_t buf[], size_t bufSize,
+                    int *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackInt
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackSChar nmUnpackSChar
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackSChar(byte_t buf[], size_t bufSize,
+                    signed char *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackSChar
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackShort nmUnpackShort
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackShort(byte_t buf[], size_t bufSize,
+                    short *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackShort
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackU8 nmUnpackU8
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackU8(byte_t buf[], size_t bufSize,
+                    byte_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackU8
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackU16 nmUnpackU16
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackU16(byte_t buf[], size_t bufSize,
+                    ushort_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackU16
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackU32 nmUnpackU32
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackU32(byte_t buf[], size_t bufSize,
+                    uint_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackU32
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackU64 nmUnpackU64
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackU64(byte_t buf[], size_t bufSize,
+                    ulonglong_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackU64
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackUInt nmUnpackUInt
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackUInt(byte_t buf[], size_t bufSize,
+                    uint_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackUInt
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackULong nmUnpackULong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackULong(byte_t buf[], size_t bufSize,
+                    ulong_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackULong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackULongLong nmUnpackULongLong
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackULongLong(byte_t buf[], size_t bufSize,
+                    ulonglong_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackULongLong
+ */
+
+/*!
+\ingroup man_libnetmsgs_base
+\defgroup man_nmUnpackUShort nmUnpackUShort
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackUShort(byte_t buf[], size_t bufSize,
+                    ushort_t *pVal, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackUShort
+ */
+
+/*! \}  end of man_libnetmsgs_base */
+
+
+// ...........................................................................
+// Library libnetmsgs ITV Function Prototypes
+// ...........................................................................
+
+/*!
+ * \ingroup man_libnetmsgs
+ * \defgroup man_libnetmsgs_itv ITV Functions
+The set of libnetmsgs Id-Type-Value functions.
+ * \{
+ */
+
+/*!
+\ingroup man_libnetmsgs_itv
+\defgroup man_nmGetITVMsgId nmGetITVMsgId
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern uint_t \ref nmGetITVMsgId(byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmGetITVMsgId
+ */
+
+/*!
+\ingroup man_libnetmsgs_itv
+\defgroup man_nmPackITVMsg nmPackITVMsg
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackITVMsg(const NMMsgDef_T *pMsgDef, void *pStruct,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackITVMsg
+ */
+
+/*!
+\ingroup man_libnetmsgs_itv
+\defgroup man_nmPackITVMsgDebug nmPackITVMsgDebug
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackITVMsgDebug(const NMMsgDef_T *pMsgDef, void *pStruct,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackITVMsgDebug
+ */
+
+/*!
+\ingroup man_libnetmsgs_itv
+\defgroup man_nmUnpackITVMsg nmUnpackITVMsg
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackITVMsg(const NMMsgDef_T *pMsgDef,
+                    byte_t buf[], size_t uMsgLen,
+                    void *pStruct, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackITVMsg
+ */
+
+/*!
+\ingroup man_libnetmsgs_itv
+\defgroup man_nmUnpackITVMsgDebug nmUnpackITVMsgDebug
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackITVMsgDebug(const NMMsgDef_T *pMsgDef,
+                    byte_t buf[], size_t uMsgLen,
+                    void *pStruct, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackITVMsgDebug
+ */
+
+/*! \}  end of man_libnetmsgs_base */
+
+
+// ...........................................................................
+// Library libnetmsgs Flat Function Prototypes
+// ...........................................................................
+
+/*!
+ * \ingroup man_libnetmsgs
+ * \defgroup man_libnetmsgs_flat Flat Functions
+The set of libnetmsgs Id-Type-Value functions.
+ * \{
+ */
+
+/*!
+\ingroup man_libnetmsgs_flat
+\defgroup man_nmPackFlatMsg nmPackFlatMsg
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackFlatMsg(const NMMsgDef_T *pMsgDef, void *pStruct,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackFlatMsg
+ */
+
+/*!
+\ingroup man_libnetmsgs_flat
+\defgroup man_nmPackFlatMsgDebug nmPackFlatMsgDebug
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmPackFlatMsgDebug(const NMMsgDef_T *pMsgDef, void *pStruct,
+                    byte_t buf[], size_t bufSize, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmPackFlatMsgDebug
+ */
+
+/*!
+\ingroup man_libnetmsgs_flat
+\defgroup man_nmUnpackFlatMsg nmUnpackFlatMsg
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackFlatMsg(const NMMsgDef_T *pMsgDef,
+                    byte_t buf[], size_t uMsgLen,
+                    void *pStruct, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackFlatMsg
+ */
+
+/*!
+\ingroup man_libnetmsgs_flat
+\defgroup man_nmUnpackFlatMsgDebug nmUnpackFlatMsgDebug
+
+\par Synopsis:
+<tt>
+\#include "rnr/netmsgs.h"\n\n
+extern int \ref nmUnpackFlatMsgDebug(const NMMsgDef_T *pMsgDef,
+                    byte_t buf[], size_t uMsgLen,
+                    void *pStruct, NMEndian_T eEndian);
+</tt>
+
+<b>Description:</b>\n
+\copydoc nmUnpackFlatMsgDebug
+ */
+
+/*! \}  end of man_libnetmsgs_base */
+
+/*! \} end of man_libnetmsgs */

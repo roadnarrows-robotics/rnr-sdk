@@ -1,0 +1,18 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows Network Messages Package
+//
+// File:      python.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the python linkage.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! \defgroup pydoc Python Documentation
+ * \htmlonly
+ * <a href="../pydoc/index.html">Documentation</a>
+ * \endhtmlonly
+ */

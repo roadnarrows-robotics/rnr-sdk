@@ -1,0 +1,7 @@
+1. Make NetMsgs python run-time calls independent of libnetmsgs.so
+
+2. Add <package>, <author>, <copyright> to meta element's children.
+
+3. Add checksum_func=val as an attribute to the <netmsgs> element.
+   Supported values: none (default), sum8, sum16, sum32, crc16, crc32
+
