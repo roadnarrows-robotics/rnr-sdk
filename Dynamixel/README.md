@@ -7,8 +7,12 @@ Robotis Dynamixel servos. Specifically, an on-target Dynamixel
 library plus the BotSense client-server
 modules for operation and monitoring of a Dynamixel chain over IP.
 
+## Copyright
+&#169; 2011-2016 RoadNarrows LLC
+
 ## License
-RoadNarrows Restricted and Copyrighted.
+RoadNarrows Free
+See the [EULA](https://github.com/roadnarrows-robotics/rnr-sdk/Dynamixel/EUAL.md).
 
 ## RoadNarrows Required Packages:
 * botsense
