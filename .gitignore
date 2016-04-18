@@ -38,3 +38,10 @@ Dynamixel/share/msgs/
 Hekateros/sw/pyModules/build
 Hekateros/sw/pyModules/build.*/
 Hekateros/sw/pyModules/src/*.done
+
+# i2c
+i2c/pyModules/build
+i2c/pyModules/build.*/
+i2c/pyModules/modules/rnr/i2ccore.py
+i2c/pyModules/src/*_wrap.c
+i2c/pyModules/src/*.done

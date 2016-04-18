@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE netmsgs PUBLIC "-//www.roadnarrows.com//DTD NETMSGS 1.0//EN"
+          "http://www.roadnarrows.com/xml/netmsgs/1.0/netmsgs.dtd">
+
+<!--
+ - Package: kuon
+ - Module:  bsKuon
+ - File:    bsKuonMsgs.xml
+ -
+
+/*!
+ \file
+
+  $LastChangedDate$
+  $Rev$
+
+  \brief BotSense client - bsProxy server Kuon device messages.
+  
+  \author Robin Knight   (robin.knight@roadnarrows.com)
+  \author Rob Shiely     (rob@roadnarrows.com)
+  \author Daniel Packard (daniel@roadnarrows.com)
+  
+  \par Copyright:
+  (C) 2010.  RoadNarrows LLC.
+  (http://www.roadnarrows.com)
+  \n All Rights Reserved
+*/
+
+ - Permission is hereby granted, without written agreement and without
+ - license or royalty fees, to use, copy, modify, and distribute this
+ - software and its documentation for any purpose, provided that
+ - (1) The above copyright notice and the following two paragraphs
+ - appear in all copies of the source code and (2) redistributions
+ - including binaries reproduces these notices in the supporting
+ - documentation.   Substantial modifications to this software may be
+ - copyrighted by their authors and need not follow the licensing terms
+ - described here, provided that the new terms are clearly indicated in
+ - all files where they apply.
+ -
+ - IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ - OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ - PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ - DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ - EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ - THE POSSIBILITY OF SUCH DAMAGE.
+ -
+ - THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ - INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ - FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ - "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ - PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ -
+-->
+
+<netmsgs encoding="itv" endian="big">
+
+  <!-- ........................................................................
+    - Meta Data to Tweak Source Generation
+    ....................................................................... -->
+  <meta>
+    <brief>
+      \h_botsense Server/Client Kuon Robot NetMsgs XML Definitions.
+    </brief>
+    <ns>BsKuon</ns>
+    <prologue lang="h">
+#include "botsense/BotSense.h"
+#include "Kuon/kuon.h"
+#include "botsense/bsKuon.h"
+    </prologue>
+    <epilogue lang="h"></epilogue>
+    <prologue lang="c"></prologue>
+    <epilogue lang="c"></epilogue>
+    <prologue lang="python">
+from bsKuonCore import KUON_USS_NUMOF, KUON_IR_NUMOF, KUON_USS_ECHO_MAX_MAX
+    </prologue>
+    <epilogue lang="python"></epilogue>
+  </meta>
+
+  <!-- ........................................................................
+    - Extended Field Types (Optional)
+    ....................................................................... -->
+
+
+  <!-- ........................................................................
+    - Message Definitions
+    ....................................................................... -->
+  <msg_types>
+
+    <!-- Set tty Address Request -->
+    <msgdef msgid="ReqOpenParams">
+      <fielddef fname="server"        ftype="u8" />
+      <fielddef fname="FrontAddr"     ftype="string" />
+      <fielddef fname="RearAddr"      ftype="string" />
+    </msgdef>
+
+    <!-- Client Lifeline -->
+    <msgdef msgid="ReqAlive">
+    </msgdef>
+
+    <!-- Set Motor Speeds Request -->
+    <msgdef msgid="ReqSetMotorSpeeds">
+      <fielddef fname="speedleft"     ftype="s16" />
+      <fielddef fname="speedright"    ftype="s16" />
+    </msgdef>
+
+    <!-- Alter Slew Rate Request -->
+    <msgdef msgid="ReqAlterSlew">
+      <fielddef fname="slewFL"        ftype="u16"/>
+      <fielddef fname="slewFR"        ftype="u16"/>
+      <fielddef fname="slewRL"        ftype="u16"/>
+      <fielddef fname="slewRR"        ftype="u16"/>
+    </msgdef>
+
+    <!-- Alter Brake Rate Request -->
+    <msgdef msgid="ReqAlterBrake">
+      <fielddef fname="brakeFL"        ftype="u16"/>
+      <fielddef fname="brakeFR"        ftype="u16"/>
+      <fielddef fname="brakeRL"        ftype="u16"/>
+      <fielddef fname="brakeRR"        ftype="u16"/>
+    </msgdef>
+
+    <!-- Stop the Robot -->
+    <msgdef msgid="ReqStop">
+    </msgdef>
+
+    <!-- Zero Out IMU Gyroscope Accumulators Request -->
+    <msgdef msgid="ReqZeroOutImuGyros" />
+
+    <!-- Read IMU Processed Data Request -->
+    <msgdef msgid="ReqReadImu" />
+
+    <!-- Read IMU Processed Data Response -->
+    <msgdef msgid="RspReadImu">
+      <fielddef fname="ax"        ftype="f32"/>
+      <fielddef fname="ay"        ftype="f32"/>
+      <fielddef fname="az"        ftype="f32"/>
+      <fielddef fname="gx"        ftype="f32"/>
+      <fielddef fname="gy"        ftype="f32"/>
+      <fielddef fname="gz"        ftype="f32"/>
+      <fielddef fname="temp"      ftype="f32"/>
+    </msgdef>
+
+    <!-- Read IMU Decoupled Angles Request -->
+    <msgdef msgid="ReqReadImuDecoupAngles" />
+
+    <!-- Read IMU Decoupled Angles Response -->
+    <msgdef msgid="RspReadImuDecoupAngles">
+      <fielddef fname="heading"   ftype="f32"/>
+      <fielddef fname="pitch"     ftype="f32"/>
+      <fielddef fname="roll"      ftype="f32"/>
+    </msgdef>
+
+  </msg_types>
+
+</netmsgs>

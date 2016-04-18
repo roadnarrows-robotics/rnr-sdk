@@ -1,0 +1,53 @@
+Some Required Target Kuon Configuration
+=======================================
+
+user admin
+----------
+root (password toor)
+$ adduser robot #(password tobor)
+
+/etc/init.d
+-----------
+$ scp kuon_* root@kuon:/etc/init.d/.
+$ cd /etc/init.d
+$ update-rc.d kuon_bsproxy defaults 90
+$ update-rc.d kuon_roscore defaults 91
+$ update-rc.d kuon_control defaults 92
+$ update-rc.d kuon_xbox defaults 93
+$ update-rc.d kuon_teleop defaults 94
+
+/etc/udev/rules.d
+-----------------
+$ scp 55-rn-hid.rules root@kuon:/etc/udev/rules.d/.
+
+/etc/ld.so.conf.d
+-----------------
+$ scp 00local.conf root@kuon:/etc/ld.so.conf.d/.
+
+/etc/profile.d
+--------------
+$ scp *.sh root@kuon:/etc/profle.d/.
+
+/opt
+----
+/opt/ros/groovy
+/opt/kuon_ros
+
+/prj
+----
+$ mkdir /xinstall
+$ mkdir /pkg
+svn_co_sw *
+$ cd /prj
+$ ln -s /prj/xinstall/linaro/bin bin
+$ ln -s /prj/xinstall/linaro/lib lib
+$ ln -s /prj/xinstall/linaro/include include
+$ ln -s /prj/xinstall/linaro/share share
+
+misc
+----
+/prj/lib/rnr/rnr-config.cmake   #and edit
+/root/.vimrc
+$ cat /root/.vimrc
+set ts=2
+set et

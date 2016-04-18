@@ -1,0 +1,6 @@
+# 
+# RoadNarrows Robotics Kuon RS160D motor controller udev rules
+#
+
+# Keyspan USB to serial 
+ATTRS{idProduct}=="0121",ATTRS{idVendor}=="06cd",MODE="666",SYMLINK+="kmot%n"

@@ -1,0 +1,69 @@
+Kuon Main Controller
+--------------------
+hostname:     kuon
+ip:           192.168.9.61
+processor:    arm7l
+kernel:       Linux 3.5.0-2-linaro-omap 
+user:         robot
+password:     tobor
+dhcp server:  192.168.9.62-192.168.9.75
+dns server:   local only
+
+Kuon WiFi Access Point/Router
+-----------------------------
+SSID:         kuon-ap
+passkey:      goodkuon
+hostname:     kuon-ap
+ip:           192.168.9.60
+
+Kuon Laptop
+------------
+brand:        I forgot
+hostname:     roadtrip
+user:         phobos
+password:     mar1n3r1s
+
+Kuon Netbook
+------------
+brand:        System76
+hostname:     blackNetBook
+user:         phobos
+password:     mar1n3r1s
+
+Xbox360 Direct Connect
+----------------------
+1. Plugin the Xbox360 wireless unit to the Kuon Host USB port
+2. It takes about 5 seconds for the system to detect the connection
+3. If the Xbox360 LED is off, press and hold it down until it syncs with the
+   wireless unit. Note: no communication between the Kuon and Xbox360 occurs
+   yet.
+4. Press Xbox360 Start to toggle to live Kuon control. Press Back to pause.
+5. Drive 
+
+Xbox360 Direct Via Laptop
+-------------------------
+1. Make sure the laptop has comm with Kuon. The ifconfig command will verify
+   this along with the wireless icon on the top status bar of the laptop.
+2. Plug in the Xbox360 wireless unit to the laptop.
+3. If the Xbox360 LED is off, press and hold it down until it syncs with the
+   wireless unit. Note: no communication between the Kuon and Xbox360 occurs 
+   yet.
+4. Execute the following command:
+    $ kuon_udev_teleop.sh
+5. Press Xbox360 Start to toggle to live Kuon control. Press Back to pause.
+6. Drive
+
+
+Some Safety Awareness
+---------------------
+1. The physical Emergency Stop button is your friend.
+2. The Kuon and laptop related software is brand new and not fully tested.
+3. As long as the Kuon is powered, it keeps the last user specified state. So
+   if you set the governor to 90%, unplug the Xbox, replug it, go to Start,
+   the governor is still at 90% !!!
+4. Best to set the governor to ~20% before leaving the Kuon.
+5. Best to pause the Xbox360 during idle times to prevent accidental button
+   presses.
+6. Wonky wifi comm can create bizzare behavior.
+
+THE KUON IS 250 POUNDS OF STEEL and LEAD THAT CAN MOVE AT 20MPH.

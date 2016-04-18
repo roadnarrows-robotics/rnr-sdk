@@ -1,0 +1,622 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Kuon
+//
+// File:      bsKuon.doxy
+//
+// Description:
+//  This file contains the doxygen directives to document the BotSense
+//  /kuon Module.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/* ---------------------------------------------------------------------------
+ * Kuon
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \defgroup bsmod_kuon BotSense Kuon PlugIn
+ *
+ * The \h_botsense Kuon robot components.
+ *
+ * The kuon module provides \h_botsense proxied functionallity for the
+ * RoadNarrows Kuon robot, a rugged, outdoor mobile robotic platform.
+ *
+ * \section bsmod_intro Introduction
+ * \subsection bsmod_intro_c BotSense C/C++ Client
+ * The client side C/C++ kuon add-on interfaces are defined by the header
+ * files:
+ * \termblock
+ * \term \ref include/Kuon/kuon.h "kuon.h"
+ *   \termdata Defines the Kuon robot and the libkuon.[a|so]
+ *   functional interface.
+ * \endterm
+ * \term \ref include/botsense/bsKuon.h "botsense/bsKuon.h"
+ *   \termdata Defines the \h_botsense client libbsclient_kuon.[a|so]
+ *   functional interface.
+ * \endterm
+ * \endtermblock
+ *
+ * \subsection bsmod_intro_py BotSense Python Client
+ * For python clients, the python \h_botsense subpackage
+ * \ref BotSense.kuon "BotSense.kuon"
+ * provides wrapper functions for the C libraries.
+ * \termblock
+ * \term BotSense.kuon.bsKuonCore
+ *    \termdata Swigged client C library interface.
+ * \endterm
+ * \term \ref bsPython/modules/BotSense/Kuon/bsKuonMsgs.py "BotSense.kuon.bsKuonMsgs"
+ *    \termdata Client - Server messages.
+ * \endterm
+ * \term BotSense.kuon.bsKuonTypes
+ *    \termdata Kuon data types.
+ * \endterm
+ * \term BotSense.kuon.bsKuon
+ *    \termdata Kuon top-level interface.
+ * \endterm
+ * \endtermblock
+ *
+ * \subsection bsmod_intro_srv BotSense bsProxy Plug-In
+ * The server side bsProxy plug-in is the Dynamic Link
+ * Library (DLL) libbsserver_kuon.so.
+ *
+ * \subsection bsmod_intro_src Source Subdirectories: 
+ * bsModules/bsKuon\n
+ * bsPython/modules/BotSense/kuon
+ * \{
+ */
+
+/*! \} */ /* end bsmod_kuon */
+
+
+/* ---------------------------------------------------------------------------
+ * Kuon Client
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_kuon
+ * \defgroup bsmod_kuon_cli Client Interfaces
+ *
+ * The BotSense Kuon robot /kuon client side interfaces provide APIs
+ * for C/C++ and python applications.
+ *
+ * \{
+ */
+
+/*! \} */ /* end bsmod_kuon_cli */
+
+/*!
+ * \ingroup bsmod_kuon_cli
+ * \defgroup man_libbsclient_kuon libbsclient_kuon Man Pages
+ *
+ * The libbsclient_kuon library provides the functional API between 
+ * client applications on one side and request-response messages to/from
+ * the BotSense bsProxy server on the other side.
+ * The libbotsense.[a|so] client library mediates the 
+ * client-server session.
+ *
+ * \{
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonGetMsgName bsKuonGetMsgName
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+const char * \ref bsKuonGetMsgName(BsClient_P   pClient,
+                                 BsVConnHnd_T hndVConn,
+                                 uint_t       uMsgId);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonGetMsgName
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqClose bsKuonReqClose
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqClose(BsClient_P   pClient,
+                      BsVConnHnd_T hndVConn);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqClose
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetFwVer bsKuonReqGetFwVer
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetFwVer(BsClient_P    pClient,
+                         BsVConnHnd_T  hndVConn,
+                         uint_t       *puVersion,
+                         uint_t       *puRevision);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetFwVer
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetIrAmbient bsKuonReqGetIrAmbient
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetIrAmbient(BsClient_P   pClient,
+                             BsVConnHnd_T hndVConn,
+                             uint_t       bufIr[]);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetIrAmbient
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetIrProximity bsKuonReqGetIrProximity
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetIrProximity(BsClient_P   pClient,
+                               BsVConnHnd_T hndVConn,
+                               uint_t       bufIr[]);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetIrProximity
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetMotorCfg bsKuonReqGetMotorCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetMotorCfg(BsClient_P         pClient,
+                            BsVConnHnd_T       hndVConn,
+                            uint_t             uWhich,
+                            \ref KuonMotorCfg_T *pMotorCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetMotorCfg
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetMotorSpeeds bsKuonReqGetMotorSpeeds
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetMotorSpeeds(BsClient_P     pClient,
+                               hBsVConnHnd_T  hndVConn,
+                               int           *pnSpeedLeft,
+                               int           *pnSpeedRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetMotorSpeeds
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetOdometry bsKuonReqGetOdometry
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetOdometry(BsClient_P    pClient,
+                            BsVConnHnd_T  hndVConn,
+                            int          *pnOdPosLeft,
+                            int          *pnOdPosRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetOdometry
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetUnits bsKuonReqGetUnits
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "rnr/units.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetUnits(BsClient_P          pClient,
+                         BsVConnHnd_T        hndVConn,
+                         \ref KuonAttrUnits_T *pAttrUnits);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetUnits
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqGetUssCfg bsKuonReqGetUssCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqGetUssCfg(BsClient_P       pClient,
+                          BsVConnHnd_T     hndVConn,
+                          \ref KuonUssCfg_T *pUssCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqGetUssCfg
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqMoveTo bsKuonReqMoveTo
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqMoveTo(BsClient_P   pClient,
+                       BsVConnHnd_T hndVConn,
+                       int          nSpeed,
+                       int          nOdPosLeft,
+                       int          nOdPosRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqMoveTo
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqOpen bsKuonReqOpen
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqOpen(BsClient_P  pClient,
+                     const char *sDevName,
+                     bool_t      bInitTrace);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqOpen
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqPingUss bsKuonReqPingUss
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqPingUss(BsClient_P        pClient,
+                        BsVConnHnd_T      hndVConn,
+                        \ref KuonUssMeas_T *pUssMeas);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqPingUss
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqResetOdometry bsKuonReqResetOdometry
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqResetOdometry(BsClient_P pClient, BsVConnHnd_T hndVConn);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqResetOdometry
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqSetMotorCfg bsKuonReqSetMotorCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqSetMotorCfg(BsClient_P         pClient,
+                            BsVConnHnd_T       hndVConn,
+                            uint_t             uWhich,
+                            \ref KuonMotorCfg_T *pMotorCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqSetMotorCfg
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqSetMotorSpeeds bsKuonReqSetMotorSpeeds
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqSetMotorSpeeds(BsClient_P    pClient,
+                               BsVConnHnd_T  hndVConn,
+                               int           nSpeedLeft,
+                               int           nSpeedRight);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqSetMotorSpeeds
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqSetUnits bsKuonReqSetUnits
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "rnr/units.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqSetUnits(BsClient_P          pClient,
+                         BsVConnHnd_T        hndVConn,
+                         \ref KuonAttrUnits_T *pAttrUnits);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqSetUnits
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqSetUssCfg bsKuonReqSetUssCfg
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqSetUssCfg(BsClient_P       pClient,
+                          BsVConnHnd_T     hndVConn,
+                          \ref KuonUssCfg_T *pUssCfg);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqSetUssCfg
+ */
+
+/*!
+\ingroup man_libbsclient_kuon
+\defgroup man_bsKuonReqStop bsKuonReqStop
+\par Synopsis:
+<tt>
+\#include "rnr/rnrconfig.h"\n
+\#include "botsense/BotSense.h"\n
+\#include "botsense/libBotSense.h"\n
+\#include "kuon.h"\n
+\#include "botsense/bsKuon.h"\n\n
+int \ref bsKuonReqStop (BsClient_P pClient, BsVConnHnd_T  hndVConn);
+</tt>
+
+<b>Description:</b>\n
+\copydoc bsKuonReqStop
+ */
+
+/*! \} */ /* end bsmod_libbsclient_kuon */
+
+
+/*!
+ * \ingroup bsmod_kuon_cli
+ * \defgroup kuon_py BotSense.kuon Python Subpackage
+ *
+ * \{
+The kuon subpackage under the \h_botsense python package provides python
+applications an interface to communicate with proxied /kuon devices.
+The underlining compiled extension module _bsKuonCore.so library provides the  
+provides the shim between python calling conventions and the C
+libbsclient_kuon.[a,so] library.
+
+\sa \ref BotSense.kuon "BotSense.kuon"
+
+\par Example:
+\code
+#
+# Example use of BotSense.kuon Subpackage
+#
+
+import sys
+
+import BotSense.BotSenseTypes as bsTypes
+import BotSense.BotSenseError as bsError
+import BotSense.BotSenseServer as bsServer
+import BotSense.kuon.bsKuonTypes as bsKuonTypes
+import BotSense.kuon.bsKuon  as bsKuon
+
+# create a BotSense client 
+cli = bsTypes.BsClient('kuon-one')
+
+# connect to the bsProxy server using default IP address and port
+try:
+  bsServer.ServerConnect(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# open a virtual connection to the proxied Kuon robot
+try:
+  hndVConn = bsKuon.KuonReqOpen(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+print "Example: established virtual connection %d" % (hndVConn)
+
+# reset the odometers to 0
+try:
+  bsKuon.KuonReqResetOdometry(cli, hndVConn)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# move robot straight forward 500mm at 30% speed
+try:
+  bsKuon.KuonReqMoveTo(cli, hndVConn, 300, 500, 500)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# monitor progress
+done = False
+while not done:
+  # read odometers
+  try:
+    odPosLeft, odPosRight = bsKuon.KuonReqGetOdometry(cli, hndVConn)
+  except bsError.BotSenseError, inst:
+    print inst
+    sys.exit(8)
+  if odPosLeft >= 495 and odPosRight >= 495:
+    done = True
+
+# safe the robot
+try:
+  bsKuon.KuonReqStop(cli, hndVConn)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# close the virtual connection
+try:
+  bsKuon.KuonReqClose(cli, hndVConn)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# close the connection to the bsProxy server
+try:
+  bsServer.ServerDisconnect(cli)
+except bsError.BotSenseError, inst:
+  print inst
+  sys.exit(8)
+
+# delete the client
+del cli
+\endcode
+ */
+
+/*! \} */ /* end bsKuon_py */
+
+
+/* ---------------------------------------------------------------------------
+ * Kuon Server
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_kuon
+ * \defgroup bsmod_kuon_srv Server Plug-In
+ *
+ * \h_botsense bsProxy server plug-in DLL for the Kuon robot
+ * /kuon device.
+ *
+ * See \ref bsModules/bsKuon/bsKuonServer.c
+ *
+ * \{
+ */
+
+/*! \} */ /* end bsmod_kuon_srv */
+
+/*!
+ * \ingroup bsmod_kuon_srv
+ * \defgroup bsmod_kuon_srv_cfg Kuon Configuration
+ *
+ * The /kuon plug-in XML configuration will be supported in BotSense v3.1.0.
+ * \{
+ */
+
+/*! \} */ /* end bsmod_kuon_srv_cfg */
+
+
+/* ---------------------------------------------------------------------------
+ * Kuon XML
+ * --------------------------------------------------------------------------*/
+
+/*!
+ * \ingroup bsmod_kuon
+ * \defgroup bsmod_kuon_xml XML Message Set
+
+The bsKuonMsgs.xml specification defines the set of messages exchanged
+between BotSense clients and the bsProxy server for proxied Kuon robot
+/kuon virtual device.
+
+The /kuon messages are terminated between the BotSense client
+libbsclient_kuon.so shared library or libbsclient_kuon.a static library
+and the bsProxy plug-in libbsserver_kuon.so interface module DLL.
+
+The message encoding is 8-bit Id-Type-Value (itv). All message fields are 
+packed in big-endian order.
+
+\include bsModules/bsKuon/bsKuonMsgs.xml
+
+ */

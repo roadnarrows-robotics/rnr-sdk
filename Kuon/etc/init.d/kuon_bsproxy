@@ -1,0 +1,86 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:       bsProxy
+# Required-Start: $remote_fs $syslog
+# Required-Stop:  $remote_fs $syslog
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+# Short-Description: BotSense proxy server.
+# Description:    BotSense proxy server bsProxy provides proxy services for
+#                 some RoadNarrows Robotics software packages.
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+
+BSPROXY=bsProxy
+
+DAEMON=/prj/bin/${BSPROXY}
+PIDFILE=/var/run/${BSPROXY}.pid
+LOGFILE=/var/log/${BSPROXY}.log
+
+test -x $DAEMON || exit 0
+
+#
+# Start service
+#
+startdaemon()
+{
+  echo -n "Starting BotSense bsProxy proxy server... "
+  start-stop-daemon --start -x $DAEMON --pidfile $PIDFILE --make-pidfile --background -- --log=diag1 --logfile=$LOGFILE
+  echo "done"
+}
+
+#
+# Stop service
+#
+stopdaemon()
+{
+  echo -n "Stopping BotSense bsProxy proxy server... "
+  start-stop-daemon --stop --pidfile $PIDFILE
+  echo "done"
+}
+
+#
+# Status
+#
+pidof_daemon() {
+  if [ -e "${PIDFILE}" ]
+  then
+    PID=$(cat ${PIDFILE})
+    pidof ${BSPROXY} | grep -q ${PID}
+    return $?
+  fi
+  return 1
+}
+
+case $1 in
+  start)
+    startdaemon
+    ;;
+  stop)
+    stopdaemon
+    ;;
+  restart|force-reload)
+    $0 stop && sleep 2 && $0 start
+    ;;
+  status)
+    if pidof_daemon
+    then
+      echo "${BSPROXY} running, process ${PID}"
+    else
+      echo "${BSPROXY} not running"
+      if [ -e "${PIDFILE}" ]
+      then
+        exit 1  # program is dead and pid file exists.
+      else
+        exit 3  # program is not running
+      fi
+    fi
+    ;;
+  *)
+    echo "Usage: $0 {start|stop|restart|force-reload|status}"
+    exit 1
+    ;;
+esac
+
+exit 0 # good
