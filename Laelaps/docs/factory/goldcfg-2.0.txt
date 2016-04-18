@@ -1,0 +1,312 @@
+================================================================================
+** Laelaps 2.0.0 Gold Software Configuration
+** Required Target Laelaps Configuration
+================================================================================
+
+--------------------------------------------------------------------------------
+* OS and Drivers ***
+--------------------------------------------------------------------------------
+$ uname -a
+Linux laelaps 3.10.82 #1 SMP PREEMPT Thu Aug 20 18:50:56 BRT 2015 armv7l armv7l armv7l GNU/Linux
+
+$ cd /etc/modprobe.d
+$ sudo vi blacklist_ioboard.conf (new)
+<add>
+blacklist ioboard_bh1780
+blacklist ioboard_bmp180
+blacklist ioboard_keyled
+
+$ sudo vi blacklist.conf (just to make sure)
+<add at bottom>
+blacklist ioboard_bh1780
+blacklist ioboard_bmp180
+blacklist ioboard_keyled
+
+
+--------------------------------------------------------------------------------
+* Network
+--------------------------------------------------------------------------------
+
+# /etc/dhcp
+#--------
+# Not needed - uses gethostname()
+#$ vi dhclient.conf
+#send host-name "laelaps";
+
+# /etc
+$ echo "laelaps" >/etc/hostname
+
+$ cat /etc/hosts
+127.0.0.1	laelaps
+127.0.0.1	localhost localhost.localdomain
+
+$ sudo /etc/init.d/network restart
+
+# make sure all is good
+
+$ hostname
+laelaps
+
+
+--------------------------------------------------------------------------------
+* Users
+--------------------------------------------------------------------------------
+
+# make sure root has password toor
+$ passwd root
+
+# groups
+$ addgroup --gid 1111 laelaps
+
+# add user robot
+$ adduser --gid <gid_of_laelaps> robot # (password tobor)
+
+# give sudo to robot
+$ usermod --groups laelaps,adm,sudo robot
+
+# add laelaps to odroid groups
+$ usermod -a --groups laelaps odroid
+
+# add laelaps to root groups
+$ usermod -a --groups root,laelaps root
+
+# verify
+$ id root
+uid=0(root) gid=0(root) groups=0(root),1111(laelaps)
+
+$ id robot
+uid=1000(robot) gid=1111(laelaps) groups=1111(laelaps),4(adm),27(sudo)
+
+
+--------------------------------------------------------------------------------
+* Linux
+--------------------------------------------------------------------------------
+
+$ apt-get update
+$ apt-get upgrade
+
+
+--------------------------------------------------------------------------------
+* Run-Time Shell Env
+--------------------------------------------------------------------------------
+
+# /etc/profile.d
+$ scp root@HOST:<root>/etc/profile.d/laelaps.sh .
+
+# umask
+$ vi /etc/login.defs
+UMASK 002
+
+
+--------------------------------------------------------------------------------
+* ROS Packages
+--------------------------------------------------------------------------------
+
+# See http://wiki.ros.org/indigo/Installation/UbuntuARM for instructions.
+
+--------------------------------------------------------------------------------
+* Other Packages
+--------------------------------------------------------------------------------
+
+# gstreamer 1.0
+
+# opencv - use ROS version unless otherwise needed
+
+# python
+
+# misc
+
+
+--------------------------------------------------------------------------------
+* RoadNarrows SDK Packages
+--------------------------------------------------------------------------------
+
+# See https://github.com/roadnarrows-robotics/laelaps/wiki/Target-Installation-Guide
+
+# Add keys
+$ wget -O - http://roadnarrows.com/packages.roadnarrows.key | sudo apt-key add -
+
+# Add apt-get source list
+$ sh -c "echo 'deb [arch=armhf] http://roadnarrows.com/distro/apt-odroid-omap stable main' > /etc/apt/sources.list.d/rnr.sources.list" 
+
+# Update apt
+$ apt-get update
+
+# SDKs
+$ apt-get install rnr-laelaps-dev rnr-peripherals-dev
+
+# ld cache
+$ wget -P /etc/ld.so.conf.d http://roadnarrows.com/distro/extras/rnr.conf
+$ ldconfig
+
+
+--------------------------------------------------------------------------------
+* Laelaps ROS Packages
+--------------------------------------------------------------------------------
+
+# See Also
+# https://github.com/roadnarrows-robotics/laelaps/wiki/Target-Installation-Guide
+# https://github.com/roadnarrows-robotics/laelaps/wiki/Host-Installation-Guide
+
+# Make location (su -l robot)
+robot$ cd /opt
+robot$ sudo mkdir laelaps_ros
+robot$ sudo chmod 775 laelaps_ros/
+robot$ sudo chgrp laelaps laelaps_ros/
+robot$ cd laelaps_ros
+robot$ mkdir src
+robot$ cd src
+robot$ source /etc/profile.d/laelaps.sh
+robot# catkin_init_workspace
+
+# git packages
+$ git clone https://github.com/roadnarrows-robotics/laelaps
+$ git clone https://github.com/roadnarrows-robotics/peripherals
+$ git clone https://github.com/ros-industrial/industrial_core --branch indigo-devel
+$ git clone https://github.com/bosch-ros-pkg/usb_cam
+
+# make 
+$ cd /opt/laelaps_ros
+$ catkin_make
+
+# Note 1. catkin_make has the error:
+
+ImportError: "from catkin_pkg.topological_order import topological_order" failed: No module named catkin_pkg.packages
+Make sure that you have installed "catkin_pkg", it is up to date and on the PYTHONPATH.
+
+Fix by removing conflicted package:
+$ rm -fr /usr/local/lib/python2.7/dist-packages/catkin*
+
+
+--------------------------------------------------------------------------------
+* Laelaps Etc Configuration
+--------------------------------------------------------------------------------
+
+/etc
+----
+$ sudo scp /prj/pkg/Laelaps/share/etc/laelaps/* /etc/laelaps/.
+
+/etc/init.d
+-----------
+$ scp laelaps_* /etc/init.d/.
+$ cd /etc/init.d
+$ update-rc.d laelaps_init defaults 89
+$ update-rc.d laelaps_bsproxy defaults 90
+$ update-rc.d laelaps_roscore defaults 91
+$ update-rc.d laelaps_control defaults 92
+$ update-rc.d laelaps_xbox defaults 93
+$ update-rc.d laelaps_teleop defaults 94
+# future $ update-rc.d laelaps_halt start 0 88 .
+
+/etc/udev/rules.d
+-----------------
+# Note: Should be all present from updating RoadNarrows SDK Packages above.
+$ ls /etc/udev/rules.d
+55-rn-arduino.rules
+55-rn-dyna.rules
+55-rn-cam.rules
+55-rn-hid.rules
+...
+$
+
+/etc/ld.so.conf.d
+-----------------
+$ ls /etc/ld.so.conf.d
+rnr.conf
+
+/etc/profile.d
+--------------
+# Note: Should be all present from updating RoadNarrows SDK Packages above.
+$ ls /etc/profile.d
+laelaps.sh
+
+
+--------------------------------------------------------------------------------
+* RoadNarrows Packages For RoadNarrows Laelaps
+--------------------------------------------------------------------------------
+
+# project top-level directories
+-------------------------------
+$ mkdir /prj
+$ mkdir /xinstall
+$ mkdir /prj/pkg
+
+# subversion checkout
+#--------------------
+$ cd /prj/pkg
+$ svn checkout http://roadnarrows.net/RN/trunk/rnmake
+$ svn checkout http://roadnarrows.net/RN/trunk/tools
+$ cd tools
+$ make install
+$ cd ..
+$ svn checkout http://roadnarrows.net/RN/trunk/librnr
+$ svn checkout http://roadnarrows.net/RN/trunk/libserial
+$ svn checkout http://roadnarrows.net/RN/trunk/i2c
+$ svn checkout http://roadnarrows.net/RN/trunk/gpio
+$ svn checkout http://roadnarrows.net/RN/trunk/netmsgs
+$ svn checkout http://roadnarrows.net/RN/trunk/appkit
+$ svn checkout http://roadnarrows.net/RN/trunk/botsense
+$ svn checkout http://roadnarrows.net/RN/trunk/peripherals
+$ svn checkout http://roadnarrows.net/RN/trunk/Dynamixel
+$ svn_co_sw http://roadnarrows.net/RN/trunk/Laelaps
+
+#----
+# make install packages in the following order:
+# librnr libserial i2c netmsgs appkit botsense peripheral Dynamixel Laelaps
+
+# soft link xinstall
+#-------------------
+$ cd /prj
+$ ln -s /prj/xinstall/linaro/bin bin
+$ ln -s /prj/xinstall/linaro/lib lib
+$ ln -s /prj/xinstall/linaro/include include
+$ ln -s /prj/xinstall/linaro/share share
+$ scp /prj/pkg/Laelaps/rnr-config.cmake  root@laelaps:/prj/lib/rnr/.
+
+# update system cache
+$ ldconf
+
+
+--------------------------------------------------------------------------------
+* Laelaps ROS Package Updates
+--------------------------------------------------------------------------------
+
+# /opt/laelaps_ros
+#-------------------
+$ cd /opt/laelaps_ros/src
+$ cd industrial_core
+$ git pull
+$ cd ../peripherals
+$ git pull
+$ cd ../laelaps
+$ git pull
+$ cd /opt/laelaps_ros
+$ catkin_make
+
+
+--------------------------------------------------------------------------------
+* Miscellaneous
+--------------------------------------------------------------------------------
+
+# Make directory framework for user's ROS devel
+$ mkdir -p /prj/ros/indigo/src
+$ chmod 775 /prj
+$ chgrp laelaps /prj
+$ cd /prj
+$ chmod -R 775 ros
+$ chown -R robot:laelaps ros
+
+# Serial Number File 
+$ mkdir -p /usr/local/share/misc
+$ chmod 755
+$ echo 'yymmppp' >/usr/local/share/misc/.sn
+
+# /root/.vimrc
+$ vi /root/.vimrc
+set ts=2
+set et
+
+# /home/robot/.vimrc
+$ vi /root/.vimrc
+set ts=2
+set et

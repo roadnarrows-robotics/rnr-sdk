@@ -1,0 +1,64 @@
+Laelaps Interface Design
+========================
+
+--------------------------------------------------------------------------------
+* Units
+--------------------------------------------------------------------------------
+
+meters
+meters/second
+meters/second^2
+radians?
+radians/second
+radians/second^2
+rpm ?
+Newton-meters
+
+
+--------------------------------------------------------------------------------
+* Operations
+--------------------------------------------------------------------------------
+W       write
+R       read
+Reset:  reset to current or default value(s)
+
+
+--------------------------------------------------------------------------------
+* Robot Contral Parameters
+--------------------------------------------------------------------------------
+
+Parameter Function      Units                     Type        Operation      
+--------- --------      -----                     ----        ---------
+MaxDeltaV Limit accel.  m/s                       float64     R/W
+
+
+--------------------------------------------------------------------------------
+* Driving Primitives
+--------------------------------------------------------------------------------
+
+Component Function      Units                     Type        Operation      
+--------- --------      -----                     ----        ---------
+Wheel(s)  velocity      m/s or r/s or rpm ?       float64     R/W
+Wheel(s)  brake         ?                         float64     W
+Wheel(s)  encoder       ticks                     int32       R
+Wheel(s)  odometer      meters                    float64     R
+  
+Robot     velocity      m/s                       float64     R/W
+Robot     brake         ?                         float64     W
+Robot     odometer      meters                    float64     R/Reset
+Robot     steering      radians                   float64     R/W
+
+
+--------------------------------------------------------------------------------
+* Moving 
+--------------------------------------------------------------------------------
+
+Component Function      Units                     Type        Operation      
+--------- --------      -----                     ----        ---------
+Robot     moveto x,y,v  meters, meters, and m/s   float64     W
+Robot     trajectory    m, m, m/s                 float64     W
+
+
+--------------------------------------------------------------------------------
+* Sensor Primitives
+--------------------------------------------------------------------------------

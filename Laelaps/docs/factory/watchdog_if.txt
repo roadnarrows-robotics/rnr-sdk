@@ -1,0 +1,126 @@
+Laelaps Watchdog Firmware Interface
+===================================
+
+Version: 1
+
+Overview
+--------
+Arduino compatable
+Processor:      ATmega328 16MHz 5V
+I2C address:    0x32
+Odroid device:  /dev/i2c-3 (HW I2C)
+
+Interface Definition
+--------------------
+include/Laelaps/laeWatchDog.h
+
+Functions
+---------
++ Watchdog
++ RGB LED (pins 9,10,12)
++ Digial I/O (pins 2-8)
++ Analog I/O (pins A0-A3)
+
+Internal States
+---------------
++ NoService(0)  - No communication with the main Odroid processor.
++ Alarmed(1)    - The robot has alarms.
++ Nominal(2)    - The robot is operating nominally.
+
+Watchdog
+--------
++ Watchdog times out in 6 seconds.
++ Any received command executed successfully resets the watchdog timer.
++ On timeout, the NoService state is entered.
+
+RGB LED Patterns
+----------------
+  Pattern             State       Behaviour
+  .......             .....       .........
++ NoService(0)        NoService   Fast flashing green
++ CriticalAlarm(1)    Alarmed     Slow flashing red
++ Alarm(2)            Alarmed     Solid red
++ BatteryCritical(3)  Alarmed     Slow flashing amber
++ User(4)             Nominal     User defined RGB solid
++ Battery(5)          Nominal     White (100%) to amber (~10%)
+
+Commands and Responses
+----------------------
+Note: The system i2c-tools i2cdetect may be used to validate I2C operation.
+Note: The RN i2c tools i2cread, i2cwrite, and i2ctrans may be used
+      to test the interface between the Odroid and Arduino WatchDog firmware.
+Note: Alternately, the RN i2c tool i2csh opens a interactive shell to exectute
+      I2C scan, check, read, write, and transaction commands.
+
+---
+Command 0: PetDog
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 0
+
+---
+Command 1: GetVersion
+i2ctrans --log=error --device=/dev/i2c-3 --address=0x32 --count=1 1
+Response: 0x01
+
+---
+Command 2: SetBattCharge
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 2 <batt>
+  where <batt> is the percentage of battery charge from 0-100.
+
+---
+Command 3: SetAlarms
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 3 <alarms_hi> <alarms_lo>
+  where <alarms_hi> and <alarms_lo> are the upper and lower bytes of the alarm
+        bits. (See header file.)
+
+---
+Command 4: SetRgbLed
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 4 <red> <green> <blue>
+  where each color is between 0-255.
+
+---
+Command 5: ResetRgbLed
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 5
+
+---
+Command 6: ConfigDPin
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 6 <pin> <dir>
+  where <pin> is digital pin 2-8
+        <dir> is 0 (input) or 1 (output).
+
+---
+Command 7: ReadDPin
+i2ctrans --log=error --device=/dev/i2c-3 --address=0x32 --count=2 7 <pin>
+Response: <pin> <value>
+  where <pin> is digital pin 2-8
+        <value> is 0x00 (low) or 0x01 (high).
+
+---
+Command 8: WriteDPin
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 8 <pin> <value>
+  where <pin> is digital pin 2-8
+        <value> is 0 (low) or 1 (high).
+
+---
+Command 9: ReadAPin
+i2ctrans --log=error --device=/dev/i2c-3 --address=0x32 --count=3 9 <pin>
+Response: <pin> <value_hi> <value_lo>
+  where <pin> is analog pin 0-3
+        <value_hi> and <value_lo> are the upper and lower bytes of the 10-bit
+          analog value 0-1023.
+
+---
+Command 10: WriteAPin
+i2cwrite --log=error --device=/dev/i2c-3 --address=0x32 10 <pin> <value_hi> <value_lo>
+  where <pin> is analog pin 0-3
+        <value_hi> and <value_lo> are the upper and lower bytes of the 10-bit
+          analog value 0-1023.
+
+---
+Command 15: Test
+i2ctrans --log=error --device=/dev/i2c-3 --address=0x32 --count=5 15
+Response: <seq_num> <op_state> <alarms_hi> <alarms_lo> <led_index>
+  where <seq_num> is the next sequence number modulo 256.
+        <op_state> is the current operational state 0-2.
+        <alarms_hi> and <alarms_lo> are the upper and lower bytes of the
+          current alarms.
+        <led_index> is the current index of the active LED pattern.

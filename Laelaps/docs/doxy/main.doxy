@@ -1,0 +1,26 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Raton
+//
+// File:      main.doxy
+//
+/*!
+  \file
+  $LastChangedDate: 2013-04-01 10:32:56 -0600 (Mon, 01 Apr 2013) $
+  $Rev: 2800 $
+*/
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! 
+\mainpage Raton
+
+Please add detailed documentation.
+
+\verbinclude page_SupportedPlatforms.doxy 
+\verbinclude page_EULA.doxy
+
+*/

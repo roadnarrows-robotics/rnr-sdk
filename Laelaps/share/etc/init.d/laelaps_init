@@ -1,0 +1,134 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:       laelaps_init
+# Required-Start: $remote_fs $syslog
+# Required-Stop:  $remote_fs $syslog
+# Default-Start:  1 2 3 4 5
+# Default-Stop:   0 6
+# Short-Description: Laelaps init services.
+# Description:    Laelaps basic initialization and GPIO monitoring.
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/prj/bin:/usr/local/bin
+
+# standard init sh support functions
+. /lib/lsb/init-functions
+
+# Laelaps initialization program
+SERVICE=laelaps_init                  # "service"
+LOGFILE=/var/log/${SERVICE}.log       # log file
+SYSGPIO=/sys/class/gpio               # sysfs gpio base directory
+
+# Exported GPIOs
+GPIO_MOTOR_CTLR_CS=173                # motor controllers chip select
+GPIO_MOTOR_CTLR_EN=174                # motor controllers enable
+GPIO_WD_RESET=189                     # watchdog sub-processor reset
+GPIO_I2C_MUX_RESET=190                # I2C multiplexer reset
+GPIO_DECK_BATT_EN=191                 # top deck battery out enable
+GPIO_DECK_5V_EN=192                   # top deck regulated 5V out enable
+
+#
+# Start GPIO
+#
+# startGpio <gpio> {in|out} [{0|1|""} [force]]
+#
+startGpio()
+{
+  gpio=${1}
+  dir=${2}
+  initval=${3}
+  force=${4}
+  gpiodir=${SYSGPIO}/gpio${gpio}
+
+  if [ ! -d ${gpiodir} -o "${force}" = "force" ]
+  then
+    log_action_begin_msg "Exporting GPIO ${gpio} as ${dir}put" || true
+    gpioexport --log-no-color --log=error --logfile=${LOGFILE} ${gpio} 
+    gpiodirection --log-no-color --log=error --logfile=${LOGFILE} ${gpio} ${dir}
+    chmod 666 ${gpiodir}/value >>${LOGFILE} 2>>${LOGFILE}
+    if [ "${dir}" = "out" -a "${initval}" = "0" -o "${initval}" = "1" ]
+    then
+      echo "${initval}" > ${gpiodir}/value >>${LOGFILE} 2>>${LOGFILE}
+    fi
+    log_action_end_msg 0 || true
+  fi
+}
+
+#
+# Start "daemon" service - just start-up initialization
+#
+# startdaemon [force]
+#
+startdaemon()
+{
+  startGpio ${GPIO_MOTOR_CTLR_CS}  out "" ${1}
+  startGpio ${GPIO_MOTOR_CTLR_EN}  out "0" ${1}
+  startGpio ${GPIO_WD_RESET}       out "" ${1}
+  startGpio ${GPIO_I2C_MUX_RESET}  out "" ${1}
+  startGpio ${GPIO_DECK_BATT_EN}   out "1" ${1}
+  startGpio ${GPIO_DECK_5V_EN}     out "1" ${1}
+}
+
+#
+# Stop "daemon" service
+#
+stopdaemon()
+{
+  true
+}
+
+#
+# Get status of GPIO
+#
+# statusOfGpio <gpio>
+#
+statusOfGpio()
+{
+  gpio=${1}
+  gpiodir=${SYSGPIO}/gpio${gpio}
+
+  if [ -d ${gpiodir} ]
+  then
+    info=$(ls -l ${gpiodir}/value 2>/dev/null)
+    perm=${info%% *}
+    val=$(cat ${gpiodir}/value 2>/dev/null)
+    dir=$(cat ${gpiodir}/direction 2>/dev/null)
+    log_action_msg "GPIO ${gpio}: ${dir}put ${val} (${perm})" || true
+  else
+    log_action_msg "GPIO ${gpio}: Not exported" || true
+  fi
+}
+
+#
+# Status
+#
+status()
+{
+  statusOfGpio ${GPIO_MOTOR_CTLR_CS}
+  statusOfGpio ${GPIO_MOTOR_CTLR_EN}
+  statusOfGpio ${GPIO_WD_RESET}
+  statusOfGpio ${GPIO_I2C_MUX_RESET}
+  statusOfGpio ${GPIO_DECK_BATT_EN}
+  statusOfGpio ${GPIO_DECK_5V_EN}
+}
+
+case $1 in
+  start)
+    startdaemon
+    ;;
+  stop)
+    stopdaemon
+    ;;
+  reload|force-reload)
+    startdaemon force
+    ;;
+  status)
+    status
+    ;;
+  *)
+    log_action_msg "Usage: $0 {start|stop|reload|force-reload|status}" || true
+    exit 1
+    ;;
+esac
+
+exit 0 # good

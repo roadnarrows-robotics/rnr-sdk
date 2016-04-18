@@ -1,0 +1,181 @@
+#
+#!/bin/bash
+#
+# Script: laelaps_ping_tof
+#
+
+## \file
+##
+## $LastChangedDate: 2013-09-25 09:39:14 -0600 (Wed, 25 Sep 2013) $  
+## $Rev: 3338 $ 
+## 
+## \brief Ping a time-of-flight sensor.
+##
+## Usage: laelaps_ping_tof <N>
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2016.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+_Cmd="laelaps_ping_tof"
+
+#
+# Synopsis:     _Usage
+# Description:  Prints command usage
+#
+_Usage()
+{
+  printf "Usage: ${_Cmd} [OPTIONS] <N>\n"
+  printf "       ${_Cmd} --help\n"
+}
+
+#
+# Synopsis:     _Desc
+# Description:  Prints command description.
+#
+_Desc()
+{
+cat <<EOF
+
+DESCRIPTION
+  Shell script to ping a time-of-flight sensor for connectivity.
+  Communication is over I2C.
+
+OPTIONS
+
+  -h, --help                Display this help and exit.
+EOF
+}
+
+#
+# Synopsis:     _help
+# Description:  Prints help and exits.
+#
+_help()
+{
+  _Usage
+  _Desc
+  exit 0
+}
+
+#
+# Synopsis:     _try
+# Description:  Prints try encouragement.
+#
+_try()
+{
+  printf "Try '${_Cmd} --help' for more information.\n" >&2
+}
+
+#
+# Synopsis:     _error [<msg1> [<msg2>...]]
+# Description:  Prints error message and exits
+#
+_error()
+{
+  if [ $# -gt 0 ]
+  then
+    printf "${_Cmd}: Error: $1"
+    shift
+    while [ $# -gt 0 ]
+    do
+      printf ": $1" 
+      shift
+    done
+    printf "\n"
+  fi
+    _try
+  exit 2
+}
+
+# options
+
+# 
+# Get command-line options and arguments.
+#
+export POSIXLY_CORRECT
+
+cmdopts=$(getopt --long=help --options=h --name=${_Cmd} -- "$@")
+
+if [ $? != 0 ]
+then
+  _try
+  exit 1
+fi
+
+eval set -- "${cmdopts}"
+
+while true
+do
+  case "$1" in
+    --help)         _help; shift;;
+    --)             shift; break;;
+    *)              echo "Internal error!"; exit 1;;
+  esac
+done
+
+shift $(($OPTIND - 1))
+
+if [[ $# -lt 1 ]]
+then
+  echo "No ToF specified"
+  _try
+  exit 2
+fi
+
+tof=${1}
+declare -i tof_chan
+
+# fixed data
+dev="/dev/i2c-3"
+addr_mux=0x70
+addr_tof=0x29
+
+# check bus
+if ! i2ccheck --device=${dev} --address=${addr_mux}
+then
+  echo "I2C mutliplexor device on ${dev} at ${addr_mux} not found." >&2
+  i2cscan --log=error --device=${dev} --verbose >&2
+  exit 2
+fi
+
+case "${tof}"
+in
+  0) tof_chan=0x01;;
+  1) tof_chan=0x02;;
+  2) tof_chan=0x04;;
+  3) tof_chan=0x08;;
+  4) tof_chan=0x10;;
+  5) tof_chan=0x20;;
+  6) tof_chan=0x40;;
+  7) tof_chan=0x80;;
+esac
+
+# read fw version command
+echo "Setting I2C mux channel."
+i2cwrite --log=error --device=${dev} --address=${addr_mux} ${tof_chan}
+
+echo "Pinging Time-of-Flight ${tof}"
+
+declare -i cnt=0
+
+while :
+do
+  echo -n "${cnt} ping ... "
+  if i2ccheck --device=${dev} --address=${addr_tof}
+  then
+    echo "ponged"
+  else
+    echo "failed"
+  fi
+  cnt+=1
+  sleep 1
+done 3<>${dev}

@@ -1,0 +1,6 @@
+# 
+# RoadNarrows Robotics motor rules
+#
+
+# RoboClaw Atmel Controller
+ATTRS{idProduct}=="2404",ATTRS{idVendor}=="03eb",MODE="666",SYMLINK+="motorctlr%n"

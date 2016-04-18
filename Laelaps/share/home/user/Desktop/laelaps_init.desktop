@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=laelaps_init
+Icon=/usr/local/share/Laelaps/images/icons/LaelapsInitIcon.png
+Exec=gksudo /usr/local/bin/laelaps_init.d.py
+#Icon=/prj/share/Laelaps/images/icons/LaelapsInitIcon.png
+#Exec=gksudo /prj/bin/laelaps_init.d.py

@@ -1,0 +1,80 @@
+debianpkgs.txt Description:
+=======
+This file contains development and installation notes for preparing the Odroid
+Linux and Ubuntu desktop packages and software dependencies for Laelaps.
+
+History: 
+========
+11/5/15 - KMW: created, copied from Hekateros 1.3. Work in progress.
+
+Version:
+====================
+In support of Laelaps 2.0
+
+Customers:
+===================
+Job 2942  (Gabriela/Mexico)
+- shipped November 6, 2015
+
+Tested Linux Versions:
+===============
+
+(Desktop)
+$uname -a
+Linux exitramp 3.13.0-67-generic #110-Ubuntu SMP Fri Oct 23 13:24:41 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
+
+$lsb_release -a
+Description:	Ubuntu 14.04.3 LTS
+Release:	14.04
+Codename:	trusty
+
+(Odroid)
+$uname -a
+$lsb_release -a
+
+
+Passwords:
+==========
+buckleup password: FCBB1@ck1P@
+Repo passphrase:   masterthief
+
+PKG
+=========
+rnr-appkit-dev
+rnr-botsense-dev
+rnr-dynamixel-dev (opt)
+rnr-i2c-dev
+rnr-laelaps-dev
+rnr-librnr-dev
+rnr-libserial-dev
+rnr-gpio-dev
+rnr-netmsgs-dev
+rnr-peripherals-dev
+
+Make
+=====
+make deb-pkg-dev
+
+APTTGT:
+========
+apt-ubuntu-trusty-odroid    # Ubuntu 14.04 trusty arm armhf
+apt-ubuntu-trusty-x86_64    # Ubuntu 14.04 trusty x86_64 amd64
+
+Make:
+=====
+rnmake_deb_all 
+
+Upload:
+=======
+$ rnupload-dpkg --help
+$ rnupload-dpkg --verbose [--arch=RNARCH] [--pkg="PKG PKG"]
+
+or 
+$ cd /prj/pkg/PKG/dist/dist.ARCH
+$ scp X-dev.deb \
+buckleup@roadnarrows.com:/home/buckleup/roadnarrows.com/distro/APTTGT/incoming/.
+
+Update:
+=======
+dpkg_repo_update --help
+dpkg_repo_update --verbose --repo=APTTGT

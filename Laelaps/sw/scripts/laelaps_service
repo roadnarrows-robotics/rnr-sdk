@@ -1,0 +1,162 @@
+#!/bin/bash
+#
+# Script: laelaps_service
+#
+
+## \file
+##
+## $LastChangedDate: 2013-09-25 09:39:14 -0600 (Wed, 25 Sep 2013) $  
+## $Rev: 3338 $ 
+## 
+## \brief Laelaps services stop|start|restart|status convenience utility.
+##
+## Usage: laelaps_service stop|start|restart|status
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2015.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+set -o nounset
+#set -o errexit # failure is an option
+
+# common environment
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+
+_Cmd="laelaps_service"
+
+readonly actions="stop|start|restart|status"
+readonly upservices=("laelaps_bsproxy" "laelaps_roscore" "laelaps_control"
+                     "laelaps_xbox" "laelaps_teleop")
+readonly dnservices=("laelaps_teleop" "laelaps_xbox" "laelaps_control"
+                     "laelaps_roscore" "laelaps_bsproxy")
+
+#
+# Synopsis:     _Usage
+# Description:  Prints command usage
+#
+_Usage()
+{
+  printf "Usage: ${_Cmd} [OPTIONS] {${actions}}\n"
+  printf "       ${_Cmd} --help\n"
+}
+
+#
+# Synopsis:     _Desc
+# Description:  Prints command description.
+#
+_Desc()
+{
+cat <<EOF
+
+DESCRIPTION
+  Convenience shell script run the core set of Laelaps init.d services.
+
+OPTIONS
+
+  -h, --help                Display this help and exit.
+EOF
+}
+
+#
+# Synopsis:     _help
+# Description:  Prints help and exits.
+#
+_help()
+{
+  _Usage
+  _Desc
+  exit 0
+}
+
+#
+# Synopsis:     _try
+# Description:  Prints try encouragement.
+#
+_try()
+{
+  printf "Try '${_Cmd} --help' for more information.\n" >&2
+}
+
+#
+# Synopsis:     _error [<msg1> [<msg2>...]]
+# Description:  Prints error message and exits
+#
+_error()
+{
+  if [ $# -gt 0 ]
+  then
+    printf "${_Cmd}: Error: $1"
+    shift
+    while [ $# -gt 0 ]
+    do
+      printf ": $1" 
+      shift
+    done
+    printf "\n"
+  fi
+    _try
+  exit 2
+}
+
+# options
+
+# 
+# Get command-line options and arguments.
+#
+export POSIXLY_CORRECT
+
+cmdopts=$(getopt --long=help --options=h --name=${_Cmd} -- "$@")
+
+if [ $? != 0 ]
+then
+  _try
+  exit 1
+fi
+
+eval set -- "${cmdopts}"
+
+while true
+do
+  case "$1" in
+    --help)         _help; shift;;
+    --)             shift; break;;
+    *)              echo "Internal error!"; exit 1;;
+  esac
+done
+
+#
+# exec_service action service...
+#
+exec_service()
+{
+  action="${1}"
+  shift
+  for src in "$@"
+  do
+    service "${src}" "${action}"
+  done
+}
+
+if [[ $# -ne 1 ]]
+then
+  _error "No action specified."
+fi
+
+case "$1" in
+  stop)     exec_service "$1" ${dnservices[@]};;
+  start)    exec_service "$1" ${upservices[@]};;
+  restart)  exec_service stop ${dnservices[@]}
+            exec_service start ${upservices[@]};;
+  status)   exec_service "$1" ${upservices[@]};;
+  *) _error "$1" "Unknown action.";;
+esac
+
+exit 0

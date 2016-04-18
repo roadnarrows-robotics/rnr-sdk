@@ -1,0 +1,184 @@
+#
+#!/bin/bash
+#
+# Script: laelaps_wd_mon
+#
+
+## \file
+##
+## $LastChangedDate: 2013-09-25 09:39:14 -0600 (Wed, 25 Sep 2013) $  
+## $Rev: 3338 $ 
+## 
+## \brief Monitor watchdog subprocessor state.
+##
+## Usage: laelaps_wd_mon
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2016.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+_Cmd="laelaps_wd_mon"
+
+#
+# Synopsis:     _Usage
+# Description:  Prints command usage
+#
+_Usage()
+{
+  printf "Usage: ${_Cmd} [OPTIONS]\n"
+  printf "       ${_Cmd} --help\n"
+}
+
+#
+# Synopsis:     _Desc
+# Description:  Prints command description.
+#
+_Desc()
+{
+cat <<EOF
+
+DESCRIPTION
+  Shell script to monitor the state of the Laelaps watchdog sub-processor.
+  Communication is over I2C.
+
+OPTIONS
+
+  -h, --help                Display this help and exit.
+EOF
+}
+
+#
+# Synopsis:     _help
+# Description:  Prints help and exits.
+#
+_help()
+{
+  _Usage
+  _Desc
+  exit 0
+}
+
+#
+# Synopsis:     _try
+# Description:  Prints try encouragement.
+#
+_try()
+{
+  printf "Try '${_Cmd} --help' for more information.\n" >&2
+}
+
+#
+# Synopsis:     _error [<msg1> [<msg2>...]]
+# Description:  Prints error message and exits
+#
+_error()
+{
+  if [ $# -gt 0 ]
+  then
+    printf "${_Cmd}: Error: $1"
+    shift
+    while [ $# -gt 0 ]
+    do
+      printf ": $1" 
+      shift
+    done
+    printf "\n"
+  fi
+    _try
+  exit 2
+}
+
+# options
+
+# 
+# Get command-line options and arguments.
+#
+export POSIXLY_CORRECT
+
+cmdopts=$(getopt --long=help --options=h --name=${_Cmd} -- "$@")
+
+if [ $? != 0 ]
+then
+  _try
+  exit 1
+fi
+
+eval set -- "${cmdopts}"
+
+while true
+do
+  case "$1" in
+    --help)         _help; shift;;
+    --)             shift; break;;
+    *)              echo "Internal error!"; exit 1;;
+  esac
+done
+
+# fixed data
+dev="/dev/i2c-3"
+addr=0x32
+cmdid_pet_the_dog=0
+cmdid_getver=1
+cmdid_read_enables=13
+cmdid_read_volts=14
+
+# check bus
+if ! i2ccheck --device=${dev} --address=${addr}
+then
+  echo "Watchdog I2C device on ${dev} at ${addr} not found." >&2
+  i2cscan --log=error --device=${dev} --verbose >&2
+  exit 2
+fi
+
+echo "Monitoring Watchdog Subprocessor on I2C Bus ${dev} at address ${addr}"
+
+# read fw version command
+i2cwrite --log=error --device=${dev} --address=${addr} ${cmdid_getver}
+ver=$(i2cread --log=error --device=${dev} --address=${addr} --count=1)
+echo "version:         ${ver}"
+
+declare -i en_motor_ctlr
+declare -i en_aux_port_batt
+declare -i en_aux_port_5v
+declare -i jackv
+declare -i battv
+declare -i chrg
+
+while :
+do
+  # read enables command
+  i2cwrite --log=error --fd=3 --address=${addr} ${cmdid_read_enables}
+  rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=3)
+  echo ${rsp} | while read en_motor_ctlr en_aux_port_batt en_aux_port_5v
+  do
+    echo "motor ctlr enable:    ${en_motor_ctlr}"
+    echo "aux port batt enable: ${en_aux_port_batt}"
+    echo "aux port 5v enable:   ${en_aux_port_5v}"
+  done
+
+  # read voltages command
+  i2cwrite --log=error --fd=3 --address=${addr} ${cmdid_read_volts}
+  rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=2)
+  echo ${rsp} | while read jackv battv
+  do
+    echo "jack volts(10x):      ${jackv}"
+    echo "batt volts(10x):      ${battv}"
+  done
+
+  # pet dog command
+  i2cwrite --log=error --fd=3 --address=${addr} ${cmdid_pet_the_dog}
+  rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=1)
+  echo ${rsp} | while read chrg
+  do
+    echo "charging:             ${chrg}"
+  done
+  sleep 1
+done 3<>${dev}

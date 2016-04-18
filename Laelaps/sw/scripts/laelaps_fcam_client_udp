@@ -1,0 +1,116 @@
+#!/bin/bash
+#
+# Script: laelaps_fcam_client_udp
+#
+
+## \file
+##
+## $LastChangedDate$
+## $Rev$
+## 
+## \brief Receive video stream from Laelaps front camera over UDP.
+##
+## GSreamer pipeline.
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2016.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+_Cmd="laelaps_fcam_client_udp"
+
+_Synopsis="\
+${_Cmd} [OPTION]...
+       ${_Cmd} --help | -?
+"
+
+_Desc="\
+Receive video stream from Laelaps front camera over UDP.
+
+OPTIONS
+  -p, --port=PORT  The port to send the video packets to.
+                    Default: 4951
+
+      --help       Print this help.
+
+EXAMPLE
+  # on client host
+  $ laelaps_fcam_client_udp --port=4000
+"
+
+# defaults
+port=4951
+
+# _usage [emsg1 [emsg2...]]
+_usage()
+{
+  ec=0
+  if [ $# -gt 0 ]
+  then
+    ec=2
+    echo -n "${_Cmd}: $1" 1>&2
+    shift
+    while [ $# -gt 0 ]
+    do
+      echo -n ": $1"  1>&2
+      shift
+    done
+    echo "\n" 1>&2
+  fi
+  echo "usage: ${_Synopsis}" 1>&2
+  echo "${_Desc}" 1>&2
+  exit ${ec}
+}
+
+opts=`getopt --long=port,help --options=p: --name=${_Cmd} -- "$@"`
+
+if [ $? != 0 ]
+then
+  _usage "Bad options."
+  exit 1
+fi
+
+eval set -- "${opts}"
+
+while true
+do
+  case "$1" in
+    -p|--port)
+      port="$2"; shift 2;;
+    --help)
+      _usage; shift 1;;
+    --) shift; break;;
+    *) break;;
+  esac
+done
+
+
+# Uncomment to enable copious debugging messages.
+#gstdbg='--gst-debug-level=3'
+
+echo
+echo "Receiving video stream from Laelaps front camera over UDP."
+echo "  Receive port:  ${port}"
+echo
+
+#
+# Simple video stream pipeline.
+#
+gst-launch-1.0 \
+    udpsrc port=${port} \
+  ! capsfilter caps="application/x-rtp,encoding-name=JPEG" \
+  ! rtpjpegdepay \
+  ! jpegdec \
+  ! autovideosink
+
+#
+# Gstreamer 0.10 version
+#
+#gst-launch udpsrc port=${port} ! smokedec ! autovideosink

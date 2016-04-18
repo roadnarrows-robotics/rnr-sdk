@@ -1,0 +1,176 @@
+#!/bin/bash
+#
+# Script: laelaps_fcam_udp
+#
+
+## \file
+##
+## $LastChangedDate: 2013-09-24 16:56:04 +0000 (Tue, 24 Sep 2013) $  
+## $Rev: 3325 $ 
+## 
+## \brief Stream Laelaps front camera over UDP.
+##
+## GSreamer pipeline.
+##
+## For the Creative USB 2.0 720p Camera, valid combinations are:
+##  Name    Resolution   FPS
+##  ----    ----------   ---
+##  qvga    320x240      10 15 30
+##  vga     640x480      10 15 30
+##  720p    1280x720     10
+##
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2013-2016.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
+#
+
+_Cmd="laelaps_fcam_udp"
+
+_Synopsis="\
+${_Cmd} [OPTION]...
+       ${_Cmd} --help | -?
+"
+
+_Desc="\
+Stream the Laelaps front camera over UDP.
+
+OPTIONS
+  -h, --host=HOST  The host/IP/Multicast group to send the video packets.
+                    Default: localhost
+  -p, --port=PORT  The port to send the video packets to.
+                    Default: 4951
+  -r, --res=RES    Video resolution: One of qvga vga 720p WxH
+                    Default: vga
+  -f, --fps=FPS    Frames per second.
+                    Default: 15
+      --tee        Tee (dup) stream to local display terminal and remote port.
+                    Default: false
+  -t, --time       Add time stamped text overlay to video stream.
+                    Default: false
+
+      --help       Print this help.
+
+EXAMPLE
+  # on laelaps
+  $ laelaps_fcam_udp --host=myhost --port=4000 --res=vga --fps=30 --tee --time
+"
+
+# defaults
+host=localhost
+port=4951
+width=640
+height=480
+fps=15
+teesubpipe=
+timeplugin=
+
+viddev="/dev/$(readlink /dev/fcam)"
+
+if [[ ! -c ${viddev} ]]
+then 
+  viddev="/dev/video0"
+fi
+
+# _usage [emsg1 [emsg2...]]
+_usage()
+{
+  ec=0
+  if [ $# -gt 0 ]
+  then
+    ec=2
+    echo -n "${_Cmd}: $1" 1>&2
+    shift
+    while [ $# -gt 0 ]
+    do
+      echo -n ": $1"  1>&2
+      shift
+    done
+    echo "\n" 1>&2
+  fi
+  echo "usage: ${_Synopsis}" 1>&2
+  echo "${_Desc}" 1>&2
+  exit ${ec}
+}
+
+opts=`getopt --long=host:,port:,res:,fps:,time,tee,help --options=h:p:r:f:t --name=${_Cmd} -- "$@"`
+
+if [ $? != 0 ]
+then
+  _usage "Bad options."
+  exit 1
+fi
+
+eval set -- "${opts}"
+
+while true
+do
+  case "$1" in
+    -h|--host)
+      host="$2"; shift 2;;
+    -p|--port)
+      port="$2"; shift 2;;
+    -r|--res)
+      res="$2";
+      case "$res" in
+        qvga) width=320; height=240;;
+        vga)  width=640; height=480;;
+        720p) width=1280; height=720;;
+        *) width=${res%%x*}; height=${res##*x}
+      esac
+      shift 2;;
+    -f|--fps)
+      fps="$2"; shift 2;;
+    --tee)
+        teesubpipe='! tee name="local" ! queue ! autovideosink local.'
+        shift 1;;
+    -t|--time)
+        timeplugin='! timeoverlay text="fcam" halignment=2 valignment=2'
+        shift 1;;
+    --help)
+      _usage; shift 1;;
+    --) shift; break;;
+    *) break;;
+  esac
+done
+
+
+echo
+echo "Streaming Laelaps front camera video over UDP."
+echo "  Destination:   ${host} on port ${port}"
+echo "  Video device:  ${viddev}"
+echo "  Resolution:    ${width}x${height}"
+echo "  Frames/second: ${fps}"
+echo
+
+# Uncomment to enable copious debugging messages.
+#gstdbg='-v --gst-debug-level=3'
+
+#
+# Simple video stream pipeline.
+#
+gst-launch-1.0 ${gstdbg} v4l2src name=fcam device=${viddev} \
+  ! video/x-raw,width=${width},height=${height},framerate=${fps}/1 \
+  ${timeplugin} \
+  $(teesubpipe) \
+  ! queue \
+  ! jpegenc \
+  ! rtpjpegpay \
+  ! udpsink host=${host} port=${port}
+
+#
+# Gstreamer 0.10 version
+# Notes:  The smokeenc/smokedec video encoder/decoder requires the width and
+#         height to multiples of 16.
+#
+#gst-launch-0.10 ${gstdbg} v4l2src name=fcam device=${viddev}  \
+#  ! video/x-raw,width=${width},height=${height},framerate=${fps}/1 \
+#  ${timeplugin} \
+#  ! smokeenc \
+#  ! udpsink host=${host} port=${port}

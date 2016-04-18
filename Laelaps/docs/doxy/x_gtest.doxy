@@ -1,0 +1,28 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Raton
+//
+// File:      x_gtest.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the unit test modules
+//
+/*!
+  \file
+  $LastChangedDate: 2013-04-01 10:32:56 -0600 (Mon, 01 Apr 2013) $
+  $Rev: 2800 $
+*/
+////////////////////////////////////////////////////////////////////////////////
+
+
+/*!
+ * \defgroup gtest Unit Testing Framework
+ * \brief How to create unit tests using the gtest framework.
+ * \{ 
+ */
+
+GTest is pretty much the most awesome thing ever.
+
+/*!
+ * \}
+ */

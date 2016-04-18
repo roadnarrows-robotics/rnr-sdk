@@ -1,0 +1,131 @@
+================================================================================
+** Laelaps 2.0 Gold Software Clone Instructions
+================================================================================
+
+--------------------------------------------------------------------------------
+* Flash to Hard Disk
+--------------------------------------------------------------------------------
+
+# Use Gnome Disk Utility to find usb flash drive (e.g. /dev/sdf).
+# gnome-disks 
+# (apt-get install gnome-disk-utility)
+
+Disk Utility
+------------
+If microSD Flash loaded into USB adapter, search for:
+USB Mass Storage Device and click. The right displays should look something
+like below:
+
+_____________________________________________________________________________
+Drive
+  Model:            xxxx...                 Serial Number:    xxxxx...
+  Firmware Version: xxxx                    World Wide Name:  -
+  Location:         -                       Device:           /dev/sd<x>
+  ...
+
+Volumes
+  ...
+_____________________________________________________________________________
+
+
+# I. copy from flash to hard drive
+$ cd /public/sdimages/laelaps
+$ sudo dd if=/dev/sd<x> of=laelaps-<x>.<y>.<z>-<YYYY>.<MM>.<DD>.img bs=1M
+
+# x.y.z are the major,minor,revision numbers of the laelaps sw,
+# YYYY is the year
+# MM is the month
+# DD is the day
+
+# II. Partitions
+# boot: 54+ MB FAT32
+# rootfs: <x> GB Ext3
+
+# Monitor progress
+$ sudo watch -n 15 kill -USR1 $(pgrep '^dd$')
+
+# III. When done eject.
+
+
+--------------------------------------------------------------------------------
+* Hard Disk to Flash
+--------------------------------------------------------------------------------
+
+# Unmount to prepare new sd card
+--------------------------------
+$ umount /media/boot
+$ umount /media/rootfs
+
+# Use Gnome Disk Utility (gnome-disks) to find usb flash drive with new card (e.g. /dev/sdf)
+
+# I. Disk Utility
+------------------
+# only do this on existing formatted and partitioned flash 
+1. Format drive, type 'Empty'
+2. Delete partition 'rootfs'
+3. Delete partition 'boot'
+
+# Should now have 16GB free space.
+
+# II. Create partitions. Don't seem to need to do this. Go to copy step III.
+1. Create Partition of 67MB, type FAT (32-bit), label 'boot'
+2. Create Partition of remaining GB, type ext3 (32-bit), label 'rootfs'
+
+
+
+# Odroid Development Flash Partitions (Notes)
+Boot 
+Partition 1 
+135 MB Fat 
+trusty 
+Partition 2
+16 GB Ext4
+Free Space
+1.6 MB
+
+# III. Copy to flash from hard drive while partitions unmounted
+$ sudo dd if=<name>-<YYYY>.<MM>.<DD>.img of=/dev/sd<x> bs=1M
+
+# Monitor progress
+$ sudo watch -n 15 kill -USR1 $(pgrep '^dd$')
+
+# IV. 
+Eject
+Pull out, then plug back in the new microSD card.
+
+# V. Make partion larger
+# Launch GParted
+# Select device from GParted toolbar menu on right side
+# Select Partition|Resize/Move menu (rootfs or trusty must be unmounted).
+# Drag rootfs or trusty to cover all of unused space.
+# Press Check tool icon to start resize operation.
+
+# V. When done eject.
+
+
+--------------------------------------------------------------------------------
+* Miscellaneous
+--------------------------------------------------------------------------------
+
+# Change Serial Number. 
+# /usr/local/share/misc/.sn
+$ sudo echo 'YYMMPP' /usr/local/share/misc/.sn
+
+# Copy correct laelaps.conf from /usr/local/share/Laelaps/etc
+$ cd /usr/local/share/Laelaps-<x>.<y..<z>/etc
+$ sudo cp laelaps<M><S>-<X>.<Y>.<Z> /etc/laelaps.conf
+
+# where x.y.z is the Laelaps package version, M is the Laelaps model 4/5,
+# S is the size L/S and X.Y.Z is the hardware version.
+
+# Where:
+#   YY is last two digits of when Hekateros was built
+#   MM is the month
+#   PP is the prime number starting from 11 of corresponding to Hekateros
+#      built that month. 11 = 1, 13 = 2, 17 = 3, etc
+
+# Net rules
+# /etc/udev/rules.d
+-------------------
+# Make sure not present.
+$ rm 70-persistent-net.rules

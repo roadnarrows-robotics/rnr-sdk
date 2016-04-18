@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=laelaps_panel
+Icon=/opt/rnr_ros/indigo/src/laelaps/laelaps_control/src/laelaps_control/images/icons/LaelapsPanelIcon.png
+Exec=rosrun laelaps_control laelaps_panel
