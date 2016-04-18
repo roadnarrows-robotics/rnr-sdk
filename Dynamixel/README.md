@@ -1,5 +1,5 @@
 # Dynamixel
-RoadNarrows Dynamixel Package
+RoadNarrows Robotics Dynamixel Package
 
 ## Description
 The Dynamixel software package provides RoadNarrows software extensions to
@@ -7,19 +7,19 @@ Robotis Dynamixel servos. Specifically, an on-target Dynamixel
 library plus the BotSense client-server
 modules for operation and monitoring of a Dynamixel chain over IP.
 
-## Dependencies
-### RoadNarrows Required Packages:
+## License
+RoadNarrows Restricted and Copyrighted.
 
+## RoadNarrows Required Packages:
 * botsense
 * netmsgs
 * libserial
 * gpio
 * librnr
 
-### Robotis Required Hardware:
-
+## External Required Hardware:
 * USB2Dynamixel dongle
-* Dynamixel servos
+* Robotis Dynamixel servos
 
 ## See Also
 See documentation for more details.
