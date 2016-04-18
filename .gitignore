@@ -54,3 +54,10 @@ Laelaps/sw/pyModules/src/*.done
 Laelaps/sw/pyModules/modules/Laelaps/ImuMspMsgs.py
 Laelaps/sw/pyModules/modules/Laelaps/RoboClawMsgs.py
 Laelaps/sw/pyModules/modules/Laelaps/WatchDogMsgs.py
+
+# netmsgs
+netmsgs/nmPython/build
+netmsgs/nmPython/build.*/
+netmsgs/nmPython/modules/NetMsgs/NetMsgsCore.py
+netmsgs/nmPython/src/*_wrap.c
+netmsgs/nmPython/src/*.done
