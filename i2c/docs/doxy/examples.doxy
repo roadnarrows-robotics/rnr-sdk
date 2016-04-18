@@ -1,0 +1,21 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows I2C Library
+//
+// File:      examples.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the examples
+//  pages found in the "Related Pages" document section.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*!
+ * \page example_i2cmon example_i2cmon
+ * This [ba]sh shell provides an example of using the i2c applications.
+ *
+ * \section i2cmon_sh I2C monitor:
+ * \include i2cmon.sh
+ */

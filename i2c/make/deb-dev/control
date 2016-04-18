@@ -1,0 +1,8 @@
+Package:rnr-i2c-dev
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Depends: rnr-librnr-dev (>=1.13.0)
+Maintainer: Robin Knight <robin.knight@roadnarrows.com>
+Description: Utilities for communicating over i2c interface.

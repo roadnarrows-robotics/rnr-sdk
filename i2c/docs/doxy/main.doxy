@@ -1,0 +1,106 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   RoadNarrows I2C Library
+//
+// File:      main.doxy
+//
+// Description:
+//  This file contains the doxygen directives to generate the main page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! \file */
+
+/*! \mainpage RoadNarrows Robotics I2C Package
+
+\section intro Introduction
+
+The I<sup>2</sup>C package provides basic interfaces to devices connected
+to an I<sup>2</sup>C Bus.
+
+\section pkglist Package List
+<dl>
+<dt> \b libi2c </dt>
+  <dd> The I<sup>2</sup>C library. </dd>
+<dt> \b i2ccheck (\ref i2ccheck) </dt>
+  <dd>
+    Check for a device on the I<sup>2</sup>C Bus device.
+  </dd>
+<dt> \b i2cread (\ref i2cread) </dt>
+  <dd>
+    Read bytes from an I<sup>2</sup>C Bus device.
+  </dd>
+<dt> \b i2cscan (\ref i2cscan) </dt>
+  <dd>
+    Scan the I<sup>2</sup>C Bus for all attached devices.
+  </dd>
+<dt> \b i2csh (\ref i2csh) </dt>
+  <dd>
+    Simple I<sup>2</sup> Bus command-line shell.
+  </dd>
+<dt> \b i2ctrans (\ref i2ctrans) </dt>
+  <dd>
+    Do a write/read transaction for to a device on the I<sup>2</sup>C Bus.
+  </dd>
+<dt> \b i2cwrite (\ref i2cwrite) </dt>
+  <dd>
+    Write bytes to an I<sup>2</sup>C Bus device.
+  </dd>
+</dl>
+
+\section req Requirements
+\b librnr - RNR standard libray 1.
+
+\todo
+\b 1. Add support to System Management Bus (SMBus) address resolution
+(http://www.smbus.org/).\n
+
+\section platforms Supported Platforms
+\li i386     - any Linux Intel (backwards) compatible 32-bit architecures
+\li x86_64   - any Linux AMD 64-bit architectures
+\li armpxa   - Linux Intel XScale PXA Arm architecures.
+\li cygwin   - Windows systems with installed cygwin.
+\li osx      - Mac OS-X architectures
+
+\section tested Tested Systems
+\li Fedora Core 5 and 6 Linux for the i386 and x86_64 architectures.
+\li Ubuntus 9.4 Linux for the i386 and x86_64 architectures.
+\li Familiar Linux 2.4 (K-Team KoreBot version) for the XScale PXA 255 Arm
+\li Windows XP with Cygwin for Intel processors.
+\li Mac OS-X 10.x for Intel processors.
+
+\page page_eula EULA
+\section eula_txt RoadNarrows Robotics i2c Package End User Licence Agreement
+
+\subsection eula_permissions Permissions
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that
+(1) The above copyright notice and the following two paragraphs
+appear in all copies of the source code and (2) redistributions
+including binaries reproduces these notices in the supporting
+documentation.   Substantial modifications to this software may be
+copyrighted by their authors and need not follow the licensing terms
+described here, provided that the new terms are clearly indicated in
+all files where they apply.
+
+\subsection eula_warranties Warranties
+In no event shall the author, RoadNarrows Robotics or any members/employees
+of RoadNarrows Robotics or distributors of this software be liable to any
+party for direct, indirect, special, incidental, or consequential
+damages arising out of the use of this software and its documentation,
+even if the authors or any of the above parties have been advised of
+the possibility of such damage.
+
+The author and RoadNarrows Robotics specifically disclaim any warranties,
+including, but not limited to, the implied warranties of merchantability anD
+fitness for a particular purpose. the software provided hereunder is on an
+"as is" basis, and the authors and distributors have no obligation tO
+provide maintenance, support, updates, enhancements, or modifications.
+
+\subsection eula_copyright Copyright
+All Rights Reserved by RoadNarrows Robotics
+\n (C) 2007-2009
+\n http://www.roadnarrowsrobotics.com
+
+*/
