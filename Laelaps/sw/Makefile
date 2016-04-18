@@ -59,7 +59,7 @@ pkgroot		= ..
 #------------------------------------------------------------------------------
 
 # Subdirectories to Build
-SUBDIRS =  gtest liblaelaps pyModules apps scripts
+SUBDIRS =  liblaelaps pyModules apps scripts
 					
 #------------------------------------------------------------------------------
 # Make Includes

@@ -45,3 +45,12 @@ i2c/pyModules/build.*/
 i2c/pyModules/modules/rnr/i2ccore.py
 i2c/pyModules/src/*_wrap.c
 i2c/pyModules/src/*.done
+
+# Laelaps
+Laelaps/sw/pyModules/build
+Laelaps/sw/pyModules/build.*/
+Laelaps/sw/pyModules/src/*_wrap.c
+Laelaps/sw/pyModules/src/*.done
+Laelaps/sw/pyModules/modules/Laelaps/ImuMspMsgs.py
+Laelaps/sw/pyModules/modules/Laelaps/RoboClawMsgs.py
+Laelaps/sw/pyModules/modules/Laelaps/WatchDogMsgs.py
