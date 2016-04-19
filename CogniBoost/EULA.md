@@ -5,27 +5,22 @@ RoadNarrows Robotics is a "Doing Business As" name for RoadNarrows LLC.
 &#169; 2011-2016 RoadNarrows LLC
 
 ## Permissions:
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that
-(1) The above copyright notice and the following two paragraphs
-appear in all copies of the source code and (2) redistributions
-including binaries reproduces these notices in the supporting
-documentation.   Substantial modifications to this software may be
-copyrighted by their authors and need not follow the licensing terms
-described here, provided that the new terms are clearly indicated in
-all files where they apply.
+Unless otherwise noted, all materials contained are copyrighted and may not
+be used except as provided in these terms and conditions or in the copyright
+notice (documents and software ) or other proprietary notice provided with
+the relevant materials.
 
 ## Warranties:
-In no event shall the author, RoadNarrows Robotics or any members/employees
-of RoadNarrows Robotics or distributors of this software be liable to any
-party for direct, indirect, special, incidental, or consequential
-damages arising out of the use of this software and its documentation,
-even if the authors or any of the above parties have been advised of
-the possibility of such damage.
+IN NO EVENT SHALL THE AUTHOR, RoadNarrows LLC, OR ANY
+MEMBERS/EMPLOYEES/CONTRACTORS
+OF RoadNarrows OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
 
-The author and RoadNarrows Robotics specifically disclaim any warranties,
-including, but not limited to, the implied warranties of merchantability anD
-fitness for a particular purpose. the software provided hereunder is on an
-"as is" basis, and the authors and distributors have no obligation tO
-provide maintenance, support, updates, enhancements, or modifications.
+THE AUTHORS AND  RoadNarrows SPECIFICALLY DISCLAIM ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+"AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.

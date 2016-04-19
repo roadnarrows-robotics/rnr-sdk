@@ -9,7 +9,7 @@ dongle.
 &#169; 2011-2016 RoadNarrows LLC
 
 ## License
-RoadNarrows Free. See the EULA for more details.
+RoadNarrows Restricted. See the EULA for more details.
 
 ## RoadNarrows Required Packages
 * libserial
