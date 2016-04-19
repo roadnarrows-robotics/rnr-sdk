@@ -8,7 +8,9 @@ devices may be easily added by developers using the open and documented
 programming interface.
 
 ## Copyright:
-&#169; 2007-2016 RoadNarrows LLC
+&#169; 2007-2016 RoadNarrows LLC<br>
+[roadnarrows.com](http://roadnarrows.com)<br>
+All Rights Reserved
 
 ## License
 RoadNarrows Free. See the EULA for more details.
