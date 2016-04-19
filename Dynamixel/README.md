@@ -11,8 +11,7 @@ modules for operation and monitoring of a Dynamixel chain over IP.
 &#169; 2011-2016 RoadNarrows LLC
 
 ## License
-RoadNarrows Free
-See the [EULA](https://github.com/roadnarrows-robotics/rnr-sdk/Dynamixel/EULA.md) for more details.
+RoadNarrows Free. See the EULA for more details.
 
 ## RoadNarrows Required Packages:
 * botsense

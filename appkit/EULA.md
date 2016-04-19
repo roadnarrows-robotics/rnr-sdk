@@ -1,20 +1,18 @@
-The appkit Package End User License Agreement
+# RoadNarrows Robotics appkit Package End User License Agreement
+RoadNarrows Robotics is a "Doing Business As" name for RoadNarrows LLC.
 
-Copyright:
-----------
-2013  RoadNarrows LLC
-(http://roadnarrows.com)
+## Copyright:
+&#169; 2013-2016 RoadNarrows LLC\n
+[RoadNarrows](http://roadnarrows.com)\n
 All Rights Reserved
 
-Permissions:
-------------
+## Permissions:
 Unless otherwise noted, all materials contained are copyrighted and may not
 be used except as provided in these terms and conditions or in the copyright
 notice (documents and software ) or other proprietary notice provided with
 the relevant materials.
 
-Warranties:
------------
+## Warranties:
 IN NO EVENT SHALL THE AUTHOR, RoadNarrows LLC, OR ANY
 MEMBERS/EMPLOYEES/CONTRACTORS
 OF RoadNarrows OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
@@ -28,4 +26,3 @@ INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
 FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-

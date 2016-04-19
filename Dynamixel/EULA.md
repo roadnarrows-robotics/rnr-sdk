@@ -1,7 +1,7 @@
 # RoadNarrows Robotics Dynamixel End User License Agreement
 RoadNarrows Robotics is a "Doing Business As" name for RoadNarrows LLC.
 
-## Copyright
+## Copyright:
 &#169; 2011-2016 RoadNarrows LLC
 
 ## Permissions:
