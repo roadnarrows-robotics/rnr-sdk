@@ -13,14 +13,14 @@ modules for operation and monitoring of a Dynamixel chain over IP.
 ## License
 RoadNarrows Free. See the EULA for more details.
 
-## RoadNarrows Required Packages:
+## RoadNarrows Required Packages
 * botsense
 * netmsgs
 * libserial
 * gpio
 * librnr
 
-## External Required Hardware:
+## External Required Hardware
 * USB2Dynamixel dongle
 * Robotis Dynamixel servos
 

@@ -1,9 +1,11 @@
-RoadNarrows Robotics CogniBoost Package End User License Agreement
+# RoadNarrows Robotics botsense Package End User License Agreement
 
 RoadNarrows Robotics is a "Doing Business As" name for RoadNarrows LLC.
 
-Permissions:
-------------
+## Copyright:
+&#169; 2007-2016 RoadNarrows LLC
+
+## Permissions:
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
 software and its documentation for any purpose, provided that
@@ -15,9 +17,7 @@ copyrighted by their authors and need not follow the licensing terms
 described here, provided that the new terms are clearly indicated in
 all files where they apply.
 
-
-Warranties:
------------
+## Warranties:
 In no event shall the author, RoadNarrows Robotics or any members/employees
 of RoadNarrows Robotics or distributors of this software be liable to any
 party for direct, indirect, special, incidental, or consequential

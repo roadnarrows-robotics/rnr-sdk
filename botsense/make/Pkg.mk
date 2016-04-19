@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2007-2012.  RoadNarrows LLC.
+  (C) 2007-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -63,8 +63,8 @@ endif
 PKG 								= botsense
 PKG_VERSION_MAJOR   = 3
 PKG_VERSION_MINOR   = 0
-PKG_VERSION_RELEASE = 4
-PKG_VERSION_DATE    = 2012
+PKG_VERSION_RELEASE = 5
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
