@@ -1,13 +1,7 @@
-<!--
- - README.txt
- -
- - $LastChangedDate$
- - $Rev$
- -->
-<readme>
-  <package>Fusion</package>
-  <synopsis>RoadNarrows Robotics Demonstraion Package</synopsis>
-  <description>
+# Fusion
+RoadNarrows Robotics Demonstraion Package
+
+## Description
 Fusion is a RoadNarrows-developed robotics demonstration application. 
 It is free to use, modify, and distribute. See EULA for more details.
 
@@ -18,6 +12,12 @@ and information exchange interface between the client and server.
 Both the vBrains and vRobots are plugable python modules. Any derived
 application conforming to the vBrain and vRobot interface will work within
 the Fusion construct. 
-  </description>
-  <seealso>See documentation for more details.</seealso>
-</readme>
+
+## Copyright
+&#169; 2005-2016 RoadNarrows LLC
+
+## License
+RoadNarrows Free. See the EULA for more details.
+
+## See Also
+See documentation for more details.
