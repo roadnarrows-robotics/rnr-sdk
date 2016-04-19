@@ -3,7 +3,7 @@ RoadNarrows Robotics is a "Doing Business As" name for RoadNarrows LLC.
 
 ## Copyright:
 &#169; 2013-2016 RoadNarrows LLC<br>
-[RoadNarrows](http://roadnarrows.com)<br>
+[roadnarrows.com](http://roadnarrows.com)<br>
 All Rights Reserved
 
 ## Permissions:

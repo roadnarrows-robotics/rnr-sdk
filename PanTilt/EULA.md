@@ -1,18 +1,19 @@
-RoadNarrows Robotics Odroid Package End User License Agreement
-
+# RoadNarrows Robotics PanTilt Package End User License Agreement
 RoadNarrows Robotics is a "Doing Business As" name for RoadNarrows LLC.
 
-Copyright:
-----------
-2016  RoadNarrows LLC
-(http://roadnarrows.com)
+## Copyright:
+&#169; 2015-2016 RoadNarrows LLC<br>
+[roadnarrows.com](http://roadnarrows.com)<br>
 All Rights Reserved
 
-Permissions:
-------------
+## Permissions:
+Unless otherwise stated explicitly, all materials contained are copyrighted
+and may not be used without RoadNarrows LLC's written consent,
+except as provided in these terms and conditions or in the copyright
+notice (documents and software) or other proprietary notice provided with
+the relevant materials.
 
-Warranties:
------------
+## Warranties:
 IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
 MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
 BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
