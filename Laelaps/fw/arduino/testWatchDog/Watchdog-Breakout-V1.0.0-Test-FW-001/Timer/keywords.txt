@@ -1,0 +1,4 @@
+Timer		KEYWORD1
+Beat_Timer	KEYWORD1
+trigger		KEYWORD2
+offset		KEYWORD2
