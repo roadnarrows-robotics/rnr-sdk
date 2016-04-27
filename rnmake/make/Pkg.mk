@@ -11,7 +11,7 @@
 #
 # Author(s): Robin Knight (robin.knight@roadnarrows.com)
 #
-# Copyright (C) 2005-2015.  RoadNarrows LLC.
+# Copyright (C) 2005-2016.  RoadNarrows LLC.
 # All Rights Reserved
 #
 # Permission is hereby granted, without written agreement and without
@@ -50,9 +50,9 @@ endif
 # The Package Definition
 PKG 								= rnmake
 PKG_VERSION_MAJOR   = 2
-PKG_VERSION_MINOR   = 8
-PKG_VERSION_RELEASE = 1
-PKG_VERSION_DATE    = 2015
+PKG_VERSION_MINOR   = 9
+PKG_VERSION_RELEASE = 0
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight, Daniel Packard"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
@@ -81,7 +81,7 @@ PKG_SYS_INCDIRS			=
 PKG_LD_LIBDIRS 			= 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 # Doxy Parameters
 HTML_HEADER     	= $(rnmake)/doxy/rn_doxy_header.html

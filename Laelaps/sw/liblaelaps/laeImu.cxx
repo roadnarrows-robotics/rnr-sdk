@@ -51,6 +51,7 @@
 
 #include <pthread.h>
 #include <unistd.h>
+#include <math.h>
 
 #include <string>
 #include <sstream>
@@ -68,6 +69,43 @@ using namespace std;
 using namespace laelaps;
 using namespace sensor::imu;
 using namespace sensor::imu::msp;
+
+
+//------------------------------------------------------------------------------
+// Quaternion Class
+//------------------------------------------------------------------------------
+
+void Quaternion::clear()
+{
+  m_x = 0.0;
+  m_y = 0.0;
+  m_z = 0.0;
+  m_w = 0.0;
+}
+
+void Quaternion::convert(double phi, double theta, double psi)
+{
+  double half_phi, half_theta, half_psi;
+  double cos_phi, sin_phi;
+  double cos_theta, sin_theta;
+  double cos_psi, sin_psi;
+
+  half_phi   = phi / 2.0;
+  half_theta = theta / 2.0;
+  half_psi   = psi / 2.0;
+
+  cos_phi   = cos(half_phi);
+  sin_phi   = sin(half_phi);
+  cos_theta = cos(half_theta);
+  sin_theta = sin(half_theta);
+  cos_psi   = cos(half_psi);
+  sin_psi   = sin(half_psi);
+
+  m_x = cos_phi*cos_theta*cos_psi + sin_phi*sin_theta*sin_psi;
+  m_y = sin_phi*cos_theta*cos_psi - cos_phi*sin_theta*sin_psi;
+  m_z = cos_phi*sin_theta*cos_psi + sin_phi*cos_theta*sin_psi;
+  m_w = cos_phi*cos_theta*sin_psi - sin_phi*sin_theta*cos_psi;
+}
 
 
 //------------------------------------------------------------------------------
@@ -170,6 +208,7 @@ void LaeImu::compute()
 
 void LaeImu::computeQuaternion()
 {
+  m_quaternion.convert(m_rpy[ROLL], m_rpy[PITCH], m_rpy[YAW]);
 }
 
 void LaeImu::computeDynamics()

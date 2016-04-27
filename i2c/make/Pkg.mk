@@ -95,7 +95,7 @@ PKG_SYS_INCDIRS			=
 PKG_LD_LIBDIRS 			= 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 # CPP flags
 PKG_CPPFLAGS				=

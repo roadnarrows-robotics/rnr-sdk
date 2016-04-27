@@ -13,7 +13,7 @@
 #
 # Author(s): Robin Knight (robin.knight@roadnarrows.com)
 #
-# Copyright (C) 2010  RoadNarrows LLC.
+# Copyright (C) 2010-2016  RoadNarrows LLC.
 # All Rights Reserved
 #
 # Permission is hereby granted, without written agreement and without
@@ -54,7 +54,7 @@ PKG 								= Fusion
 PKG_VERSION_MAJOR   = 0
 PKG_VERSION_MINOR   = 15
 PKG_VERSION_RELEASE = 0
-PKG_VERSION_DATE    = 2010
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
@@ -86,7 +86,7 @@ PKG_LD_LIBDIRS 			=
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.txt
+PKG_REL_FILES				= VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------

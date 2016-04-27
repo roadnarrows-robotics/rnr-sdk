@@ -17,7 +17,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2010-2012  RoadNarrows LLC.
+  (C) 2010-2016  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -63,7 +63,7 @@ PKG 								= netmsgs
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 1
 PKG_VERSION_RELEASE = 2
-PKG_VERSION_DATE    = 2012
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
@@ -95,7 +95,7 @@ PKG_LD_LIBDIRS 			=
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------

@@ -62,7 +62,7 @@ PKG 								= Dynamixel
 PKG_VERSION_MAJOR   = 2
 PKG_VERSION_MINOR   = 8
 PKG_VERSION_RELEASE = 2
-PKG_VERSION_DATE    = 2015
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
@@ -99,7 +99,7 @@ PKG_LIB_PLUGIN_SUBDIR = botsense
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------

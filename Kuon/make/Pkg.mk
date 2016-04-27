@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 	
 
 \par Copyright:
-  (C) 2010-2015.  RoadNarrows LLC.
+  (C) 2010-2017.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -44,7 +44,7 @@ PKG 								= Kuon
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 0
 PKG_VERSION_RELEASE = 0
-PKG_VERSION_DATE    = 2015
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight, Rob Shiely, and Daniel Packard"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
@@ -97,7 +97,7 @@ PKG_LIB_PLUGIN_SUBDIR = botsense
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt 
+PKG_REL_FILES				= VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------

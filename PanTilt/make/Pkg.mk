@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author Robin Knight (robin.knight@roadnarrows.com)
 	
 \par Copyright:
-  (C) 2015.  RoadNarrows LLC.
+  (C) 2015-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -43,7 +43,7 @@ PKG 								= PanTilt
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 2
 PKG_VERSION_RELEASE = 0
-PKG_VERSION_DATE    = 2015
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "RoadNarrows"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= "(C) 2015 RoadNarrows LLC. All rights reserved."
@@ -79,7 +79,7 @@ PKG_LIB_PLUGIN_SUBDIR =
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------

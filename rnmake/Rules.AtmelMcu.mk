@@ -22,7 +22,7 @@ $Rev: 1791 $
 \author Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-(C) 2009-2012.  RoadNarrows LLC.
+(C) 2009-2016.  RoadNarrows LLC.
 (http://www.roadnarrows.com)
 \n All Rights Reserved
 
@@ -644,6 +644,11 @@ $(DISTDIR_DOC)/VERSION.txt:
 	@echo "Copyright (C) $(PKG_VERSION_DATE) RoadNarrows LLC" >> $@
 	@echo "" >> $@
 	@echo "Compiled: `date`" >> $@
+
+$(DISTDIR_DOC)/README.md: README.md
+	@echo ""
+	@echo "     $@"
+	-$(CP) README.md $@
 
 $(DISTDIR_DOC)/README.txt: README.txt
 	@echo ""

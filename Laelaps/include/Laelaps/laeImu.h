@@ -106,8 +106,35 @@ namespace sensor
       YAW   = 2   ///< yaw index
     };
   
-
 #ifndef SWIG
+    //--------------------------------------------------------------------------
+    // Quaternion Class
+    //--------------------------------------------------------------------------
+    class Quaternion
+    {
+    public:
+      double  m_x;
+      double  m_y;
+      double  m_z;
+      double  m_w; 
+
+      Quaternion()
+      {
+        clear();
+      }
+
+      ~Quaternion()
+      {
+      }
+
+      void clear();
+
+      void convert(double phi, double theta, double psi);
+
+    protected:
+    };
+
+
     //--------------------------------------------------------------------------
     // LaeImu Virtual Base Class
     //--------------------------------------------------------------------------
@@ -348,13 +375,13 @@ namespace sensor
       //
       // Converted sensor values in SI units.
       //
-      double  m_accel[NumOfAxes];       ///< accelerometer (m/s^2)
-      double  m_gyro[NumOfAxes];        ///< gyrscope (radians/s)
-      double  m_mag[NumOfAxes];         ///< magnetometer (tesla)
-      double  m_rpy[NumOfAxes];         ///< roll,pitch,yaw (radians)
-
+      double      m_accel[NumOfAxes];   ///< accelerometer (m/s^2)
+      double      m_gyro[NumOfAxes];    ///< gyrscope (radians/s)
+      double      m_mag[NumOfAxes];     ///< magnetometer (tesla)
+      double      m_rpy[NumOfAxes];     ///< roll,pitch,yaw (radians)
+      Quaternion  m_quaternion;         ///< imu orientation (and robot)
+      
       // FUTURE
-      // Quaternion m_quaternion;
       // double m_vel[];
       // double m_pos[];
       // int m_baroRaw;

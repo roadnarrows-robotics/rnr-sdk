@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2005-2015.  RoadNarrows LLC.
+  (C) 2005-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -64,7 +64,7 @@ PKG 								= librnr
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 13
 PKG_VERSION_RELEASE = 1
-PKG_VERSION_DATE    = 2015
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight, Kim Wheeler, Daniel Packard"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
@@ -93,7 +93,7 @@ PKG_SYS_INCDIRS			=
 PKG_LD_LIBDIRS 			= 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 # CPP flags
 PKG_CPPFLAGS				=

@@ -102,7 +102,7 @@ PKG_LIB_PLUGIN_SUBDIR =
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------

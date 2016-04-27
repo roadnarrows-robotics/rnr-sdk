@@ -157,7 +157,7 @@ PKG_SYS_INCDIRS += $(PKG_SYS_PREFIX)/include/gstreamer-$(GST_VER)
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.xml
+PKG_REL_FILES				= VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------

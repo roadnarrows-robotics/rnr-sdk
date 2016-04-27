@@ -17,7 +17,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard <daniel@roadnarrows.com>
 
 \par Copyright:
-  (C) 2013-2015 RoadNarrows LLC
+  (C) 2013-2016 RoadNarrows LLC
 	(http://www.roadnarrows.com)
   All Rights Reserved
 
