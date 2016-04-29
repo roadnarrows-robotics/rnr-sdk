@@ -1330,6 +1330,14 @@ namespace sensor
                                   std::vector<double> &vecAmbient);
 
 
+      /*!
+       * \brief Execute task in one cycle to take measurements.
+       *
+       * \par Context:
+       * LaeThreadRange thread instance.
+       */
+      virtual void exec();
+
     }; // class LaeRangeSensorGroup
 
   } // namespace vl6180

@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -103,9 +103,5 @@ int LaeThreadImu::reload(const LaeTunes &tunes)
 
 void LaeThreadImu::exec()
 {
-  if( m_hwif.readRawImu() == LAE_OK )
-  {
-    m_hwif.convertRawToSI();
-    m_hwif.compute();
-  }
+  m_hwif.exec();
 }

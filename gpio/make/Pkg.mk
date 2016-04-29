@@ -63,7 +63,7 @@ endif
 PKG 								= gpio
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 2
-PKG_VERSION_RELEASE = 1
+PKG_VERSION_RELEASE = 2
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"

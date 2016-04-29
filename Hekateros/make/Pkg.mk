@@ -65,7 +65,7 @@ endif
 PKG 								= Hekateros
 PKG_VERSION_MAJOR   = 3
 PKG_VERSION_MINOR   = 3
-PKG_VERSION_RELEASE = 2
+PKG_VERSION_RELEASE = 3
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "RoadNarrows"
 PKG_OWNERS					= "RoadNarrows LLC"

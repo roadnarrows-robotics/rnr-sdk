@@ -4,14 +4,14 @@
 //
 // Library:   liblaelaps
 //
-// File:      laeBase.cxx
+// File:      laePlatform.cxx
 //
 /*! \file
  *
  * $LastChangedDate: 2016-04-08 15:42:39 -0600 (Fri, 08 Apr 2016) $
  * $Rev: 4380 $
  *
- * \brief Laelaps base control and dynamics state implementation.
+ * \brief Laelaps robotic platform control and dynamics state implementation.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
@@ -63,7 +63,7 @@
 #include "Laelaps/laeDb.h"
 #include "Laelaps/laeTraj.h"
 #include "Laelaps/laePowertrain.h"
-#include "Laelaps/laeBase.h"
+#include "Laelaps/laePlatform.h"
 
 
 using namespace std;
@@ -102,10 +102,10 @@ LaeMotorCtlrState LaeMotorCtlrState::operator=(const LaeMotorCtlrState &rhs)
 
 
 // -----------------------------------------------------------------------------
-// Class LaeBase
+// Class LaePlatform
 // -----------------------------------------------------------------------------
 
-LaeBase::LaeBase() : m_strName("base")
+LaePlatform::LaePlatform() : m_strName("plaform")
 {
   clear();
 
@@ -113,7 +113,7 @@ LaeBase::LaeBase() : m_strName("base")
   m_ctlr[LaeMotorCtlrIdRear].m_strName  = LaeKeyRear;
 }
 
-LaeBase::LaeBase(const LaeBase &src)
+LaePlatform::LaePlatform(const LaePlatform &src)
 {
   int   nCtlr;
   int   i;
@@ -149,7 +149,7 @@ LaeBase::LaeBase(const LaeBase &src)
   }
 }
 
-LaeBase LaeBase::operator=(const LaeBase &rhs)
+LaePlatform LaePlatform::operator=(const LaePlatform &rhs)
 {
   int   nCtlr;
   int   i;
@@ -187,7 +187,7 @@ LaeBase LaeBase::operator=(const LaeBase &rhs)
   return *this;
 }
 
-void LaeBase::clear()
+void LaePlatform::clear()
 {
   int   i;
 
@@ -218,7 +218,7 @@ void LaeBase::clear()
   m_ctlr[LaeMotorCtlrIdRear].clear();
 }
 
-int LaeBase::configure(const LaeDescBase &desc)
+int LaePlatform::configure(const LaeDescBase &desc)
 {
   // base kinematics
   m_dimBody     = desc.m_dimBody;
@@ -227,7 +227,7 @@ int LaeBase::configure(const LaeDescBase &desc)
   m_fWheeltrack = desc.m_fWheeltrack;
 }
 
-int LaeBase::configure(const LaeTunes &tunes)
+int LaePlatform::configure(const LaeTunes &tunes)
 {
   LaeDescBase desc;
   double      fTuneTireRadius, fTuneTireWidth;      // tire dimensions
@@ -245,12 +245,12 @@ int LaeBase::configure(const LaeTunes &tunes)
   return LAE_OK;
 }
 
-int LaeBase::reload(const LaeTunes &tunes)
+int LaePlatform::reload(const LaeTunes &tunes)
 {
   return configure(tunes);
 }
 
-int LaeBase::resetOdometer()
+int LaePlatform::resetOdometer()
 {
   int   i;
 
@@ -264,7 +264,7 @@ int LaeBase::resetOdometer()
   m_fOdometer = 0.0;
 }
 
-int LaeBase::updateStateDynamics(const LaeMapPowertrain &mapPowertrains)
+int LaePlatform::updateStateDynamics(const LaeMapPowertrain &mapPowertrains)
 {
   static double ReallyZero = 1e-4;
 
@@ -414,7 +414,7 @@ int LaeBase::updateStateDynamics(const LaeMapPowertrain &mapPowertrains)
   return LAE_OK;
 }
 
-int LaeBase::updateCtlrHealth(int    nCtlr,
+int LaePlatform::updateCtlrHealth(int    nCtlr,
                               double fVolts,
                               double fTemp,
                               uint_t uStatus)
@@ -432,7 +432,7 @@ int LaeBase::updateCtlrHealth(int    nCtlr,
   return LAE_OK;
 }
 
-int LaeBase::updateHealth(const LaeMapPowertrain &mapPowertrains)
+int LaePlatform::updateHealth(const LaeMapPowertrain &mapPowertrains)
 {
   LaeMapPowertrain::const_iterator iter;
 
@@ -463,7 +463,7 @@ int LaeBase::updateHealth(const LaeMapPowertrain &mapPowertrains)
   return LAE_OK;
 }
 
-void LaeBase::clearPoses()
+void LaePlatform::clearPoses()
 {
   for(int i = 0; i < HistSize; ++i)
   {
@@ -471,7 +471,7 @@ void LaeBase::clearPoses()
   }
 }
 
-void LaeBase::pushNewPose(const LaePose &pose)
+void LaePlatform::pushNewPose(const LaePose &pose)
 {
   // save pose
   m_pose[IdxPrev] = m_pose[IdxCur];

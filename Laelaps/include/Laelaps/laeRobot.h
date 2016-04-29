@@ -83,7 +83,7 @@
 // control and application interface
 #include "Laelaps/laeTraj.h"
 #include "Laelaps/laePowertrain.h"
-#include "Laelaps/laeBase.h"
+#include "Laelaps/laePlatform.h"
 #include "Laelaps/laeKin.h"
 #include "Laelaps/laeReports.h"
 #include "Laelaps/laeThread.h"
@@ -350,10 +350,14 @@ namespace laelaps
      *                      The array size must be \h_ge \ref NumOfAxes.
      * \param [out] rpy     Roll,pitch,yaw data (radians).
      *                      The array size must be \h_ge \ref NumOfAxes.
+       * \param [out] q     Vehicle quaternion.
      *
      * \copydoc doc_return_std
      */
-     virtual int getImu(double accel[], double gyro[], double rpy[]);
+     virtual int getImu(double accel[],
+                        double gyro[],
+                        double rpy[],
+                        sensor::imu::Quaternion &q);
 
     /*!
      * \brief Get range sensor properties.

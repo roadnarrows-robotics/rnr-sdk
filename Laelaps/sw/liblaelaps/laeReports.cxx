@@ -264,7 +264,7 @@ void LaeRptRobotStatus::generate(LaeRobot *pRobot)
 
   LaeAlarms::copyAlarms(RtDb.m_alarms.m_system, m_alarms);
 
-  LaeBase &base = pRobot->m_kin.getBase();
+  LaePlatform &base = pRobot->m_kin.getPlatform();
 
   //
   // Motor controller health extended status
@@ -406,7 +406,7 @@ void LaeRptDynamics::generate(LaeRobot *pRobot)
   LaeRptDynPowertrain pt;
 
   //
-  // Base dynamics
+  // Platform dynamics
   //
   m_pose.m_x      = RtDb.m_kin.m_robot.m_x;
   m_pose.m_y      = RtDb.m_kin.m_robot.m_y;

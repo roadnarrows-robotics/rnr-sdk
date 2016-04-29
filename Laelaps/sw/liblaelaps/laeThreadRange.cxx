@@ -102,12 +102,5 @@ int LaeThreadRange::reload(const LaeTunes &tunes)
 
 void LaeThreadRange::exec()
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    m_hwif.m_interface_2_1.exec();
-  }
-  else
-  {
-    m_hwif.m_interface_2_0.exec();
-  }
+  m_hwif.exec();
 }

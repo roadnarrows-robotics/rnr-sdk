@@ -2270,3 +2270,15 @@ int LaeRangeSensorGroup::getAmbientLight(vector<string> &vecNames,
     return m_interface_2_0.getAmbientLight(vecNames, vecAmbient);
   }
 }
+
+void LaeRangeSensorGroup::exec()
+{
+  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  {
+    m_interface_2_1.exec();
+  }
+  else
+  {
+    m_interface_2_0.exec();
+  }
+}

@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015.  RoadNarrows LLC
+ * (C) 2015-2016.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -72,7 +72,7 @@
 // control and application interface
 #include "Laelaps/laeTraj.h"
 #include "Laelaps/laePowertrain.h"
-#include "Laelaps/laeBase.h"
+#include "Laelaps/laePlatform.h"
 #include "Laelaps/laeKin.h"
 #include "Laelaps/laeThread.h"
 #include "Laelaps/laeThreadImu.h"

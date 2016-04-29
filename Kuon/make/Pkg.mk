@@ -43,7 +43,7 @@ endif
 PKG 								= Kuon
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 0
-PKG_VERSION_RELEASE = 0
+PKG_VERSION_RELEASE = 1
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight, Rob Shiely, and Daniel Packard"
 PKG_OWNERS					= "RoadNarrows LLC"

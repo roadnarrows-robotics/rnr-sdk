@@ -75,12 +75,22 @@ using namespace sensor::imu::msp;
 // Quaternion Class
 //------------------------------------------------------------------------------
 
+Quaternion Quaternion::operator=(const Quaternion &rhs)
+{
+  m_x = rhs.m_x;
+  m_y = rhs.m_y;
+  m_z = rhs.m_z;
+  m_w = rhs.m_w;
+
+  return *this;
+}
+
 void Quaternion::clear()
 {
   m_x = 0.0;
   m_y = 0.0;
   m_z = 0.0;
-  m_w = 0.0;
+  m_w = 1.0;
 }
 
 void Quaternion::convert(double phi, double theta, double psi)
@@ -118,14 +128,16 @@ LaeImu::LaeImu(string strIdent) : m_strIdent(strIdent)
 
   zeroData();
 
-  pthread_mutex_init(&m_mutex, NULL);
+  pthread_mutex_init(&m_mutexIo, NULL);
+  pthread_mutex_init(&m_mutexOp, NULL);
 }
 
 LaeImu::~LaeImu()
 {
   close();
 
-  pthread_mutex_destroy(&m_mutex);
+  pthread_mutex_destroy(&m_mutexOp);
+  pthread_mutex_destroy(&m_mutexIo);
 }
 
 int LaeImu::open(const string &strDevName, int nBaudRate)
@@ -133,7 +145,7 @@ int LaeImu::open(const string &strDevName, int nBaudRate)
   string  strDevNameReal;
   int     rc;
 
-  lock();
+  lockIo();
 
   // Get the real device name, not any symbolic links.
   strDevNameReal  = getRealDeviceName(strDevName);
@@ -159,14 +171,14 @@ int LaeImu::open(const string &strDevName, int nBaudRate)
     rc = LAE_OK;
   }
 
-  unlock();
+  unlockIo();
 
   return rc;
 }
 
 int LaeImu::close()
 {
-  lock();
+  lockIo();
 
   if( m_fd >= 0 )
   {
@@ -179,7 +191,7 @@ int LaeImu::close()
   m_nBaudRate = 0;
   m_fd        = -1;
 
-  unlock();
+  unlockIo();
 
   return LAE_OK;
 }
@@ -198,6 +210,8 @@ void LaeImu::zeroData()
     m_mag[i]      = 0.0;
     m_rpy[i]      = 0.0;
   }
+
+  m_quaternion.clear();
 }
 
 void LaeImu::compute()
@@ -213,6 +227,19 @@ void LaeImu::computeQuaternion()
 
 void LaeImu::computeDynamics()
 {
+}
+
+void LaeImu::exec()
+{
+  lockOp();
+
+  if( readRawImu() == LAE_OK )
+  {
+    convertRawToSI();
+    compute();
+  }
+
+  unlockOp();
 }
 
 void LaeImu::getRawInertiaData(int accel[], int gyro[])
@@ -233,6 +260,22 @@ void LaeImu::getInertiaData(double accel[], double gyro[])
   }
 }
 
+void LaeImu::getMagnetometerData(double mag[])
+{
+  for(int i = 0; i < NumOfAxes; ++i)
+  {
+    mag[i] = m_mag[i];
+  }
+}
+
+void LaeImu::getAttitude(double rpy[])
+{
+  for(int i = 0; i < NumOfAxes; ++i)
+  {
+    rpy[i] = m_rpy[i];
+  }
+}
+
 void LaeImu::getAttitude(double &roll, double &pitch, double &yaw)
 {
   roll  = m_rpy[ROLL];
@@ -240,11 +283,28 @@ void LaeImu::getAttitude(double &roll, double &pitch, double &yaw)
   yaw   = m_rpy[YAW];
 }
 
+void LaeImu::getQuaternion(Quaternion &q)
+{
+  q = m_quaternion;
+}
+
+void LaeImu::getImuData(double accel[], double gyro[], double mag[],
+                        double rpy[], Quaternion &q)
+{
+  lockOp();
+
+  getInertiaData(accel, gyro);
+  getMagnetometerData(mag);
+  getAttitude(rpy);
+  getQuaternion(q);
+
+  unlockOp();
+}
+
 
 //------------------------------------------------------------------------------
 // LaeImuCleanFlight IMU class with Cleanflight firmware on a supported board.
 //------------------------------------------------------------------------------
-
 
 LaeImuCleanFlight::LaeImuCleanFlight() :
   LaeImu("CleanFlight Naze32 with MPU-6050 IMU sensor")
@@ -336,7 +396,7 @@ int LaeImuCleanFlight::mspReadIdent(MspIdent &ident)
   byte_t  rspData[RspDataLen];
   int     rc;
 
-  lock();
+  lockIo();
 
   if( (rc = sendCmd(CmdId, NULL, 0)) == LAE_OK )
   {
@@ -351,7 +411,7 @@ int LaeImuCleanFlight::mspReadIdent(MspIdent &ident)
     unpack32(&rspData[3], ident.m_uCaps);
   }
 
-  unlock();
+  unlockIo();
 
   return rc;
 }
@@ -365,7 +425,7 @@ int LaeImuCleanFlight::mspReadRawImu()
   int     i, n;
   int     rc;
 
-  lock();
+  lockIo();
 
   if( (rc = sendCmd(CmdId, NULL, 0)) == LAE_OK )
   {
@@ -388,7 +448,7 @@ int LaeImuCleanFlight::mspReadRawImu()
     }
   }
 
-  unlock();
+  unlockIo();
 
   return rc;
 }
@@ -402,7 +462,7 @@ int LaeImuCleanFlight::mspReadAttitude()
   int     i, n;
   int     rc;
 
-  lock();
+  lockIo();
 
   if( (rc = sendCmd(CmdId, NULL, 0)) == LAE_OK )
   {
@@ -417,7 +477,7 @@ int LaeImuCleanFlight::mspReadAttitude()
     }
   }
 
-  unlock();
+  unlockIo();
 
   return rc;
 }

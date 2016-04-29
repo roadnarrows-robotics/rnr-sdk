@@ -71,7 +71,6 @@ DIST_SHLIBS    = laelaps
 # Source Files
 laelaps.SRC.CXX  = \
 	laeAlarms.cxx \
-	laeBase.cxx \
 	laeBatt.cxx \
 	laeDb.cxx \
 	laeDesc.cxx \
@@ -81,6 +80,7 @@ laelaps.SRC.CXX  = \
 	laeImu.cxx \
 	laeKin.cxx \
 	laeMotor.cxx \
+	laePlatform.cxx \
 	laePowertrain.cxx \
 	laeReports.cxx \
 	laeRobot.cxx \

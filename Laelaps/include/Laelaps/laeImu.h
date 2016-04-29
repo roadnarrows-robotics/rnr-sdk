@@ -110,25 +110,54 @@ namespace sensor
     //--------------------------------------------------------------------------
     // Quaternion Class
     //--------------------------------------------------------------------------
+
+    /*!
+     * \brief Quaternion class.
+     */
     class Quaternion
     {
     public:
-      double  m_x;
-      double  m_y;
-      double  m_z;
-      double  m_w; 
+      double  m_x;  ///< x
+      double  m_y;  ///< y
+      double  m_z;  ///< z
+      double  m_w;  ///< w
 
+      /*!
+       * \brief Default constructor.
+       */
       Quaternion()
       {
         clear();
       }
 
+      /*!
+       * \brief Destructor.
+       */
       ~Quaternion()
       {
       }
 
+      /*!
+       * \brief Assignment operator.
+       *
+       * \param rhs   Right hand side object.
+       *
+       * \return Returns copy of this.
+       */
+      Quaternion operator=(const Quaternion &rhs);
+
+      /*!
+       * \brief Clear quaternion values.
+       */
       void clear();
 
+      /*!
+       * \brief Convert Euler angles to quaternion.
+       *
+       * \param phi   Angle between x axis and the N axis.
+       * \param theta Angle between z axis and the Z axis.
+       * \param phi   Angle between N axis and the X axis.
+       */
       void convert(double phi, double theta, double psi);
 
     protected:
@@ -268,7 +297,7 @@ namespace sensor
       virtual int convertRawToSI() = 0;
   
       /*!
-       * \brief Compute all IMU values. 
+       * \brief Compute all IMU values form converted, raw values. 
        *
        * \todo
        */
@@ -276,8 +305,6 @@ namespace sensor
 
       /*!
        * \brief Compute the quaternion from the IMU data.
-       *
-       * \todo
        */
       virtual void computeQuaternion();
 
@@ -288,6 +315,11 @@ namespace sensor
        * \todo
        */
       virtual void computeDynamics();
+
+      /*!
+       * \brief Exectute one step to read, convert, and compute IMU values.
+       */
+      virtual void exec();
 
       /*!
        * \brief Get IMU identity.
@@ -311,7 +343,7 @@ namespace sensor
       /*!
        * \brief Get the last read raw inertia data.
        *
-       * Not applicable data are set to zero.
+       * \note N/A data are set to zero.
        *
        * \param [out] accel   Raw accelerometer data.
        *                      The array size must be \h_ge \ref NumOfAxes.
@@ -323,7 +355,7 @@ namespace sensor
       /*!
        * \brief Get the last read and converted inertia data.
        *
-       * Not applicable data are set to zero.
+       * \note N/A data are set to zero.
        *
        * \param [out] accel   Accelerometer data (m/s^2).
        *                      The array size must be \h_ge \ref NumOfAxes.
@@ -333,15 +365,42 @@ namespace sensor
       virtual void getInertiaData(double accel[], double gyro[]);
 
       /*!
+       * \brief Get the last read magnetometer values.
+       *
+       * \note N/A data are set to zero.
+       *
+       * \param [out] mag     Magnetometer data (tesla).
+       *                      The array size must be \h_ge \ref NumOfAxes.
+       */
+      virtual void getMagnetometerData(double mag[]);
+
+      /*!
        * \brief Get the last read IMU (vehicle) attitude.
        *
-       * Data are set to zero if not availble.
+       * \note N/A data are set to zero.
+       *
+       * \param [out] rpy     Vehicle roll, pitch, and yaw (radians).
+       *                      The array size must be \h_ge \ref NumOfAxes.
+       */
+      virtual void getAttitude(double rpy[]);
+
+      /*!
+       * \brief Get the last read IMU (vehicle) attitude.
+       *
+       * \note N/A data are set to zero.
        *
        * \param [out] roll    Vehicle roll (radians).
        * \param [out] pitch   Vehicle pitch (radians).
        * \param [out] yaw     Vehicle yaw (radians).
        */
       virtual void getAttitude(double &roll, double &pitch, double &yaw);
+
+      /*!
+       * \brief Get the last computed quaternion.
+       *
+       * \param [out] q   Vehicle quaternion.
+       */
+      virtual void getQuaternion(Quaternion &q);
 
       // FUTURE
       //virtual void getRawMagData(int mag[]);
@@ -351,9 +410,26 @@ namespace sensor
       //virtual void getRawTemperatureData(int &temp);
       //virtual void getGps(GPS &gps);
       //virtual void getTemperatureData(double &temp);
-      //virutal void getQuaternion(Quaternian &q);
       //virtual void getDynamics(double &vel[], double &pos[]);
       // FUTURE
+
+      /*!
+       * \brief Get the last sensed, converted, and computed IMU data.
+       *
+       * \note N/A data are set to zero.
+       *
+       * \param [out] accel   Accelerometer data (m/s^2).
+       *                      The array size must be \h_ge \ref NumOfAxes.
+       * \param [out] gyro    Gyroscope data (radians/s).
+       *                      The array size must be \h_ge \ref NumOfAxes.
+       * \param [out] mag     Magnetometer data (tesla).
+       *                      The array size must be \h_ge \ref NumOfAxes.
+       * \param [out] rpy     Vehicle roll, pitch, and yaw (radians).
+       *                      The array size must be \h_ge \ref NumOfAxes.
+       * \param [out] q       Vehicle quaternion.
+       */
+      virtual void getImuData(double accel[], double gyro[], double mag[],
+                              double rpy[], Quaternion &q);
 
     protected:
       //
@@ -391,31 +467,56 @@ namespace sensor
       // GPS m_gps;
       // FUTURE
 
-      // mutual exclusion
-      pthread_mutex_t m_mutex;          ///< mutex
+      // mutual exclusions
+      pthread_mutex_t m_mutexIo;    ///< low-level I/O mutex
+      pthread_mutex_t m_mutexOp;    ///< high-level operation mutex
   
       /*!
-       * \brief Lock the shared resource.
+       * \brief Lock the shared I/O resource.
        *
        * The lock()/unlock() primitives provide for safe multi-threading.
        *
        * \par Context:
        * Any.
        */
-      void lock()
+      void lockIo()
       {
-        pthread_mutex_lock(&m_mutex);
+        pthread_mutex_lock(&m_mutexIo);
       }
     
       /*!
-       * \brief Unlock the shared resource.
+       * \brief Unlock the shared I/O resource.
        *
        * \par Context:
        * Any.
        */
-      void unlock()
+      void unlockIo()
       {
-        pthread_mutex_unlock(&m_mutex);
+        pthread_mutex_unlock(&m_mutexIo);
+      }
+
+      /*!
+       * \brief Lock the extended operation.
+       *
+       * The lock()/unlock() primitives provide for safe multi-threading.
+       *
+       * \par Context:
+       * Any.
+       */
+      void lockOp()
+      {
+        pthread_mutex_lock(&m_mutexOp);
+      }
+    
+      /*!
+       * \brief Unlock the extended operation.
+       *
+       * \par Context:
+       * Any.
+       */
+      void unlockOp()
+      {
+        pthread_mutex_unlock(&m_mutexOp);
       }
 
       /*!

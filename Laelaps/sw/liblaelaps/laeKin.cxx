@@ -70,7 +70,7 @@
 #include "Laelaps/laeDb.h"
 #include "Laelaps/laeTraj.h"
 #include "Laelaps/laePowertrain.h"
-#include "Laelaps/laeBase.h"
+#include "Laelaps/laePlatform.h"
 #include "Laelaps/laeKin.h"
 
 using namespace std;
@@ -353,9 +353,9 @@ int LaeKinematics::configure(const LaeDesc &desc)
   }
 
   //
-  // Base platform
+  // Robot platform
   //
-  m_kinBase.configure(*desc.m_pDescBase);
+  m_kinPlatform.configure(*desc.m_pDescBase);
 
   return rc;
 }
@@ -373,7 +373,7 @@ int LaeKinematics::configure(const LaeTunes &tunes)
     }
   }
 
-  m_kinBase.configure(tunes);
+  m_kinPlatform.configure(tunes);
 
   return rc;
 }
@@ -894,7 +894,7 @@ int LaeKinematics::reload(const LaeTunes &tunes)
     iter->second.reload(tunes);
   }
 
-  m_kinBase.reload(tunes);
+  m_kinPlatform.reload(tunes);
 
   return LAE_OK;
 }
@@ -1042,7 +1042,7 @@ int LaeKinematics::resetOdometers()
       }
     }
 
-    m_kinBase.resetOdometer();
+    m_kinPlatform.resetOdometer();
   }
 
   unlock();
@@ -1426,7 +1426,7 @@ int LaeKinematics::senseDynamics()
     }
   }
 
-  m_kinBase.updateStateDynamics(m_kinPowertrains);
+  m_kinPlatform.updateStateDynamics(m_kinPowertrains);
 
   m_bIsStopped = bIsStopped;
   RtDb.m_robotstatus.m_bInMotion = m_bIsStopped? false: true;
@@ -1526,10 +1526,10 @@ int LaeKinematics::monitorHealth()
       }
     }
 
-    m_kinBase.updateCtlrHealth(nCtlr, volts, temp, status);
+    m_kinPlatform.updateCtlrHealth(nCtlr, volts, temp, status);
   }
 
-  m_kinBase.updateHealth(m_kinPowertrains);
+  m_kinPlatform.updateHealth(m_kinPowertrains);
 
   LOGDIAG4("Kinematics Thread: Monitored health of motor controllers.");
 

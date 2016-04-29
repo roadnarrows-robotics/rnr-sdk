@@ -100,7 +100,7 @@
 #include "Laelaps/laeGpio.h"
 #include "Laelaps/laeTraj.h"
 #include "Laelaps/laePowertrain.h"
-#include "Laelaps/laeBase.h"
+#include "Laelaps/laePlatform.h"
 
 namespace laelaps
 {
@@ -222,13 +222,13 @@ namespace laelaps
     virtual int reload(const LaeTunes &tunes);
   
     /*!
-     * \brief Get robot base kinodynamics.
+     * \brief Get robot platform kinodynamics.
      *
-     * \return Returns reference to robot base kinodynamics object.
+     * \return Returns reference to robot platform kinodynamics object.
      */
-    LaeBase &getBase()
+    LaePlatform &getPlatform()
     {
-      return m_kinBase;
+      return m_kinPlatform;
     }
 
     /*!
@@ -504,7 +504,7 @@ namespace laelaps
                                         ///< RoboClaw motor controllers
 
     // the kinematics (abstracted) hardware interfaces
-    LaeBase           m_kinBase;        ///< robot base kinematics
+    LaePlatform       m_kinPlatform;    ///< robot platform kinematics
     LaeMapPowertrain  m_kinPowertrains; ///< robot powertrain kinematics
 
     // actions

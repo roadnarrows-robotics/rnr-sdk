@@ -65,8 +65,8 @@ endif
 PKG 								= peripherals
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 3
-PKG_VERSION_RELEASE = 0
-PKG_VERSION_DATE    = 2015
+PKG_VERSION_RELEASE = 1
+PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight, Danial Packard"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \

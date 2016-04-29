@@ -86,7 +86,7 @@
 // control and application interface
 #include "Laelaps/laeTraj.h"
 #include "Laelaps/laePowertrain.h"
-#include "Laelaps/laeBase.h"
+#include "Laelaps/laePlatform.h"
 #include "Laelaps/laeKin.h"
 #include "Laelaps/laeAlarms.h"
 #include "Laelaps/laeReports.h"
@@ -639,10 +639,12 @@ int LaeRobot::readAnalogPin(uint_t pin, uint_t &val)
   return m_watchdog.cmdReadAPin(pin, val);
 }
 
-int LaeRobot::getImu(double accel[], double gyro[], double rpy[])
+int LaeRobot::getImu(double accel[], double gyro[], double rpy[], Quaternion &q)
 {
-  m_imu.getInertiaData(accel, gyro);
-  m_imu.getAttitude(rpy[ROLL], rpy[PITCH], rpy[YAW]);
+  double mag[NumOfAxes];    // no magnetometer
+
+  m_imu.getImuData(accel, gyro, mag, rpy, q);
+
   return LAE_OK;
 }
 

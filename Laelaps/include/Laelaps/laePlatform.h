@@ -4,14 +4,14 @@
 //
 // Library:   liblaelaps
 //
-// File:      laeBase.h
+// File:      laePlatform.h
 //
 /*! \file
  *
  * $LastChangedDate: 2016-02-15 12:16:48 -0700 (Mon, 15 Feb 2016) $
  * $Rev: 4319 $
  *
- * \brief Laelaps base control and dynamics state.
+ * \brief Laelaps robotic platform control and dynamics state interface.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
@@ -46,8 +46,8 @@
  */
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _LAE_BASE_H
-#define _LAE_BASE_H
+#ifndef _LAE_PLATFORM_H
+#define _LAE_PLATFORM_H
 
 #include <string>
 #include <vector>
@@ -118,13 +118,13 @@ namespace laelaps
 
 
   // ---------------------------------------------------------------------------
-  // Class LaeBase
+  // Class LaePlatform
   // ---------------------------------------------------------------------------
 
   /*!
-   * \brief  Robot base control and state data class.
+   * \brief  Robot platform control and state data class.
    */
-  class LaeBase
+  class LaePlatform
   {
   public:
     /*!
@@ -137,7 +137,7 @@ namespace laelaps
       HistSize  = 2     ///< size of history
     };
 
-    std::string   m_strName;  ///< robot base name
+    std::string   m_strName;  ///< robot platform name
 
     // dimensions
     Dim       m_dimRobot;     ///< total dimensions of robot (TODO)
@@ -163,17 +163,17 @@ namespace laelaps
     /*!
      * \brief Default constructor.
      */
-    LaeBase();
+    LaePlatform();
 
     /*!
      * \brief Copy constructor.
      */
-    LaeBase(const LaeBase &src);
+    LaePlatform(const LaePlatform &src);
 
     /*!
      * \brief Destructor.
      */
-    ~LaeBase()
+    ~LaePlatform()
     {
     }
 
@@ -184,7 +184,7 @@ namespace laelaps
      *
      * \return Returns copy of this.
      */
-    LaeBase operator=(const LaeBase &rhs);
+    LaePlatform operator=(const LaePlatform &rhs);
 
     /*!
      * \brief Clear data sans name.
@@ -192,26 +192,26 @@ namespace laelaps
     void clear();
 
     /*!
-     * \brief Get robot base name.
+     * \brief Get robot platform name.
      *
      * \return String.
      */
-    std::string getBaseName() const
+    std::string getPlatformName() const
     {
       return m_strName;
     }
 
     /*!
-     * \brief Configure base platform from product description.
+     * \brief Configure robot platform from product description.
      *
-     * \param desc  Laelaps base product description data.
+     * \param desc  Laelaps robot base product description data.
      *
      * \copydoc doc_return_std
      */
     virtual int configure(const LaeDescBase &desc);
 
     /*!
-     * \brief Configure base.
+     * \brief Configure platform.
      *
      * \param tunes   Laelaps tuning parameters.
      *
@@ -238,7 +238,7 @@ namespace laelaps
     virtual int resetOdometer();
 
     /*!
-     * \brief Update robot base state dynamics.
+     * \brief Update robot platform state dynamics.
      *
      * \param mapPowertrains  Powertrain kinodynamics.
      *
@@ -247,7 +247,7 @@ namespace laelaps
     virtual int updateStateDynamics(const LaeMapPowertrain &mapPowertrains);
 
     /*!
-     * \brief Update robot base motor controller health state.
+     * \brief Update robot platform motor controller health state.
      *
      * \param nCtlr       Motor controller id.
      * \param fVolts      Motor input voltage (V).
@@ -262,7 +262,7 @@ namespace laelaps
                                  uint_t uStatus);
 
     /*!
-     * \brief Update robot base health state.
+     * \brief Update robot platform health state.
      *
      * \param mapPowertrains  Powertrain kinodynamics.
      *
@@ -284,9 +284,9 @@ namespace laelaps
      */
     virtual void pushNewPose(const LaePose &pose);
 
-  };    // class LaeBase
+  };    // class LaePlatform
 
 } // namespace laelaps
 
 
-#endif // _LAE_BASE_H
+#endif // _LAE_PLATFORM_H
