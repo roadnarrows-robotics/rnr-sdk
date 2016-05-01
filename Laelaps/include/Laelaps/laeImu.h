@@ -154,9 +154,9 @@ namespace sensor
       /*!
        * \brief Convert Euler angles to quaternion.
        *
-       * \param phi   Angle between x axis and the N axis.
-       * \param theta Angle between z axis and the Z axis.
-       * \param phi   Angle between N axis and the X axis.
+       * \param phi   Angle between x axis and the N axis (radians).
+       * \param theta Angle between z axis and the Z axis (radians).
+       * \param phi   Angle between N axis and the X axis (radians).
        */
       void convert(double phi, double theta, double psi);
 

@@ -171,7 +171,7 @@ void LaeDescBase::calcDimensions(double fTireRadius, double fTireWidth)
 
 void LaeDescBase::print(int indent)
 {
-  printf("%*sBase Description =\n", indent, "");
+  printf("%*sPlatform Description =\n", indent, "");
   printf("%*s{\n", indent, "");
 
   printf("%*sKey = %s\n", indent+2, "", m_strKey.c_str());
@@ -522,7 +522,7 @@ void LaeDescImu::print(int indent)
 // Class LaeDesc
 // -----------------------------------------------------------------------------
 
-const char* const LaeDesc::KeyRobotBase = "base";
+const char* const LaeDesc::KeyRobotBase = "platform";
 
 const char* const LaeDesc::KeyBattery = "battery";
 
