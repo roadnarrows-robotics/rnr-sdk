@@ -30,8 +30,8 @@ botsense/bsPython/modules/BotSense/bsSerial.py
 Dynamixel/bsMsgs/bsDynaCore_wrap.c
 Dynamixel/bsMsgs/bsDynaMsgs.c
 Dynamixel/bsMsgs/*.done
-#Dynamixel/pyPython/modules/BotSense/Dynamixel/bsDynaCore.py
-#Dynamixel/pyPython/modules/BotSense/Dynamixel/bsDynaMsgs.py
+Dynamixel/bsPython/modules/BotSense/Dynamixel/bsDynaCore.py
+Dynamixel/bsPython/modules/BotSense/Dynamixel/bsDynaMsgs.py
 Dynamixel/include/botsense/bsDynaMsgs.h
 Dynamixel/share/msgs/*.xml
 
