@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2011-2014.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -112,7 +112,7 @@ extra-make: netmsgs-all
 extra-make-post: swig-all
 
 .PHONY: extra-deps
-extra-deps:
+extra-deps: netmsgs-all
 	@touch $(DEPSFILE)
 
 .PHONY: extra-clean
