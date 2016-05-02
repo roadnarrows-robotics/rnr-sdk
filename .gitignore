@@ -14,7 +14,7 @@ botsense/include/botsense/bsNullMsgs.h
 botsense/include/botsense/bsProxyMsgs.h
 botsense/include/botsense/bsSerialMsgs.h
 botsense/libbotsense/bsProxyMsgs.c
-botsense/share/msgs/
+botsense/share/msgs/*.xml
 botsense/bsModules/*/*_wrap.c
 botsense/bsModules/*/*.done
 botsense/bsPython/src/*_wrap.c
@@ -32,7 +32,7 @@ Dynamixel/bsMsgs/bsDynaMsgs.c
 Dynamixel/bsMsgs/*.done
 Dynamixel/bsPython/modules/
 Dynamixel/include/botsense/bsDynaMsgs.h
-Dynamixel/share/msgs/
+Dynamixel/share/msgs/*.xml
 
 # Hekateros
 Hekateros/sw/pyModules/build
