@@ -113,11 +113,15 @@ include $(rnmake)/Rules.mk
 # Odroid Ubuntu versions of Laelaps
 # 
 ifeq "$(arch)" "odroid"
-	ETC_PROF_D_LAE = share/etc/profile.d/laelaps_odroid.sh 
+	#ETC_PROF_D_LAE = share/etc/profile.d/laelaps_odroid.sh 
 
-	ETC_FILES	=	share/etc/ld.so.conf.d/*.conf \
-							share/etc/udev/rules.d/*.rules \
-							etc/udev/rules.d/*
+	ETC_PROF_D_LAE = 
+
+	#ETC_FILES	=	share/etc/ld.so.conf.d/*.conf \
+	#						share/etc/udev/rules.d/*.rules \
+	#						etc/udev/rules.d/*
+
+	ETC_FILES	=	
 
 	LIB_FILES = 
 
