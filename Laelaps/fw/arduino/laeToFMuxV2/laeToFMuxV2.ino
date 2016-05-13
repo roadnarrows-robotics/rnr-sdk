@@ -45,8 +45,12 @@ typedef byte byte_t;
 
 using namespace laelaps;
 
+#include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
 #include <Wire.h>
 #include <SoftwareWire.h>
+
 
 #include "VL6180X.h"
 
@@ -82,13 +86,15 @@ SoftwareWire *SoftWire[LaeToFMuxNumOfChan] =
 //
 #define ALS_FREQ 2
 
+//
+// Sensors
+//
 VL6180x  *ToFSensor[LaeToFMuxNumOfChan];
 int       AlsSensorId;
 int       AlsFreqCnt;
 
-
 //
-// Response data
+// I2C Response data
 //
 byte        RspBuf[LaeToFMuxMaxRspLen];         ///< response buffer
 int         RspLen;                             ///< response length
@@ -97,6 +103,15 @@ const byte  RspErrorBuf[LaeToFMuxMaxRspLen] =   ///< response error pattern
   0xde, 0xad, 0xfa, 0xce, 0xba, 0xad, 0xf0, 0x0d, 0,
 };
 
+//
+// Serial CLI
+//
+char      SerLine[LaeToFMuxSerMaxCmdLen+1];
+int       SerLinePos;
+char      SerArgs[LaeToFMuxSerMaxCmdArgs][LaeToFMuxSerMaxCmdArgLen];
+int       SerArgCnt;
+const int SerCmdIdx = 0;
+boolean   SerContinuousMode;
 
 //------------------------------------------------------------------------------
 // Arduino Hook Functions
@@ -141,22 +156,39 @@ void setup()
   Wire.onReceive(receiveCmd);
   Wire.onRequest(sendRsp);
 
+  //
+  // Serial command-line interface (baud does not matter over USB) 
+  // 
+  SerLinePos        = 0;
+  SerArgCnt         = 0;
+  SerContinuousMode = false;
   Serial.begin(115200);
 }
 
 void loop()
 {
+  // take distance measurements from all connected sensors
   measureRanges();
 
+  // take one ambient light measurement
   if( --AlsFreqCnt <= 0 )
   {
     measureAmbient();
     nextAmbientSensor();
   }
 
-  if( Serial.available() > 0 )
+  if( SerContinuousMode )
   {
-    serialRcvCmd();
+    serContinuousOutput();
+  }
+
+  // process any serial input
+  if( serRcvCmd() )
+  {
+    if( serParseCmd() )
+    {
+      serExecCmd();
+    }
   }
 }
 
@@ -526,77 +558,283 @@ boolean execGetTunes()
 // Serial Functions
 //------------------------------------------------------------------------------
 
-#include <stdarg.h>
-
 void p(char *fmt, ... )
 {
-  char buf[128]; // resulting string limited to 128 chars
   va_list args;
+  char    buf[LaeToFMuxSerMaxRspLen];
 
-  va_start(args, fmt );
-  vsnprintf(buf, 128, fmt, args);
+  va_start(args, fmt);
+  vsnprintf(buf, LaeToFMuxSerMaxRspLen, fmt, args);
   va_end(args);
 
   Serial.print(buf);
 }
 
-void serialRcvCmd()
+void rsp(char *fmt, ... )
 {
-  byte  cmd;
+  va_list args;
+  char    buf[LaeToFMuxSerMaxRspLen];
 
-  cmd = Serial.read();
+  va_start(args, fmt);
+  vsnprintf(buf, LaeToFMuxSerMaxRspLen, fmt, args);
+  va_end(args);
 
-  switch( cmd )
-  {
-    case 'h':
-      serPrintHelp();
-      break;
-    case 'l':
-      serPrintSensors();
-      break;
-    case 'p':
-      probe();
-      break;
-    case 'r':
-      serPrintRanges();
-      break;
-    default:
-      Serial.print("Commands are: 'l r h'\n");
-      break;
-  }
+  Serial.print(buf);
+  Serial.print(LaeToFMuxSerEoR);
 }
 
-void serPrintHelp()
+inline boolean whitespace(char c)
 {
-  Serial.print("\nHelp:\n");
-  Serial.print("l  - list connected sensors\n");
-  Serial.print("p  - (re)probe connected sensors\n");
-  Serial.print("r  - print measured ranges\n");
-  Serial.print("\n");
-  Serial.print("h  - print help\n");
+  return ((c == ' ') || (c == '\t'));
 }
 
-void serPrintSensors()
+inline boolean eol(char c)
 {
-  int   i;
+  return ((c == '\n') || (c == '\r'));
+}
 
-  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+boolean serRcvCmd()
+{
+  char    c;
+
+  while( Serial.available() > 0 )
   {
-    if( ToFSensor[i]->isBlacklisted() )
+    c = Serial.read();
+
+    // command too long - truncate (could still be a valid command).
+    if( SerLinePos >= LaeToFMuxSerMaxCmdLen )
     {
-      p("%d: not present\n", i);
+      SerLine[LaeToFMuxSerMaxCmdLen] = 0;
+      SerLinePos = 0;
+      return true;
     }
+
+    // end-of-line
+    else if( eol(c) )
+    {
+      SerLine[SerLinePos] = 0;
+      SerLinePos = 0;
+      return true;
+    }
+
+    // command character
     else
     {
-      p("%d: present\n", i);
+      SerLine[SerLinePos++] = c;
     }
+  }
+
+  return false;
+}
+
+boolean serParseCmd()
+{
+  int i, j;
+  int len;
+
+  SerArgCnt = 0;
+  len       = strlen(SerLine);
+  i         = 0;
+
+  do
+  {
+    // skip leading white space
+    while( (i < len) && whitespace(SerLine[i]) )
+    {
+      ++i;
+    }
+
+    // no more arguments
+    if( i >= len )
+    {
+      break;
+    }
+
+    j = 0;
+
+    // copy argument
+    while( (i < len) &&
+            (j < LaeToFMuxSerMaxCmdArgLen-1) &&
+            !whitespace(SerLine[i]) )
+    {
+      SerArgs[SerArgCnt][j++] = SerLine[i++];
+    }
+
+    SerArgs[SerArgCnt++][j] = 0;
+
+  } while( SerArgCnt < LaeToFMuxSerMaxCmdArgs );
+
+  return SerArgCnt > 0;
+}
+
+int serParseSensorNumber(char *s)
+{
+  int   n;
+  char *endptr;
+
+  if( (s == NULL) || (*s == 0) )
+  {
+    rsp("%s %s no sensor argument", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
+    return -1;
+  }
+
+  n = (int)strtol(s, &endptr, 0);
+
+  if( *endptr != 0 )
+  {
+    rsp("%s %s %s not a number",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
+    return -1;
+  }
+  else if( (n < LaeToFMuxMinChan) || (n > LaeToFMuxMaxChan) )
+  {
+    rsp("%s %s %s sensor number out-of-range",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
+    return -1;
+  }
+  else if( ToFSensor[n]->isBlacklisted() )
+  {
+    rsp("%s %s %s no sensor connected",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
+    return -1;
+  }
+  else
+  {
+    return n;
   }
 }
 
-void serPrintRanges()
+boolean serChkArgCnt(int nExpected)
+{
+  if( (SerArgCnt-1) != nExpected )
+  {
+    rsp("%s %s require %d args, got %d",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nExpected, SerArgCnt-1);
+    return false;
+  }
+
+  return true;
+}
+
+void serExecCmd()
+{
+  char    cmdId;
+  boolean bMode;
+
+  if( strlen(SerArgs[SerCmdIdx]) > 1 )
+  {
+    rsp("%s %s bad command", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
+    return;
+  }
+
+  // any command turns off continuous output mode
+  bMode = false;
+
+  switch( SerArgs[SerCmdIdx][0] )
+  {
+    case LaeToFMuxSerCmdIdHelp:
+      serExecHelp();
+      break;
+    case LaeToFMuxSerCmdIdGetVersion:
+      serExecGetVersion();
+      break;
+    case LaeToFMuxSerCmdIdGetIdent:
+      serExecGetIdent();
+      break;
+    case LaeToFMuxSerCmdIdGetDist:
+      serExecGetDist();
+      break;
+    case LaeToFMuxSerCmdIdGetLux:
+      serExecGetLux();
+      break;
+    case LaeToFMuxSerCmdIdGetTunes:
+      serExecGetTunes();
+      break;
+    case LaeToFMuxSerCmdIdProbe:
+      serExecProbe();
+      break;
+    case LaeToFMuxSerCmdIdList:
+      serExecList();
+      break;
+    case LaeToFMuxSerCmdIdCont:
+      serExecCont();
+      bMode = SerContinuousMode; // this command toggles continuous mode
+      break;
+    default:
+      rsp("%s %s unknown command", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
+      break;
+  }
+
+  SerContinuousMode = bMode;
+}
+
+void serExecHelp()
+{
+  rsp("%c          - get ambient light measurements from all sensors",
+                           LaeToFMuxSerCmdIdGetLux);
+  rsp("%c          - turn on/off continuous output mode",
+                           LaeToFMuxSerCmdIdCont);
+  rsp("%c          - get distance measurements from all sensors",
+                           LaeToFMuxSerCmdIdGetDist);
+  rsp("%c <sensor> - get ToF sensor identify", LaeToFMuxSerCmdIdGetIdent);
+  rsp("%c          - list sensor connected state",
+                           LaeToFMuxSerCmdIdProbe);
+  rsp("%c          - probe for connected sensors",
+                           LaeToFMuxSerCmdIdProbe);
+  rsp("%c <sensor> - get ToF sensor tune parameters",
+                            LaeToFMuxSerCmdIdGetTunes);
+  rsp("%c          - get firmware version", LaeToFMuxSerCmdIdGetVersion);
+
+  rsp("");
+  rsp("%c          - print this help", LaeToFMuxSerCmdIdHelp);
+}
+
+void serExecGetVersion()
+{
+  if( serChkArgCnt(LaeToFMuxSerCmdArgsGetVersion) )
+  {
+    rsp("%s %d", SerArgs[SerCmdIdx], LAE_TOF_MUX_FW_VERSION);
+  }
+}
+
+void serExecGetIdent()
+{
+  int                   sensor;
+  VL6180xIdentification ident;
+ 
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetIdent) )
+  {
+    return;
+  }
+  else if( (sensor = serParseSensorNumber(SerArgs[1])) < 0 )
+  {
+    return;
+  }
+  else
+  {
+    ToFSensor[sensor]->getIdent(&ident);
+
+    rsp("%s 0x%02x %d.%d %d.%d, %d, %d",
+      SerArgs[SerCmdIdx],
+      ident.idModel,
+      ident.idModelRevMajor, ident.idModelRevMinor,
+      ident.idModuleRevMajor, ident.idModuleRevMinor,
+      ident.idDate,
+      ident.idTime);
+  }
+}
+
+void serExecGetDist()
 {
   int   i;
   byte  dist;
+
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetDist) )
+  {
+    return;
+  }
+
+  Serial.print(SerArgs[SerCmdIdx]);
 
   for(i = 0; i < LaeToFMuxNumOfChan; ++i)
   {
@@ -609,8 +847,187 @@ void serPrintRanges()
       dist = ToFSensor[i]->getRange();
     }
 
-    p("%3d ", dist);
+    switch( dist )
+    {
+      case LaeToFMuxArgRangeNoObj:
+        p(" %6s", LaeToFMuxSerArgNoObj);
+        break;
+      case LaeToFMuxArgRangeErr:
+        p(" %6s", LaeToFMuxSerArgSensorErr);
+        break;
+      case LaeToFMuxArgRangeNoDev:
+        p(" %6s", LaeToFMuxSerArgNotPresent);
+        break;
+      default:
+        p(" %6d", dist);
+        break;
+    }
   }
 
-  Serial.print("\n");
+  Serial.print(LaeToFMuxSerEoR);
+}
+
+void serExecGetLux()
+{
+  int       i;
+  float     lux;
+  uint32_t  lux_int;
+  uint32_t  lux_frac;
+
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetLux) )
+  {
+    return;
+  }
+
+  Serial.print(SerArgs[SerCmdIdx]);
+
+  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    if( ToFSensor[i]->isBlacklisted() )
+    {
+      lux = LaeToFMuxArgLuxNoLight;
+    }
+    else
+    {
+      lux = ToFSensor[i]->getAmbientLight();
+    }
+
+    lux_int = (uint32_t)lux;
+    lux = lux - (float)lux_int;
+    lux_frac = (uint32_t)(lux * 100.0);
+
+    p(" %7d.%02d", lux_int, lux_frac);
+  }
+
+  Serial.print(LaeToFMuxSerEoR);
+}
+
+void serExecGetTunes()
+{
+  int       sensor;
+  byte      offset;
+  byte      crosstalk;
+  byte      gain;
+  uint16_t  intPeriod;
+
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetTunes) )
+  {
+    return;
+  }
+  else if( (sensor = serParseSensorNumber(SerArgs[1])) < 0 )
+  {
+    return;
+  }
+  else
+  {
+    ToFSensor[sensor]->getTunes(offset, crosstalk, gain, intPeriod);
+
+    rsp("%s %u %u %u %u",
+        SerArgs[SerCmdIdx], offset, crosstalk, gain, intPeriod);
+  }
+}
+
+void serExecProbe()
+{
+  int   i;
+  int   nSensors;
+
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsProbe) )
+  {
+    return;
+  }
+
+  probe();
+
+  // count
+  for(i = 0, nSensors = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    if( !ToFSensor[i]->isBlacklisted() )
+    {
+      ++nSensors;
+    }
+  }
+
+  rsp("%s %d", SerArgs[SerCmdIdx], nSensors);
+}
+
+void serExecList()
+{
+  int   i;
+
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsList) )
+  {
+    return;
+  }
+
+  Serial.print(SerArgs[SerCmdIdx]);
+
+  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    if( ToFSensor[i]->isBlacklisted() )
+    {
+      p(" %s", LaeToFMuxSerArgNotPresent);
+    }
+    else
+    {
+      p(" %s", LaeToFMuxSerArgPresent);
+    }
+  }
+
+  Serial.print(LaeToFMuxSerEoR);
+}
+
+void serExecCont()
+{
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsCont) )
+  {
+    return; 
+  }
+
+  if( !SerContinuousMode )
+  {
+    SerContinuousMode = true;
+    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOn);
+  }
+  else
+  {
+    SerContinuousMode = false;
+    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOff);
+  }
+}
+
+void serContinuousOutput()
+{
+  int i;
+  int dist;
+
+  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    if( ToFSensor[i]->isBlacklisted() )
+    {
+      dist = LaeToFMuxArgRangeNoDev;
+    }
+    else
+    {
+      dist = ToFSensor[i]->getRange();
+    }
+
+    switch( dist )
+    {
+      case LaeToFMuxArgRangeNoObj:
+        p(" %6s", LaeToFMuxSerArgNotPresent);
+        break;
+      case LaeToFMuxArgRangeErr:
+        p(" %6s", LaeToFMuxSerArgSensorErr);
+        break;
+      case LaeToFMuxArgRangeNoDev:
+        p(" %6s", LaeToFMuxSerArgNotPresent);
+        break;
+      default:
+        p(" %6d", dist);
+        break;
+    }
+  }
+
+  Serial.print(LaeToFMuxSerEoR);
 }
