@@ -181,6 +181,18 @@ class VL6180x
 {
 public:	
   /*!
+   * \brief Asynchronous measurement execution states
+   */
+  enum AsyncState
+  {
+    AsyncStateInit,           ///< initialize measurement state
+    AsyncStateWaitForReady,   ///< wait for sensor to be ready
+    AsyncStateStartMeas,      ///< start measurement
+    AsyncStateWaitForResult,  ///< wait for sensor measurement result
+    AsyncStateDone            ///< measurement made
+  };
+
+  /*!
    * \brief Default initialization constructor.
    *
    * \param wire      Associated software I2C.
@@ -244,6 +256,24 @@ public:
    * \brief Measure ambient light.
    */
   float measureAmbientLight();
+
+  /*!
+   * \brief Measure object's range.
+   *
+   * \param [out] dist    Measured distance (mm).
+   *
+   * \return Returns true when measurement is complete, false otherwise.
+   */
+  boolean asyncMeasureRange(byte &dist);
+
+  /*!
+   * \brief Measure ambient light.
+   *
+   * \param [out] lux     Ambient light (lux).
+   *
+   * \return Returns true when measurement is complete, false otherwise.
+   */
+  boolean asyncMeasureAmbientLight(float &lux);
 
   /*!
    * \brief Mark time-of-flight sensor for tuning.
@@ -343,11 +373,15 @@ protected:
   boolean       m_bBusy;          ///< is [not] busy 
 
   // read values
-  VL6180xIdentification m_ident;          ///< sensor identity
-  byte                  m_range;          ///< last read range value
-  float                 m_lux;            ///< last read ambient light value
+  VL6180xIdentification m_ident;      ///< sensor identity
+  byte                  m_range;      ///< last read range value
+  float                 m_lux;        ///< last read ambient light value
 
-  // pending operations
+  // asynchronous measurment state
+  AsyncState    m_eAsyncState;        ///< current state
+  unsigned long m_uAsyncTWait;        ///< wait timeout clock (msec)
+  
+  // pending tuning operations
   byte      m_newRangeOffset;         ///< new pending range part-to-part offset
   byte      m_newRangeCrossTalk;      ///< new pending range cross-talk
   boolean   m_bRangeNeedsTuning;      ///< range sensor does [not] need tuning

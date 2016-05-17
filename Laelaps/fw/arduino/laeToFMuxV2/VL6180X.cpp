@@ -59,6 +59,30 @@
 
 #include "VL6180X.h"
 
+
+/*!
+ * \brief Elapse delta time.
+ *
+ * \param t0  Some earlier, previous time.
+ *
+ * \return Milliseconds.
+ */
+unsigned long dt(unsigned long t0)
+{
+  t1 = millis();
+
+  // time t1 is later than t0
+  if( t1 >= t0 )
+  {
+    return t1 - t0;
+  }
+  // must haved wrapped - happens about every 50 days of up time.
+  else
+  {
+    return 4294967295 - t0 + t1;
+  }
+}
+
 VL6180x::VL6180x(SoftwareWire &wire, uint8_t address) :
     m_wire(wire), m_addr(address)
 {
@@ -69,6 +93,8 @@ VL6180x::VL6180x(SoftwareWire &wire, uint8_t address) :
 
   m_range         = 0;
   m_lux           = 0.0;
+
+  m_eAsyncState   = AsyncStateInit;
 
   m_bRangeNeedsTuning = false;
   m_bAlsNeedsTuning   = false;
@@ -362,6 +388,120 @@ float VL6180x::measureAmbientLight()
   m_bBusy = false;
 
   return m_lux;
+}
+
+boolean VL6180x::asyncMeasureRange(byte &dist)
+{
+  boolean bExec;  // can continue to execute on this pass
+  boolean bDone;  // measurement is [not] done
+  byte    status; // status register value
+
+  bExec = true;
+  bDone = false;
+
+  //
+  // Execute asynchronous measurement a far as synchonously possible.
+  //
+  while( bExec )
+  {
+    switch( m_eAsyncState )
+    {
+      //
+      // Initialize data for measurment state.
+      //
+      case AsyncStateInit:
+        m_bBusy = true;
+        if( m_bRangeNeedsTuning ) // range tune parameters need updating
+        {
+          tuneRangeSensor(m_newRangeOffset, m_newRangeCrossTalk);
+        }
+        m_uAsyncTWait   = millis() + 20;
+        m_eAsyncState   = AsyncStateWaitForReady;
+        break;
+
+      //
+      // Wait for the sensor to be ready.
+      //
+      case AsyncStateWaitForReady:
+        status = readReg8(VL6180X_RESULT_RANGE_STATUS);
+        if( status & 0x01 )
+        {
+          m_eAsyncState = AsyncStateStartMeas;
+        }
+        else if( m_uAsyncMaxWait > 0 )
+        {
+          delay(1);
+          --m_uAsyncMaxWait;
+          bExec = false;
+        }
+        else
+        {
+          m_eAsyncState = AsyncStateDone;
+        }
+        break;
+
+      //
+      // Start a measurement.
+      //
+      case AsyncStateStartMeas:
+        writeReg8(VL6180X_SYSRANGE_START, 0x01);
+        m_eAsyncState = AsyncStateWaitForResult;
+        bExec = false;
+        break;
+
+      //
+      // Wait for the result of the measurement.
+      //
+      case AsyncStateWaitForResult:
+        status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
+        if( status & 0x04 )
+        {
+          m_eAsyncState = AsyncStateDone;
+        }
+        
+        break;
+
+      //
+      // Sensor measurement has completed, retrieve the value.
+      //
+      case AsyncStateDone:
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
+
+        m_range = readReg8(VL6180X_RESULT_RANGE_VAL);
+        status  = readReg8(VL6180X_RESULT_RANGE_STATUS);
+        status >>= 4;
+  
+        // over/under flow (usually means no object)
+        if( status != 0 )
+        {
+          m_range = 0xff; // no object value
+        }
+
+        bExec   = false;
+        bDone   = true;
+
+        m_eAsyncState = AsyncStateInit;
+        m_bBusy       = false;
+        break;
+
+      //
+      // Unknown/error state.
+      //
+      case default:
+        m_eAsyncState = AsyncStateInit;
+        break;
+    }
+  }
+
+  return bDone;
+
+
+  delay(20);
+
+
+  m_bBusy = false;
+
+  return m_range;
 }
 
 void VL6180x::markRangeForTuning(byte offset, byte crosstalk)

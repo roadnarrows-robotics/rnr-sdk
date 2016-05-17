@@ -51,7 +51,6 @@ using namespace laelaps;
 #include <Wire.h>
 #include <SoftwareWire.h>
 
-
 #include "VL6180X.h"
 
 //
@@ -75,6 +74,9 @@ SoftwareWire softWire5(12, 13, true, false);
 SoftwareWire softWire6(A0, A1, true, false);
 SoftwareWire softWire7(A2, A3, true, false);
 
+//
+// The sensor I2C interface.
+//
 SoftwareWire *SoftWire[LaeToFMuxNumOfChan] =
 {
   &softWire0, &softWire1, &softWire2, &softWire3,
@@ -84,17 +86,15 @@ SoftwareWire *SoftWire[LaeToFMuxNumOfChan] =
 //
 // The Sensors
 //
-#define ALS_FREQ 2
+VL6180x    *ToFSensor[LaeToFMuxNumOfChan];  ///< the sensor objects
+int         ToFNumConn;                     ///< number of sensors connected
+const int   DistAlsRatio = 16;              ///< dist/amb meas approx ratio
+int         AlsSensorId;                    ///< current ALS sensor id
+int         AlsCounter;                     ///< ALS sense counter
+int         AlsFreq;                        ///< ALS sense frequency 
 
 //
-// Sensors
-//
-VL6180x  *ToFSensor[LaeToFMuxNumOfChan];
-int       AlsSensorId;
-int       AlsFreqCnt;
-
-//
-// I2C Response data
+// I2C slave data
 //
 byte        RspBuf[LaeToFMuxMaxRspLen];         ///< response buffer
 int         RspLen;                             ///< response length
@@ -112,6 +112,7 @@ char      SerArgs[LaeToFMuxSerMaxCmdArgs][LaeToFMuxSerMaxCmdArgLen];
 int       SerArgCnt;
 const int SerCmdIdx = 0;
 boolean   SerContinuousMode;
+
 
 //------------------------------------------------------------------------------
 // Arduino Hook Functions
@@ -138,26 +139,21 @@ void setup()
   }
 
   //
-  // Probe and initialize sensors.
+  // Probe and initialize sensors and data.
   //
   probe();
 
-  AlsFreqCnt  = ALS_FREQ;
-
   //
-  // Response
+  // I2C slave setup. Receive and send from/to master handlee by asynchronous
+  // callbacks.
   //
   RspLen = 0;
-
-  //
-  // I2C slave
-  //
   Wire.begin(LaeI2CAddrToFMux);
   Wire.onReceive(receiveCmd);
   Wire.onRequest(sendRsp);
 
   //
-  // Serial command-line interface (baud does not matter over USB) 
+  // Serial command-line ASCII interface (baud does not matter over USB) 
   // 
   SerLinePos        = 0;
   SerArgCnt         = 0;
@@ -167,22 +163,22 @@ void setup()
 
 void loop()
 {
-  // take distance measurements from all connected sensors
-  measureRanges();
+  //
+  // Take asynchronous measurements.
+  //
+  measure();
 
-  // take one ambient light measurement
-  if( --AlsFreqCnt <= 0 )
-  {
-    measureAmbient();
-    nextAmbientSensor();
-  }
-
+  //
+  // Produce any serial continuous mode output.
+  //
   if( SerContinuousMode )
   {
     serContinuousOutput();
   }
 
-  // process any serial input
+  //
+  // Process any serial input.
+  //
   if( serRcvCmd() )
   {
     if( serParseCmd() )
@@ -192,9 +188,18 @@ void loop()
   }
 }
 
+
+//------------------------------------------------------------------------------
+// Master Interface to Sensors
+//------------------------------------------------------------------------------
+
 void probe()
 {
   int   i;
+
+  ToFNumConn  = 0;
+  AlsSensorId = -1;
+  AlsFreq     = DistAlsRatio;
 
   for(i = 0; i < LaeToFMuxNumOfChan; ++i)
   {
@@ -204,6 +209,7 @@ void probe()
       ToFSensor[i]->initSensor();
       ToFSensor[i]->writeSensorDefaults();
       ToFSensor[i]->readTunes();
+      ++ToFNumConn;
       AlsSensorId = i;
     }
     else
@@ -211,13 +217,95 @@ void probe()
       ToFSensor[i]->blacklist();
     }
   }
+
+  if( ToFNumConn > 0 )
+  {
+    AlsFreq = DistAlsRatio / ToFNumConn;
+  }
+
+  AlsCounter = AlsFreq;
 }
 
+void measure()
+{
+  int     i;
 
-//------------------------------------------------------------------------------
-// Master Interface to Sensors
-//------------------------------------------------------------------------------
+  //
+  // Loop through all sensors and take the appropriate measurements.
+  //
+  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    //
+    // No sensor attached.
+    //
+    if( ToFSensor[i]->isBlacklisted() )
+    {
+      continue;
+    }
 
+    //
+    // This sensor is scheduled or actively taking an ambient light measurement.
+    //
+    if( AlsSensorId == i )
+    {
+      //
+      // Scheduled.
+      //
+      if( AlsCounter > 0 )
+      {
+        // done with a distance measurement
+        if( ToFSensor[i]->asyncMeasureRange() )
+        {
+          --AlsCounter;
+        }
+      }
+
+      //
+      // Making an ambient light measurement.
+      //
+      else
+      {
+        // done with ambient light measurement
+        if( ToFSensor[i]->asyncMeasureAmbienLight() )
+        {
+          AlsSensorId = nextAmbientSensor(AlsSensorId)
+          AlsCounter  = AlsFreq;
+        }
+      }
+    }
+
+    //
+    // Take a distance measurement.
+    //
+    else
+    {
+      ToFSensor[i]->asyncMeasureRange();
+    }
+  }
+}
+
+int nextAmbientSensor(int sensor)
+{
+  int   i;
+
+  sensor = (sensor + 1) % LaeToFMuxNumOfChan;
+
+  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    if( ToFSensor[sensor]->isBlacklisted() )
+    {
+      sensor = (sensor + 1) % LaeToFMuxNumOfChan;
+    }
+    else
+    {
+      break;
+    }
+  }
+
+  return sensor;
+}
+
+#if 0 // synchronous version
 void measureRanges()
 {
   int   i;
@@ -243,23 +331,8 @@ void measureAmbient()
     delay(5);
   }
 }
+#endif // synchronous
 
-void nextAmbientSensor()
-{
-  int   i;
-
-  AlsFreqCnt  = ALS_FREQ;
-  AlsSensorId = (AlsSensorId + 1) % LaeToFMuxNumOfChan;
-
-  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
-  {
-    if( !ToFSensor[AlsSensorId]->isBlacklisted() )
-    {
-      break;
-    }
-    AlsSensorId = (AlsSensorId + 1) % LaeToFMuxNumOfChan;
-  }
-}
 
 
 //------------------------------------------------------------------------------

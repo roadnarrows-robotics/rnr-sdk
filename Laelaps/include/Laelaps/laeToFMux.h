@@ -136,8 +136,8 @@ namespace laelaps
   const byte_t LaeToFMuxArgRangeNoObj = 255;  ///< no object detected 
   const byte_t LaeToFMuxArgRangeNoDev = 254;  ///< no sensor device attached/op
   const byte_t LaeToFMuxArgRangeErr   = 253;  ///< sensor error
-  const byte_t LaeToFMuxArgRangeMin   =   0;  ///< minimum distance (mm)
   const byte_t LaeToFMuxArgRangeMax   = 200;  ///< maximum distance (mm)
+  const byte_t LaeToFMuxArgRangeMin   =   0;  ///< minimum distance (mm)
 
   // ---
  
