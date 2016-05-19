@@ -138,7 +138,7 @@
 
 // cross-talk compensation calibration
 #define VL6180X_RANGE_XTALK_MIN   0       ///< minimum tof cross-talk
-#define VL6180X_RANGE_XTALK_MAX   255     ///< maximum tof cross-talk
+#define VL6180X_RANGE_XTALK_MAX   0xffff  ///< maximum tof cross-talk
 
 //
 // Ambient Light Sensor Specs
@@ -441,7 +441,7 @@ namespace sensor
        * \param [out] regAlsIntPeriod   ALS itegration period register value.
        */
       void readShadowRegs(byte_t &regRangeOffset,
-                          byte_t &regRangeCrossTalk,
+                          u16_t  &regRangeCrossTalk,
                           byte_t &regAlsGain,
                           u16_t  &regAlsIntPeriod);
 
@@ -696,7 +696,7 @@ namespace sensor
       
       // shadow register values
       byte_t  m_regRangeOffset;         ///< range part-to-part offset register
-      byte_t  m_regRangeCrossTalk;      ///< range cross-talk register
+      u16_t   m_regRangeCrossTalk;      ///< range cross-talk register
       byte_t  m_regAlsGain;             ///< ambient light sensor gain register
       u16_t   m_regAlsIntPeriod;        ///< ALS itegration period register
 

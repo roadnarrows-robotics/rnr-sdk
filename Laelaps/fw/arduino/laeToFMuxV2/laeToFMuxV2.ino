@@ -112,6 +112,7 @@ char      SerArgs[LaeToFMuxSerMaxCmdArgs][LaeToFMuxSerMaxCmdArgLen];
 int       SerArgCnt;
 const int SerCmdIdx = 0;
 boolean   SerContinuousMode;
+byte      SerContinuousOutput;
 
 
 //------------------------------------------------------------------------------
@@ -209,6 +210,7 @@ void probe()
       ToFSensor[i]->initSensor();
       ToFSensor[i]->writeSensorDefaults();
       ToFSensor[i]->readTunes();
+
       ++ToFNumConn;
       AlsSensorId = i;
     }
@@ -266,9 +268,9 @@ void measure()
       else
       {
         // done with ambient light measurement
-        if( ToFSensor[i]->asyncMeasureAmbienLight() )
+        if( ToFSensor[i]->asyncMeasureAmbientLight() )
         {
-          AlsSensorId = nextAmbientSensor(AlsSensorId)
+          AlsSensorId = nextAmbientSensor(AlsSensorId);
           AlsCounter  = AlsFreq;
         }
       }
@@ -287,6 +289,11 @@ void measure()
 int nextAmbientSensor(int sensor)
 {
   int   i;
+
+  if( ToFNumConn == 0 )
+  {
+    return -1;
+  }
 
   sensor = (sensor + 1) % LaeToFMuxNumOfChan;
 
@@ -594,7 +601,7 @@ boolean execGetTunes()
   byte      len = LaeToFMuxCmdLenGetTunes - 1; 
   byte      sensor;
   byte      offset;
-  byte      crosstalk;
+  uint16_t  crosstalk;
   byte      gain;
   uint16_t  intPeriod;
   uint16_t  val_hi, val_lo;
@@ -740,49 +747,143 @@ boolean serParseCmd()
   return SerArgCnt > 0;
 }
 
-int serParseSensorNumber(char *s)
+boolean serChkArgCnt(int nExpected)
 {
-  int   n;
-  char *endptr;
+  int   argCnt;
 
-  if( (s == NULL) || (*s == 0) )
+  argCnt = SerArgCnt - 1;
+
+  if( argCnt != nExpected )
   {
-    rsp("%s %s no sensor argument", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
-    return -1;
+    rsp("%s %s command requires %d args, got %d",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nExpected, argCnt);
+    return false;
   }
 
-  n = (int)strtol(s, &endptr, 0);
+  return true;
+}
 
-  if( *endptr != 0 )
+boolean serChkArgMinMaxCnt(int nMin, int nMax)
+{
+  int   argCnt;
+
+  argCnt = SerArgCnt - 1;
+
+  if( argCnt < nMin )
   {
-    rsp("%s %s %s not a number",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
-    return -1;
+    rsp("%s %s command has a minimum of %d args, got %d",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nMin, argCnt);
+    return false;
   }
-  else if( (n < LaeToFMuxMinChan) || (n > LaeToFMuxMaxChan) )
+  else if( argCnt > nMax )
   {
-    rsp("%s %s %s sensor number out-of-range",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
-    return -1;
+    rsp("%s %s command has a maximum of %d args, got %d",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nMin, argCnt);
+    return false;
   }
-  else if( ToFSensor[n]->isBlacklisted() )
+
+  return true;
+}
+
+int serParseOp(char *s)
+{
+  String  str(s);
+
+  if( str == LaeToFMuxSerArgGet )
   {
-    rsp("%s %s %s no sensor connected",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
-    return -1;
+    return 'g';
+  }
+  else if( str == LaeToFMuxSerArgSet )
+  {
+    return 's';
   }
   else
   {
-    return n;
+    rsp("%s %s command has unknown operator %s",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
+    return '?';
   }
 }
 
-boolean serChkArgCnt(int nExpected)
+boolean serParseNumber(char *sName, char *sVal,
+                       long  nMin,  long nMax,
+                       long &nVal)
 {
-  if( (SerArgCnt-1) != nExpected )
+  String  str = "";
+  char   *s, c;
+
+  if( (sVal == NULL) || (*sVal == 0) )
   {
-    rsp("%s %s require %d args, got %d",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nExpected, SerArgCnt-1);
+    rsp("%s %s no %s argument",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], *sName);
+    return false;
+  }
+
+  for(s = sVal; *s != NULL; ++s)
+  {
+    c = *s;
+    if( isDigit(c) )
+    {
+      str += c;
+    }
+    else
+    {
+      rsp("%s %s %s is not a number",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], sVal);
+      return false;
+    }
+  }
+    
+  nVal = str.toInt();
+
+  if( (nVal < nMin) || (nVal > nMax) )
+  {
+    rsp("%s %s %s %s out-of-range",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], sName, sVal);
+    return false;
+  }
+
+  return true;
+}
+
+boolean serParseSensorId(char *sVal, int sensor)
+{
+  long  n;
+
+  if( !serParseNumber("sensor", sVal, LaeToFMuxMinChan, LaeToFMuxMaxChan, n) )
+  {
+    return false;
+  }
+  else if( ToFSensor[n]->isBlacklisted() )
+  {
+    rsp("%s %s sensor %s not connected",
+        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], sVal);
+    return false;
+  }
+  else
+  {
+    sensor = (int)n;
+    return true;
+  }
+}
+
+boolean serParseTuneParam(char *sName, char *sVal,
+                          long nCur, long nDft,
+                          long nMin, long nMax,
+                          long &nVal)
+{
+  String  str(sVal);
+
+  if( str == LaeToFMuxSerArgStet )
+  {
+    nVal = nCur;
+  }
+  else if( str == LaeToFMuxSerArgReset )
+  {
+    nVal = nDft;
+  }
+  else if( !serParseNumber(sName, sVal, nMin, nMax, nVal) )
+  {
     return false;
   }
 
@@ -811,6 +912,9 @@ void serExecCmd()
     case LaeToFMuxSerCmdIdGetVersion:
       serExecGetVersion();
       break;
+    case LaeToFMuxSerCmdIdConfig:
+      serExecConfig();
+      break;
     case LaeToFMuxSerCmdIdGetIdent:
       serExecGetIdent();
       break;
@@ -820,8 +924,8 @@ void serExecCmd()
     case LaeToFMuxSerCmdIdGetLux:
       serExecGetLux();
       break;
-    case LaeToFMuxSerCmdIdGetTunes:
-      serExecGetTunes();
+    case LaeToFMuxSerCmdIdTunes:
+      serExecTunes();
       break;
     case LaeToFMuxSerCmdIdProbe:
       serExecProbe();
@@ -831,8 +935,10 @@ void serExecCmd()
       break;
     case LaeToFMuxSerCmdIdCont:
       serExecCont();
-      bMode = SerContinuousMode; // this command toggles continuous mode
+      bMode = true;
       break;
+    case LaeToFMuxSerCmdIdDebug:
+      break;  // TODO
     default:
       rsp("%s %s unknown command", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
       break;
@@ -843,23 +949,27 @@ void serExecCmd()
 
 void serExecHelp()
 {
-  rsp("%c          - get ambient light measurements from all sensors",
-                           LaeToFMuxSerCmdIdGetLux);
-  rsp("%c          - turn on/off continuous output mode",
-                           LaeToFMuxSerCmdIdCont);
-  rsp("%c          - get distance measurements from all sensors",
-                           LaeToFMuxSerCmdIdGetDist);
-  rsp("%c <sensor> - get ToF sensor identify", LaeToFMuxSerCmdIdGetIdent);
-  rsp("%c          - list sensor connected state",
-                           LaeToFMuxSerCmdIdProbe);
-  rsp("%c          - probe for connected sensors",
-                           LaeToFMuxSerCmdIdProbe);
-  rsp("%c <sensor> - get ToF sensor tune parameters",
-                            LaeToFMuxSerCmdIdGetTunes);
-  rsp("%c          - get firmware version", LaeToFMuxSerCmdIdGetVersion);
-
-  rsp("");
-  rsp("%c          - print this help", LaeToFMuxSerCmdIdHelp);
+  rsp("%s 10", SerArgs[SerCmdIdx]);
+  rsp("%c                       - get ambient light measurements from all sensors",
+      LaeToFMuxSerCmdIdGetLux);
+  rsp("%c <op> [cfg]            - get/set firmware operation",
+      LaeToFMuxSerCmdIdGetLux);
+  rsp("%c                       - get distance measurements from all sensors",
+      LaeToFMuxSerCmdIdGetDist);
+  rsp("%c                       - print this help",
+      LaeToFMuxSerCmdIdHelp);
+  rsp("%c <sensor>              - get ToF sensor identify",
+      LaeToFMuxSerCmdIdGetIdent);
+  rsp("%c                       - list sensor connected state",
+      LaeToFMuxSerCmdIdList);
+  rsp("%c <output>              - enable continuous output mode",
+      LaeToFMuxSerCmdIdCont);
+  rsp("%c                       - probe for connected sensors",
+      LaeToFMuxSerCmdIdProbe);
+  rsp("%c <op> <sensor> [tunes] - get/set ToF sensor tune parameters",
+      LaeToFMuxSerCmdIdTunes);
+  rsp("%c                       - get firmware version",
+      LaeToFMuxSerCmdIdGetVersion);
 }
 
 void serExecGetVersion()
@@ -867,6 +977,60 @@ void serExecGetVersion()
   if( serChkArgCnt(LaeToFMuxSerCmdArgsGetVersion) )
   {
     rsp("%s %d", SerArgs[SerCmdIdx], LAE_TOF_MUX_FW_VERSION);
+  }
+}
+
+void serExecConfig()
+{
+  int   op;
+  long  state;
+
+  if( !serChkArgMinMaxCnt(LaeToFMuxSerCmdArgsGetConfig,
+                          LaeToFMuxSerCmdArgsSetConfig) )
+  {
+    return;
+  }
+  else if( (op = serParseOp(SerArgs[1])) == '?' )
+  {
+    return;
+  }
+
+  if( op == 'g' )
+  {
+    if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetConfig) )
+    {
+      return;
+    }
+  }
+  else if( op == 's' )
+  {
+    if( !serChkArgCnt(LaeToFMuxSerCmdArgsSetConfig) )
+    {
+      return;
+    }
+    
+    if( !serParseNumber("als_state", SerArgs[2], 0, 1, state) )
+    {
+      return;
+    }
+
+    if( state == 0 )
+    {
+      AlsSensorId = -1;
+    }
+    else
+    {
+      AlsSensorId = AlsSensorId < 0? nextAmbientSensor(0): AlsSensorId;
+    }
+  }
+
+  if( AlsSensorId < 0 )
+  {
+    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOff);
+  }
+  else
+  {
+    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOn);
   }
 }
 
@@ -879,7 +1043,7 @@ void serExecGetIdent()
   {
     return;
   }
-  else if( (sensor = serParseSensorNumber(SerArgs[1])) < 0 )
+  else if( !serParseSensorId(SerArgs[1], sensor) ) 
   {
     return;
   }
@@ -958,53 +1122,147 @@ void serExecGetLux()
   {
     if( ToFSensor[i]->isBlacklisted() )
     {
-      lux = LaeToFMuxArgLuxNoLight;
+      lux = LaeToFMuxArgLuxNoDev;
+      p(" %7s", LaeToFMuxSerArgNotPresent);
     }
     else
     {
       lux = ToFSensor[i]->getAmbientLight();
+
+      lux_int = (uint32_t)lux;
+      lux = lux - (float)lux_int;
+      lux_frac = (uint32_t)(lux * 100.0);
+
+      p(" %7d.%02d", lux_int, lux_frac);
     }
-
-    lux_int = (uint32_t)lux;
-    lux = lux - (float)lux_int;
-    lux_frac = (uint32_t)(lux * 100.0);
-
-    p(" %7d.%02d", lux_int, lux_frac);
   }
 
   Serial.print(LaeToFMuxSerEoR);
 }
 
-void serExecGetTunes()
+void serExecTunes()
 {
+  int       op;
   int       sensor;
-  byte      offset;
-  byte      crosstalk;
-  byte      gain;
-  uint16_t  intPeriod;
+  byte      rangeOffset, rangeOffsetDft;
+  uint16_t  rangeCrossTalk, rangeCrossTalkDft;
+  byte      alsGain, alsGainDft;
+  uint16_t  alsIntPeriod, alsIntPeriodDft;
+  long      val;
 
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetTunes) )
+  if( !serChkArgMinMaxCnt(LaeToFMuxSerCmdArgsGetTunes,
+                          LaeToFMuxSerCmdArgsSetTunes) )
   {
     return;
   }
-  else if( (sensor = serParseSensorNumber(SerArgs[1])) < 0 )
+  else if( (op = serParseOp(SerArgs[1])) == '?' )
   {
     return;
+  }
+  else if( !serParseSensorId(SerArgs[2], sensor) )
+  {
+    return;
+  }
+
+  // get current tune values
+  ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
+                              alsGain,     alsIntPeriod);
+
+  //
+  // get
+  //
+  if( op == 'g' )
+  {
+    if( serChkArgCnt(LaeToFMuxSerCmdArgsGetTunes) )
+    {
+      rsp("%s %u %u %u %u",
+        SerArgs[SerCmdIdx], rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
+    }
+    return;
+  }
+
+  //
+  // set
+  //
+
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsSetTunes) )
+  {
+    return;
+  }
+
+  // get factory default tune values
+  ToFSensor[sensor]->getDefaultTunes(rangeOffsetDft, rangeCrossTalkDft,
+                                     alsGainDft,     alsIntPeriodDft);
+
+  //
+  // parse tune arguments
+  //
+
+  if( serParseTuneParam("tof_offset", SerArgs[3],
+                          rangeOffset, rangeOffsetDft,
+                          VL6180X_RANGE_OFFSET_MIN, VL6180X_RANGE_OFFSET_MIN,
+                          val) )
+  {
+    rangeOffset = (byte)val;
   }
   else
   {
-    ToFSensor[sensor]->getTunes(offset, crosstalk, gain, intPeriod);
-
-    rsp("%s %u %u %u %u",
-        SerArgs[SerCmdIdx], offset, crosstalk, gain, intPeriod);
+    return;
   }
+
+  if( serParseTuneParam("tof_cross_talk", SerArgs[4],
+                          rangeCrossTalk, rangeCrossTalkDft,
+                          VL6180X_RANGE_XTALK_MIN, VL6180X_RANGE_XTALK_MIN,
+                          val) )
+  {
+    rangeCrossTalk = (uint16_t)val;
+  }
+  else
+  {
+    return;
+  }
+
+  if( serParseTuneParam("als_gain", SerArgs[5],
+                          alsGain, alsGainDft,
+                          VL6180X_AMBIENT_GAIN_MIN, VL6180X_AMBIENT_GAIN_MAX,
+                          val) )
+  {
+    alsGain = (byte)val;
+  }
+  else
+  {
+    return;
+  }
+
+  if( serParseTuneParam("als_int_period", SerArgs[6],
+                          alsIntPeriod, alsIntPeriodDft,
+                          VL6180X_AMBIENT_INT_T_MIN, VL6180X_AMBIENT_INT_T_MAX,
+                          val) )
+  {
+    alsIntPeriod = (uint16_t)val;
+  }
+  else
+  {
+    return;
+  }
+
+  ToFSensor[sensor]->markRangeForTuning(rangeOffset, rangeCrossTalk);
+  ToFSensor[sensor]->markAlsForTuning(alsGain, alsIntPeriod);
+  
+  //
+  // Get new current tune values. Note that tune parameters are updated 
+  // asynchronously, so the current value may not match the target set values
+  // yet.
+  //
+  ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
+                              alsGain,     alsIntPeriod);
+
+  rsp("%s %u %u %u %u",
+        SerArgs[SerCmdIdx], rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
 }
 
 void serExecProbe()
 {
-  int   i;
-  int   nSensors;
-
   if( !serChkArgCnt(LaeToFMuxSerCmdArgsProbe) )
   {
     return;
@@ -1012,16 +1270,7 @@ void serExecProbe()
 
   probe();
 
-  // count
-  for(i = 0, nSensors = 0; i < LaeToFMuxNumOfChan; ++i)
-  {
-    if( !ToFSensor[i]->isBlacklisted() )
-    {
-      ++nSensors;
-    }
-  }
-
-  rsp("%s %d", SerArgs[SerCmdIdx], nSensors);
+  rsp("%s %d", SerArgs[SerCmdIdx], ToFNumConn);
 }
 
 void serExecList()

@@ -198,7 +198,7 @@ LaeVL6180Mux::LaeVL6180Mux(LaeI2CMux     &mux,
   m_uAlsIntPeriod   = 50;   // datasheet recommends the forever 100 msec
 
   m_regRangeOffset    = (byte_t)0;
-  m_regRangeCrossTalk = (byte_t)0;
+  m_regRangeCrossTalk = (u16_t)0;
   m_regAlsGain        = (byte_t)gainAnalogToEnum(m_fAlsGain);
   m_regAlsIntPeriod   = (u16_t)(m_uAlsIntPeriod - 1);
 
@@ -382,7 +382,7 @@ int LaeVL6180Mux::tune(uint_t uRangeOffset, uint_t uRangeCrossTalk,
                        double fAlsGain, uint_t uAlsIntPeriod)
 {
   byte_t  regRangeOffset;
-  byte_t  regRangeCrossTalk;
+  u16_t   regRangeCrossTalk;
   byte_t  regAlsGain;
   u16_t   regAlsIntPeriod;
   int     rc;
@@ -407,7 +407,7 @@ int LaeVL6180Mux::tune(uint_t uRangeOffset, uint_t uRangeCrossTalk,
   }
   else
   {
-    regRangeCrossTalk = (byte_t)cap(uRangeCrossTalk,
+    regRangeCrossTalk = (u16_t)cap(uRangeCrossTalk,
                                     (uint_t)VL6180X_RANGE_XTALK_MIN,
                                     (uint_t)VL6180X_RANGE_XTALK_MAX);
   }
@@ -443,7 +443,7 @@ int LaeVL6180Mux::tune(uint_t uRangeOffset, uint_t uRangeCrossTalk,
   //
   if( regRangeCrossTalk != m_regRangeCrossTalk )
   {
-    rc = writeReg8(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE,
+    rc = writeReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE,
                       regRangeCrossTalk);
     if( rc == LAE_OK )
     {
@@ -500,7 +500,7 @@ void LaeVL6180Mux::readShadowRegs()
   lock();
 
   readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET, m_regRangeOffset);
-  readReg8(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE, m_regRangeCrossTalk);
+  readReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE, m_regRangeCrossTalk);
   readReg8(VL6180X_SYSALS_ANALOGUE_GAIN, m_regAlsGain);
   readReg16(VL6180X_SYSALS_INTEGRATION_PERIOD, m_regAlsIntPeriod);
 
@@ -516,7 +516,7 @@ void LaeVL6180Mux::readShadowRegs()
 }
 
 void LaeVL6180Mux::readShadowRegs(byte_t &regRangeOffset,
-                                  byte_t &regRangeCrossTalk,
+                                  u16_t  &regRangeCrossTalk,
                                   byte_t &regAlsGain,
                                   u16_t  &regAlsIntPeriod)
 {
@@ -1058,7 +1058,7 @@ int LaeVL6180Mux::calibCrossTalk(int &nCrossTalk)
   //
   // Clear compensation register.
   //
-  if( (rc = writeReg8(regComp, 0)) == LAE_OK )
+  if( (rc = writeReg16(regComp, 0)) == LAE_OK )
   {
     m_regRangeCrossTalk = 0;  // update shadow register
   }
@@ -1106,7 +1106,7 @@ int LaeVL6180Mux::calibCrossTalk(int &nCrossTalk)
   //
   // Write new compensation value.
   //
-  if( (rc = writeReg8(regComp, val)) == LAE_OK )
+  if( (rc = writeReg16(regComp, val)) == LAE_OK )
   {
     m_regRangeCrossTalk = val;    // update shadow register
   }

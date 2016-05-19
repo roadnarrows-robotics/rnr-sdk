@@ -137,6 +137,22 @@
 #define VL6180X_I2C_SLAVE_DEVICE_ADDRESS             0x0212
 #define VL6180X_INTERLEAVED_MODE_ENABLE              0x02A3
 
+//
+// Range sensor tunes
+//
+
+// part-to-part offset calibration
+#define VL6180X_RANGE_OFFSET_MIN  0     ///< minimum tof offset
+#define VL6180X_RANGE_OFFSET_MAX  0xff  ///< maximum tof offset
+
+// cross-talk compensation calibration
+#define VL6180X_RANGE_XTALK_MIN   0       ///< minimum tof cross-talk
+#define VL6180X_RANGE_XTALK_MAX   0xffff  ///< maximum tof cross-talk
+#define VL6180X_RANGE_XTALK_DFT   0       ///< factory default tof cross-talk
+
+//
+// Ambient light sensor tunes
+//
 
 /*!
  * \brief ALS gain enumeration.
@@ -145,15 +161,28 @@
  */
 enum vl6180x_als_gain
 {
-  GAIN_20 = 0, ///< Actual ALS Gain of 20
-  GAIN_10,     ///< Actual ALS Gain of 10.32
-  GAIN_5,      ///< Actual ALS Gain of 5.21
-  GAIN_2_5,    ///< Actual ALS Gain of 2.60
-  GAIN_1_67,   ///< Actual ALS Gain of 1.72
-  GAIN_1_25,   ///< Actual ALS Gain of 1.28
-  GAIN_1 ,     ///< Actual ALS Gain of 1.01
-  GAIN_40,     ///< Actual ALS Gain of 40
+  GAIN_20 = 0,  ///< Actual ALS Gain of 20
+  GAIN_10,      ///< Actual ALS Gain of 10.32
+  GAIN_5,       ///< Actual ALS Gain of 5.21
+  GAIN_2_5,     ///< Actual ALS Gain of 2.60
+  GAIN_1_67,    ///< Actual ALS Gain of 1.72
+  GAIN_1_25,    ///< Actual ALS Gain of 1.28
+  GAIN_1 ,      ///< Actual ALS Gain of 1.01
+  GAIN_40       ///< Actual ALS Gain of 40
 };
+
+// analog gain tuning
+#define VL6180X_AMBIENT_GAIN_MIN  GAIN_20 ///< minimum als analog gain value
+#define VL6180X_AMBIENT_GAIN_MAX  GAIN_40 ///< maximum als analog gain
+#define VL6180X_AMBIENT_GAIN_DFT  GAIN_1  ///< factory default als analog gain
+
+// integration period tuning
+#define VL6180X_AMBIENT_INT_T_MIN   1     ///< minimum als int period (msec)
+#define VL6180X_AMBIENT_INT_T_MAX   512   ///< maximum als int period (msec)
+#define VL6180X_AMBIENT_INT_T_DFT   1     ///< factory default int period (1 ms)
+#define VL6180X_AMBIENT_INT_T_REC   100   ///< recommended int period (msec)
+#define VL6180X_AMBIENT_INT_T_MASK  0x1ff ///< als integration period mask
+
 
 /*!
  * \brief Sensor identification structure.
@@ -189,6 +218,7 @@ public:
     AsyncStateWaitForReady,   ///< wait for sensor to be ready
     AsyncStateStartMeas,      ///< start measurement
     AsyncStateWaitForResult,  ///< wait for sensor measurement result
+    AsyncStateAbort,          ///< abort measurement
     AsyncStateDone            ///< measurement made
   };
 
@@ -260,20 +290,49 @@ public:
   /*!
    * \brief Measure object's range.
    *
-   * \param [out] dist    Measured distance (mm).
+   * Example code snippet:
+   * \verbatim 
+   * byte dist;
+   * while(1)
+   * {
+   *  if( asyncMeasureRange() )
+   *  {
+   *    dist = getRange();
+   *    // .. do something.
+   *  }
+   * }
+   * \endverbatim 
    *
    * \return Returns true when measurement is complete, false otherwise.
    */
-  boolean asyncMeasureRange(byte &dist);
+  boolean asyncMeasureRange();
 
   /*!
    * \brief Measure ambient light.
    *
-   * \param [out] lux     Ambient light (lux).
-   *
    * \return Returns true when measurement is complete, false otherwise.
    */
-  boolean asyncMeasureAmbientLight(float &lux);
+  boolean asyncMeasureAmbientLight();
+
+  /*!
+   * \brief Convert raw range value to disance.
+   *
+   * \param rangeRaw    Range's raw value.
+   * \param rangeStatus Range measurement status.
+   *
+   * \return Converted distance (mm).
+   */
+  byte cvtRangeRawToDist(byte rangeRaw, byte rangeStatus);
+
+  /*!
+   * \brief Convert raw ALS value to lux.
+   *
+   * \param alsRaw    ALS's raw ambient light value.
+   * \param alsStatus ALS measurement status.
+   *
+   * \return Converted lux.
+   */
+  float cvtAlsRawToLux(uint16_t alsRaw, byte alsStatus);
 
   /*!
    * \brief Mark time-of-flight sensor for tuning.
@@ -281,7 +340,7 @@ public:
    * \param offset    ToF sensor part-to-part offset.
    * \param crosstalk ToF sensor cross-talk compensation.
    */
-  void markRangeForTuning(byte offset, byte crosstalk);
+  void markRangeForTuning(byte offset, uint16_t crosstalk);
   
   /*!
    * \brief Tune time-of-flight range sensor.
@@ -291,7 +350,7 @@ public:
    *
    * \return Returns true on success, false on failure.
    */
-  boolean tuneRangeSensor(byte offset, byte crosstalk);
+  boolean tuneRangeSensor(byte offset, uint16_t crosstalk);
 
   /*!
    * \brief Mark ambient light sensor for tuning.
@@ -343,14 +402,26 @@ public:
   void getIdent(VL6180xIdentification *pIdent);
 
   /*!
-   * \brief Get the exported tuning parameters.
+   * \brief Get the current tuning parameters values.
    *
    * \param [out] offset      ToF sensor part-to-part offset.
    * \param [out] crosstalk   ToF sensor cross-talk compensation.
    * \param [out] gain        Ambient light sensor analog gain enum.
    * \param [out] intPeriod   Ambient light sensor integration period (msec).
    */
-  void getTunes(byte &offset, byte &crosstalk, byte &gain, uint16_t &intPeriod);
+  void getTunes(byte &offset, uint16_t &crosstalk,
+                byte &gain,   uint16_t &intPeriod);
+
+  /*!
+   * \brief Get the exported tuning factory defaults.
+   *
+   * \param [out] offset      ToF sensor part-to-part offset.
+   * \param [out] crosstalk   ToF sensor cross-talk compensation.
+   * \param [out] gain        Ambient light sensor analog gain enum.
+   * \param [out] intPeriod   Ambient light sensor integration period (msec).
+   */
+  void getDefaultTunes(byte &offset, uint16_t &crosstalk,
+                       byte &gain,   uint16_t &intPeriod);
 
   /*!
    * \brief Get measured range.
@@ -379,7 +450,8 @@ protected:
 
   // asynchronous measurment state
   AsyncState    m_eAsyncState;        ///< current state
-  unsigned long m_uAsyncTWait;        ///< wait timeout clock (msec)
+  unsigned long m_uAsyncTStart;       ///< measurement start clock time (msec)
+  unsigned long m_uAsyncTWait;        ///< wait timeout (msec)
   
   // pending tuning operations
   byte      m_newRangeOffset;         ///< new pending range part-to-part offset
@@ -390,10 +462,11 @@ protected:
   boolean   m_bAlsNeedsTuning;        ///< ALS does [not] need tuning
 
   // shadow register values
-  byte      m_regRangeOffset;         ///< range part-to-part offset register
-  byte      m_regRangeCrossTalk;      ///< range cross-talk register
-  byte      m_regAlsGain;             ///< ALS gain register
-  uint16_t  m_regAlsIntPeriod;        ///< ALS itegration period register
+  byte      m_regRangeOffsetDft;      ///< factory calibrated offset register
+  byte      m_regRangeOffset;         ///< range part-to-part offset value
+  uint16_t  m_regRangeCrossTalk;      ///< range cross-talk value
+  byte      m_regAlsGain;             ///< ALS gain value
+  uint16_t  m_regAlsIntPeriod;        ///< ALS itegration period value
 
   /*!
    * \brief Read 8-bit value from sensor register.

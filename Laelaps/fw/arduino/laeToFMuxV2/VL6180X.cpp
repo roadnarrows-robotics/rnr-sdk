@@ -21,7 +21,7 @@
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * 2015  RoadNarrows
+ * 2015-2016  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -69,6 +69,8 @@
  */
 unsigned long dt(unsigned long t0)
 {
+  unsigned long t1;
+
   t1 = millis();
 
   // time t1 is later than t0
@@ -99,10 +101,11 @@ VL6180x::VL6180x(SoftwareWire &wire, uint8_t address) :
   m_bRangeNeedsTuning = false;
   m_bAlsNeedsTuning   = false;
 
-  m_regRangeOffset    = 0;        // default
-  m_regRangeCrossTalk = 0;        // default
-  m_regAlsGain        = GAIN_1;   // 1.0
-  m_regAlsIntPeriod   = 100;      // 100 msec
+  m_regRangeOffsetDft = 0;                          // factory part default 
+  m_regRangeOffset    = 0;                          // default varies by part
+  m_regRangeCrossTalk = VL6180X_RANGE_XTALK_DFT;    // cross-talk default
+  m_regAlsGain        = VL6180X_AMBIENT_GAIN_DFT;   // als gain 1.0
+  m_regAlsIntPeriod   = VL6180X_AMBIENT_INT_T_REC;  // als int time 100 msec
 }
 
 boolean VL6180x::ping(int tries)
@@ -188,25 +191,50 @@ void VL6180x::writeSensorDefaults()
 {
   m_bBusy = true;
 
-  //Recommended settings from datasheet
-  //http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
+  // Recommended settings from datasheet
+  // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
 
-  //Enable Interrupts on Conversion Complete (any source)
-  writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, (4 << 3)|(4) ); // Set GPIO1 high when sample complete
+  // enable interrupts on conversion complete (any source)
+  // Set GPIO1 high when sample complete
+  writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, (4 << 3)|(4) );
 
+  // Set GPIO1 high when sample complete
+  writeReg8(VL6180X_SYSTEM_MODE_GPIO1, 0x10);
 
-  writeReg8(VL6180X_SYSTEM_MODE_GPIO1, 0x10); // Set GPIO1 high when sample complete
-  writeReg8(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30); //Set Avg sample period
-  writeReg8(VL6180X_SYSALS_ANALOGUE_GAIN, (0x40 | m_regAlsGain)); // Set the ALS gain
-  writeReg8(VL6180X_SYSRANGE_VHV_REPEAT_RATE, 0xFF); // Set auto calibration period (Max = 255)/(OFF = 0)
-  writeReg8(VL6180X_SYSALS_INTEGRATION_PERIOD, m_regAlsIntPeriod-1); // Set ALS integration time to 100ms
-  writeReg8(VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01); // perform a single temperature calibration
-  //Optional settings from datasheet
-  //http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
-  writeReg8(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09); // Set default ranging inter-measurement period to 100ms
-  writeReg8(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 0x0A); // Set default ALS inter-measurement period to 100ms
-  writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24); // Configures interrupt on ‘New Sample Ready threshold event’ 
-  //Additional settings defaults from community
+  // Set avg sample period
+  writeReg8(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30);
+
+  // factory calibrated offset
+  m_regRangeOffsetDft = readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET);
+
+  // cross-talk compensation
+  writeReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE, m_regRangeCrossTalk);
+
+  // set the ALS gain
+  writeReg8(VL6180X_SYSALS_ANALOGUE_GAIN, (0x40 | m_regAlsGain));
+
+  // set auto calibration period (Max = 255)/(OFF = 0)
+  writeReg8(VL6180X_SYSRANGE_VHV_REPEAT_RATE, 0xFF);
+
+  // Set ALS integration time to 100ms
+  writeReg8(VL6180X_SYSALS_INTEGRATION_PERIOD, m_regAlsIntPeriod-1);
+
+  // perform a single temperature calibration
+  writeReg8(VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01);
+
+  // Optional settings from datasheet
+  // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
+ 
+  // set default ranging inter-measurement period to 100ms
+  writeReg8(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09);
+
+  // set default ALS inter-measurement period to 100ms
+  writeReg8(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 0x0A);
+
+  // configures interrupt on ‘new sample ready threshold event’ 
+  writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24);
+
+  // additional settings defaults from community
   writeReg8(VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME, 0x32);
   writeReg8(VL6180X_SYSRANGE_RANGE_CHECK_ENABLES, 0x10 | 0x01);
   writeReg16(VL6180X_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE, 0x7B );
@@ -236,8 +264,7 @@ void VL6180x::readIdent()
 void VL6180x::readTunes()
 {
   m_regRangeOffset    = readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET);
-
-  m_regRangeCrossTalk = readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET);
+  m_regRangeCrossTalk = readReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE);
 
   m_regAlsGain = readReg8(VL6180X_SYSALS_ANALOGUE_GAIN);
   m_regAlsGain &= 0x2f;
@@ -271,8 +298,8 @@ byte VL6180x::changeAddress(byte new_address)
 
 byte VL6180x::measureRange()
 {
-  int   i;
-  byte  status;
+  byte  range;    // range raw value
+  byte  status;   // range measurement status
 
   m_bBusy = true;
 
@@ -287,15 +314,10 @@ byte VL6180x::measureRange()
 
   writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
-  m_range = readReg8(VL6180X_RESULT_RANGE_VAL);
+  range   = readReg8(VL6180X_RESULT_RANGE_VAL);
   status  = readReg8(VL6180X_RESULT_RANGE_STATUS);
-  status >>= 4;
-  
-  // over/under flow (usually means no object)
-  if( status != 0 )
-  {
-    m_range = 0xff;
-  }
+
+  m_range = cvtRangeRawToDist(range, status);
 
   m_bBusy = false;
 
@@ -305,10 +327,6 @@ byte VL6180x::measureRange()
 float VL6180x::measureAmbientLight()
 {
   unsigned int  alsRaw;
-  unsigned int  alsIntegrationPeriodRaw;
-  float         alsIntegrationPeriod;
-  float         alsGain;
-  float         alsCalculated;
   byte          status;
 
   m_bBusy = true;
@@ -318,18 +336,7 @@ float VL6180x::measureAmbientLight()
     tuneAls(m_newAlsGain, m_newAlsIntPeriod);
   }
 
-  // Calculate actual LUX from Appnotes
-
-  //
-  // Set the ALS gain
-  //
-  // First load in Gain we are using, do it everytime incase someone changes it
-  // on us.
-  // Note: Upper nibble shoudl be set to 0x4 i.e. for ALS gain of 1.0 write 0x46
-  //
-  //writeReg8(VL6180X_SYSALS_ANALOGUE_GAIN, (0x40 | m_regAlsGain));
-
-  // Start ALS Measurement 
+  // start ALS measurement 
   writeReg8(VL6180X_SYSALS_START, 0x01);
 
   delay(m_regAlsIntPeriod+10); // give it time... 
@@ -340,16 +347,310 @@ float VL6180x::measureAmbientLight()
   alsRaw = readReg16(VL6180X_RESULT_ALS_VAL);
   status = readReg8(VL6180X_RESULT_ALS_STATUS);
   
+  // convert raw to lux
+  m_lux = cvtAlsRawToLux(alsRaw, status);
+
+  m_bBusy = false;
+
+  return m_lux;
+}
+
+boolean VL6180x::asyncMeasureRange()
+{
+  boolean bExec;  // can [not] continue to execute on this pass
+  boolean bDone;  // measurement is [not] done
+  byte    range;  // range raw value
+  byte    status; // status register value
+
+  bExec = true;
+  bDone = false;
+
   //
-  // Get Integration Period for calculation, we do this everytime in case
-  // someone changes it on us.
+  // Execute asynchronous measurement a far as synchronously possible.
   //
-  //alsIntegrationPeriodRaw = readReg16(VL6180X_SYSALS_INTEGRATION_PERIOD);
+  while( bExec )
+  {
+    switch( m_eAsyncState )
+    {
+      //
+      // Initialize data for measurment.
+      //
+      case AsyncStateInit:
+        // mark sensor busy
+        m_bBusy = true;
+
+        // range tune parameters need updating
+        if( m_bRangeNeedsTuning )
+        {
+          tuneRangeSensor(m_newRangeOffset, m_newRangeCrossTalk);
+        }
+
+        // initialize state
+        m_uAsyncTWait   = 20;
+        m_uAsyncTStart  = millis();
+        m_eAsyncState   = AsyncStateWaitForReady;
+        break;
+
+      //
+      // Wait for the sensor to be ready.
+      //
+      case AsyncStateWaitForReady:
+        // read range status register
+        status = readReg8(VL6180X_RESULT_RANGE_STATUS);
+
+        // sensor is ready
+        if( status & 0x01 )
+        {
+          m_eAsyncState = AsyncStateStartMeas;
+        }
+        // keep waiting
+        else if( dt(m_uAsyncTStart) <= m_uAsyncTWait )
+        {
+          bExec = false;
+        }
+        // timeout - abort
+        else
+        {
+          m_eAsyncState = AsyncStateAbort;
+        }
+        break;
+
+      //
+      // Start a measurement.
+      //
+      case AsyncStateStartMeas:
+        writeReg8(VL6180X_SYSRANGE_START, 0x01);
+        bExec         = false;
+        m_eAsyncState = AsyncStateWaitForResult;
+        break;
+
+      //
+      // Wait for the measurement's result.
+      //
+      case AsyncStateWaitForResult:
+        // read gpio interrupt status 
+        status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
+
+        // result ready
+        if( status & 0x04 )
+        {
+          m_eAsyncState = AsyncStateDone;
+        }
+        // keep waiting
+        else if( dt(m_uAsyncTStart) <= m_uAsyncTWait )
+        {
+          bExec = false;
+        }
+        // timeout - abort
+        else
+        {
+          m_eAsyncState = AsyncStateAbort;
+        }
+        break;
+
+      //
+      // Sensor measurement has completed, retrieve the value.
+      //
+      case AsyncStateDone:
+        // clear interrupts
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
+
+        // get range distance and status values
+        range   = readReg8(VL6180X_RESULT_RANGE_VAL);
+        status  = readReg8(VL6180X_RESULT_RANGE_STATUS);
+
+        m_range = cvtRangeRawToDist(range, status);
+
+        bExec         = false;
+        bDone         = true;
+        m_eAsyncState = AsyncStateInit;
+        m_bBusy       = false;
+        break;
+
+      case AsyncStateAbort:
+        // clear interrupts
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
+
+        bExec         = false;
+        bDone         = true;
+        m_eAsyncState = AsyncStateInit;
+        m_bBusy       = false;
+        break;
+
+      //
+      // Unknown/error state.
+      //
+      default:
+        m_eAsyncState = AsyncStateInit;
+        break;
+    }
+  }
+
+  return bDone;
+}
+
+boolean VL6180x::asyncMeasureAmbientLight()
+{
+  boolean   bExec;  // can [not] continue to execute on this pass
+  boolean   bDone;  // measurement is [not] done
+  uint16_t  raw;    // als raw value
+  byte      status; // status register value
+
+  bExec = true;
+  bDone = false;
+
+  //
+  // Execute asynchronous measurement a far as synchronously possible.
+  //
+  while( bExec )
+  {
+    switch( m_eAsyncState )
+    {
+      //
+      // Initialize data for measurment.
+      //
+      case AsyncStateInit:
+        // mark sensor busy
+        m_bBusy = true;
+
+        // ambient light tune parameters need updating
+        if( m_bAlsNeedsTuning )
+        {
+          tuneAls(m_newAlsGain, m_newAlsIntPeriod);
+        }
+
+        // initialize state
+        m_uAsyncTWait   = (unsigned long)m_regAlsIntPeriod + 10;
+        m_uAsyncTStart  = millis();
+        m_eAsyncState   = AsyncStateWaitForReady;
+        break;
+
+      //
+      // Wait for the sensor to be ready.
+      //
+      case AsyncStateWaitForReady:
+        // read range status register
+        status = readReg8(VL6180X_RESULT_ALS_STATUS);
+
+        // sensor is ready
+        if( status & 0x01 )
+        {
+          m_eAsyncState = AsyncStateStartMeas;
+        }
+        // keep waiting
+        else if( dt(m_uAsyncTStart) <= m_uAsyncTWait )
+        {
+          bExec = false;
+        }
+        // timeout - abort
+        else
+        {
+          m_eAsyncState = AsyncStateAbort;
+        }
+        break;
+
+      //
+      // Start a measurement.
+      //
+      case AsyncStateStartMeas:
+        writeReg8(VL6180X_SYSALS_START, 0x01);
+        bExec         = false;
+        m_eAsyncState = AsyncStateWaitForResult;
+        break;
+
+      //
+      // Wait for the measurement's result.
+      //
+      case AsyncStateWaitForResult:
+        // read gpio interrupt status 
+        status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
+
+        // result ready
+        if( status & 0x02 )
+        {
+          m_eAsyncState = AsyncStateDone;
+        }
+        // keep waiting
+        else if( dt(m_uAsyncTStart) <= m_uAsyncTWait )
+        {
+          bExec = false;
+        }
+        // timeout - abort
+        else
+        {
+          m_eAsyncState = AsyncStateAbort;
+        }
+        break;
+
+      //
+      // Sensor measurement has completed, retrieve the value.
+      //
+      case AsyncStateDone:
+        // clear interrupts
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
+
+        // get range distance and status values
+        raw     = readReg16(VL6180X_RESULT_ALS_VAL);
+        status  = readReg8(VL6180X_RESULT_ALS_STATUS);
   
+        m_lux = cvtAlsRawToLux(raw, status);
+
+        bExec         = false;
+        bDone         = true;
+        m_eAsyncState = AsyncStateInit;
+        m_bBusy       = false;
+        break;
+
+      case AsyncStateAbort:
+        // clear interrupts
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
+
+        bExec         = false;
+        bDone         = true;
+        m_eAsyncState = AsyncStateInit;
+        m_bBusy       = false;
+        break;
+
+      //
+      // Unknown/error state.
+      //
+      default:
+        m_eAsyncState = AsyncStateInit;
+        break;
+    }
+  }
+
+  return bDone;
+}
+
+byte VL6180x::cvtRangeRawToDist(byte rangeRaw, byte rangeStatus)
+{
+  byte  range;
+
+  rangeStatus >>= 4;
+  
+  if( rangeStatus == 0 )
+  {
+    range = rangeRaw;
+  }
+  // over/under flow (usually means no object)
+  else
+  {
+    range = 0xff;
+  }
+
+  return range;
+}
+
+float VL6180x::cvtAlsRawToLux(uint16_t alsRaw, byte alsStatus)
+{
+  float   alsIntegrationPeriod;
+  float   alsGain;
+  float   lux;
+
   alsIntegrationPeriod = 100.0 / (float)m_regAlsIntPeriod;
 
-  // Calculate actual LUX from Appnotes
-
+  // gain enums to values
   switch( m_regAlsGain )
   {
     case GAIN_20:   alsGain = 20.0; break;
@@ -364,154 +665,34 @@ float VL6180x::measureAmbientLight()
   }
 
   // Calculate LUX from formula in AppNotes
-  m_lux = (float)0.32 * ((float)alsRaw / alsGain) * alsIntegrationPeriod;
+  lux = (float)0.32 * ((float)alsRaw / alsGain) * alsIntegrationPeriod;
 
 #if 0 // DBG code
-  if( status & 0x10 )         // overflow
+  if( alsStatus & 0x10 )         // overflow
   {
-    m_lux = 1.0;
+    lux = -100.0;
   }
-  else if( status & 0x20 )    // underflow
+  else if( alsStatus & 0x20 )    // underflow
   {
-    m_lux = 2.0;
+    lux = -200.0;
   }
-  else if( !(status & 0x01) ) // busy
+  else if( !(alsStatus & 0x01) ) // busy
   {
-    m_lux = 3.0;
-  }
-  else                        // good
-  {
-    m_lux = 0.0;
+    lux = -300.0;
   }
 #endif // DBG code
 
-  m_bBusy = false;
-
-  return m_lux;
+  return lux;
 }
 
-boolean VL6180x::asyncMeasureRange(byte &dist)
-{
-  boolean bExec;  // can continue to execute on this pass
-  boolean bDone;  // measurement is [not] done
-  byte    status; // status register value
-
-  bExec = true;
-  bDone = false;
-
-  //
-  // Execute asynchronous measurement a far as synchonously possible.
-  //
-  while( bExec )
-  {
-    switch( m_eAsyncState )
-    {
-      //
-      // Initialize data for measurment state.
-      //
-      case AsyncStateInit:
-        m_bBusy = true;
-        if( m_bRangeNeedsTuning ) // range tune parameters need updating
-        {
-          tuneRangeSensor(m_newRangeOffset, m_newRangeCrossTalk);
-        }
-        m_uAsyncTWait   = millis() + 20;
-        m_eAsyncState   = AsyncStateWaitForReady;
-        break;
-
-      //
-      // Wait for the sensor to be ready.
-      //
-      case AsyncStateWaitForReady:
-        status = readReg8(VL6180X_RESULT_RANGE_STATUS);
-        if( status & 0x01 )
-        {
-          m_eAsyncState = AsyncStateStartMeas;
-        }
-        else if( m_uAsyncMaxWait > 0 )
-        {
-          delay(1);
-          --m_uAsyncMaxWait;
-          bExec = false;
-        }
-        else
-        {
-          m_eAsyncState = AsyncStateDone;
-        }
-        break;
-
-      //
-      // Start a measurement.
-      //
-      case AsyncStateStartMeas:
-        writeReg8(VL6180X_SYSRANGE_START, 0x01);
-        m_eAsyncState = AsyncStateWaitForResult;
-        bExec = false;
-        break;
-
-      //
-      // Wait for the result of the measurement.
-      //
-      case AsyncStateWaitForResult:
-        status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
-        if( status & 0x04 )
-        {
-          m_eAsyncState = AsyncStateDone;
-        }
-        
-        break;
-
-      //
-      // Sensor measurement has completed, retrieve the value.
-      //
-      case AsyncStateDone:
-        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
-
-        m_range = readReg8(VL6180X_RESULT_RANGE_VAL);
-        status  = readReg8(VL6180X_RESULT_RANGE_STATUS);
-        status >>= 4;
-  
-        // over/under flow (usually means no object)
-        if( status != 0 )
-        {
-          m_range = 0xff; // no object value
-        }
-
-        bExec   = false;
-        bDone   = true;
-
-        m_eAsyncState = AsyncStateInit;
-        m_bBusy       = false;
-        break;
-
-      //
-      // Unknown/error state.
-      //
-      case default:
-        m_eAsyncState = AsyncStateInit;
-        break;
-    }
-  }
-
-  return bDone;
-
-
-  delay(20);
-
-
-  m_bBusy = false;
-
-  return m_range;
-}
-
-void VL6180x::markRangeForTuning(byte offset, byte crosstalk)
+void VL6180x::markRangeForTuning(byte offset, uint16_t crosstalk)
 {
   m_newRangeOffset    = offset;
   m_newRangeCrossTalk = crosstalk;
   m_bRangeNeedsTuning = true;
 }
 
-boolean VL6180x::tuneRangeSensor(byte offset, byte crosstalk)
+boolean VL6180x::tuneRangeSensor(byte offset, uint16_t crosstalk)
 {
   if( offset != m_regRangeOffset )
   {
@@ -521,8 +702,9 @@ boolean VL6180x::tuneRangeSensor(byte offset, byte crosstalk)
 
   if( crosstalk != m_regRangeCrossTalk )
   {
-    writeReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET, crosstalk);
-    m_regRangeCrossTalk = readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET);
+    writeReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE, crosstalk);
+    m_regRangeCrossTalk =
+                    readReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE);
   }
 
   m_bRangeNeedsTuning = false;
@@ -599,13 +781,22 @@ void VL6180x::getIdent(VL6180xIdentification *pIdent)
 {
 }
 
-void VL6180x::getTunes(byte &offset, byte &crosstalk,
+void VL6180x::getTunes(byte &offset, uint16_t &crosstalk,
                        byte &gain,   uint16_t &intPeriod)
 {
   offset    = m_regRangeOffset;
   crosstalk = m_regRangeCrossTalk;
   gain      = m_regAlsGain;
   intPeriod = m_regAlsIntPeriod;
+}
+
+void VL6180x::getDefaultTunes(byte &offset, uint16_t &crosstalk,
+                              byte &gain,   uint16_t &intPeriod)
+{
+  offset    = m_regRangeOffsetDft;
+  crosstalk = VL6180X_RANGE_XTALK_DFT;
+  gain      = VL6180X_AMBIENT_GAIN_DFT;
+  intPeriod = VL6180X_AMBIENT_INT_T_REC;
 }
 
 byte VL6180x::getRange()
