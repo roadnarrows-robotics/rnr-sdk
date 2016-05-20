@@ -273,6 +273,7 @@ void VL6180x::readTunes()
   m_regAlsIntPeriod += 1;
 }
 
+#ifdef INCLUDE_EXTRAS
 byte VL6180x::changeAddress(byte new_address)
 {
   if( new_address == m_addr )
@@ -354,6 +355,7 @@ float VL6180x::measureAmbientLight()
 
   return m_lux;
 }
+#endif // INCLUDE_EXTRAS
 
 boolean VL6180x::asyncMeasureRange()
 {

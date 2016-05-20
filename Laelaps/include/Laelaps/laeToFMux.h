@@ -377,7 +377,7 @@ namespace laelaps
   //
   const char LaeToFMuxSerCmdIdCont     = 'o'; ///< serial command id
   const byte_t LaeToFMuxSerCmdArgsCont = 1;   ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsCont = 2;   ///< rsp argument count
+  const byte_t LaeToFMuxSerRspArgsCont = 1;   ///< rsp argument count
 
   //
   // Debug

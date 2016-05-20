@@ -265,6 +265,7 @@ public:
    */
   void readTunes();
 
+#ifdef INCLUDE_EXTRAS
   /*!
    * \brief Change address of sensor.
    *
@@ -286,6 +287,7 @@ public:
    * \brief Measure ambient light.
    */
   float measureAmbientLight();
+#endif // INCLUDE_EXTRAS
 
   /*!
    * \brief Measure object's range.

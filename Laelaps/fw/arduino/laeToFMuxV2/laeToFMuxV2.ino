@@ -167,14 +167,14 @@ void loop()
   //
   // Take asynchronous measurements.
   //
-  measure();
+  //RDK measure();
 
   //
   // Produce any serial continuous mode output.
   //
   if( SerContinuousMode )
   {
-    serContinuousOutput();
+    //RDK serContinuousOutput();
   }
 
   //
@@ -312,7 +312,7 @@ int nextAmbientSensor(int sensor)
   return sensor;
 }
 
-#if 0 // synchronous version
+#ifdef INCLUDE_EXTRAS
 void measureRanges()
 {
   int   i;
@@ -338,7 +338,7 @@ void measureAmbient()
     delay(5);
   }
 }
-#endif // synchronous
+#endif // INCLUDE_EXTRAS
 
 
 
@@ -436,11 +436,6 @@ void flushRead()
     d = Wire.read();
   }
 }
-
-
-//------------------------------------------------------------------------------
-// Command Functions
-//------------------------------------------------------------------------------
 
 /*!
  * \brief Execute I2C command to get the firmware's version number.
@@ -638,7 +633,7 @@ boolean execGetTunes()
 // Serial Functions
 //------------------------------------------------------------------------------
 
-void p(char *fmt, ... )
+void p(char *fmt, ...)
 {
   va_list args;
   char    buf[LaeToFMuxSerMaxRspLen];
@@ -652,15 +647,38 @@ void p(char *fmt, ... )
 
 void rsp(char *fmt, ... )
 {
+  String  strFmt;
   va_list args;
   char    buf[LaeToFMuxSerMaxRspLen];
 
+  sprintf(buf, "%s ", SerArgs[SerCmdIdx]);
+  strFmt  = buf;
+  strFmt += fmt;
+  strFmt += LaeToFMuxSerEoR;
+
   va_start(args, fmt);
-  vsnprintf(buf, LaeToFMuxSerMaxRspLen, fmt, args);
+  vsnprintf(buf, LaeToFMuxSerMaxRspLen, strFmt.c_str(), args);
   va_end(args);
 
   Serial.print(buf);
-  Serial.print(LaeToFMuxSerEoR);
+}
+
+void errrsp(char *fmt, ... )
+{
+  String  strFmt;
+  va_list args;
+  char    buf[LaeToFMuxSerMaxRspLen];
+
+  sprintf(buf, "%s %s ", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
+  strFmt  = buf;
+  strFmt += fmt;
+  strFmt += LaeToFMuxSerEoR;
+
+  va_start(args, fmt);
+  vsnprintf(buf, LaeToFMuxSerMaxRspLen, strFmt.c_str(), args);
+  va_end(args);
+
+  Serial.print(buf);
 }
 
 inline boolean whitespace(char c)
@@ -755,30 +773,7 @@ boolean serChkArgCnt(int nExpected)
 
   if( argCnt != nExpected )
   {
-    rsp("%s %s command requires %d args, got %d",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nExpected, argCnt);
-    return false;
-  }
-
-  return true;
-}
-
-boolean serChkArgMinMaxCnt(int nMin, int nMax)
-{
-  int   argCnt;
-
-  argCnt = SerArgCnt - 1;
-
-  if( argCnt < nMin )
-  {
-    rsp("%s %s command has a minimum of %d args, got %d",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nMin, argCnt);
-    return false;
-  }
-  else if( argCnt > nMax )
-  {
-    rsp("%s %s command has a maximum of %d args, got %d",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], nMin, argCnt);
+    errrsp("requires %d args, got %d", nExpected, argCnt);
     return false;
   }
 
@@ -799,8 +794,7 @@ int serParseOp(char *s)
   }
   else
   {
-    rsp("%s %s command has unknown operator %s",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], s);
+    errrsp("unknown operator %s", s);
     return '?';
   }
 }
@@ -814,8 +808,7 @@ boolean serParseNumber(char *sName, char *sVal,
 
   if( (sVal == NULL) || (*sVal == 0) )
   {
-    rsp("%s %s no %s argument",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], *sName);
+    errrsp("no %s argument", *sName);
     return false;
   }
 
@@ -828,8 +821,7 @@ boolean serParseNumber(char *sName, char *sVal,
     }
     else
     {
-      rsp("%s %s %s is not a number",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], sVal);
+      errrsp("%s value %s is not a number", sName, sVal);
       return false;
     }
   }
@@ -838,8 +830,7 @@ boolean serParseNumber(char *sName, char *sVal,
 
   if( (nVal < nMin) || (nVal > nMax) )
   {
-    rsp("%s %s %s %s out-of-range",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], sName, sVal);
+    errrsp("%s value %s out-of-range", sName, sVal);
     return false;
   }
 
@@ -856,8 +847,7 @@ boolean serParseSensorId(char *sVal, int sensor)
   }
   else if( ToFSensor[n]->isBlacklisted() )
   {
-    rsp("%s %s sensor %s not connected",
-        LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx], sVal);
+    errrsp("sensor %s not connected", sVal);
     return false;
   }
   else
@@ -897,7 +887,7 @@ void serExecCmd()
 
   if( strlen(SerArgs[SerCmdIdx]) > 1 )
   {
-    rsp("%s %s bad command", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
+    errrsp("bad command");
     return;
   }
 
@@ -935,12 +925,12 @@ void serExecCmd()
       break;
     case LaeToFMuxSerCmdIdCont:
       serExecCont();
-      bMode = true;
+      bMode = SerContinuousMode;
       break;
     case LaeToFMuxSerCmdIdDebug:
       break;  // TODO
     default:
-      rsp("%s %s unknown command", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
+      errrsp("unknown command");
       break;
   }
 
@@ -949,34 +939,47 @@ void serExecCmd()
 
 void serExecHelp()
 {
-  rsp("%s 10", SerArgs[SerCmdIdx]);
-  rsp("%c                       - get ambient light measurements from all sensors",
-      LaeToFMuxSerCmdIdGetLux);
-  rsp("%c <op> [cfg]            - get/set firmware operation",
-      LaeToFMuxSerCmdIdGetLux);
-  rsp("%c                       - get distance measurements from all sensors",
-      LaeToFMuxSerCmdIdGetDist);
-  rsp("%c                       - print this help",
-      LaeToFMuxSerCmdIdHelp);
-  rsp("%c <sensor>              - get ToF sensor identify",
-      LaeToFMuxSerCmdIdGetIdent);
-  rsp("%c                       - list sensor connected state",
-      LaeToFMuxSerCmdIdList);
-  rsp("%c <output>              - enable continuous output mode",
-      LaeToFMuxSerCmdIdCont);
-  rsp("%c                       - probe for connected sensors",
-      LaeToFMuxSerCmdIdProbe);
-  rsp("%c <op> <sensor> [tunes] - get/set ToF sensor tune parameters",
-      LaeToFMuxSerCmdIdTunes);
-  rsp("%c                       - get firmware version",
+  rsp("%c %c %c %c %c %c %c %c %c",
+      LaeToFMuxSerCmdIdGetLux,
+      LaeToFMuxSerCmdIdConfig,
+      LaeToFMuxSerCmdIdGetDist,
+      LaeToFMuxSerCmdIdGetIdent,
+      LaeToFMuxSerCmdIdList,
+      LaeToFMuxSerCmdIdCont,
+      LaeToFMuxSerCmdIdProbe,
+      LaeToFMuxSerCmdIdTunes,
       LaeToFMuxSerCmdIdGetVersion);
+
+#if 0 // RDK not sufficient memory
+  rsp("%s 10", SerArgs[SerCmdIdx]);
+  p("%c                       - get ambient light measurements from all sensors%s",
+      LaeToFMuxSerCmdIdGetLux, LaeToFMuxSerEoR);
+  p("%c <op> [cfg]            - get/set firmware operation%s",
+      LaeToFMuxSerCmdIdConfig, LaeToFMuxSerEoR);
+  p("%c                       - get distance measurements from all sensors%s",
+      LaeToFMuxSerCmdIdGetDist, LaeToFMuxSerEoR);
+  p("%c                       - print this help%s",
+      LaeToFMuxSerCmdIdHelp, LaeToFMuxSerEoR);
+  p("%c <sensor>              - get ToF sensor identify%s",
+      LaeToFMuxSerCmdIdGetIdent, LaeToFMuxSerEoR);
+  p("%c                       - list sensor connected state%s",
+      LaeToFMuxSerCmdIdList, LaeToFMuxSerEoR);
+  p("%c <output>              - enable continuous output mode%s",
+      LaeToFMuxSerCmdIdCont, LaeToFMuxSerEoR);
+  p(%s"%c                       - probe for connected sensors%s",
+      LaeToFMuxSerCmdIdProbe, LaeToFMuxSerEoR);
+  p("%c <op> <sensor> [tunes] - get/set ToF sensor tune parameters%s",
+      LaeToFMuxSerCmdIdTunes, LaeToFMuxSerEoR);
+  p("%c                       - get firmware version%s",
+      LaeToFMuxSerCmdIdGetVersion, LaeToFMuxSerEoR);
+#endif // RDK
 }
 
 void serExecGetVersion()
 {
   if( serChkArgCnt(LaeToFMuxSerCmdArgsGetVersion) )
   {
-    rsp("%s %d", SerArgs[SerCmdIdx], LAE_TOF_MUX_FW_VERSION);
+    rsp("%d", LAE_TOF_MUX_FW_VERSION);
   }
 }
 
@@ -985,10 +988,9 @@ void serExecConfig()
   int   op;
   long  state;
 
-  if( !serChkArgMinMaxCnt(LaeToFMuxSerCmdArgsGetConfig,
-                          LaeToFMuxSerCmdArgsSetConfig) )
+  if( (SerArgCnt - 1) == 0 )
   {
-    return;
+    errrsp("no operator");
   }
   else if( (op = serParseOp(SerArgs[1])) == '?' )
   {
@@ -1026,11 +1028,11 @@ void serExecConfig()
 
   if( AlsSensorId < 0 )
   {
-    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOff);
+    rsp("%s", LaeToFMuxSerArgOff);
   }
   else
   {
-    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOn);
+    rsp("%s", LaeToFMuxSerArgOn);
   }
 }
 
@@ -1051,8 +1053,7 @@ void serExecGetIdent()
   {
     ToFSensor[sensor]->getIdent(&ident);
 
-    rsp("%s 0x%02x %d.%d %d.%d, %d, %d",
-      SerArgs[SerCmdIdx],
+    rsp("0x%02x %d.%d %d.%d, %d, %d",
       ident.idModel,
       ident.idModelRevMajor, ident.idModelRevMinor,
       ident.idModuleRevMajor, ident.idModuleRevMinor,
@@ -1150,9 +1151,9 @@ void serExecTunes()
   uint16_t  alsIntPeriod, alsIntPeriodDft;
   long      val;
 
-  if( !serChkArgMinMaxCnt(LaeToFMuxSerCmdArgsGetTunes,
-                          LaeToFMuxSerCmdArgsSetTunes) )
+  if( (SerArgCnt - 1) == 0 )
   {
+    errrsp("no operator");
     return;
   }
   else if( (op = serParseOp(SerArgs[1])) == '?' )
@@ -1175,8 +1176,7 @@ void serExecTunes()
   {
     if( serChkArgCnt(LaeToFMuxSerCmdArgsGetTunes) )
     {
-      rsp("%s %u %u %u %u",
-        SerArgs[SerCmdIdx], rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
+      rsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
     }
     return;
   }
@@ -1257,8 +1257,7 @@ void serExecTunes()
   ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
                               alsGain,     alsIntPeriod);
 
-  rsp("%s %u %u %u %u",
-        SerArgs[SerCmdIdx], rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
+  rsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
 }
 
 void serExecProbe()
@@ -1270,7 +1269,7 @@ void serExecProbe()
 
   probe();
 
-  rsp("%s %d", SerArgs[SerCmdIdx], ToFNumConn);
+  rsp("%d", ToFNumConn);
 }
 
 void serExecList()
@@ -1301,21 +1300,32 @@ void serExecList()
 
 void serExecCont()
 {
+  String  str;
+
   if( !serChkArgCnt(LaeToFMuxSerCmdArgsCont) )
   {
     return; 
   }
 
-  if( !SerContinuousMode )
+  str = SerArgs[1];
+
+  if( str == "a" )
   {
-    SerContinuousMode = true;
-    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOn);
+    SerContinuousOutput = 'a';
+  }
+  else if( str == "d" )
+  {
+    SerContinuousOutput = 'd';
   }
   else
   {
-    SerContinuousMode = false;
-    rsp("%s %s", SerArgs[SerCmdIdx], LaeToFMuxSerArgOff);
+    errrsp("%s bad output mode", str.c_str());
+    return;
   }
+
+  SerContinuousMode = true;
+
+  rsp("%s", str.c_str());
 }
 
 void serContinuousOutput()
