@@ -141,7 +141,7 @@
 // Range sensor tunes
 //
 
-// part-to-part offset calibration
+// part-to-part offset calibration (part to part default varies)
 #define VL6180X_RANGE_OFFSET_MIN  0     ///< minimum tof offset
 #define VL6180X_RANGE_OFFSET_MAX  0xff  ///< maximum tof offset
 
@@ -270,32 +270,32 @@ public:
    * \brief Change address of sensor.
    *
    * Note: IT APPEARS THAT CHANGING THE ADDRESS IS NOT STORED IN NON-VOLATILE
-   *       MEMORY POWER CYCLING THE DEVICE REVERTS ADDRESS BACK TO 0X29.
+   *       MEMORY. POWER CYCLING THE DEVICE REVERTS ADDRESS BACK TO 0X29.
    *
    * \return Return (new) address.
    */
   byte changeAddress(byte new_address);
 
   /*!
-   * \brief Measure object's range.
+   * \brief Synchronously measure object's range.
    *
    * \return Returns distance (mm).
    */
   byte measureRange();
 
   /*!
-   * \brief Measure ambient light.
+   * \brief Synchronously measure ambient light.
    */
   float measureAmbientLight();
 #endif // INCLUDE_EXTRAS
 
   /*!
-   * \brief Measure object's range.
+   * \brief Asynchronously measure object's range.
    *
    * Example code snippet:
    * \verbatim 
    * byte dist;
-   * while(1)
+   * while(true)
    * {
    *  if( asyncMeasureRange() )
    *  {
@@ -310,7 +310,20 @@ public:
   boolean asyncMeasureRange();
 
   /*!
-   * \brief Measure ambient light.
+   * \brief Asynchronously measure ambient light.
+   *
+   * Example code snippet:
+   * \verbatim 
+   * byte dist;
+   * while(true)
+   * {
+   *  if( asyncMeasureAmbientLight() )
+   *  {
+   *    dist = getRange();
+   *    // .. do something.
+   *  }
+   * }
+   * \endverbatim 
    *
    * \return Returns true when measurement is complete, false otherwise.
    */
@@ -376,6 +389,11 @@ public:
   //............................................................................
   // Attriube Member Functions
   //............................................................................
+
+  /*!
+   * \brief Whitelist this sensor.
+   */
+  void whitelist();
 
   /*!
    * \brief Blacklist this sensor.

@@ -88,7 +88,7 @@ SoftwareWire *SoftWire[LaeToFMuxNumOfChan] =
 //
 VL6180x    *ToFSensor[LaeToFMuxNumOfChan];  ///< the sensor objects
 int         ToFNumConn;                     ///< number of sensors connected
-const int   DistAlsRatio = 16;              ///< dist/amb meas approx ratio
+const int   DistAlsRatio = 16;              ///< dist to amb sense approx ratio
 int         AlsSensorId;                    ///< current ALS sensor id
 int         AlsCounter;                     ///< ALS sense counter
 int         AlsFreq;                        ///< ALS sense frequency 
@@ -96,12 +96,8 @@ int         AlsFreq;                        ///< ALS sense frequency
 //
 // I2C slave data
 //
-byte        RspBuf[LaeToFMuxMaxRspLen];         ///< response buffer
-int         RspLen;                             ///< response length
-const byte  RspErrorBuf[LaeToFMuxMaxRspLen] =   ///< response error pattern
-{
-  0xde, 0xad, 0xfa, 0xce, 0xba, 0xad, 0xf0, 0x0d, 0,
-};
+byte        I2CRspBuf[LaeToFMuxMaxRspLen];  ///< response buffer
+int         I2CRspLen;                      ///< response length
 
 //
 // Serial CLI
@@ -119,6 +115,9 @@ byte      SerContinuousOutput;
 // Arduino Hook Functions
 //------------------------------------------------------------------------------
 
+/*!
+ * \brief Arduino setup() hook.
+ */
 void setup()
 {
   int   i;
@@ -148,10 +147,10 @@ void setup()
   // I2C slave setup. Receive and send from/to master handlee by asynchronous
   // callbacks.
   //
-  RspLen = 0;
+  I2CRspLen = 0;
   Wire.begin(LaeI2CAddrToFMux);
-  Wire.onReceive(receiveCmd);
-  Wire.onRequest(sendRsp);
+  Wire.onReceive(i2cReceiveCmd);
+  Wire.onRequest(i2cSendRsp);
 
   //
   // Serial command-line ASCII interface (baud does not matter over USB) 
@@ -162,19 +161,22 @@ void setup()
   Serial.begin(115200);
 }
 
+/*!
+ * \brief Arduino loop() hook.
+ */
 void loop()
 {
   //
   // Take asynchronous measurements.
   //
-  //RDK measure();
+  measure();
 
   //
   // Produce any serial continuous mode output.
   //
   if( SerContinuousMode )
   {
-    //RDK serContinuousOutput();
+    serContinuousOutput();
   }
 
   //
@@ -194,6 +196,12 @@ void loop()
 // Master Interface to Sensors
 //------------------------------------------------------------------------------
 
+/*!
+ * \brief Probe for all connected I2C sensors.
+ *  
+ * Each discovered sensor is (re)initialized. Each unconnected or non-repsonsive
+ * sensor is blacklisted.
+ */
 void probe()
 {
   int   i;
@@ -206,6 +214,7 @@ void probe()
   {
     if( ToFSensor[i]->ping(3) )
     {
+      ToFSensor[i]->whitelist();
       ToFSensor[i]->readIdent();
       ToFSensor[i]->initSensor();
       ToFSensor[i]->writeSensorDefaults();
@@ -228,6 +237,9 @@ void probe()
   AlsCounter = AlsFreq;
 }
 
+/*!
+ * \brief Take distance and ambient light measurements from all sensors.
+ */
 void measure()
 {
   int     i;
@@ -246,7 +258,8 @@ void measure()
     }
 
     //
-    // This sensor is scheduled or actively taking an ambient light measurement.
+    // This sensor is scheduled or is actively taking an ambient light
+    // measurement.
     //
     if( AlsSensorId == i )
     {
@@ -255,29 +268,31 @@ void measure()
       //
       if( AlsCounter > 0 )
       {
-        // done with a distance measurement
+        // continue taking distance measurements
         if( ToFSensor[i]->asyncMeasureRange() )
         {
-          --AlsCounter;
+          --AlsCounter; // when done decrement ALS counter.
         }
       }
 
       //
-      // Making an ambient light measurement.
+      // Active.
       //
       else
       {
-        // done with ambient light measurement
+        // push ambient light measurement until done
         if( ToFSensor[i]->asyncMeasureAmbientLight() )
         {
-          AlsSensorId = nextAmbientSensor(AlsSensorId);
+          // when done move to next sensor
+          AlsSensorId = nextSensor(AlsSensorId);
           AlsCounter  = AlsFreq;
         }
       }
     }
 
     //
-    // Take a distance measurement.
+    // This sensor is not scheduled or is actively taking an ambient light
+    // measurement. So take a distance measurement.
     //
     else
     {
@@ -286,10 +301,18 @@ void measure()
   }
 }
 
-int nextAmbientSensor(int sensor)
+/*!
+ * \brief Find the next sensor in sequence.
+ *
+ * \param sensor  Starting sensor id.
+ *
+ * \param Next sesnor id.
+ */
+int nextSensor(int sensor)
 {
   int   i;
 
+  // no sensors
   if( ToFNumConn == 0 )
   {
     return -1;
@@ -313,6 +336,9 @@ int nextAmbientSensor(int sensor)
 }
 
 #ifdef INCLUDE_EXTRAS
+/*!
+ * \brief Synchronously take distance measurements from all connected sensors.
+ */
 void measureRanges()
 {
   int   i;
@@ -328,13 +354,19 @@ void measureRanges()
   }
 }
 
-void measureAmbient()
+/*!
+ * \brief Synchronously take an ambient light measurement from the given
+ * sensor.
+ *
+ * \param sensor  Sensor id.
+ */
+void measureAmbient(int sensor)
 {
   float flux;
 
-  if( !ToFSensor[AlsSensorId]->isBlacklisted() )
+  if( !ToFSensor[sensor]->isBlacklisted() )
   {
-    flux = ToFSensor[AlsSensorId]->measureAmbientLight();
+    flux = ToFSensor[sensor]->measureAmbientLight();
     delay(5);
   }
 }
@@ -353,38 +385,38 @@ void measureAmbient()
  *
  * This function is called asynchronously by the Arduino I2C slave framework.
  */
-void receiveCmd(int n)
+void i2cReceiveCmd(int n)
 {
   byte    cmdId;
   boolean bOk;
 
   if( Wire.available() > 0 )
   {
-    cmdId   = Wire.read();
-    RspLen  = 0;
+    cmdId     = Wire.read();
+    I2CRspLen = 0;
 
     switch( cmdId )
     {
       case LaeToFMuxCmdIdGetVersion:
-        bOk = execGetVersion();
+        bOk = i2cExecGetVersion();
         break;
       case LaeToFMuxCmdIdGetIdent:
-        bOk = execGetIdent();
+        bOk = i2cExecGetIdent();
         break;
       case LaeToFMuxCmdIdGetRanges:
-        bOk = execGetRanges();
+        bOk = i2cExecGetRanges();
         break;
       case LaeToFMuxCmdIdGetLux:
-        bOk = execGetAmbients();
+        bOk = i2cExecGetAmbients();
         break;
       case LaeToFMuxCmdIdTuneRangeSensor:
-        bOk = execTuneRange();
+        bOk = i2cExecTuneRange();
         break;
       case LaeToFMuxCmdIdTuneAls:
-        bOk = execTuneAls();
+        bOk = i2cExecTuneAls();
         break;
       case LaeToFMuxCmdIdGetTunes:
-        bOk = execGetTunes();
+        bOk = i2cExecGetTunes();
         break;
       default:
         flushRead();
@@ -394,33 +426,33 @@ void receiveCmd(int n)
 }
 
 /*!
- * \brief Send any response loaded in response buffer.
+ * \brief Send any response pre-loaded in response buffer.
  */
-void sendRsp()
+void i2cSendRsp()
 {
-  if( RspLen > 0 )
+  if( I2CRspLen > 0 )
   {
-    Wire.write(RspBuf, RspLen);
-    RspLen = 0;
+    Wire.write(I2CRspBuf, I2CRspLen);
+    I2CRspLen = 0;
   }
 }
 
 /*!
  * \brief Error response for bad commands the expect data back.
  *
- * \param n   Length of expected response.
+ * \param n   Length of expected non-error response.
  */
 void errorRsp(int n)
 {
-  int   i;
+  byte  b;
 
   // flush input 
   flushRead();
 
-  // fill response buffer with recognizable error pattern
-  for(; RspLen < n; ++RspLen)
+  // fill response buffer with recognizable error pattern ABC...
+  for(b = 'A'; I2CRspLen < n; ++I2CRspLen, ++b)
   {
-    RspBuf[RspLen] = RspErrorBuf[RspLen];
+    I2CRspBuf[I2CRspLen] = b;
   }
 }
 
@@ -429,11 +461,11 @@ void errorRsp(int n)
  */
 void flushRead()
 {
-  byte  d;
+  byte  b;
 
   while( Wire.available() > 0 )
   {
-    d = Wire.read();
+    b = Wire.read();
   }
 }
 
@@ -442,13 +474,18 @@ void flushRead()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execGetVersion()
+boolean i2cExecGetVersion()
 {
-  RspBuf[RspLen++] = (byte)LAE_TOF_MUX_FW_VERSION;
+  I2CRspBuf[I2CRspLen++] = (byte)LAE_TOF_MUX_FW_VERSION;
   return true;
 }
 
-boolean execGetIdent()
+/*!
+ * \brief Execute I2C command to get a sensor's identity.
+ *
+ * \return Returns true on success, false on failure.
+ */
+boolean i2cExecGetIdent()
 {
   byte                  len = LaeToFMuxCmdLenGetIdent - 1; 
   byte                  sensor;
@@ -462,15 +499,15 @@ boolean execGetIdent()
     {
       ToFSensor[sensor]->getIdent(&ident);
 
-      RspBuf[RspLen++] = (byte)ident.idModel;
-      RspBuf[RspLen++] = (byte)ident.idModelRevMajor;
-      RspBuf[RspLen++] = (byte)ident.idModelRevMinor;
-      RspBuf[RspLen++] = (byte)ident.idModuleRevMajor;
-      RspBuf[RspLen++] = (byte)ident.idModuleRevMinor;
-      RspBuf[RspLen++] = (byte)(ident.idDate >> 8);
-      RspBuf[RspLen++] = (byte)(ident.idDate & 0xff);
-      RspBuf[RspLen++] = (byte)(ident.idTime >> 8);
-      RspBuf[RspLen++] = (byte)(ident.idTime & 0xff);
+      I2CRspBuf[I2CRspLen++] = (byte)ident.idModel;
+      I2CRspBuf[I2CRspLen++] = (byte)ident.idModelRevMajor;
+      I2CRspBuf[I2CRspLen++] = (byte)ident.idModelRevMinor;
+      I2CRspBuf[I2CRspLen++] = (byte)ident.idModuleRevMajor;
+      I2CRspBuf[I2CRspLen++] = (byte)ident.idModuleRevMinor;
+      I2CRspBuf[I2CRspLen++] = (byte)(ident.idDate >> 8);
+      I2CRspBuf[I2CRspLen++] = (byte)(ident.idDate & 0xff);
+      I2CRspBuf[I2CRspLen++] = (byte)(ident.idTime >> 8);
+      I2CRspBuf[I2CRspLen++] = (byte)(ident.idTime & 0xff);
 
       return true;
     }
@@ -482,7 +519,12 @@ boolean execGetIdent()
   return false;
 }
 
-boolean execGetRanges()
+/*!
+ * \brief Execute I2C command to get measured distances.
+ *
+ * \return Returns true on success, false on failure.
+ */
+boolean i2cExecGetRanges()
 {
   int   i;
   byte  dist;
@@ -502,13 +544,18 @@ boolean execGetRanges()
       }
     }
 
-    RspBuf[RspLen++] = dist;
+    I2CRspBuf[I2CRspLen++] = dist;
   }
 
   return true;
 }
 
-boolean execGetAmbients()
+/*!
+ * \brief Execute I2C command to get ambient light measurements.
+ *
+ * \return Returns true on success, false on failure.
+ */
+boolean i2cExecGetAmbients()
 {
   int       i;
   float     lux;
@@ -527,16 +574,21 @@ boolean execGetAmbients()
 
     val = (uint32_t)(lux * LaeToFMuxArgLuxMult);
 
-    RspBuf[RspLen++] = (byte)((val >> 24) & 0xff);
-    RspBuf[RspLen++] = (byte)((val >> 16) & 0xff);
-    RspBuf[RspLen++] = (byte)((val >>  8) & 0xff);
-    RspBuf[RspLen++] = (byte)(val & 0xff);
+    I2CRspBuf[I2CRspLen++] = (byte)((val >> 24) & 0xff);
+    I2CRspBuf[I2CRspLen++] = (byte)((val >> 16) & 0xff);
+    I2CRspBuf[I2CRspLen++] = (byte)((val >>  8) & 0xff);
+    I2CRspBuf[I2CRspLen++] = (byte)(val & 0xff);
   }
 
   return true;
 }
 
-boolean execTuneRange()
+/*!
+ * \brief Execute I2C command to tune range sensor parameters.
+ *
+ * \return Returns true on success, false on failure.
+ */
+boolean i2cExecTuneRange()
 {
   byte  len = LaeToFMuxCmdLenTuneRangeSensor - 1; 
   byte  sensor;
@@ -562,7 +614,12 @@ boolean execTuneRange()
   return false;
 }
 
-boolean execTuneAls()
+/*!
+ * \brief Execute I2C command to tune ambient light sensor parameters.
+ *
+ * \return Returns true on success, false on failure.
+ */
+boolean i2cExecTuneAls()
 {
   byte      len = LaeToFMuxCmdLenTuneAls - 1; 
   byte      sensor;
@@ -591,7 +648,12 @@ boolean execTuneAls()
   return false;
 }
 
-boolean execGetTunes()
+/*!
+ * \brief Execute I2C command to get sensor tune parameters.
+ *
+ * \return Returns true on success, false on failure.
+ */
+boolean i2cExecGetTunes()
 {
   byte      len = LaeToFMuxCmdLenGetTunes - 1; 
   byte      sensor;
@@ -612,11 +674,11 @@ boolean execGetTunes()
       val_hi    = (byte)(intPeriod >> 8);
       val_lo    = (byte)(intPeriod & 0xff);
 
-      RspBuf[RspLen++] = offset;
-      RspBuf[RspLen++] = crosstalk;
-      RspBuf[RspLen++] = gain;
-      RspBuf[RspLen++] = val_hi;
-      RspBuf[RspLen++] = val_lo;
+      I2CRspBuf[I2CRspLen++] = offset;
+      I2CRspBuf[I2CRspLen++] = crosstalk;
+      I2CRspBuf[I2CRspLen++] = gain;
+      I2CRspBuf[I2CRspLen++] = val_hi;
+      I2CRspBuf[I2CRspLen++] = val_lo;
 
       return true;
     }
@@ -633,6 +695,14 @@ boolean execGetTunes()
 // Serial Functions
 //------------------------------------------------------------------------------
 
+/*!
+ * \brief Format and print data to ascii serial interface. 
+ *
+ * \param fmt   Print format string. A subset if printf(3). Note that float
+ *              format conversion specifiers are not supported.
+ *
+ * ...          Variable arguments.
+ */
 void p(char *fmt, ...)
 {
   va_list args;
@@ -645,6 +715,14 @@ void p(char *fmt, ...)
   Serial.print(buf);
 }
 
+/*!
+ * \brief Format and print standard response to ascii serial interface. 
+ *
+ * \param fmt   Print format string. A subset if printf(3). Note that float
+ *              format conversion specifiers are not supported.
+ *
+ * ...          Variable arguments.
+ */
 void rsp(char *fmt, ... )
 {
   String  strFmt;
@@ -663,6 +741,14 @@ void rsp(char *fmt, ... )
   Serial.print(buf);
 }
 
+/*!
+ * \brief Format and print error response to ascii serial interface. 
+ *
+ * \param fmt   Print format string. A subset if printf(3). Note that float
+ *              format conversion specifiers are not supported.
+ *
+ * ...          Variable arguments.
+ */
 void errrsp(char *fmt, ... )
 {
   String  strFmt;
@@ -681,16 +767,32 @@ void errrsp(char *fmt, ... )
   Serial.print(buf);
 }
 
+/*!
+ * \brief Test is character c is whitespace.
+ *
+ * \return Returns true or false.
+ */
 inline boolean whitespace(char c)
 {
   return ((c == ' ') || (c == '\t'));
 }
 
+/*!
+ * \brief Test is character c is end-of-line.
+ *
+ * \return Returns true or false.
+ */
 inline boolean eol(char c)
 {
   return ((c == '\n') || (c == '\r'));
 }
 
+/*!
+ * \brief Receive serial characters and build command.
+ *
+ * \return Returns true when a complete command has been received. Otherwise
+ * false is returned.
+ */
 boolean serRcvCmd()
 {
   char    c;
@@ -725,6 +827,11 @@ boolean serRcvCmd()
   return false;
 }
 
+/*!
+ * \brief Parse received command into a series of arguments.
+ *
+ * \return Returns true if cmdid [arg arg...] found. False otherwise.
+ */
 boolean serParseCmd()
 {
   int i, j;
@@ -765,6 +872,14 @@ boolean serParseCmd()
   return SerArgCnt > 0;
 }
 
+/*!
+ * \brief Check received argument count vs. expected.
+ *
+ * \param nExpected   Number of expected arguments.
+ *
+ * \return Returns true if matched. Else prints error response and returns
+ * false.
+ */
 boolean serChkArgCnt(int nExpected)
 {
   int   argCnt;
@@ -780,9 +895,17 @@ boolean serChkArgCnt(int nExpected)
   return true;
 }
 
-int serParseOp(char *s)
+/*!
+ * \brief Parse command get/set operator.
+ *
+ * \param sArg  Operator argument.
+ *
+ * \return Returns 'g' (get) or 's' (set) on success. Prints error response
+ * and returns '?' on failure.
+ */
+int serParseOp(char *sArg)
 {
-  String  str(s);
+  String  str(sArg);
 
   if( str == LaeToFMuxSerArgGet )
   {
@@ -794,11 +917,23 @@ int serParseOp(char *s)
   }
   else
   {
-    errrsp("unknown operator %s", s);
+    errrsp("unknown operator %s", sArg);
     return '?';
   }
 }
 
+/*!
+ * \brief Parse and convert decimal number string argument.
+ *
+ * \param sName       Argument name.
+ * \param sVal        Argument string value to convert.
+ * \param nMin        Minimum value.
+ * \param nMax        Maximum value.
+ * \param [out] nVal  Converted value.
+ *
+ * \return Returns true on success. On error, prints error response and returns
+ * false.
+ */
 boolean serParseNumber(char *sName, char *sVal,
                        long  nMin,  long nMax,
                        long &nVal)
@@ -808,7 +943,7 @@ boolean serParseNumber(char *sName, char *sVal,
 
   if( (sVal == NULL) || (*sVal == 0) )
   {
-    errrsp("no %s argument", *sName);
+    errrsp("no %s argument", sName);
     return false;
   }
 
@@ -837,7 +972,16 @@ boolean serParseNumber(char *sName, char *sVal,
   return true;
 }
 
-boolean serParseSensorId(char *sVal, int sensor)
+/*!
+ * \brief Parse sensor argument.
+ *
+ * \param sVal          Sensor string value.
+ * \param [out] sensor  Converted sensor id value.
+ *
+ * \return Returns true on success. On error, prints error response and returns
+ * false.
+ */
+boolean serParseSensorId(char *sVal, int &sensor)
 {
   long  n;
 
@@ -857,9 +1001,26 @@ boolean serParseSensorId(char *sVal, int sensor)
   }
 }
 
+/*!
+ * \brief Parse and convert tune parameter.
+ *
+ * \param sName       Argument name.
+ * \param sVal        Argument string value to convert. Value can be:\r
+ *                      '-'  ==> leave as current value\n
+ *                      'r'  ==> reset to factory default\n
+ *                      n    ==> numeric decimal string
+ * \param nCur        Current value.
+ * \param nDft        Factory default value.
+ * \param nMin        Minimum value.
+ * \param nMax        Maximum value.
+ * \param [out] nVal  Converted value.
+ *
+ * \return Returns true on success. On error, prints error response and returns
+ * false.
+ */
 boolean serParseTuneParam(char *sName, char *sVal,
-                          long nCur, long nDft,
-                          long nMin, long nMax,
+                          long nCur,   long nDft,
+                          long nMin,   long nMax,
                           long &nVal)
 {
   String  str(sVal);
@@ -880,6 +1041,9 @@ boolean serParseTuneParam(char *sName, char *sVal,
   return true;
 }
 
+/*!
+ * \brief Execute recieved command.
+ */
 void serExecCmd()
 {
   char    cmdId;
@@ -937,6 +1101,9 @@ void serExecCmd()
   SerContinuousMode = bMode;
 }
 
+/*!
+ * \brief Execute help serial command.
+ */
 void serExecHelp()
 {
   rsp("%c %c %c %c %c %c %c %c %c",
@@ -975,6 +1142,9 @@ void serExecHelp()
 #endif // RDK
 }
 
+/*!
+ * \brief Execute get version serial command.
+ */
 void serExecGetVersion()
 {
   if( serChkArgCnt(LaeToFMuxSerCmdArgsGetVersion) )
@@ -983,6 +1153,9 @@ void serExecGetVersion()
   }
 }
 
+/*!
+ * \brief Execute get/set configuration command.
+ */
 void serExecConfig()
 {
   int   op;
@@ -1022,7 +1195,7 @@ void serExecConfig()
     }
     else
     {
-      AlsSensorId = AlsSensorId < 0? nextAmbientSensor(0): AlsSensorId;
+      AlsSensorId = AlsSensorId < 0? nextSensor(0): AlsSensorId;
     }
   }
 
@@ -1036,6 +1209,9 @@ void serExecConfig()
   }
 }
 
+/*!
+ * \brief Execute get sensor identify serial command.
+ */
 void serExecGetIdent()
 {
   int                   sensor;
@@ -1062,6 +1238,9 @@ void serExecGetIdent()
   }
 }
 
+/*!
+ * \brief Execute get distance measurements serial command.
+ */
 void serExecGetDist()
 {
   int   i;
@@ -1105,6 +1284,9 @@ void serExecGetDist()
   Serial.print(LaeToFMuxSerEoR);
 }
 
+/*!
+ * \brief Execute get ambient light measurements serial command.
+ */
 void serExecGetLux()
 {
   int       i;
@@ -1141,6 +1323,9 @@ void serExecGetLux()
   Serial.print(LaeToFMuxSerEoR);
 }
 
+/*!
+ * \brief Execute get/set sensor tune parameters serial command.
+ */
 void serExecTunes()
 {
   int       op;
@@ -1260,6 +1445,9 @@ void serExecTunes()
   rsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
 }
 
+/*!
+ * \brief Execute probe and initialize sensors serial command.
+ */
 void serExecProbe()
 {
   if( !serChkArgCnt(LaeToFMuxSerCmdArgsProbe) )
@@ -1272,6 +1460,9 @@ void serExecProbe()
   rsp("%d", ToFNumConn);
 }
 
+/*!
+ * \brief Execute list sensor connection status serial command.
+ */
 void serExecList()
 {
   int   i;
@@ -1298,6 +1489,9 @@ void serExecList()
   Serial.print(LaeToFMuxSerEoR);
 }
 
+/*!
+ * \brief Execute continous measurement output serial command.
+ */
 void serExecCont()
 {
   String  str;
@@ -1328,6 +1522,9 @@ void serExecCont()
   rsp("%s", str.c_str());
 }
 
+/*!
+ * \brief Generate continuous measurement output.
+ */
 void serContinuousOutput()
 {
   int i;

@@ -764,6 +764,11 @@ boolean VL6180x::tuneAls(byte gain, uint16_t intPeriod)
   }
 }
 
+void VL6180x::whitelist()
+{
+  m_bBlackListed = false;
+}
+
 void VL6180x::blacklist()
 {
   m_bBlackListed = true;
@@ -781,6 +786,7 @@ boolean VL6180x::isBusy()
 
 void VL6180x::getIdent(VL6180xIdentification *pIdent)
 {
+  *pIdent = m_ident;
 }
 
 void VL6180x::getTunes(byte &offset, uint16_t &crosstalk,

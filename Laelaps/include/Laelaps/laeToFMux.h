@@ -233,10 +233,8 @@ namespace laelaps
   // Print help command and response.
   //
   // Command format:  cmd_id EOC
-  // Response format: cmd_id count
-  //                  command synopsis EOR
-  //                  command_synopsis EOR
-  //                  ...
+  // Response format: cmd_id cmd_id_0 ...
+  //
   // Note: This command's use is intended only in user interactive mode.
   //
   const char LaeToFMuxSerCmdIdHelp      = 'h';  ///< serial command id
