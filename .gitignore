@@ -1,6 +1,16 @@
 # rnr-sdk specific ignores
 # Lines that start with '#' are comments.
 
+# RNR SDKs
+*.deps
+*/include/arch/*
+*/include/version.h
+*/loc
+*/dist/
+*/obj/
+*/doxy.err.log
+*/doxy.out.log
+
 # botsense
 botsense/bsModules/bsI2C/bsI2CMsgs.c
 botsense/bsModules/bsNull/bsNullMsgs.c
