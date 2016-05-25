@@ -43,6 +43,7 @@
 ################################################################################
 
 scripts = \
+	cp_to_repostaging \
 	dpkg_repro_status \
 	dpkg_repro_update \
 	eula_update.py \

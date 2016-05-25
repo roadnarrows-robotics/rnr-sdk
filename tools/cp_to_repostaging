@@ -1,0 +1,29 @@
+#!/bin/bash
+
+arch=${RNMAKE_ARCH_DFT:-x86_64}
+pkgdir=/prj/pkg
+host=$(hostname)
+
+if [[ "${host}" == "sharetheroad" ]]
+then
+  cmd=cp
+  repodir=/public/repostaging
+else
+  cmd=scp
+  repodir=rknight@sharetheroad:/public/repostaging
+fi
+
+if [[ ! -d ${pkgdir} ]]
+then
+  echo "No ${pkgdir} directory"
+  exit 1
+fi
+
+cd /prj/pkg
+debs=$(ls */dist/dist.${arch}/*.deb 2>/dev/null)
+
+if [[ "${debs}" != "" ]]
+then
+  ${cmd} ${debs} ${repodir}/.
+  echo "$(wc -w <<<${debs}) files copied"
+fi
