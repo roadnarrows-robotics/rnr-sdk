@@ -63,9 +63,7 @@ using namespace laelaps;
 //   (4) allow the Slave to stretch the clock pulse. Default true. Set to false
 //       for faster code.
 //
-// Using pin 2 (software sda) and 3 (software scl) in this example.
-//
-SoftwareWire softWire0( 2,  3, true, false);
+SoftwareWire softWire0(A4, A5, true, false);
 SoftwareWire softWire1( 4,  5, true, false);
 SoftwareWire softWire2( 6,  7, true, false);
 SoftwareWire softWire3( 8,  9, true, false);
@@ -123,7 +121,7 @@ void setup()
   int   i;
 
   //
-  // Begin software wires
+  // Begin software wires.
   //
   for(i = 0; i < LaeToFMuxNumOfChan; ++i)
   {
@@ -139,12 +137,12 @@ void setup()
   }
 
   //
-  // Probe and initialize sensors and data.
+  // Probe and initialize sensors and class object data.
   //
   probe();
 
   //
-  // I2C slave setup. Receive and send from/to master handlee by asynchronous
+  // I2C slave setup. Receive and send from/to I2C master by asynchronous
   // callbacks.
   //
   I2CRspLen = 0;
@@ -180,7 +178,7 @@ void loop()
   }
 
   //
-  // Process any serial input.
+  // Process any serial command input.
   //
   if( serRcvCmd() )
   {
@@ -703,7 +701,7 @@ boolean i2cExecGetTunes()
  *
  * ...          Variable arguments.
  */
-void p(char *fmt, ...)
+void p(const char *fmt, ...)
 {
   va_list args;
   char    buf[LaeToFMuxSerMaxRspLen];
@@ -723,7 +721,7 @@ void p(char *fmt, ...)
  *
  * ...          Variable arguments.
  */
-void rsp(char *fmt, ... )
+void rsp(const char *fmt, ... )
 {
   String  strFmt;
   va_list args;
@@ -749,7 +747,7 @@ void rsp(char *fmt, ... )
  *
  * ...          Variable arguments.
  */
-void errrsp(char *fmt, ... )
+void errrsp(const char *fmt, ... )
 {
   String  strFmt;
   va_list args;
@@ -934,12 +932,13 @@ int serParseOp(char *sArg)
  * \return Returns true on success. On error, prints error response and returns
  * false.
  */
-boolean serParseNumber(char *sName, char *sVal,
+boolean serParseNumber(const char *sName, const char *sVal,
                        long  nMin,  long nMax,
                        long &nVal)
 {
-  String  str = "";
-  char   *s, c;
+  String      str = "";
+  const char *s;
+  char        c;
 
   if( (sVal == NULL) || (*sVal == 0) )
   {
@@ -947,7 +946,7 @@ boolean serParseNumber(char *sName, char *sVal,
     return false;
   }
 
-  for(s = sVal; *s != NULL; ++s)
+  for(s = sVal; *s != 0; ++s)
   {
     c = *s;
     if( isDigit(c) )
@@ -1018,9 +1017,9 @@ boolean serParseSensorId(char *sVal, int &sensor)
  * \return Returns true on success. On error, prints error response and returns
  * false.
  */
-boolean serParseTuneParam(char *sName, char *sVal,
-                          long nCur,   long nDft,
-                          long nMin,   long nMax,
+boolean serParseTuneParam(const char *sName, const char *sVal,
+                          long nCur,  long nDft,
+                          long nMin,  long nMax,
                           long &nVal)
 {
   String  str(sVal);
