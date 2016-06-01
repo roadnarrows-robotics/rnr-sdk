@@ -27,7 +27,7 @@
 
 #include <Wire.h>
 
-#include <SparkFun_VL6180X.h>
+#include "VL6180X.h"
 
 /*const float GAIN_1    = 1.01;  // Actual ALS Gain of 1.01
 const float GAIN_1_25 = 1.28;  // Actual ALS Gain of 1.28

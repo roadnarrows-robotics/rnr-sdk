@@ -27,7 +27,7 @@
  ******************************************************************************/
 
 #include <Wire.h>
-#include "SparkFun_VL6180X.h"
+#include "VL6180X.h"
 
 VL6180x::VL6180x(uint8_t address)
 // Initialize the Library
