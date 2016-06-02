@@ -76,6 +76,9 @@
 
 #define VL6180X_FAILURE_RESET  -1
 
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Registers
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 #define VL6180X_IDENTIFICATION_MODEL_ID              0x0000
 #define VL6180X_IDENTIFICATION_MODEL_REV_MAJOR       0x0001
 #define VL6180X_IDENTIFICATION_MODEL_REV_MINOR       0x0002
@@ -137,9 +140,13 @@
 #define VL6180X_I2C_SLAVE_DEVICE_ADDRESS             0x0212
 #define VL6180X_INTERLEAVED_MODE_ENABLE              0x02A3
 
-//
-// Range sensor tunes
-//
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Range sensor values
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+#define VL6180X_RANGE_MIN     0     ///< minimum valid measured distance (mm)
+#define VL6180X_RANGE_MAX     200   ///< maximum valid measured distance (mm)
+#define VL6180X_RANGE_NO_OBJ  255   ///< no object detected special value
 
 // part-to-part offset calibration (part to part default varies)
 #define VL6180X_RANGE_OFFSET_MIN  0     ///< minimum tof offset
@@ -150,9 +157,11 @@
 #define VL6180X_RANGE_XTALK_MAX   0xffff  ///< maximum tof cross-talk
 #define VL6180X_RANGE_XTALK_DFT   0       ///< factory default tof cross-talk
 
-//
-// Ambient light sensor tunes
-//
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Ambient light sensor values
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+#define VL6180X_LUX_NO_LIGHT  0 ///< no light detected
 
 /*!
  * \brief ALS gain enumeration.

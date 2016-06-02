@@ -217,7 +217,7 @@ void VL6180x::writeSensorDefaults()
   writeReg8(VL6180X_SYSRANGE_VHV_REPEAT_RATE, 0xFF);
 
   // Set ALS integration time to 100ms
-  writeReg8(VL6180X_SYSALS_INTEGRATION_PERIOD, m_regAlsIntPeriod-1);
+  writeReg16(VL6180X_SYSALS_INTEGRATION_PERIOD, m_regAlsIntPeriod-1);
 
   // perform a single temperature calibration
   writeReg8(VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01);
@@ -638,7 +638,7 @@ byte VL6180x::cvtRangeRawToDist(byte rangeRaw, byte rangeStatus)
   // over/under flow (usually means no object)
   else
   {
-    range = 0xff;
+    range = VL6180X_RANGE_NO_OBJ;
   }
 
   return range;

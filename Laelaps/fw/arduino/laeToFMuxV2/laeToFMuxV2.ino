@@ -94,7 +94,7 @@ int         AlsFreq;                        ///< ALS sense frequency
 //
 // I2C slave data
 //
-byte        I2CRspBuf[LaeToFMuxMaxRspLen];  ///< response buffer
+byte        I2CRspBuf[LaeToFMuxI2CMaxRspLen];  ///< response buffer
 int         I2CRspLen;                      ///< response length
 
 //
@@ -395,29 +395,29 @@ void i2cReceiveCmd(int n)
 
     switch( cmdId )
     {
-      case LaeToFMuxCmdIdGetVersion:
+      case LaeToFMuxI2CCmdIdGetVersion:
         bOk = i2cExecGetVersion();
         break;
-      case LaeToFMuxCmdIdGetIdent:
+      case LaeToFMuxI2CCmdIdGetIdent:
         bOk = i2cExecGetIdent();
         break;
-      case LaeToFMuxCmdIdGetRanges:
+      case LaeToFMuxI2CCmdIdGetRanges:
         bOk = i2cExecGetRanges();
         break;
-      case LaeToFMuxCmdIdGetLux:
+      case LaeToFMuxI2CCmdIdGetLux:
         bOk = i2cExecGetAmbients();
         break;
-      case LaeToFMuxCmdIdTuneRangeSensor:
+      case LaeToFMuxI2CCmdIdTuneToFSensor:
         bOk = i2cExecTuneRange();
         break;
-      case LaeToFMuxCmdIdTuneAls:
+      case LaeToFMuxI2CCmdIdTuneAls:
         bOk = i2cExecTuneAls();
         break;
-      case LaeToFMuxCmdIdGetTunes:
+      case LaeToFMuxI2CCmdIdGetTunes:
         bOk = i2cExecGetTunes();
         break;
       default:
-        flushRead();
+        i2cFlushRead();
         bOk = false;
     }
   }
@@ -436,16 +436,16 @@ void i2cSendRsp()
 }
 
 /*!
- * \brief Error response for bad commands the expect data back.
+ * \brief I2C error response for bad commands the expect data back.
  *
  * \param n   Length of expected non-error response.
  */
-void errorRsp(int n)
+void i2cErrorRsp(int n)
 {
   byte  b;
 
   // flush input 
-  flushRead();
+  i2cFlushRead();
 
   // fill response buffer with recognizable error pattern ABC...
   for(b = 'A'; I2CRspLen < n; ++I2CRspLen, ++b)
@@ -457,7 +457,7 @@ void errorRsp(int n)
 /*!
  * \brief Flush the I2C input buffer.
  */
-void flushRead()
+void i2cFlushRead()
 {
   byte  b;
 
@@ -485,7 +485,7 @@ boolean i2cExecGetVersion()
  */
 boolean i2cExecGetIdent()
 {
-  byte                  len = LaeToFMuxCmdLenGetIdent - 1; 
+  byte                  len = LaeToFMuxI2CCmdLenGetIdent - 1; 
   byte                  sensor;
   VL6180xIdentification ident;
 
@@ -512,7 +512,7 @@ boolean i2cExecGetIdent()
   }
 
   // error
-  errorRsp(LaeToFMuxRspLenGetIdent);
+  i2cErrorRsp(LaeToFMuxI2CRspLenGetIdent);
 
   return false;
 }
@@ -531,14 +531,14 @@ boolean i2cExecGetRanges()
   {
     if( ToFSensor[i]->isBlacklisted() )
     {
-      dist = LaeToFMuxArgRangeNoDev;
+      dist = LaeToFMuxRangeNoDev;
     }
     else
     {
       dist = ToFSensor[i]->getRange();
-      if( dist > LaeToFMuxArgRangeMax )
+      if( dist > LaeToFMuxRangeMax )
       {
-        dist = LaeToFMuxArgRangeNoObj;
+        dist = LaeToFMuxRangeNoObj;
       }
     }
 
@@ -563,14 +563,14 @@ boolean i2cExecGetAmbients()
   {
     if( ToFSensor[i]->isBlacklisted() )
     {
-      lux = LaeToFMuxArgLuxNoLight;
+      lux = LaeToFMuxLuxNoLight;
     }
     else
     {
       lux = ToFSensor[i]->getAmbientLight();
     }
 
-    val = (uint32_t)(lux * LaeToFMuxArgLuxMult);
+    val = (uint32_t)(lux * LaeToFMuxI2CArgLuxMult);
 
     I2CRspBuf[I2CRspLen++] = (byte)((val >> 24) & 0xff);
     I2CRspBuf[I2CRspLen++] = (byte)((val >> 16) & 0xff);
@@ -588,16 +588,19 @@ boolean i2cExecGetAmbients()
  */
 boolean i2cExecTuneRange()
 {
-  byte  len = LaeToFMuxCmdLenTuneRangeSensor - 1; 
-  byte  sensor;
-  byte  offset;
-  byte  crosstalk;
+  byte      len = LaeToFMuxI2CCmdLenTuneToFSensor - 1; 
+  byte      sensor;
+  uint16_t  val_hi, val_lo;
+  byte      offset;
+  uint16_t  crosstalk;
 
   if( Wire.available() == len )
   {
     sensor    = Wire.read();
     offset    = Wire.read();
-    crosstalk = Wire.read();
+    val_hi    = (uint16_t)Wire.read();
+    val_lo    = (uint16_t)Wire.read();
+    crosstalk = val_hi << 8 | val_lo;
 
     if( sensor < LaeToFMuxNumOfChan ) 
     {
@@ -607,7 +610,7 @@ boolean i2cExecTuneRange()
   }
 
   // error
-  errorRsp(LaeToFMuxRspLenGetIdent);
+  i2cErrorRsp(LaeToFMuxI2CRspLenTuneToFSensor);
 
   return false;
 }
@@ -619,7 +622,7 @@ boolean i2cExecTuneRange()
  */
 boolean i2cExecTuneAls()
 {
-  byte      len = LaeToFMuxCmdLenTuneAls - 1; 
+  byte      len = LaeToFMuxI2CCmdLenTuneAls - 1; 
   byte      sensor;
   uint16_t  val_hi, val_lo;
   byte      gain;
@@ -641,7 +644,7 @@ boolean i2cExecTuneAls()
   }
 
   // error
-  errorRsp(LaeToFMuxRspLenGetIdent);
+  i2cErrorRsp(LaeToFMuxI2CRspLenTuneAls);
 
   return false;
 }
@@ -653,13 +656,13 @@ boolean i2cExecTuneAls()
  */
 boolean i2cExecGetTunes()
 {
-  byte      len = LaeToFMuxCmdLenGetTunes - 1; 
+  byte      len = LaeToFMuxI2CCmdLenGetTunes - 1; 
   byte      sensor;
   byte      offset;
   uint16_t  crosstalk;
   byte      gain;
   uint16_t  intPeriod;
-  uint16_t  val_hi, val_lo;
+  byte      val_hi, val_lo;
 
   if( Wire.available() == len )
   {
@@ -669,12 +672,17 @@ boolean i2cExecGetTunes()
     {
       ToFSensor[sensor]->getTunes(offset, crosstalk, gain, intPeriod);
 
-      val_hi    = (byte)(intPeriod >> 8);
-      val_lo    = (byte)(intPeriod & 0xff);
-
+      // tof
       I2CRspBuf[I2CRspLen++] = offset;
-      I2CRspBuf[I2CRspLen++] = crosstalk;
+      val_hi = (byte)(crosstalk >> 8);
+      val_lo = (byte)(crosstalk & 0xff);
+      I2CRspBuf[I2CRspLen++] = val_hi;
+      I2CRspBuf[I2CRspLen++] = val_lo;
+
+      // als
       I2CRspBuf[I2CRspLen++] = gain;
+      val_hi = (byte)(intPeriod >> 8);
+      val_lo = (byte)(intPeriod & 0xff);
       I2CRspBuf[I2CRspLen++] = val_hi;
       I2CRspBuf[I2CRspLen++] = val_lo;
 
@@ -683,7 +691,7 @@ boolean i2cExecGetTunes()
   }
 
   // error
-  errorRsp(LaeToFMuxRspLenGetTunes);
+  i2cErrorRsp(LaeToFMuxI2CRspLenGetTunes);
 
   return false;
 }
@@ -721,7 +729,7 @@ void p(const char *fmt, ...)
  *
  * ...          Variable arguments.
  */
-void rsp(const char *fmt, ... )
+void serRsp(const char *fmt, ... )
 {
   String  strFmt;
   va_list args;
@@ -747,7 +755,7 @@ void rsp(const char *fmt, ... )
  *
  * ...          Variable arguments.
  */
-void errrsp(const char *fmt, ... )
+void serErrorRsp(const char *fmt, ... )
 {
   String  strFmt;
   va_list args;
@@ -763,6 +771,76 @@ void errrsp(const char *fmt, ... )
   va_end(args);
 
   Serial.print(buf);
+}
+
+/*!
+ * \brief Print all current measured distances
+ */
+void serPrintDist()
+{
+  int   i;
+  byte  dist;
+
+  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    if( ToFSensor[i]->isBlacklisted() )
+    {
+      dist = LaeToFMuxRangeNoDev;
+    }
+    else
+    {
+      dist = ToFSensor[i]->getRange();
+      if( dist > LaeToFMuxRangeMax )
+      {
+        dist = LaeToFMuxRangeNoObj;
+      }
+    }
+
+    switch( dist )
+    {
+      case LaeToFMuxRangeNoObj:
+        p(" %6s", LaeToFMuxSerArgNoObj);
+        break;
+      case LaeToFMuxRangeErr:
+        p(" %6s", LaeToFMuxSerArgSensorErr);
+        break;
+      case LaeToFMuxRangeNoDev:
+        p(" %6s", LaeToFMuxSerArgNotPresent);
+        break;
+      default:
+        p(" %6d", dist);
+        break;
+    }
+  }
+}
+
+/*!
+ * \brief Print all current ambient light measurements
+ */
+void serPrintLux()
+{
+  int       i;
+  float     lux;
+  uint32_t  lux_int;
+  uint32_t  lux_frac;
+
+  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  {
+    if( ToFSensor[i]->isBlacklisted() )
+    {
+      p(" %7s", LaeToFMuxSerArgNotPresent);
+    }
+    else
+    {
+      lux = ToFSensor[i]->getAmbientLight();
+
+      lux_int = (uint32_t)lux;
+      lux = lux - (float)lux_int;
+      lux_frac = (uint32_t)(lux * 100.0);
+
+      p(" %7d.%02d", lux_int, lux_frac);
+    }
+  }
 }
 
 /*!
@@ -886,7 +964,7 @@ boolean serChkArgCnt(int nExpected)
 
   if( argCnt != nExpected )
   {
-    errrsp("requires %d args, got %d", nExpected, argCnt);
+    serErrorRsp("requires %d args, got %d", nExpected, argCnt);
     return false;
   }
 
@@ -915,7 +993,7 @@ int serParseOp(char *sArg)
   }
   else
   {
-    errrsp("unknown operator %s", sArg);
+    serErrorRsp("unknown operator %s", sArg);
     return '?';
   }
 }
@@ -942,7 +1020,7 @@ boolean serParseNumber(const char *sName, const char *sVal,
 
   if( (sVal == NULL) || (*sVal == 0) )
   {
-    errrsp("no %s argument", sName);
+    serErrorRsp("no %s argument", sName);
     return false;
   }
 
@@ -955,7 +1033,7 @@ boolean serParseNumber(const char *sName, const char *sVal,
     }
     else
     {
-      errrsp("%s value %s is not a number", sName, sVal);
+      serErrorRsp("%s value %s is not a number", sName, sVal);
       return false;
     }
   }
@@ -964,7 +1042,7 @@ boolean serParseNumber(const char *sName, const char *sVal,
 
   if( (nVal < nMin) || (nVal > nMax) )
   {
-    errrsp("%s value %s out-of-range", sName, sVal);
+    serErrorRsp("%s value %s out-of-range", sName, sVal);
     return false;
   }
 
@@ -990,7 +1068,7 @@ boolean serParseSensorId(char *sVal, int &sensor)
   }
   else if( ToFSensor[n]->isBlacklisted() )
   {
-    errrsp("sensor %s not connected", sVal);
+    serErrorRsp("sensor %s not connected", sVal);
     return false;
   }
   else
@@ -1050,7 +1128,7 @@ void serExecCmd()
 
   if( strlen(SerArgs[SerCmdIdx]) > 1 )
   {
-    errrsp("bad command");
+    serErrorRsp("bad command");
     return;
   }
 
@@ -1093,7 +1171,7 @@ void serExecCmd()
     case LaeToFMuxSerCmdIdDebug:
       break;  // TODO
     default:
-      errrsp("unknown command");
+      serErrorRsp("unknown command");
       break;
   }
 
@@ -1105,7 +1183,7 @@ void serExecCmd()
  */
 void serExecHelp()
 {
-  rsp("%c %c %c %c %c %c %c %c %c",
+  serRsp("%c %c %c %c %c %c %c %c %c",
       LaeToFMuxSerCmdIdGetLux,
       LaeToFMuxSerCmdIdConfig,
       LaeToFMuxSerCmdIdGetDist,
@@ -1117,7 +1195,7 @@ void serExecHelp()
       LaeToFMuxSerCmdIdGetVersion);
 
 #if 0 // RDK not sufficient memory
-  rsp("%s 10", SerArgs[SerCmdIdx]);
+  serRsp("%s 10", SerArgs[SerCmdIdx]);
   p("%c                       - get ambient light measurements from all sensors%s",
       LaeToFMuxSerCmdIdGetLux, LaeToFMuxSerEoR);
   p("%c <op> [cfg]            - get/set firmware operation%s",
@@ -1148,7 +1226,7 @@ void serExecGetVersion()
 {
   if( serChkArgCnt(LaeToFMuxSerCmdArgsGetVersion) )
   {
-    rsp("%d", LAE_TOF_MUX_FW_VERSION);
+    serRsp("%d", LAE_TOF_MUX_FW_VERSION);
   }
 }
 
@@ -1162,7 +1240,7 @@ void serExecConfig()
 
   if( (SerArgCnt - 1) == 0 )
   {
-    errrsp("no operator");
+    serErrorRsp("no operator");
   }
   else if( (op = serParseOp(SerArgs[1])) == '?' )
   {
@@ -1200,11 +1278,11 @@ void serExecConfig()
 
   if( AlsSensorId < 0 )
   {
-    rsp("%s", LaeToFMuxSerArgOff);
+    serRsp("%s", LaeToFMuxSerArgOff);
   }
   else
   {
-    rsp("%s", LaeToFMuxSerArgOn);
+    serRsp("%s", LaeToFMuxSerArgOn);
   }
 }
 
@@ -1228,12 +1306,11 @@ void serExecGetIdent()
   {
     ToFSensor[sensor]->getIdent(&ident);
 
-    rsp("0x%02x %d.%d %d.%d, %d, %d",
+    serRsp("0x%02x %d.%d %d.%d %d %d",
       ident.idModel,
       ident.idModelRevMajor, ident.idModelRevMinor,
       ident.idModuleRevMajor, ident.idModuleRevMinor,
-      ident.idDate,
-      ident.idTime);
+      ident.idDate, ident.idTime);
   }
 }
 
@@ -1242,9 +1319,6 @@ void serExecGetIdent()
  */
 void serExecGetDist()
 {
-  int   i;
-  byte  dist;
-
   if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetDist) )
   {
     return;
@@ -1252,33 +1326,7 @@ void serExecGetDist()
 
   Serial.print(SerArgs[SerCmdIdx]);
 
-  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
-  {
-    if( ToFSensor[i]->isBlacklisted() )
-    {
-      dist = LaeToFMuxArgRangeNoDev;
-    }
-    else
-    {
-      dist = ToFSensor[i]->getRange();
-    }
-
-    switch( dist )
-    {
-      case LaeToFMuxArgRangeNoObj:
-        p(" %6s", LaeToFMuxSerArgNoObj);
-        break;
-      case LaeToFMuxArgRangeErr:
-        p(" %6s", LaeToFMuxSerArgSensorErr);
-        break;
-      case LaeToFMuxArgRangeNoDev:
-        p(" %6s", LaeToFMuxSerArgNotPresent);
-        break;
-      default:
-        p(" %6d", dist);
-        break;
-    }
-  }
+  serPrintDist();
 
   Serial.print(LaeToFMuxSerEoR);
 }
@@ -1288,11 +1336,6 @@ void serExecGetDist()
  */
 void serExecGetLux()
 {
-  int       i;
-  float     lux;
-  uint32_t  lux_int;
-  uint32_t  lux_frac;
-
   if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetLux) )
   {
     return;
@@ -1300,24 +1343,7 @@ void serExecGetLux()
 
   Serial.print(SerArgs[SerCmdIdx]);
 
-  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
-  {
-    if( ToFSensor[i]->isBlacklisted() )
-    {
-      lux = LaeToFMuxArgLuxNoDev;
-      p(" %7s", LaeToFMuxSerArgNotPresent);
-    }
-    else
-    {
-      lux = ToFSensor[i]->getAmbientLight();
-
-      lux_int = (uint32_t)lux;
-      lux = lux - (float)lux_int;
-      lux_frac = (uint32_t)(lux * 100.0);
-
-      p(" %7d.%02d", lux_int, lux_frac);
-    }
-  }
+  serPrintLux();
 
   Serial.print(LaeToFMuxSerEoR);
 }
@@ -1337,7 +1363,7 @@ void serExecTunes()
 
   if( (SerArgCnt - 1) == 0 )
   {
-    errrsp("no operator");
+    serErrorRsp("no operator");
     return;
   }
   else if( (op = serParseOp(SerArgs[1])) == '?' )
@@ -1360,7 +1386,7 @@ void serExecTunes()
   {
     if( serChkArgCnt(LaeToFMuxSerCmdArgsGetTunes) )
     {
-      rsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
+      serRsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
     }
     return;
   }
@@ -1441,7 +1467,7 @@ void serExecTunes()
   ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
                               alsGain,     alsIntPeriod);
 
-  rsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
+  serRsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
 }
 
 /*!
@@ -1456,7 +1482,7 @@ void serExecProbe()
 
   probe();
 
-  rsp("%d", ToFNumConn);
+  serRsp("%d", ToFNumConn);
 }
 
 /*!
@@ -1481,7 +1507,7 @@ void serExecList()
     }
     else
     {
-      p(" %s", LaeToFMuxSerArgPresent);
+      p(" %d", i);
     }
   }
 
@@ -1512,13 +1538,13 @@ void serExecCont()
   }
   else
   {
-    errrsp("%s bad output mode", str.c_str());
+    serErrorRsp("%s bad output mode", str.c_str());
     return;
   }
 
   SerContinuousMode = true;
 
-  rsp("%s", str.c_str());
+  serRsp("%s", str.c_str());
 }
 
 /*!
@@ -1526,35 +1552,14 @@ void serExecCont()
  */
 void serContinuousOutput()
 {
-  int i;
-  int dist;
-
-  for(i = 0; i < LaeToFMuxNumOfChan; ++i)
+  if( SerContinuousOutput == 'a' )
   {
-    if( ToFSensor[i]->isBlacklisted() )
-    {
-      dist = LaeToFMuxArgRangeNoDev;
-    }
-    else
-    {
-      dist = ToFSensor[i]->getRange();
-    }
-
-    switch( dist )
-    {
-      case LaeToFMuxArgRangeNoObj:
-        p(" %6s", LaeToFMuxSerArgNotPresent);
-        break;
-      case LaeToFMuxArgRangeErr:
-        p(" %6s", LaeToFMuxSerArgSensorErr);
-        break;
-      case LaeToFMuxArgRangeNoDev:
-        p(" %6s", LaeToFMuxSerArgNotPresent);
-        break;
-      default:
-        p(" %6d", dist);
-        break;
-    }
+    serRsp("%d %d %d", AlsSensorId, AlsCounter, AlsFreq);
+    //serPrintLux();
+  }
+  else if( SerContinuousOutput == 'd' )
+  {
+    serPrintDist();
   }
 
   Serial.print(LaeToFMuxSerEoR);

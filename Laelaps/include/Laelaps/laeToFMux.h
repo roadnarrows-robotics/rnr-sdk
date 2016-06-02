@@ -71,7 +71,27 @@ namespace laelaps
 {
 #endif // SWIG
   //----------------------------------------------------------------------------
-  // I2C Binary Interface
+  // Common Interface Values
+  //----------------------------------------------------------------------------
+ 
+  // sensors
+  const byte_t LaeToFMuxMinChan   =  0; ///< minimum sensor channel number
+  const byte_t LaeToFMuxMaxChan   =  7; ///< maximum sensor channel number
+  const byte_t LaeToFMuxNumOfChan =  8; ///< maximum number of channels
+
+  // range sensor values
+  const byte_t LaeToFMuxRangeNoObj  = 255;  ///< no object detected 
+  const byte_t LaeToFMuxRangeNoDev  = 254;  ///< no sensor device attached
+  const byte_t LaeToFMuxRangeErr    = 253;  ///< sensor error
+  const byte_t LaeToFMuxRangeMax    = 200;  ///< maximum distance (mm)
+  const byte_t LaeToFMuxRangeMin    =   0;  ///< minimum distance (mm)
+
+  // ambient light sensor values
+  const float LaeToFMuxLuxNoLight = 0;    ///< no light/no sensor
+
+
+  //----------------------------------------------------------------------------
+  // I2C Slave Binary Interface
   //----------------------------------------------------------------------------
  
   //
@@ -79,21 +99,18 @@ namespace laelaps
   //
   const byte_t LaeI2CAddrToFMux = 0x71;  ///< arduino \h_i2c 7-bit slave address
 
-  //
+  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
   // I2C Packet.
-  //
-  const int    LaeToFMuxMaxCmdLen = 16; ///< maximum command length
-  const int    LaeToFMuxMaxRspLen = 32; ///< maximum response length
-  const byte_t LaeToFMuxMinChan   =  0; ///< minimum sensor channel number
-  const byte_t LaeToFMuxMaxChan   =  7; ///< maximum sensor channel number
-  const byte_t LaeToFMuxNumOfChan =  8; ///< maximum number of channels
+  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  const int    LaeToFMuxI2CMaxCmdLen  = 16; ///< maximum command length
+  const int    LaeToFMuxI2CMaxRspLen  = 32; ///< maximum response length
 
-  const byte_t LaeToFMuxArgFail   =  0; ///< command failure response
-  const byte_t LaeToFMuxArgPass   =  1; ///< command success response
+  const byte_t LaeToFMuxI2CArgFail    =  0; ///< command failure response
+  const byte_t LaeToFMuxI2CArgPass    =  1; ///< command success response
 
-  //............................................................................
+  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
   // Commands and Responses
-  //............................................................................
+  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   //
   // Get firmware version command and response.
@@ -101,9 +118,9 @@ namespace laelaps
   // Command format:  cmd_id
   // Response format: fw_version
   //
-  const byte_t LaeToFMuxCmdIdGetVersion   = 0;  ///< command id
-  const byte_t LaeToFMuxCmdLenGetVersion  = 1;  ///< command length (bytes)
-  const byte_t LaeToFMuxRspLenGetVersion  = 1;  ///< response length (bytes)
+  const byte_t LaeToFMuxI2CCmdIdGetVersion  = 0;  ///< command id
+  const byte_t LaeToFMuxI2CCmdLenGetVersion = 1;  ///< command length (bytes)
+  const byte_t LaeToFMuxI2CRspLenGetVersion = 1;  ///< response length (bytes)
 
   // ---
  
@@ -114,9 +131,9 @@ namespace laelaps
   // Response format: model_id model_major model_minor module_major module_minor
   //                  date_high date_low time_high time_low
   //
-  const byte_t LaeToFMuxCmdIdGetIdent   = 1;  ///< command id
-  const byte_t LaeToFMuxCmdLenGetIdent  = 2;  ///< command length (bytes)
-  const byte_t LaeToFMuxRspLenGetIdent  = 9;  ///< response length (bytes)
+  const byte_t LaeToFMuxI2CCmdIdGetIdent  = 1;  ///< command id
+  const byte_t LaeToFMuxI2CCmdLenGetIdent = 2;  ///< command length (bytes)
+  const byte_t LaeToFMuxI2CRspLenGetIdent = 9;  ///< response length (bytes)
 
   // ---
  
@@ -129,15 +146,9 @@ namespace laelaps
   // Command format:  cmd_id
   // Response format: dist0 dist1 ... dist7
   //
-  const byte_t LaeToFMuxCmdIdGetRanges  = 2;  ///< command id
-  const byte_t LaeToFMuxCmdLenGetRanges = 1;  ///< command length (bytes)
-  const byte_t LaeToFMuxRspLenGetRanges = 8;  ///< response length (bytes)
-
-  const byte_t LaeToFMuxArgRangeNoObj = 255;  ///< no object detected 
-  const byte_t LaeToFMuxArgRangeNoDev = 254;  ///< no sensor device attached
-  const byte_t LaeToFMuxArgRangeErr   = 253;  ///< sensor error
-  const byte_t LaeToFMuxArgRangeMax   = 200;  ///< maximum distance (mm)
-  const byte_t LaeToFMuxArgRangeMin   =   0;  ///< minimum distance (mm)
+  const byte_t LaeToFMuxI2CCmdIdGetRanges   = 2;  ///< command id
+  const byte_t LaeToFMuxI2CCmdLenGetRanges  = 1;  ///< command length (bytes)
+  const byte_t LaeToFMuxI2CRspLenGetRanges  = 8;  ///< response length (bytes)
 
   // ---
  
@@ -147,26 +158,26 @@ namespace laelaps
   // Command format:  cmd_id 
   // Response format: [value_3 value_2 value_1 value_0] * 8
   //
-  const byte_t LaeToFMuxCmdIdGetLux   = 3;  ///< command id
-  const byte_t LaeToFMuxCmdLenGetLux  = 1;  ///< command length (bytes)
-  const byte_t LaeToFMuxRspLenGetLux  = 32; ///< response length (bytes)
+  const byte_t LaeToFMuxI2CCmdIdGetLux  = 3;  ///< command id
+  const byte_t LaeToFMuxI2CCmdLenGetLux = 1;  ///< command length (bytes)
+  const byte_t LaeToFMuxI2CRspLenGetLux = 32; ///< response length (bytes)
 
-  const float LaeToFMuxArgLuxNoDev    = -1.0;   ///< no sensor device attached
-  const float LaeToFMuxArgLuxNoLight  = 0.0;    ///< no light/no sensor
-  const float LaeToFMuxArgLuxScale    = 0.01;   ///< lux = value * scale
-  const float LaeToFMuxArgLuxMult     = 100.0;  ///< value = lux * mult
+  const float LaeToFMuxI2CArgLuxNoLight = 0.0;    ///< no light/no sensor
+  const float LaeToFMuxI2CArgLuxScale   = 0.01;   ///< lux = value * scale
+  const float LaeToFMuxI2CArgLuxMult    = 100.0;  ///< value = lux * mult
 
   // ---
  
   //
   // Tune time-of-flight range sensor.
   //
-  // Command format:  cmd_id sensor tof_offset tof_cross_talk
+  // Command format:  cmd_id sensor
+  //                    tof_offset tof_cross_talk_high tof_cross_talk_low
   // Response format: N/A
   //
-  const byte_t LaeToFMuxCmdIdTuneRangeSensor  = 4;  ///< command id
-  const byte_t LaeToFMuxCmdLenTuneRangeSensor = 4;  ///< command length (bytes)
-  const byte_t LaeToFMuxRspLenTuneRangeSensor = 0;  ///< response length (bytes)
+  const byte_t LaeToFMuxI2CCmdIdTuneToFSensor   = 4;  ///< command id
+  const byte_t LaeToFMuxI2CCmdLenTuneToFSensor  = 5;  ///< command length
+  const byte_t LaeToFMuxI2CRspLenTuneToFSensor  = 0;  ///< response length
 
   // ---
  
@@ -177,9 +188,9 @@ namespace laelaps
   //                    als_gain als_int_period_high als_int_period_low
   // Response format: N/A
   //
-  const byte_t LaeToFMuxCmdIdTuneAls  = 5;  ///< command id
-  const byte_t LaeToFMuxCmdLenTuneAls = 5;  ///< command length (bytes)
-  const byte_t LaeToFMuxRspLenTuneAls = 0;  ///< response length (bytes)
+  const byte_t LaeToFMuxI2CCmdIdTuneAls   = 5;  ///< command id
+  const byte_t LaeToFMuxI2CCmdLenTuneAls  = 5;  ///< command length (bytes)
+  const byte_t LaeToFMuxI2CRspLenTuneAls  = 0;  ///< response length (bytes)
 
   // ---
  
@@ -187,12 +198,12 @@ namespace laelaps
   // Get tune parameters.
   //
   // Command format:  cmd_id sensor
-  // Response format: tof_offset tof_cross_talk
+  // Response format: tof_offset tof_cross_talk_high tof_cross_talk_low
   //                  als_gain als_int_period_high als_int_period_low
   //
-  const byte_t LaeToFMuxCmdIdGetTunes   = 6;  ///< command id
-  const byte_t LaeToFMuxCmdLenGetTunes  = 2;  ///< command length (bytes)
-  const byte_t LaeToFMuxRspLenGetTunes  = 5;  ///< response length (bytes)
+  const byte_t LaeToFMuxI2CCmdIdGetTunes  = 6;  ///< command id
+  const byte_t LaeToFMuxI2CCmdLenGetTunes = 2;  ///< command length (bytes)
+  const byte_t LaeToFMuxI2CRspLenGetTunes = 6;  ///< response length (bytes)
 
 
   //----------------------------------------------------------------------------
@@ -351,7 +362,8 @@ namespace laelaps
   // Command format:  cmd_id EOC
   // Response format: cmd_id state_0 state_1 ... state_7 EOR
   // Arguments:
-  //  state_k   := {'+' | '-'}
+  //  state_k   := {sensor | '-'}
+  //  sensor    := DECIMAL
   //
   const char   LaeToFMuxSerCmdIdList   = 'l';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsList = 0;    ///< cmd argument count
