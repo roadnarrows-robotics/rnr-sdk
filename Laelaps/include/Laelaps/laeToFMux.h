@@ -87,21 +87,29 @@ namespace laelaps
   const byte_t LaeToFMuxRangeMin    =   0;  ///< minimum distance (mm)
 
   // ambient light sensor values
-  const float LaeToFMuxLuxNoLight = 0;    ///< no light/no sensor
+  const float LaeToFMuxLuxNoLight = 0.0;    ///< no light/no sensor
 
 
   //----------------------------------------------------------------------------
   // I2C Slave Binary Interface
+  //
+  // The I2C inteface is a big-endian, byte oriented, binary interface. Any
+  // signed numbers are in 2-compliment format.
+  //
+  // The (Partial) BNF
+  //
+  // cmd  ::= cmd_id, {byte}
+  // rsp  ::= {byte}
+  //
+  // cmd_id ::= u8
   //----------------------------------------------------------------------------
  
-  //
-  // Arduino sub-processor I2C 7-bit address.
-  //
+  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  // I2C Addressing and Packet Format
+  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
   const byte_t LaeI2CAddrToFMux = 0x71;  ///< arduino \h_i2c 7-bit slave address
 
-  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-  // I2C Packet.
-  //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
   const int    LaeToFMuxI2CMaxCmdLen  = 16; ///< maximum command length
   const int    LaeToFMuxI2CMaxRspLen  = 32; ///< maximum response length
 
@@ -109,7 +117,7 @@ namespace laelaps
   const byte_t LaeToFMuxI2CArgPass    =  1; ///< command success response
 
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-  // Commands and Responses
+  // I2C Commands and Responses
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   //
@@ -117,6 +125,9 @@ namespace laelaps
   //
   // Command format:  cmd_id
   // Response format: fw_version
+  //
+  // Argument data types and ranges:
+  //  fw_version ::= u8 [1-255]
   //
   const byte_t LaeToFMuxI2CCmdIdGetVersion  = 0;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenGetVersion = 1;  ///< command length (bytes)
@@ -131,6 +142,22 @@ namespace laelaps
   // Response format: model_id model_major model_minor module_major module_minor
   //                  date_high date_low time_high time_low
   //
+  // Argument data types and ranges:
+  //  sensor        ::= u8 [1-7]
+  //  model_id      ::= u8
+  //  model_major   ::= u8
+  //  model_minor   ::= u8
+  //  modul3_major  ::= u8
+  //  modul3_minor  ::= u8
+  //  date_high     ::= u8
+  //  date_low      ::= u8
+  //  time_high     ::= u8
+  //  time_low      ::= u8
+  //
+  // Conversions:
+  //  date = date_high << 8 + date_low
+  //  time = time_high << 8 + time_low
+  //
   const byte_t LaeToFMuxI2CCmdIdGetIdent  = 1;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenGetIdent = 2;  ///< command length (bytes)
   const byte_t LaeToFMuxI2CRspLenGetIdent = 9;  ///< response length (bytes)
@@ -144,7 +171,10 @@ namespace laelaps
   // and places the results in a range buffer.
   //
   // Command format:  cmd_id
-  // Response format: dist0 dist1 ... dist7
+  // Response format: dist_0 dist_1 ... dist_7
+  //
+  // Argument data types and ranges:
+  //  dist_k  ::= u8 [0-200, 253, 254, 255]
   //
   const byte_t LaeToFMuxI2CCmdIdGetRanges   = 2;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenGetRanges  = 1;  ///< command length (bytes)
@@ -156,13 +186,22 @@ namespace laelaps
   // Get measured ambient light lux values.
   //
   // Command format:  cmd_id 
-  // Response format: [value_3 value_2 value_1 value_0] * 8
+  // Response format: _lux_0_3 lux_0_2 lux_0_1 lux_0_0
+  //                  _lux_1_3 lux_1_2 lux_1_1 lux_1_0
+  //                  ...
+  //                  _lux_7_3 lux_7_2 lux_7_1 lux_7_0
+  //
+  // Argument data types and ranges:
+  //  _lux_k_n  ::= u8
+  //
+  // Conversions:
+  //  lux100_k  = lux_k_3 << 24 + lux_k_2 << 16 + lux_k_1 << 8 + lux_k_0
+  //  lux_k     = lux100_k * 0.01
   //
   const byte_t LaeToFMuxI2CCmdIdGetLux  = 3;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenGetLux = 1;  ///< command length (bytes)
   const byte_t LaeToFMuxI2CRspLenGetLux = 32; ///< response length (bytes)
 
-  const float LaeToFMuxI2CArgLuxNoLight = 0.0;    ///< no light/no sensor
   const float LaeToFMuxI2CArgLuxScale   = 0.01;   ///< lux = value * scale
   const float LaeToFMuxI2CArgLuxMult    = 100.0;  ///< value = lux * mult
 
@@ -174,6 +213,17 @@ namespace laelaps
   // Command format:  cmd_id sensor
   //                    tof_offset tof_cross_talk_high tof_cross_talk_low
   // Response format: N/A
+  //
+  // Argument data types and ranges:
+  //  sensor              ::= u8 [1-7]
+  //  tof_offset          ::= u8
+  //  tof_cross_talk_high ::= u8
+  //  tof_cross_talk_low  ::= u8
+  //  tof_cross_talk      ::= u16
+  //
+  // Conversions:
+  //  tof_cross_talk_high = tof_cross_talk >> 8
+  //  tof_cross_talk_low  = tof_cross_talk & 0xff
   //
   const byte_t LaeToFMuxI2CCmdIdTuneToFSensor   = 4;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenTuneToFSensor  = 5;  ///< command length
@@ -188,6 +238,17 @@ namespace laelaps
   //                    als_gain als_int_period_high als_int_period_low
   // Response format: N/A
   //
+  // Argument data types and ranges:
+  //  sensor              ::= u8 [1-7]
+  //  als_gain            ::= u8 [0-7]
+  //  als_int_period_high ::= u8
+  //  als_int_period_low  ::= u8
+  //  als_int_period      ::= u16 [1-512]
+  //
+  // Conversions:
+  //  als_int_period_high = als_int_period >> 8
+  //  als_int_period_low  = als_int_period & 0xff
+  //
   const byte_t LaeToFMuxI2CCmdIdTuneAls   = 5;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenTuneAls  = 5;  ///< command length (bytes)
   const byte_t LaeToFMuxI2CRspLenTuneAls  = 0;  ///< response length (bytes)
@@ -201,6 +262,19 @@ namespace laelaps
   // Response format: tof_offset tof_cross_talk_high tof_cross_talk_low
   //                  als_gain als_int_period_high als_int_period_low
   //
+  // Argument data types and ranges:
+  //  sensor              ::= u8 [1-7]
+  //  tof_offset          ::= u8
+  //  tof_cross_talk_high ::= u8
+  //  tof_cross_talk_low  ::= u8
+  //  als_gain            ::= u8 [0-7]
+  //  als_int_period_high ::= u8
+  //  als_int_period_low  ::= u8
+  //
+  // Conversions:
+  //  tof_cross_talk = tof_cross_talk_high << 8 + tof_cross_talk_low
+  //  als_int_period = als_int_period_high << 8 + als_int_period_low
+  //
   const byte_t LaeToFMuxI2CCmdIdGetTunes  = 6;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenGetTunes = 2;  ///< command length (bytes)
   const byte_t LaeToFMuxI2CRspLenGetTunes = 6;  ///< response length (bytes)
@@ -208,11 +282,52 @@ namespace laelaps
 
   //----------------------------------------------------------------------------
   // Serial ASCII Interface
+  //
+  // The (Partial) BNF
+  //
+  // cmd          ::= CMD_ID, {arg}, EOC
+  // rsp          ::=   CMD_ID, {arg}, EOR
+  //                  | ERROR_RSP_ID, CMD_ID, {arg}, EOR
+  //
+  // CMD_ID       ::= 'a' | 'c' | 'd' | 'i' | 'p' | 'r' | 't' | 'v' | 'w'
+  // ERROR_RSP_ID ::= 'E'
+  // EOC          ::= '\n'
+  // EOR          ::= '\n'
+  //
+  // OP_GET_SET   ::= 'g' | 's'
+  // OP_RESET     ::= 'r'
+  // OP_STET      ::= '-'
+  // OFF_ON       ::= '0' | '1'
+  // MEASUREMENT  ::= ALS | TOF
+  // ALS          ::= 'a'
+  // TOF          ::= 'd'
+  // NO_SENSOR    ::= '-'
+  // SENSOR_ERROR ::= 'error'
+  // NO_OBJ       ::= 'noobj'
+  //
+  // INT          ::= OCTAL | DECIMAL | HEX
+  //
+  // OCTAL        ::= ['-'] '0', {oct_digit} 
+  // oct_digit    ::= '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7'
+  //
+  // DECIMAL            ::= ['-'] nonzero_dec_digit, {dec_digit} 
+  // nonzero_dec_digit  ::= '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
+  // dec_digit          ::= '0' | nonzero_dec_digit
+  //
+  // HEX              ::= ['-'] hex_pre, hex_digit, {hex_digit} 
+  // hex_pre          ::= '0x' | '0X'
+  // hex_digit        ::= dec_digit | hex_alpha_lower | hex_alpha_upper
+  // hex_alpha_lower  ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f'
+  // hex_alpha_upper  ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
+  //
+  // FLOAT        ::=   ['-'], dec_digit, {dec_digit}
+  //                  | ['-'], dec_digit, {dec_digit}, '.', {dec_digit}
+  //                  | ['-'], {dec_digit}, '.', dec_digit, {dec_digit}
   //----------------------------------------------------------------------------
 
-  //
-  // Serial Packet.
-  //
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  // Serial Message Format
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   // sizes
   const byte_t LaeToFMuxSerMaxCmdLen    =  80; ///< max command length (bytes)
@@ -228,8 +343,7 @@ namespace laelaps
   const char LaeToFMuxSerSep        = ' ';      ///< argument separator(s)
 
   // common arguments
-  const char LaeToFMuxSerArgPresent[]     = "+";      ///< sensor is present 
-  const char LaeToFMuxSerArgNotPresent[]  = "-";      ///< sensor not present
+  const char LaeToFMuxSerArgNoSensor[]    = "-";      ///< sensor not present
   const char LaeToFMuxSerArgNoObj[]       = "noobj";  ///< no object detected
   const char LaeToFMuxSerArgSensorErr[]   = "error";  ///< sensor meas. error
   const char LaeToFMuxSerArgOff[]         = "0";      ///< off state
@@ -240,24 +354,28 @@ namespace laelaps
   const char LaeToFMuxSerArgStet[]        = "-";      ///< leave as is
   const char LaeToFMuxSerArgErrRsp[]      = "E";      ///< response error
 
-  //
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  // Serial Commands and Responses
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
   // Print help command and response.
   //
-  // Command format:  cmd_id EOC
-  // Response format: cmd_id cmd_id_0 ...
+  // Command format:  'h' EOC
+  // Response format: 'h' cmd_id_0 ... EOR
+  // Arguments:
+  //  cmd_id_k ::= CMD_ID
   //
   // Note: This command's use is intended only in user interactive mode.
   //
-  const char LaeToFMuxSerCmdIdHelp      = 'h';  ///< serial command id
+  const char LaeToFMuxSerCmdIdHelp  = 'h';  ///< serial command id
 
   //
   // Get firmware version command and response.
   //
-  // Command format:  cmd_id EOC
-  // Response format: cmd_id fw_version EOR
+  // Command format:  'v' EOC
+  // Response format: 'v' fw_version EOR
   // Arguments:
-  //  fw_version := DECIMAL
-  //
+  //  fw_version ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdGetVersion    = 'v';  ///< serial command id
   const byte_t LaeToFMuxSerCmdArgsGetVersion  = 0;    ///< cmd argument count
@@ -266,12 +384,12 @@ namespace laelaps
   //
   // Configure firmware operation.
   //
-  // Command format:  cmd_id op [config] EOC
-  // Response format: cmd_id config EOR
+  // Command format:  'c' op [config] EOC
+  // Response format: 'c' config EOR
   // Arguments:
-  //  op        := {'g' | 's'}
-  //  config    := als_state
-  //  als_state := {'0' | '1'}
+  //  op        ::= OP_GET_SET
+  //  config    ::= als_state
+  //  als_state ::= OFF_ON
   //
   const char   LaeToFMuxSerCmdIdConfig      = 'c';  ///< serial command id
   const byte_t LaeToFMuxSerCmdArgsGetConfig = 1;    ///< cmd get argument count
@@ -281,17 +399,17 @@ namespace laelaps
   //
   // Get sensor identity command and response.
   //
-  // Command format:  cmd_id sensor EOC
-  // Response format: cmd_id model_id model_ver module_ver date time EOR
+  // Command format:  'i' sensor EOC
+  // Response format: 'i' model_id model_ver module_ver date time EOR
   // Arguments:
-  //  sensor      := DECIMAL [0-7]
-  //  model_id    := HEX
-  //  model_ver   := major.minor
-  //  module_ver  := major.minor
-  //  date        := INTEGER
-  //  time        := INTEGER
-  //  major       := INTEGER
-  //  minor       := INTEGER
+  //  sensor      ::= INT
+  //  model_id    ::= HEX
+  //  model_ver   ::= major.minor
+  //  module_ver  ::= major.minor
+  //  date        ::= DECIMAL
+  //  time        ::= DECIMAL
+  //  major       ::= DECIMAL
+  //  minor       ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdGetIdent    = 'i';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsGetIdent  = 1;    ///< cmd argument count
@@ -303,10 +421,10 @@ namespace laelaps
   // The sub-processor continuously takes range measurments from all devices
   // and places the results in a range buffer.
   //
-  // Command format:  cmd_id EOC
-  // Response format: cmd_id dist_0 dist_1 ... dist_7 EOR
+  // Command format:  'd' EOC
+  // Response format: 'd' dist_0 dist_1 ... dist_7 EOR
   // Arguments:
-  //  dist_k := {DECIMAL | 'noobj' | 'error' | '-'}
+  //  dist_k ::= DECIMAL | NO_OBJ | SENSOR_ERROR | NO_SENSOR
   //
   const char   LaeToFMuxSerCmdIdGetDist   = 'd';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsGetDist = 0;    ///< cmd argument count
@@ -315,10 +433,10 @@ namespace laelaps
   //
   // Get measured ambient light sensor lux values.
   //
-  // Command format:  cmd_id  EOC
-  // Response format: cmd_id lux_0 lux_1 ... lux_7 EOR
+  // Command format:  'a'  EOC
+  // Response format: 'a' lux_0 lux_1 ... lux_7 EOR
   // Arguments:
-  //  lux_k := {FLOAT | 'error' | '-'}
+  //  lux_k ::= FLOAT | SENSOR_ERROR | NO_SENSOR
   //
   const char   LaeToFMuxSerCmdIdGetLux    = 'a';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsGetLux  = 0;    ///< cmd argument count
@@ -327,16 +445,16 @@ namespace laelaps
   //
   // Get/set tune parameters.
   //
-  // Command format:  cmd_id op sensor [tunes] EOC
-  // Response format: cmd_id tunes EOR
+  // Command format:  't' op sensor [tunes] EOC
+  // Response format: 't' tunes EOR
   // Arguments:
-  //  sensor          := DECIMAL
-  //  op              := {'g' | 's'}
-  //  tunes           := tof_offset tof_cross_talk als_gain als_int_period
-  //  tof_offset      := {DECIMAL | 'r' | '-'}
-  //  tof_cross_talk  := {DECIMAL | 'r' | '-'}
-  //  als_gain        := {DECIMAL | 'r' | '-'}
-  //  als_int_period  := {DECIMAL | 'r' | '-'}
+  //  sensor          ::= INT
+  //  op              ::= OP_GET_SET
+  //  tunes           ::= tof_offset tof_cross_talk als_gain als_int_period
+  //  tof_offset      ::= INT | OP_RESET | OP_STET
+  //  tof_cross_talk  ::= INT | OP_RESET | OP_STET
+  //  als_gain        ::= INT | OP_RESET | OP_STET
+  //  als_int_period  ::= INT | OP_RESET | OP_STET
   //
   const char   LaeToFMuxSerCmdIdTunes       = 't';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsGetTunes  = 2;    ///< cmd get argument count
@@ -346,10 +464,10 @@ namespace laelaps
   //
   // Probe for connected ToF sensors.
   //
-  // Command format:  cmd_id EOC
-  // Response format: cmd_id count EOR
+  // Command format:  'p' EOC
+  // Response format: 'p' count EOR
   // Arguments:
-  //  count := DECIMAL
+  //  count ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdProbe   = 'p';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsProbe = 0;    ///< cmd argument count
@@ -359,11 +477,11 @@ namespace laelaps
   //
   // List state of ToF sensors.
   //
-  // Command format:  cmd_id EOC
-  // Response format: cmd_id state_0 state_1 ... state_7 EOR
+  // Command format:  'l' EOC
+  // Response format: 'l' state_0 state_1 ... state_7 EOR
   // Arguments:
-  //  state_k   := {sensor | '-'}
-  //  sensor    := DECIMAL
+  //  state_k   ::= {sensor | NO_SENSOR}
+  //  sensor    ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdList   = 'l';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsList = 0;    ///< cmd argument count
@@ -372,15 +490,18 @@ namespace laelaps
   //
   // Enable serial continuous output mode.
   //
-  // Command format:    cmd_id output EOC
-  // Response format:   cmd_id output EOR
-  // Continuous output formats:
-  //  output := 'a' ==> lux_0  lux_1  ... lux_7  EOR
-  //  output := 'd' ==> dist_0 dist_1 ... dist_7 EOR
+  // Command format:    'o' output EOC
+  // Response format:   'o' output EOR
   // Arguments:
-  //  output  := {'a' | 'd'}
-  //  dist_k  := {DECIMAL | 'noobj' | 'error' | '-'}
-  //  lux_k   := {FLOAT | 'error' | '-'}
+  //  output  ::= MEASUREMENT
+  // Continuous ambient light measurement output format:
+  //  lux_0  lux_1  ... lux_7  EOR
+  // with:
+  //  lux_k   ::= FLOAT | SENSOR_ERROR | NO_SENSOR
+  // Continuous time-of-flight distance measurement output format:
+  //  dist_0 dist_1 ... dist_7 EOR
+  // with:
+  //  dist_k  ::= DECIMAL | NO_OBJ | SENSOR_ERROR | NO_SENSOR
   //
   // Note: This command's use is intended only in user interactive mode.
   // Note: Any command, except this command, turns off continuous output mode.
@@ -390,12 +511,42 @@ namespace laelaps
   const byte_t LaeToFMuxSerRspArgsCont = 1;   ///< rsp argument count
 
   //
-  // Debug
+  // Read register value.
   //
-  // Command format:  cmd_id level EOC
-  // Response format: cmd_id level EOR
+  // Command format:  'r' sensor addr size EOC
+  // Response format: 'r' val EOR
   // Arguments:
-  //  level := DECIMAL [0-3]
+  //  sensor  ::= INT
+  //  addr    ::= INT
+  //  size    ::= 1 | 2
+  //  val     ::= HEX
+  //
+  const char   LaeToFMuxSerCmdIdReadReg   = 'r';  ///< command id
+  const byte_t LaeToFMuxSerCmdArgsReadReg = 3;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgsReadReg = 1;    ///< rsp argument count
+
+  //
+  // Write register value.
+  //
+  // Command format:  'w' sensor addr size val EOC
+  // Response format: 'w' val EOR
+  // Arguments:
+  //  sensor  ::= INT
+  //  addr    ::= INT
+  //  size    ::= 1 | 2
+  //  val     ::= INT
+  //
+  const char   LaeToFMuxSerCmdIdWriteReg    = 'w';  ///< command id
+  const byte_t LaeToFMuxSerCmdArgsWriteReg  = 4;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgsWriteReg  = 1;    ///< rsp argument count
+
+  //
+  // Debug (not implemented)
+  //
+  // Command format:  'x' level EOC
+  // Response format: 'x' level EOR
+  // Arguments:
+  //  level ::= INT
   //
   const char   LaeToFMuxSerCmdIdDebug   = 'x';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsDebug = 1;    ///< cmd argument count

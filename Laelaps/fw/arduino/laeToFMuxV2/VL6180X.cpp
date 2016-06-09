@@ -59,6 +59,53 @@
 
 #include "VL6180X.h"
 
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Debugging Macros
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+/*! \brief Define to include debug hooks, undef to exclude */
+#undef DBG_ENABLE
+
+// debug sections
+#define DBG_SECT_INI    0x01    ///< debug initialization code section
+#define DBG_SECT_TOF    0x02    ///< debug time-of-flight code section
+#define DBG_SECT_ALS    0x04    ///< debug ambient light code section
+
+/*! \brief define sensor to debug [0-7] */
+#define DBG_SENSOR  7
+
+/*! \brief define or'ed bits of DBG_SECT code sections */
+#define DBG_MASK    DBG_SECT_INI
+
+#ifdef DBG_ENABLE
+
+#define DBG_PRINT(sensor, section, arg) \
+  do \
+  { \
+    if( ((sensor) == DBG_SENSOR) && ((section) & DBG_MASK) ) \
+    { \
+      Serial.print(arg); \
+    } \
+  } \
+  while(false)
+
+#define DBG_PRINT_NUM(sensor, section, arg, fmt) \
+  do \
+  { \
+    if( ((sensor) == DBG_SENSOR) && ((section) & DBG_MASK) ) \
+    { \
+      Serial.print(arg, fmt); \
+    } \
+  } \
+  while(false)
+
+#else // disable
+
+#define DBG_PRINT(sensor, section, ...)
+#define DBG_PRINT_NUM(sensor, section, arg, fmt)
+
+#endif // DBG_ENABLE
+
 
 /*!
  * \brief Elapse delta time.
@@ -85,8 +132,13 @@ unsigned long dt(unsigned long t0)
   }
 }
 
-VL6180x::VL6180x(SoftwareWire &wire, uint8_t address) :
-    m_wire(wire), m_addr(address)
+
+//------------------------------------------------------------------------------
+// Class VL6180x
+//------------------------------------------------------------------------------
+
+VL6180x::VL6180x(int sensorId, SoftwareWire &wire, uint8_t address) :
+    m_nSensorId(sensorId), m_wire(wire), m_addr(address)
 {
   m_bBlackListed  = false;
   m_bBusy         = false;
@@ -108,6 +160,29 @@ VL6180x::VL6180x(SoftwareWire &wire, uint8_t address) :
   m_regAlsIntPeriod   = VL6180X_AMBIENT_INT_T_REC;  // als int time 100 msec
 }
 
+boolean VL6180x::waitForBootup(int tries)
+{
+  int   i;
+  byte  d;
+
+  for(i = 0; i < tries; ++i)
+  {
+    d = readReg8(VL6180X_FIRMWARE_BOOTUP);
+    if( d & 0x01 )
+    {
+      DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: booted\n");
+      return true;
+    }
+    else
+    {
+      delay(1);
+    }
+  }
+
+  DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: not booted\n");
+  return false;
+}
+
 boolean VL6180x::ping(int tries)
 {
   int   i;
@@ -121,6 +196,10 @@ boolean VL6180x::ping(int tries)
 
     if( (d != 0) && (d != 0xff) )
     {
+      DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: pinged, tries=");
+      DBG_PRINT_NUM(m_nSensorId, DBG_SECT_INI, i+1, DEC);
+      DBG_PRINT(m_nSensorId, DBG_SECT_INI, "\n");
+
       m_bBusy = false;
       return true;
     }
@@ -128,63 +207,68 @@ boolean VL6180x::ping(int tries)
     delay(10);
   }
 
+  DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: no response, tries=");
+  DBG_PRINT_NUM(m_nSensorId, DBG_SECT_INI, 1, DEC);
+  DBG_PRINT(m_nSensorId, DBG_SECT_INI, "\n");
+
   m_bBusy = false;
 
   return false;
 }
 
-int VL6180x::initSensor()
+void VL6180x::initSensor()
 {
-  byte data; //for temp data storage
+  byte reset;
 
   m_bBusy = true;
 
-  data = readReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET);
+  reset = readReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET);
 
-  if( data != 1 )
+  //
+  // Sensor came out of reset
+  //
+  if( reset & 0x01 )
   {
-    m_bBusy = false;
-    return VL6180X_FAILURE_RESET;
+    //
+    // Required by datasheet
+    // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
+    //
+    writeReg8(0x0207, 0x01);
+    writeReg8(0x0208, 0x01);
+    writeReg8(0x0096, 0x00);
+    writeReg8(0x0097, 0xfd);
+    writeReg8(0x00e3, 0x00);
+    writeReg8(0x00e4, 0x04);
+    writeReg8(0x00e5, 0x02);
+    writeReg8(0x00e6, 0x01);
+    writeReg8(0x00e7, 0x03);
+    writeReg8(0x00f5, 0x02);
+    writeReg8(0x00d9, 0x05);
+    writeReg8(0x00db, 0xce);
+    writeReg8(0x00dc, 0x03);
+    writeReg8(0x00dd, 0xf8);
+    writeReg8(0x009f, 0x00);
+    writeReg8(0x00a3, 0x3c);
+    writeReg8(0x00b7, 0x00);
+    writeReg8(0x00bb, 0x3c);
+    writeReg8(0x00b2, 0x09);
+    writeReg8(0x00ca, 0x09);  
+    writeReg8(0x0198, 0x01);
+    writeReg8(0x01b0, 0x17);
+    writeReg8(0x01ad, 0x00);
+    writeReg8(0x00ff, 0x05);
+    writeReg8(0x0100, 0x05);
+    writeReg8(0x0199, 0x05);
+    writeReg8(0x01a6, 0x1b);
+    writeReg8(0x01ac, 0x3e);
+    writeReg8(0x01a7, 0x1f);
+    writeReg8(0x0030, 0x00);
+
+    // clear reset
+    writeReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET, 0);
   }
 
-  //
-  // Required by datasheet
-  // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
-  //
-  writeReg8(0x0207, 0x01);
-  writeReg8(0x0208, 0x01);
-  writeReg8(0x0096, 0x00);
-  writeReg8(0x0097, 0xfd);
-  writeReg8(0x00e3, 0x00);
-  writeReg8(0x00e4, 0x04);
-  writeReg8(0x00e5, 0x02);
-  writeReg8(0x00e6, 0x01);
-  writeReg8(0x00e7, 0x03);
-  writeReg8(0x00f5, 0x02);
-  writeReg8(0x00d9, 0x05);
-  writeReg8(0x00db, 0xce);
-  writeReg8(0x00dc, 0x03);
-  writeReg8(0x00dd, 0xf8);
-  writeReg8(0x009f, 0x00);
-  writeReg8(0x00a3, 0x3c);
-  writeReg8(0x00b7, 0x00);
-  writeReg8(0x00bb, 0x3c);
-  writeReg8(0x00b2, 0x09);
-  writeReg8(0x00ca, 0x09);  
-  writeReg8(0x0198, 0x01);
-  writeReg8(0x01b0, 0x17);
-  writeReg8(0x01ad, 0x00);
-  writeReg8(0x00ff, 0x05);
-  writeReg8(0x0100, 0x05);
-  writeReg8(0x0199, 0x05);
-  writeReg8(0x01a6, 0x1b);
-  writeReg8(0x01ac, 0x3e);
-  writeReg8(0x01a7, 0x1f);
-  writeReg8(0x0030, 0x00);
-
   m_bBusy = false;
-
-  return 0;
 }
 
 void VL6180x::writeSensorDefaults()
@@ -378,6 +462,8 @@ boolean VL6180x::asyncMeasureRange()
       // Initialize data for measurment.
       //
       case AsyncStateInit:
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: init\n");
+
         // mark sensor busy
         m_bBusy = true;
 
@@ -397,6 +483,8 @@ boolean VL6180x::asyncMeasureRange()
       // Wait for the sensor to be ready.
       //
       case AsyncStateWaitForReady:
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: wait ready\n");
+
         // read range status register
         status = readReg8(VL6180X_RESULT_RANGE_STATUS);
 
@@ -421,6 +509,8 @@ boolean VL6180x::asyncMeasureRange()
       // Start a measurement.
       //
       case AsyncStateStartMeas:
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: start meas\n");
+
         writeReg8(VL6180X_SYSRANGE_START, 0x01);
         bExec         = false;
         m_eAsyncState = AsyncStateWaitForResult;
@@ -430,8 +520,13 @@ boolean VL6180x::asyncMeasureRange()
       // Wait for the measurement's result.
       //
       case AsyncStateWaitForResult:
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: wait meas, status=0x");
+
         // read gpio interrupt status 
         status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
+
+        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_TOF, status, HEX);
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "\n");
 
         // result ready
         if( status & 0x04 )
@@ -454,6 +549,10 @@ boolean VL6180x::asyncMeasureRange()
       // Sensor measurement has completed, retrieve the value.
       //
       case AsyncStateDone:
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: done in msec=");
+        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_TOF, dt(m_uAsyncTStart), DEC);
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "\n");
+
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
@@ -469,7 +568,14 @@ boolean VL6180x::asyncMeasureRange()
         m_bBusy       = false;
         break;
 
+      //
+      // Abort measurement.
+      //
       case AsyncStateAbort:
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: abort after msec=");
+        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_TOF, dt(m_uAsyncTStart), DEC);
+        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "\n");
+
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
@@ -512,6 +618,8 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Initialize data for measurment.
       //
       case AsyncStateInit:
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: init\n");
+
         // mark sensor busy
         m_bBusy = true;
 
@@ -522,7 +630,7 @@ boolean VL6180x::asyncMeasureAmbientLight()
         }
 
         // initialize state
-        m_uAsyncTWait   = (unsigned long)m_regAlsIntPeriod + 10;
+        m_uAsyncTWait   = (unsigned long)((float)m_regAlsIntPeriod * 1.2);
         m_uAsyncTStart  = millis();
         m_eAsyncState   = AsyncStateWaitForReady;
         break;
@@ -531,6 +639,8 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Wait for the sensor to be ready.
       //
       case AsyncStateWaitForReady:
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: wait ready\n");
+
         // read range status register
         status = readReg8(VL6180X_RESULT_ALS_STATUS);
 
@@ -555,6 +665,8 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Start a measurement.
       //
       case AsyncStateStartMeas:
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: start meas\n");
+
         writeReg8(VL6180X_SYSALS_START, 0x01);
         bExec         = false;
         m_eAsyncState = AsyncStateWaitForResult;
@@ -564,11 +676,16 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Wait for the measurement's result.
       //
       case AsyncStateWaitForResult:
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: wait meas, status=0x");
+
         // read gpio interrupt status 
         status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
 
+        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_ALS, status, HEX);
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "\n");
+
         // result ready
-        if( status & 0x02 )
+        if( status & 0x20 )
         {
           m_eAsyncState = AsyncStateDone;
         }
@@ -588,6 +705,10 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Sensor measurement has completed, retrieve the value.
       //
       case AsyncStateDone:
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: done in msec=");
+        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_ALS, dt(m_uAsyncTStart), DEC);
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "\n");
+
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
@@ -603,7 +724,14 @@ boolean VL6180x::asyncMeasureAmbientLight()
         m_bBusy       = false;
         break;
 
+      //
+      // Abort measurement.
+      //
       case AsyncStateAbort:
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: abort after msec=");
+        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_ALS, dt(m_uAsyncTStart), DEC);
+        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "\n");
+
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
@@ -807,6 +935,11 @@ void VL6180x::getDefaultTunes(byte &offset, uint16_t &crosstalk,
   intPeriod = VL6180X_AMBIENT_INT_T_REC;
 }
 
+int VL6180x::getSensorId()
+{
+  return m_nSensorId;
+}
+
 byte VL6180x::getRange()
 {
   return m_range;
@@ -817,13 +950,13 @@ float VL6180x::getAmbientLight()
   return m_lux;
 }
 
-byte VL6180x::readReg8(uint16_t registerAddr)
+byte VL6180x::readReg8(uint16_t regAddr)
 {
   byte data;
 
   m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((registerAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(registerAddr & 0xFF); //LSB of register address
+  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
+  m_wire.write(regAddr & 0xFF); //LSB of register address
   m_wire.endTransmission(false); //Send address and register address bytes
   m_wire.requestFrom( m_addr , 1);
   data = m_wire.read(); //Read Data from selected register
@@ -831,15 +964,15 @@ byte VL6180x::readReg8(uint16_t registerAddr)
   return data;
 }
 
-uint16_t VL6180x::readReg16(uint16_t registerAddr)
+uint16_t VL6180x::readReg16(uint16_t regAddr)
 {
   uint8_t data_low;
   uint8_t data_high;
   uint16_t data;
 
   m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((registerAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(registerAddr & 0xFF); //LSB of register address
+  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
+  m_wire.write(regAddr & 0xFF); //LSB of register address
   m_wire.endTransmission(false); //Send address and register address bytes
 
   m_wire.requestFrom( m_addr, 2);
@@ -850,20 +983,20 @@ uint16_t VL6180x::readReg16(uint16_t registerAddr)
   return data;
 }
 
-void VL6180x::writeReg8(uint16_t registerAddr, byte data)
+void VL6180x::writeReg8(uint16_t regAddr, byte data)
 {
   m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((registerAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(registerAddr & 0xFF); //LSB of register address
+  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
+  m_wire.write(regAddr & 0xFF); //LSB of register address
   m_wire.write(data); // Data/setting to be sent to device.
   m_wire.endTransmission(); //Send address and register address bytes
 }
 
-void VL6180x::writeReg16(uint16_t registerAddr, uint16_t data)
+void VL6180x::writeReg16(uint16_t regAddr, uint16_t data)
 {
   m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((registerAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(registerAddr & 0xFF); //LSB of register address
+  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
+  m_wire.write(regAddr & 0xFF); //LSB of register address
   uint8_t temp;
   temp = (data >> 8) & 0xff;
   m_wire.write(temp); // Data/setting to be sent to device

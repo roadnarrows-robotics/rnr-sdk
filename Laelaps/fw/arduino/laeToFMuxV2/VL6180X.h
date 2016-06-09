@@ -192,6 +192,9 @@ enum vl6180x_als_gain
 #define VL6180X_AMBIENT_INT_T_REC   100   ///< recommended int period (msec)
 #define VL6180X_AMBIENT_INT_T_MASK  0x1ff ///< als integration period mask
 
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Other sensor values
+//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 /*!
  * \brief Sensor identification structure.
@@ -234,10 +237,22 @@ public:
   /*!
    * \brief Default initialization constructor.
    *
+   * \param sensorId  Sensor software id.
    * \param wire      Associated software I2C.
    * \param address   Sensor I2C 7-bit address.
    */
-  VL6180x(SoftwareWire &wire, uint8_t address = VL6180X_I2C_ADDR_DFT);
+  VL6180x(int           sensorId,
+          SoftwareWire &wire,
+          uint8_t       address = VL6180X_I2C_ADDR_DFT);
+
+  /*!
+   * \brief Busy wait for sensor firmware to fully booted up.
+   *
+   * \brief tries   Number of tries.
+   *
+   * \return Returns true if sensor firmware booted, false otherwise.
+   */
+  boolean waitForBootup(int tries=1);
 
   /*!
    * \brief Ping sensor for existence on bus.
@@ -252,10 +267,8 @@ public:
    * \brief Initialize size as per ST datasheet.
    *
    * http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf (Section 1.3).
-   *
-   * \return Returns 0 on success, -1 on failure.
    */
-  int initSensor();
+  void initSensor();
 
   /*!
    * \brief Set default value as per ST data sheet.
@@ -339,26 +352,6 @@ public:
   boolean asyncMeasureAmbientLight();
 
   /*!
-   * \brief Convert raw range value to disance.
-   *
-   * \param rangeRaw    Range's raw value.
-   * \param rangeStatus Range measurement status.
-   *
-   * \return Converted distance (mm).
-   */
-  byte cvtRangeRawToDist(byte rangeRaw, byte rangeStatus);
-
-  /*!
-   * \brief Convert raw ALS value to lux.
-   *
-   * \param alsRaw    ALS's raw ambient light value.
-   * \param alsStatus ALS measurement status.
-   *
-   * \return Converted lux.
-   */
-  float cvtAlsRawToLux(uint16_t alsRaw, byte alsStatus);
-
-  /*!
    * \brief Mark time-of-flight sensor for tuning.
    *
    * \param offset    ToF sensor part-to-part offset.
@@ -398,6 +391,13 @@ public:
   //............................................................................
   // Attriube Member Functions
   //............................................................................
+
+  /*!
+   * \brief Get sensor's assigned id.
+   *
+   * \return Sensor id.
+   */
+  int getSensorId();
 
   /*!
    * \brief Whitelist this sensor.
@@ -466,11 +466,50 @@ public:
    */
   float getAmbientLight();
 
+  /*!
+   * \brief Read 8-bit value from sensor register.
+   *
+   * \param regAddr   Sensor's 16-bit register address.
+   *
+   * \return Read value.
+   */
+  byte readReg8(uint16_t regAddr);
+
+  /*!
+   * \brief Read 16-bit value from sensor register.
+   *
+   * \param regAddr   Sensor's 16-bit register address.
+   *
+   * \return Read value.
+   */
+  uint16_t readReg16(uint16_t regAddr);
+
+  /*!
+   * \brief Write 8-bit value to sensor register.
+   *
+   * \param regAddr   Sensor's 16-bit register address.
+   * \param data      8-bit value.
+   *
+   * \return Read value.
+   */
+  void writeReg8(uint16_t regAddr, uint8_t data);
+
+  /*!
+   * \brief Write 16-bit value to sensor register.
+   *
+   * \param regAddr   Sensor's 16-bit register address.
+   * \param data      16-bit value.
+   *
+   * \return Read value.
+   */
+  void writeReg16(uint16_t regAddr, uint16_t data);
+
 protected:
-  SoftwareWire &m_wire;           ///< bound i2c bus interface
-  int           m_addr;           ///< address of sensor
-  boolean       m_bBlackListed;   ///< is [not] blacklisted
-  boolean       m_bBusy;          ///< is [not] busy 
+  int           m_nSensorId;          ///< assigned sensor id
+  SoftwareWire &m_wire;               ///< bound i2c bus interface
+  int           m_addr;               ///< address of sensor
+  boolean       m_bBlackListed;       ///< is [not] blacklisted
+  boolean       m_bBusy;              ///< is [not] busy 
 
   // read values
   VL6180xIdentification m_ident;      ///< sensor identity
@@ -498,42 +537,25 @@ protected:
   uint16_t  m_regAlsIntPeriod;        ///< ALS itegration period value
 
   /*!
-   * \brief Read 8-bit value from sensor register.
+   * \brief Convert raw range value to disance.
    *
-   * \param registerAddr  Sensor's 16-bit register address.
+   * \param rangeRaw    Range's raw value.
+   * \param rangeStatus Range measurement status.
    *
-   * \return Read value.
+   * \return Converted distance (mm).
    */
-  byte readReg8(uint16_t registerAddr);
+  byte cvtRangeRawToDist(byte rangeRaw, byte rangeStatus);
 
   /*!
-   * \brief Read 16-bit value from sensor register.
+   * \brief Convert raw ALS value to lux.
    *
-   * \param registerAddr  Sensor's 16-bit register address.
+   * \param alsRaw    ALS's raw ambient light value.
+   * \param alsStatus ALS measurement status.
    *
-   * \return Read value.
+   * \return Converted lux.
    */
-  uint16_t readReg16(uint16_t registerAddr);
+  float cvtAlsRawToLux(uint16_t alsRaw, byte alsStatus);
 
-  /*!
-   * \brief Write 8-bit value to sensor register.
-   *
-   * \param registerAddr  Sensor's 16-bit register address.
-   * \param data          8-bit value.
-   *
-   * \return Read value.
-   */
-  void writeReg8(uint16_t registerAddr, uint8_t data);
-
-  /*!
-   * \brief Write 16-bit value to sensor register.
-   *
-   * \param registerAddr  Sensor's 16-bit register address.
-   * \param data          16-bit value.
-   *
-   * \return Read value.
-   */
-  void writeReg16(uint16_t registerAddr, uint16_t data);
 };  // class VL6180x
 
 #endif // _VL6180X_H

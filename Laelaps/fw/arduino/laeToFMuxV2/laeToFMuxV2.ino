@@ -133,7 +133,7 @@ void setup()
   //
   for(i = 0; i < LaeToFMuxNumOfChan; ++i)
   {
-    ToFSensor[i] = new VL6180x(*SoftWire[i]);
+    ToFSensor[i] = new VL6180x(i, *SoftWire[i]);
   }
 
   //
@@ -210,7 +210,7 @@ void probe()
 
   for(i = 0; i < LaeToFMuxNumOfChan; ++i)
   {
-    if( ToFSensor[i]->ping(3) )
+    if( ToFSensor[i]->waitForBootup(5) && ToFSensor[i]->ping(3) )
     {
       ToFSensor[i]->whitelist();
       ToFSensor[i]->readIdent();
@@ -270,6 +270,7 @@ void measure()
         if( ToFSensor[i]->asyncMeasureRange() )
         {
           --AlsCounter; // when done decrement ALS counter.
+          //if( i == 0 ) p("%d %d\n", i, AlsCounter);
         }
       }
 
@@ -281,9 +282,14 @@ void measure()
         // push ambient light measurement until done
         if( ToFSensor[i]->asyncMeasureAmbientLight() )
         {
+          //if( i == 0 ) p("%d m ..... done\n", i);
           // when done move to next sensor
           AlsSensorId = nextSensor(AlsSensorId);
           AlsCounter  = AlsFreq;
+        }
+        else
+        {
+          //if( i == 0 ) p("%d m .....\n", i);
         }
       }
     }
@@ -805,7 +811,7 @@ void serPrintDist()
         p(" %6s", LaeToFMuxSerArgSensorErr);
         break;
       case LaeToFMuxRangeNoDev:
-        p(" %6s", LaeToFMuxSerArgNotPresent);
+        p(" %6s", LaeToFMuxSerArgNoSensor);
         break;
       default:
         p(" %6d", dist);
@@ -828,7 +834,7 @@ void serPrintLux()
   {
     if( ToFSensor[i]->isBlacklisted() )
     {
-      p(" %7s", LaeToFMuxSerArgNotPresent);
+      p(" %7s", LaeToFMuxSerArgNoSensor);
     }
     else
     {
@@ -1014,9 +1020,7 @@ boolean serParseNumber(const char *sName, const char *sVal,
                        long  nMin,  long nMax,
                        long &nVal)
 {
-  String      str = "";
-  const char *s;
-  char        c;
+  char *sEnd;
 
   if( (sVal == NULL) || (*sVal == 0) )
   {
@@ -1024,25 +1028,16 @@ boolean serParseNumber(const char *sName, const char *sVal,
     return false;
   }
 
-  for(s = sVal; *s != 0; ++s)
+  nVal = strtol(sVal, &sEnd, 0);
+  
+  if( *sEnd != 0 )
   {
-    c = *s;
-    if( isDigit(c) )
-    {
-      str += c;
-    }
-    else
-    {
-      serErrorRsp("%s value %s is not a number", sName, sVal);
-      return false;
-    }
+    serErrorRsp("%s %s is not a number", sName, sVal);
+    return false;
   }
-    
-  nVal = str.toInt();
-
-  if( (nVal < nMin) || (nVal > nMax) )
+  else if( (nVal < nMin) || (nVal > nMax) )
   {
-    serErrorRsp("%s value %s out-of-range", sName, sVal);
+    serErrorRsp("%s %s is out-of-range", sName, sVal);
     return false;
   }
 
@@ -1168,6 +1163,12 @@ void serExecCmd()
       serExecCont();
       bMode = SerContinuousMode;
       break;
+    case LaeToFMuxSerCmdIdReadReg:
+      serExecReadReg();
+      break;
+    case LaeToFMuxSerCmdIdWriteReg:
+      serExecWriteReg();
+      break;
     case LaeToFMuxSerCmdIdDebug:
       break;  // TODO
     default:
@@ -1183,40 +1184,31 @@ void serExecCmd()
  */
 void serExecHelp()
 {
-  serRsp("%c %c %c %c %c %c %c %c %c",
-      LaeToFMuxSerCmdIdGetLux,
-      LaeToFMuxSerCmdIdConfig,
-      LaeToFMuxSerCmdIdGetDist,
-      LaeToFMuxSerCmdIdGetIdent,
-      LaeToFMuxSerCmdIdList,
-      LaeToFMuxSerCmdIdCont,
-      LaeToFMuxSerCmdIdProbe,
-      LaeToFMuxSerCmdIdTunes,
-      LaeToFMuxSerCmdIdGetVersion);
+  int i;
 
-#if 0 // RDK not sufficient memory
-  serRsp("%s 10", SerArgs[SerCmdIdx]);
-  p("%c                       - get ambient light measurements from all sensors%s",
-      LaeToFMuxSerCmdIdGetLux, LaeToFMuxSerEoR);
-  p("%c <op> [cfg]            - get/set firmware operation%s",
-      LaeToFMuxSerCmdIdConfig, LaeToFMuxSerEoR);
-  p("%c                       - get distance measurements from all sensors%s",
-      LaeToFMuxSerCmdIdGetDist, LaeToFMuxSerEoR);
-  p("%c                       - print this help%s",
-      LaeToFMuxSerCmdIdHelp, LaeToFMuxSerEoR);
-  p("%c <sensor>              - get ToF sensor identify%s",
-      LaeToFMuxSerCmdIdGetIdent, LaeToFMuxSerEoR);
-  p("%c                       - list sensor connected state%s",
-      LaeToFMuxSerCmdIdList, LaeToFMuxSerEoR);
-  p("%c <output>              - enable continuous output mode%s",
-      LaeToFMuxSerCmdIdCont, LaeToFMuxSerEoR);
-  p(%s"%c                       - probe for connected sensors%s",
-      LaeToFMuxSerCmdIdProbe, LaeToFMuxSerEoR);
-  p("%c <op> <sensor> [tunes] - get/set ToF sensor tune parameters%s",
-      LaeToFMuxSerCmdIdTunes, LaeToFMuxSerEoR);
-  p("%c                       - get firmware version%s",
-      LaeToFMuxSerCmdIdGetVersion, LaeToFMuxSerEoR);
-#endif // RDK
+  char cmdids[] =
+  {
+    LaeToFMuxSerCmdIdGetLux,
+    LaeToFMuxSerCmdIdConfig,
+    LaeToFMuxSerCmdIdGetDist,
+    LaeToFMuxSerCmdIdGetIdent,
+    LaeToFMuxSerCmdIdList,
+    LaeToFMuxSerCmdIdCont,
+    LaeToFMuxSerCmdIdProbe,
+    LaeToFMuxSerCmdIdReadReg,
+    LaeToFMuxSerCmdIdTunes,
+    LaeToFMuxSerCmdIdGetVersion,
+    LaeToFMuxSerCmdIdWriteReg,
+    0
+  };
+
+  p("%c ", LaeToFMuxSerCmdIdHelp);
+  for(i=0; cmdids[i]!=0; ++i)
+  {
+    p("%c ", cmdids[i]);
+  }
+
+  Serial.print(LaeToFMuxSerEoR);
 }
 
 /*!
@@ -1464,8 +1456,8 @@ void serExecTunes()
   // asynchronously, so the current value may not match the target set values
   // yet.
   //
-  ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
-                              alsGain,     alsIntPeriod);
+  //ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
+  //                            alsGain,     alsIntPeriod);
 
   serRsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
 }
@@ -1503,7 +1495,7 @@ void serExecList()
   {
     if( ToFSensor[i]->isBlacklisted() )
     {
-      p(" %s", LaeToFMuxSerArgNotPresent);
+      p(" %s", LaeToFMuxSerArgNoSensor);
     }
     else
     {
@@ -1554,8 +1546,8 @@ void serContinuousOutput()
 {
   if( SerContinuousOutput == 'a' )
   {
-    serRsp("%d %d %d", AlsSensorId, AlsCounter, AlsFreq);
-    //serPrintLux();
+    //serRsp("%d %d %d", AlsSensorId, AlsCounter, AlsFreq);
+    serPrintLux();
   }
   else if( SerContinuousOutput == 'd' )
   {
@@ -1563,4 +1555,97 @@ void serContinuousOutput()
   }
 
   Serial.print(LaeToFMuxSerEoR);
+}
+
+/*!
+ * \brief Execute read sensor register command.
+ */
+void serExecReadReg()
+{
+  int       sensor;
+  long      regAddr;
+  long      regSize;
+  uint16_t  regVal;
+ 
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsReadReg) )
+  {
+    return;
+  }
+  else if( !serParseSensorId(SerArgs[1], sensor) ) 
+  {
+    return;
+  }
+  else if( !serParseNumber("addr", SerArgs[2],
+        VL6180X_IDENTIFICATION_MODEL_ID, VL6180X_INTERLEAVED_MODE_ENABLE,
+        regAddr) )
+  {
+    return;
+  }
+  else if( !serParseNumber("size", SerArgs[3], 1, 2, regSize) )
+  {
+    return;
+  }
+
+  switch( regSize )
+  {
+    case 2:
+      regVal = ToFSensor[sensor]->readReg16((uint16_t)regAddr);
+      serRsp("0x%04x", regVal);
+      break;
+    case 1:
+    default:
+      regVal = (uint16_t)ToFSensor[sensor]->readReg8((uint16_t)regAddr);
+      serRsp("0x%02x", regVal);
+      break;
+  }
+}
+
+/*!
+ * \brief Execute write sensor register command.
+ */
+void serExecWriteReg()
+{
+  int       sensor;
+  long      regAddr;
+  long      regSize;
+  long      regWVal;
+  uint16_t  regRVal;
+ 
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgsWriteReg) )
+  {
+    return;
+  }
+  else if( !serParseSensorId(SerArgs[1], sensor) ) 
+  {
+    return;
+  }
+  else if( !serParseNumber("addr", SerArgs[2],
+        VL6180X_IDENTIFICATION_MODEL_ID, VL6180X_INTERLEAVED_MODE_ENABLE,
+        regAddr) )
+  {
+    return;
+  }
+  else if( !serParseNumber("size", SerArgs[3], 1, 2, regSize) )
+  {
+    return;
+  }
+  else if( !serParseNumber("val", SerArgs[4], 0, 0xffff, regWVal) )
+  {
+    return;
+  }
+
+  switch( regSize )
+  {
+    case 2:
+      ToFSensor[sensor]->writeReg16((uint16_t)regAddr, (uint16_t)regWVal);
+      regRVal = ToFSensor[sensor]->readReg16((uint16_t)regAddr);
+      serRsp("0x%04x", regRVal);
+      break;
+    case 1:
+    default:
+      ToFSensor[sensor]->writeReg8((uint16_t)regAddr, (byte)regWVal);
+      regRVal = (uint16_t)ToFSensor[sensor]->readReg8((uint16_t)regAddr);
+      serRsp("0x%02x", regRVal);
+      break;
+  }
 }
