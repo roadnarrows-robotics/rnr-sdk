@@ -61,8 +61,8 @@ endif
 # The Package Definition
 PKG 								= netmsgs
 PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 1
-PKG_VERSION_RELEASE = 3
+PKG_VERSION_MINOR   = 2
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
@@ -112,6 +112,9 @@ PKG_CXXFLAGS				=
 
 # Link flags
 PKG_LDFLAGS					=
+
+# package wide lib subdir
+LIB_SUBDIR					= rnr
 
 # Doxy Parameters
 

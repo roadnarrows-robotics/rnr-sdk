@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2015.  RoadNarrows LLC.
+  (C) 2015-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -63,23 +63,23 @@ pkgroot   = ..
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS 			= gpio
+DIST_STLIBS 			= rnr_gpio
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= gpio
+DIST_SHLIBS 			= rnr_gpio
 
 # Source Files
-gpio.SRC.C 			= gpio.c mmapGpio.c
+rnr_gpio.SRC.C 			= gpio.c mmapGpio.c
 
 # Libraries to link with
-gpio.LIBS	= rnr
+rnr_gpio.LIBS	= rnr
 
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
 
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD=\"libgpio\"
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD=\"librnr_gpio\"
 
 #------------------------------------------------------------------------------
 # Make Includes

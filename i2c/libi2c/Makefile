@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2007-2010.  RoadNarrows LLC.
+  (C) 2007-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -63,20 +63,20 @@ pkgroot		= ..
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS 			= i2c
+DIST_STLIBS 			= rnr_i2c
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= i2c
+DIST_SHLIBS 			= rnr_i2c
 
 # Source Files
-i2c.SRC.C 	= 	i2ccom.c smbus.c
+rnr_i2c.SRC.C 	= 	i2ccom.c smbus.c
 
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
 
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libi2c\""
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_i2c\""
 
 
 #------------------------------------------------------------------------------

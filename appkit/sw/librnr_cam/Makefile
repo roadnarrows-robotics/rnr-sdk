@@ -1,4 +1,4 @@
-################################################################################
+
 #
 # ./sw/librnr_cam/Makefile
 
@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2012-2013.  RoadNarrows LLC.
+  (C) 2012-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -90,7 +90,7 @@ rnr_cam.LIBS  = \
 	$(CAIRO_LIB) $(FONT_LIBS) $(GOBJ_LIBS) \
 	$(GST_LIB_IF) $(GLIB_LIB)
 
-rnr_cam.LIBDEPS  = tinyxml rnr_appkit rnr_win rnr_wingtk rnr_winqt
+rnr_cam.LIBDEPS  = rnr_tinyxml rnr_appkit rnr_win rnr_wingtk rnr_winqt
 
 #------------------------------------------------------------------------------
 # Optional Variables 

@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2015.  RoadNarrows LLC.
+  (C) 2015-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -64,11 +64,11 @@ DIST_PGMS = gpioexport
 
 # Libraries to Link With
 gpioexport.LIBS = \
-	gpio \
+	rnr_gpio \
 	rnr \
 	stdc++
 
-gpioexport.LIBDEPS  = gpio
+gpioexport.LIBDEPS  = rnr_gpio
 
 
 #------------------------------------------------------------------------------

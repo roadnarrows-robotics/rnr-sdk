@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2015.  RoadNarrows LLC.
+  (C) 2015-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -64,11 +64,11 @@ DIST_PGMS = gpioread
 
 # Libraries to Link With
 gpioread.LIBS = \
-	gpio \
+	rnr_gpio \
 	rnr \
 	stdc++
 
-gpioread.LIBDEPS  = gpio
+gpioread.LIBDEPS  = rnr_gpio
 
 
 #------------------------------------------------------------------------------

@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-	(C) 2009-2011.  RoadNarrows LLC.
+	(C) 2009-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
 	All Rights Reserved
 
@@ -26,6 +26,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -49,6 +50,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -63,20 +65,20 @@ pkgroot		= ..
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS 			= netmsgs
+DIST_STLIBS 			= rnr_netmsgs
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= netmsgs
+DIST_SHLIBS 			= rnr_netmsgs
 
 # Source Files
-netmsgs.SRC.C 	=	nmLibInternal.c \
-									nmLibPack.c \
- 									nmLibPackFlat.c \
-									nmLibPackITV.c \
-									nmLibUtils.c
+rnr_netmsgs.SRC.C =	nmLibInternal.c \
+										nmLibPack.c \
+ 										nmLibPackFlat.c \
+										nmLibPackITV.c \
+										nmLibUtils.c
 
 # Linked libraries
-netmsgs.LIBS	= rnr
+rnr_netmsgs.LIBS	= rnr
 
 #------------------------------------------------------------------------------
 # Interface Headers
@@ -89,7 +91,7 @@ netmsgs.LIBS	= rnr
 # LOG									compile in logging
 # LOGMOD							logging module's name (id)
 # NMLIB_DEBUG_ENABLE	compile in library debuging
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libnetmsgs\"" -DNMLIB_DEBUG_ENABLE
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_netmsgs\"" -DNMLIB_DEBUG_ENABLE
 
 #------------------------------------------------------------------------------
 # Make Includes

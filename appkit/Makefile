@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2013  RoadNarrows LLC
+  (C) 2013-2016  RoadNarrows LLC
   (http://roadnarrows.com)
   All Rights Reserved
 
@@ -85,8 +85,8 @@ DIST_HDRS = tinyxml librnr_appkit librnr_win librnr_wingtk
 #       $(topdir)/include. Otherwise, is it really a deliverable header?
 #
 tinyxml.HDRS.H = \
-	tinystr.h \
-	tinyxml.h
+	rnr/tinyxml/tinystr.h \
+	rnr/tinyxml/tinyxml.h
 
 librnr_appkit.HDRS.H = \
 	rnr/Camera.h \

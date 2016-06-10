@@ -17,7 +17,7 @@
 	_CrtMemState endMemState;
 #endif
 
-#include "tinyxml.h"
+#include "rnr/tinyxml/tinyxml.h"
 
 bool XmlTest (const char* testString, const char* expected, const char* found, bool noEcho = false);
 bool XmlTest( const char* testString, int expected, int found, bool noEcho = false );

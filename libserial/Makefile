@@ -17,7 +17,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2008-2010.  RoadNarrows LLC.
+  (C) 2008-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +25,8 @@ RN Make System Specific Makefile
  */
 endif
 
+#
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -48,6 +50,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -62,16 +65,16 @@ pkgroot   = .
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS 			= serial
+DIST_STLIBS 			= rnr_serial
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= serial
+DIST_SHLIBS 			= rnr_serial
 
 # Source Files
-serial.SRC.C 			= serdev.c
+rnr_serial.SRC.C = serdev.c
 
 # Libraries to link with
-serial.LIBS	= rnr
+rnr_serial.LIBS	= rnr
 
 
 #------------------------------------------------------------------------------
@@ -99,7 +102,7 @@ rnr.HDRS.H 		=   rnr/serdev.h
 #
 
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD=\"libserial\"
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD=\"librnr_serial\"
 
 # Document SubPackage Name
 DOC_SUBDIR        =

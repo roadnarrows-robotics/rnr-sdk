@@ -61,16 +61,16 @@ pkgroot		= ../..
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS       = tinyxml
+DIST_STLIBS       = rnr_tinyxml
 
 # Distribution Shared Libraries
-DIST_SHLIBS       = tinyxml
+DIST_SHLIBS       = rnr_tinyxml
 
 # Source Files
-tinyxml.SRC.CPP  = tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp
+rnr_tinyxml.SRC.CPP = tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp
 
 # Linked Libraries 
-tinyxml.LIBS	= stdc++
+rnr_tinyxml.LIBS	= stdc++
 
 #------------------------------------------------------------------------------
 # Test Programs
@@ -78,7 +78,7 @@ tinyxml.LIBS	= stdc++
 # uncomment to build test program
 # LOC_PGMS =xmltest
 
-xmltest.LIBS		= tinyxml
+rnr_xmltest.LIBS		= tinyxml
 
 # C++ Source Files
 xmltest.SRC.CPP	= xmltest.cpp

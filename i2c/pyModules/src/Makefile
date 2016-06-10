@@ -84,7 +84,7 @@ include $(rnmake)/Rules.mk
 
 SWIG_FILES 				= i2ccore.i
 SWIG_EXTMOD_DIR 	= ../modules/rnr
-SWIG_EXTMOD_LIBS 	= -li2c -lrnr
+SWIG_EXTMOD_LIBS 	= -lrnr_i2c -lrnr
 
 # Include Swig Rules Makefile
 include $(rnmake)/Rules.swig.mk

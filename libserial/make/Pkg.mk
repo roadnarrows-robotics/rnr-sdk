@@ -64,8 +64,8 @@ endif
 # The Package Definition
 PKG 								= libserial
 PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 5
-PKG_VERSION_RELEASE = 2
+PKG_VERSION_MINOR   = 6
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"

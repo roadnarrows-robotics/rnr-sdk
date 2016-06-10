@@ -61,7 +61,7 @@
 #include <sstream>
 #include <string>
 
-#include "tinyxml.h"
+#include "rnr/tinyxml/tinyxml.h"
 
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"

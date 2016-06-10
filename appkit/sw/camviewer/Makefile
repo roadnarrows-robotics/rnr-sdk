@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2013 RoadNarrows LLC
+  (C) 2013-2016 RoadNarrows LLC
   (http://roadnarrows.com)
   All Rights Reserved
 
@@ -69,7 +69,7 @@ camviewer.SRC.CXX = camviewer.cxx
 
 camviewer.LIBDEPS = rnr_wingtk rnr_winqt rnr_win rnr_cam rnr_appkit tinyxml
 camviewer.LIBS 		= rnr_wingtk rnr_winqt rnr_win rnr_cam rnr_appkit rnr \
-										tinyxml stdc++
+										rnr_tinyxml stdc++
 
 #------------------------------------------------------------------------------
 # Optional Variables 

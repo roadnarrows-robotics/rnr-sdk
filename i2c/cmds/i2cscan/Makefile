@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2010-03-25 08:03:07 -0600 (Thu, 25 Mar 2010) $
 $Rev: 309 $
 
-\brief
-Make i2cscan command to scan I2C Bus scan for devices.
+\brief Make i2cscan command to scan I2C Bus scan for devices.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2007-2010.  RoadNarrows LLC.
+  (C) 2007-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -48,6 +48,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -64,8 +65,8 @@ pkgroot		= ../..
 DIST_PGMS         = i2cscan
 
 # Libraries to Link With
-i2cscan.LIBS      = rnr i2c
-i2cscan.LIBDEPS   = i2c
+i2cscan.LIBS      = rnr_i2c rnr
+i2cscan.LIBDEPS   = rnr_i2c
 
 
 #------------------------------------------------------------------------------
