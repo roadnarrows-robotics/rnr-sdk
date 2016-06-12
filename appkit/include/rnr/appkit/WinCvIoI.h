@@ -17,7 +17,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2011-2013.  RoadNarrows
+ * (C) 2011-2016.  RoadNarrows
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -59,7 +59,7 @@
 
 #include "opencv2/core/core.hpp"
 
-#include "rnr/Win.h"
+#include "rnr/appkit/Win.h"
 
 //
 // RoaNarrows Robotics Windowing Declarations

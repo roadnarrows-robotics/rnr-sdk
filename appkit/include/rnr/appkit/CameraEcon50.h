@@ -4,20 +4,20 @@
 //
 // Library:   librnr_cam
 //
-// File:      CameraEcon32.h
+// File:      CameraEcon50.h
 //
 /*! \file
  *
  * $LastChangedDate: 2013-07-15 11:45:50 -0600 (Mon, 15 Jul 2013) $
  * $Rev: 3131 $
  *
- * \brief Econ 3.2 megapixel video and still image camera class.
+ * \brief Econ 5.0 megapixel video and still image camera class.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright
- * (C) 2012-2013.  RoadNarrows LLC.
+ * (C) 2012-2016.  RoadNarrows LLC.
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -52,8 +52,8 @@
  */
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _RNR_CAMERA_ECON_32_H
-#define _RNR_CAMERA_ECON_32_H
+#ifndef _RNR_CAMERA_ECON_50_H
+#define _RNR_CAMERA_ECON_50_H
 
 #if defined(ARCH_overo)
 
@@ -65,10 +65,10 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
-#include "rnr/Camera.h"
-#include "rnr/CameraCv.h"
+#include "rnr/appkit/Camera.h"
+#include "rnr/appkit/CameraCv.h"
 
-#include "econ/econ32.h"
+#include "econ/econ50.h"
 
 #include "opencv/cv.h"
 
@@ -77,30 +77,22 @@ namespace rnr
   /*!
    * \brief Special Econ supported camera resolutions.
    */
-  const CamRes CamResEcon3_2MP = CamRes2048x1536;  ///< max camera resolution
+  const CamRes CamResEcon5_0MP = CamRes2592x1944;  ///< max camera resolution
 
-  /*!
-   * \brief Camera physical characteristics.
-   */
-  const double      ViewAngleDiag = 65.0;         ///< 65\h_deg
-  const double      FocusMinMM    = 100.0;        ///< minimum focus (mm)
-  const double      FocusMaxMM    = HUGE_VAL;     ///< maximum focus (mm)
-  const CvSize2D32f SensorDimMM   = {2.7, 3.6};   ///< sensor dimensions
-  const double      FocalLenCM    = 4.00;         ///< focal length (cm)
 
   //---------------------------------------------------------------------------
-  // Econ 3.2MP Camera Derived Class
+  // Econ 5.0MP Camera Derived Class (work in progress)
   //---------------------------------------------------------------------------
 
   /*!
-   * \brief Econ 3.2MP implementation of the camera class.
+   * \brief Econ 5.0MP implementation of the camera class.
    *
    * The video is streamed via OpenCv calls. The still images are taken via
    * econ methods to gain higher resolution (theoretically).
    *
-   * \note CameraEcon32 needs to be re-tested on hardware.
+   * \todo The CameraEcon50 class is not fully implemented.
    */
-  class CameraEcon32 : public CameraCv
+  class CameraEcon50 : public CameraCv
   {
   public:
     /*
@@ -110,14 +102,14 @@ namespace rnr
      * \param resVideo        Video resolution.
      * \param resImage        Image resolution.
      */
-    CameraEcon32(const std::string &strVideoDevName="/dev/video0",
+    CameraEcon50(const std::string &strVideoDevName="/dev/video0",
                  const CamRes      &resVideo=CamResQVGA,
                  const CamRes      &resImage=CamResVGA);
 
     /*!
      * \brief Destructor.
      */
-    virtual ~CameraEcon32();
+    virtual ~CameraEcon50();
 
     /*!
      * \brief Take a still image.
@@ -139,9 +131,9 @@ namespace rnr
     virtual void autoFocus();
 
   protected:
-    ecam       *m_eCam;                 ///< econ 3.2 MP camera
+    ecam50     *m_eCam;                 ///< econ 5.0 MP camera
     char        m_bufTmpName[PATH_MAX]; ///< temporary file name buffer
-    
+
     /*!
      * \brief Set the camera resolution in either video or still image mode.
      *
@@ -155,11 +147,10 @@ namespace rnr
      * \brief Make unique temporary file.
      */
     void makeTmpFile();
-
   };
 
 } // namespace rnr
 
 #endif // defined(ARCH_overo)
 
-#endif // _RNR_CAMERA_ECON_32_H
+#endif // _RNR_CAMERA_ECON_50_H

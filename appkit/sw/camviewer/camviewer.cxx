@@ -19,7 +19,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright
- * (C) 2013.  RoadNarrows LLC.
+ * (C) 2013-2016.  RoadNarrows LLC.
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -60,9 +60,9 @@
 
 #include "rnr/rnrconfig.h"
 
-#include "rnr/WinLookFeel.h"
-#include "rnr/WinGtk.h"
-#include "rnr/WinGtkMenu.h"
+#include "rnr/appkit/WinLookFeel.h"
+#include "rnr/appkit/WinGtk.h"
+#include "rnr/appkit/WinGtkMenu.h"
 
 using namespace rnr;
 

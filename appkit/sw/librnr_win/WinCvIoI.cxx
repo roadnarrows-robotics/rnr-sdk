@@ -17,7 +17,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2011-2013  RoadNarrows
+ * (C) 2011-2016  RoadNarrows
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -66,9 +66,9 @@
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"
 
-#include "rnr/Win.h"
-#include "rnr/WinOpenCv.h"
-#include "rnr/WinCvIoI.h"
+#include "rnr/appkit/Win.h"
+#include "rnr/appkit/WinOpenCv.h"
+#include "rnr/appkit/WinCvIoI.h"
 
 using namespace std;
 using namespace cv;

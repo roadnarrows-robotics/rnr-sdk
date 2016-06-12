@@ -3,6 +3,6 @@ Version: @VERSION@
 Section: devel
 Priority: optional
 Architecture: @ARCH@
-Depends: rnr-librnr-dev (>=1.13.0), rnr-libserial-dev (>=1.5.1), libusb-1.0-0 (>=0.0.0)
+Depends: rnr-librnr-dev (>=1.13.0), rnr-libserial-dev (>=1.6.0), libusb-1.0-0 (>=0.0.0)
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
 Description: Libraries for communicating with various hardware devices.

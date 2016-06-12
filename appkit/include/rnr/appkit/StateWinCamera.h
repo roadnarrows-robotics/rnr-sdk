@@ -2,22 +2,25 @@
 //
 // Package:   RoadNarrows Robotics Application Tool Kit
 //
-// Library:   librnr_appkit
+// Library:   librnr_cam
 //
-// File:      StateKb.h
+// File:      StateWinCamera.h
 //
 /*! \file
  *
- * $LastChangedDate: 2013-05-06 10:03:14 -0600 (Mon, 06 May 2013) $
- * $Rev: 2907 $
+ * $LastChangedDate: 2013-07-13 13:54:59 -0600 (Sat, 13 Jul 2013) $
+ * $Rev: 3122 $
  *
- * \brief Keyboard StateKb derived state class interface.
+ * \brief StateWinCamera derived state class interface.
+ *
+ * The StateWinCamera class uses the GTK windowing system along with the
+ * GStreamer interface to a video camera.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2012-2013.  RoadNarrows LLC
+ * (C) 2012-2016.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -52,126 +55,114 @@
  */
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _RNR_STATE_KB_H
-#define _RNR_STATE_KB_H
+#ifndef _RNR_STATE_WIN_CAMERA_H
+#define _RNR_STATE_WIN_CAMERA_H
 
 #include <stdio.h>
-#include <termios.h>
 
 #include <string>
 #include <map>
 
 #include "rnr/rnrconfig.h"
 
-#include "rnr/State.h"
+#include "rnr/appkit/Win.h"
+#include "rnr/appkit/WinGtk.h"
+#include "rnr/appkit/WinMenuGtk.h"
+#include "rnr/appkit/CameraGst.h"
+#include "rnr/appkit/SessionWin.h"
+#include "rnr/appkit/State.h"
+#include "rnr/appkit/StateWin.h"
 
 namespace rnr
 {
   //----------------------------------------------------------------------------
-  // StateKb Class
+  // StateWinCamera Class
   //----------------------------------------------------------------------------
   
   /*!
-   * Keyboard state class.
-   *
-   * The keyboard state receives non-blocking input from stdin.
-   * The events are:
-   * \li KbEventError
-   * \li KbEventEof
-   * \li KbEvnetTimeOut
-   * \li 8-bit ascii code
+   * State base class.
    */
-  class StateKb : public State
+  class StateWinCamera : public StateWin
   {
   public:
-    static int            ClassObjRefCnt;         ///< object reference count
-    static int            OrigInputStatusFlags;   ///< original status flags
-    static struct termios OrigInputTio;           ///< original terminal i/o
-
-    //
-    // Specical keyboard event ids.
-    //
-    static const int KbEventError     = -2;   ///< input error
-    static const int KbEventEof       = -1;   ///< end of file
-    static const int KbEventTimeOut   = 256;  ///< time out
-
     /*!
      * \brief Initialization constructor.
      *
      * \param nStateId      State id. Must be state machine unique.
+     * \param session       State's embedding in (derived) window session.
      * \param strStateName  State name.
      * \param strRefTag     State reference id.
      */
-    StateKb(int                nStateId,
-            const std::string &strStateName="",
-            const std::string &strRefTag="") :
-        State(nStateId, strStateName, strRefTag)
+    StateWinCamera(int                nStateId,
+                   SessionWin        &session,
+                   const std::string &strStateName="",
+                   const std::string &strRefTag="") :
+        StateWin(nStateId, session, strStateName, strRefTag)
     {
-      if( ++ClassObjRefCnt == 1 )
-      {
-        configInput();
-      }
+      m_bOneTimeInit  = false;
+      m_bMouseEvents  = true;
+      m_bKbEvents     = false;
+      m_pButtons      = NULL;
     }
   
     /*!
      * \brief List constructor.
      *
      * \param nStateId        State id. Must be state machine unique.
+     * \param session         State's embedding in (derived) window session.
      * \param strStateName    State name.
      * \param strRefTag       State reference id.
      * \param listStateEvents Declaration list of allocated state events.
      *                        NULL terminated.
      */
-    StateKb(int                nStateId,
-            const std::string &strStateName,
-            const std::string &strRefTag,
-            StateEvent        *listStateEvents[]) :
-        State(nStateId, strStateName, strRefTag, listStateEvents)
+    StateWinCamera(int                nStateId,
+                   SessionWin        &session,
+                   const std::string &strStateName,
+                   const std::string &strRefTag,
+                   StateEvent        *listStateEvents[]) :
+        StateWin(nStateId, session, strStateName, strRefTag, listStateEvents)
     {
-      if( ++ClassObjRefCnt == 1 )
-      {
-        configInput();
-      }
+      m_bOneTimeInit  = false;
+      m_bMouseEvents  = true;
+      m_bKbEvents     = false;
+      m_pButtons      = NULL;
     }
 
     /*!
      * \brief Destructor.
      */
-    virtual ~StateKb()
+    virtual ~StateWinCamera()
     {
-      if( --ClassObjRefCnt == 0 )
-      {
-        restoreInput();
-      }
     }
   
     /*!
-     * \brief Receive next event.
+     * \brief Set button states.
      *
-     * This Keyboard state class receives keyboard input.
-     *
-     * The receive event may set state internal variables used specifically by
-     * the state.
-     *
-     * \return Returns event id.
+     * State and/or session data determine the state of the buttons.
      */
-    virtual int receiveEvent();
+    virtual void setButtonStates();
 
   protected:
-    friend class StateEvent;            ///< friend
+    CameraGst       m_camera;         ///< the camera
+
+    friend class    StateEvent;       ///< friend
 
     /*!
-     * \brief Configure stdin input.
+     * \brief One-time button menu initialization.
+     *
+     * This function is called on the "enter state" action.
      */
-    void configInput();
+    virtual void initOnceButtons();
 
     /*!
-     * \brief Restore stdin original configuration.
+     * \brief Build the window gui interface.
+     *
+     * This function is called on the "enter state" action.
      */
-    void restoreInput();
+    virtual void buildGuiInterface();
   };
 
 } // namespace rnr
 
 
-#endif // _RNR_STATE_KB_H
+#endif // _RNR_STATE_WIN_CAMERA_H

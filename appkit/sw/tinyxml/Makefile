@@ -144,10 +144,10 @@ endif
 # Extra make targets (place after Rules.mk)
 
 .PHONY: extra-make-post
-extra-make-post: $(pkgroot)/include/tinyxml.h $(pkgroot)/include/tinystr.h
+extra-make-post: $(pkgroot)/include/rnr/tinyxml/tinyxml.h $(pkgroot)/include/rnr/tinyxml/tinystr.h
 
-$(pkgroot)/include/tinyxml.h: tinyxml.h
+$(pkgroot)/include/rnr/tinyxml/tinyxml.h: tinyxml.h
 	$(CP) $(<) $(@)
  
-$(pkgroot)/include/tinystr.h: tinystr.h
+$(pkgroot)/include/rnr/tinyxml/tinystr.h: tinystr.h
 	$(CP) $(<) $(@)

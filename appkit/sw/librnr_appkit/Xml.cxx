@@ -17,7 +17,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2012-2013.  RoadNarrows LLC
+ * (C) 2012-2016.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -66,7 +66,7 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
-#include "rnr/Xml.h"
+#include "rnr/appkit/Xml.h"
 
 using namespace std;
 using namespace rnr;

@@ -17,7 +17,7 @@
  * \author Robin Knight   (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- * (C) 2015.  RoadNarrows LLC.
+ * (C) 2015-2016.  RoadNarrows LLC.
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -39,7 +39,7 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
-#include "rnr/Time.h"
+#include "rnr/appkit/Time.h"
 
 using namespace std;
 using namespace rnr;

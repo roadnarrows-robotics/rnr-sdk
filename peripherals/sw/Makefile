@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2012-04-25 18:46:22 -0600 (Wed, 25 Apr 2012) $  
 $Rev: 1896 $ 
 
-\brief
-Make the peripherals software package.
+\brief Make the peripherals software package.
 
 RN Make System Specific Makefile
 
@@ -65,7 +64,6 @@ pkgroot		= ..
 
 # Subdirectories to Build
 SUBDIRS = libhid libimu libmot apps
-#libmot
 					
 #------------------------------------------------------------------------------
 # Make Includes

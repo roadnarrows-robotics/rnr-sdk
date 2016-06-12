@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2014-02-25 09:07:04 -0700 (Tue, 25 Feb 2014) $
 $Rev: 3567 $
 
-\brief
-Make the RoadNarrows libhid Human Interface Device library.
+\brief Make the RoadNarrows libhid Human Interface Device library.
 
 RN Make System Specific Makefile
 
@@ -18,7 +17,7 @@ RN Make System Specific Makefile
 \author: Rob Shiely   (rob@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2013-2014  RoadNarrows LLC.
+  (C) 2013-2016  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -69,23 +68,23 @@ SUBDIRS = ut
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS       = hid 
+DIST_STLIBS       = rnr_hid 
 
 # Distribution Shared Libraries
-DIST_SHLIBS       = hid 
+DIST_SHLIBS       = rnr_hid 
 
 # Source Files
-hid.SRC.CXX = HIDXbox360.cxx 
+rnr_hid.SRC.CXX = HIDXbox360.cxx 
 
 # Linked Libraries 
-hid.LIBS	= rnr stdc++ usb-1.0
+rnr_hid.LIBS	= rnr stdc++ usb-1.0
 
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
 
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"hid\""
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_hid\""
 
 #------------------------------------------------------------------------------
 # Make Includes

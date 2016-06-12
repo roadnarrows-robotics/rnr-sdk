@@ -1,6 +1,6 @@
 ################################################################################
 #
-# ./sw/Makefile
+# ./sw/apps/xbox360diag/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2015-01-15 12:28:04 -0700 (Thu, 15 Jan 2015) $  
 $Rev: 3855 $ 
 
-\brief
-Make Xbox360 dignostic application
+\brief Make Xbox360 dignostic application
 
 RN Make System Specific Makefile
 
 \author: Robin Knight   (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2014.  RoadNarrows LLC.
+  (C) 2014-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -64,8 +63,8 @@ pkgroot		= ../../..
 
 DIST_PGMS = xbox360diag
 
-xbox360diag.LIBS = hid rnr stdc++
-xbox360diag.LIBDEPS = hid
+xbox360diag.LIBS = rnr_hid rnr stdc++
+xbox360diag.LIBDEPS = rnr_hid
 
 #------------------------------------------------------------------------------
 # Sources

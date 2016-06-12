@@ -17,7 +17,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2012-2013.  RoadNarrows LLC
+ * (C) 2012-2016.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -62,10 +62,10 @@
 
 #include "rnr/rnrconfig.h"
 
-#include "rnr/Win.h"
-#include "rnr/WinMenu.h"
-#include "rnr/SessionWin.h"
-#include "rnr/State.h"
+#include "rnr/appkit/Win.h"
+#include "rnr/appkit/WinMenu.h"
+#include "rnr/appkit/SessionWin.h"
+#include "rnr/appkit/State.h"
 
 namespace rnr
 {

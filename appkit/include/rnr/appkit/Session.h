@@ -17,7 +17,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2012-2013.  RoadNarrows LLC
+ * (C) 2012-2016.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -61,8 +61,8 @@
 
 #include "rnr/rnrconfig.h"
 
-#include "rnr/State.h"
-#include "rnr/StateMach.h"
+#include "rnr/appkit/State.h"
+#include "rnr/appkit/StateMach.h"
 
 namespace rnr
 {

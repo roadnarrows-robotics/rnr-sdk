@@ -1,6 +1,6 @@
 ################################################################################
 #
-# ./sw/libWMSuite/Makefile
+# ./sw/libimu/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2013-01-22 08:45:33 -0700 (Tue, 22 Jan 2013) $
 $Rev: 2604 $
 
-\brief
-Make the libUSBcontroller library.
+\brief Make the IMU library.
 
 RN Make System Specific Makefile
 
@@ -18,7 +17,7 @@ RN Make System Specific Makefile
 \author: Rob Shiely   (rob@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -26,6 +25,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -49,6 +49,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -62,23 +63,23 @@ pkgroot		= ../..
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS       = imu
+DIST_STLIBS       = rnr_imu
 
 # Distribution Shared Libraries
-DIST_SHLIBS       = imu
+DIST_SHLIBS       = rnr_imu
 
 # Source Files
-imu.SRC.CXX = yost.cxx
+rnr_imu.SRC.CXX = yost.cxx
 
 # Linked Libraries 
-imu.LIBS	= rnr stdc++ usb-1.0 
+rnr_imu.LIBS	= rnr stdc++ usb-1.0 
 
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
 
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"imu\""
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_imu\""
 
 #------------------------------------------------------------------------------
 # Make Includes

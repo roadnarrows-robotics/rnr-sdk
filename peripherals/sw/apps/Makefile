@@ -1,6 +1,6 @@
 ################################################################################
 #
-# ./sw/Makefile
+# ./sw/apps/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2014-02-25 09:07:04 -0700 (Tue, 25 Feb 2014) $  
 $Rev: 3567 $ 
 
-\brief
-Make the peripherals software package.
+\brief Make the peripherals software package.
 
 RN Make System Specific Makefile
 
@@ -19,7 +18,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2012-2014.  RoadNarrows LLC.
+  (C) 2012-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -65,7 +64,6 @@ pkgroot		= ../..
 
 # Subdirectories to Build
 SUBDIRS = xbox360diag
-#libmot
 					
 #------------------------------------------------------------------------------
 # Make Includes

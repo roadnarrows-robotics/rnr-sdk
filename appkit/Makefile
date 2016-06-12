@@ -89,34 +89,35 @@ tinyxml.HDRS.H = \
 	rnr/tinyxml/tinyxml.h
 
 librnr_appkit.HDRS.H = \
-	rnr/Camera.h \
-	rnr/CameraCv.h \
-	rnr/CameraEcon32.h \
-	rnr/CameraEcon50.h \
-	rnr/CameraGst.h \
-	rnr/Random.h \
-	rnr/Session.h \
-	rnr/SessionWin.h \
-	rnr/State.h \
-	rnr/StateKb.h \
-	rnr/StateMach.h \
-	rnr/StateWin.h \
-	rnr/StateWinCamera.h \
-	rnr/Thread.h \
-	rnr/Time.h \
-	rnr/Xml.h
+	rnr/appkit/Camera.h \
+	rnr/appkit/CameraCv.h \
+	rnr/appkit/CameraGst.h \
+	rnr/appkit/Random.h \
+	rnr/appkit/Session.h \
+	rnr/appkit/SessionWin.h \
+	rnr/appkit/State.h \
+	rnr/appkit/StateKb.h \
+	rnr/appkit/StateMach.h \
+	rnr/appkit/StateWin.h \
+	rnr/appkit/StateWinCamera.h \
+	rnr/appkit/Thread.h \
+	rnr/appkit/Time.h \
+	rnr/appkit/Xml.h
+
+#	rnr/appkit/CameraEcon32.h \
+	rnr/appkit/CameraEcon50.h
 
 librnr_win.HDRS.H = \
-	rnr/Win.h \
-	rnr/WinCvIoI.h \
-	rnr/WinCvMouse.h \
-	rnr/WinLookFeel.h \
-	rnr/WinMenu.h \
-	rnr/WinOpenCv.h
+	rnr/appkit/Win.h \
+	rnr/appkit/WinCvIoI.h \
+	rnr/appkit/WinCvMouse.h \
+	rnr/appkit/WinLookFeel.h \
+	rnr/appkit/WinMenu.h \
+	rnr/appkit/WinOpenCv.h
 
 librnr_wingtk.HDRS.H = \
-	rnr/WinGtkMenu.h \
-	rnr/WinGtk.h
+	rnr/appkit/WinGtkMenu.h \
+	rnr/appkit/WinGtk.h
 
 
 #------------------------------------------------------------------------------

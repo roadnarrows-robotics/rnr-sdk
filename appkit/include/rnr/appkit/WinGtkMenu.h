@@ -17,7 +17,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2011-2013  RoadNarrows
+ * (C) 2011-2016  RoadNarrows
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -61,9 +61,9 @@
 
 #include <gtk/gtk.h>
 
-#include "rnr/Win.h"
-#include "rnr/WinGtk.h"
-#include "rnr/WinMenu.h"
+#include "rnr/appkit/Win.h"
+#include "rnr/appkit/WinGtk.h"
+#include "rnr/appkit/WinMenu.h"
 
 //
 // RoadNarrows Robotics Windowing Declarations

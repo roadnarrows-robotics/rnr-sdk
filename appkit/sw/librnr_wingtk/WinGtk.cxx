@@ -17,7 +17,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2011-2013.  RoadNarrows
+ * (C) 2011-2016.  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -63,9 +63,9 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
-#include "rnr/WinLookFeel.h"
-#include "rnr/Win.h"
-#include "rnr/WinGtk.h"
+#include "rnr/appkit/WinLookFeel.h"
+#include "rnr/appkit/Win.h"
+#include "rnr/appkit/WinGtk.h"
 
 #include "opencv2/core/core.hpp"
 #include "opencv2/highgui/highgui.hpp"

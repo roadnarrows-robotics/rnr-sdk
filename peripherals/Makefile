@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2010-03-25 08:03:07 -0600 (Thu, 25 Mar 2010) $
 $Rev: 309 $
 
-\brief
-Make RoadNarrows peripherals package.
+\brief Make RoadNarrows peripherals package.
 
 RN Make System Specific Makefile
 
@@ -19,7 +18,7 @@ RN Make System Specific Makefile
 \author: Rob Shiely     (rob@roadnarrows.com)
 
 \par Copyright:
-  (C) 2012-2015.  RoadNarrows LLC.
+  (C) 2012-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -86,11 +85,6 @@ DIST_HDRS	= peripherals
 # 			$(topdir)/include. Otherwise, is it really a deliverable header?
 #
 peripherals.HDRS.H = \
-	econ/econ32.h \
-	econ/econ50.h \
-	econ/econ_error.h \
-	econ/econ_fn_res_prototype.h \
-	econ/econ_typedef.h \
 	rnr/usbext.h \
 	rnr/hid/HID.h \
 	rnr/hid/HIDXbox360.h \
@@ -99,6 +93,11 @@ peripherals.HDRS.H = \
 	rnr/mot/MotRoboteq.h\
 	rnr/mot/MotRoboteqSmall.h
 
+#	econ/econ32.h \
+	econ/econ50.h \
+	econ/econ_error.h \
+	econ/econ_fn_res_prototype.h \
+	econ/econ_typedef.h \
 
 #------------------------------------------------------------------------------
 # Optional Variables 
