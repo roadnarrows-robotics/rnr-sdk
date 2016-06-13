@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2015-03-13 13:28:02 -0600 (Fri, 13 Mar 2015) $
 $Rev: 3890 $
 
-\brief
-Make libDynamixel library.
+\brief Make libDynamixel library.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2011-2015.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -59,14 +58,17 @@ pkgroot		= ..
 #------------------------------------------------------------------------------
 # Libraries
 
+# place libraries in subdirectory
+LIB_SUBDIR = $(PKG_LIB_SUBDIR)
+
 # Distribution Static Libraries
-DIST_STLIBS 			= Dynamixel
+DIST_STLIBS 			= rnr_dynamixel
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= Dynamixel
+DIST_SHLIBS 			= rnr_dynamixel
 
 # Source Files
-Dynamixel.SRC.CXX	=	\
+rnr_dynamixel.SRC.CXX	=	\
 	DynaBgThread.cxx \
 	DynaChain.cxx \
 	DynaComm.cxx \
@@ -90,8 +92,17 @@ Dynamixel.SRC.CXX	=	\
 	DynaServoRX64.cxx
 
 # Libraries to link with
-Dynamixel.LIBS = dxl bsclient_dyna botsense netmsgs serial gpio rnr pthread rt
-Dynamixel.LIBDEPS = dxl
+rnr_dynamixel.LIBS = \
+	rnr_dxl \
+	bsclient_dyna \
+	botsense \
+	rnr_netmsgs \
+	rnr_serial \
+	rnr_gpio \
+	rnr \
+	pthread rt
+
+rnr_dynamixel.LIBDEPS = rnr_dxl
 
 
 #------------------------------------------------------------------------------
@@ -102,8 +113,11 @@ Dynamixel.LIBDEPS = dxl
 # Optional Variables 
 #
 
+# Link Library Extra Library Directories (exluding local library)
+EXTRA_LD_LIBDIRS = $(DISTROOT_LIB)/botsense
+
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libDynamixel\""
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_dynamixel\""
 
 #------------------------------------------------------------------------------
 # Make Includes

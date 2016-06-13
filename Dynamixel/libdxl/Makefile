@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2015.  RoadNarrows LLC.
+  (C) 2015-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -58,19 +58,22 @@ pkgroot		= ..
 #------------------------------------------------------------------------------
 # Libraries
 
+# place libraries in subdirectory
+LIB_SUBDIR = $(PKG_LIB_SUBDIR)
+
 # Distribution Static Libraries
-DIST_STLIBS 			= dxl
+DIST_STLIBS 			= rnr_dxl
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= dxl
+DIST_SHLIBS 			= rnr_dxl
 
 # Source Files
-dxl.SRC.CXX	=	\
+rnr_dxl.SRC.CXX	=	\
 	dxlhal.cxx \
 	dynamixel.cxx
 
 # Libraries to link with
-dxl.LIBS		= serial rnr
+rnr_dxl.LIBS		= rnr_serial rnr
 
 
 #------------------------------------------------------------------------------
@@ -82,7 +85,7 @@ dxl.LIBS		= serial rnr
 #
 
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libdxl\""
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_dxl\""
 
 #------------------------------------------------------------------------------
 # Make Includes

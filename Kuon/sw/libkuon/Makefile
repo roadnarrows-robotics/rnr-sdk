@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight   (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2014. RoadNarrows LLC.
+  (C) 2014-2016. RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -88,7 +88,7 @@ kuon.SRC.CXX = \
 kuon.LIBS	= \
 	RS160D \
 	rnr_appkit \
-	serial \
+	rnr_serial \
 	rnr \
 	tinyxml \
 	stdc++

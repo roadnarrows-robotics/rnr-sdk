@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2014-09-26 11:43:33 -0600 (Fri, 26 Sep 2014) $
 $Rev: 3757 $
 
-\brief
-Make Robotis dynamixel SDK library libdxl.
+\brief Make Robotis dynamixel SDK library libdxl.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2011.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -61,10 +60,10 @@ pkgroot		= ..
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS 			= dxl
+DIST_STLIBS 			= rnr_dxl
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= dxl
+DIST_SHLIBS 			= rnr_dxl
 
 # Source Files
 dxl.SRC.C 	=	dxl_hal.c dynamixel.c

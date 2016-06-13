@@ -2,7 +2,7 @@
 //
 // Package:   Dynamixel
 //
-// Library:   libDynamixel
+// Library:   librnr_dynamixel
 //
 // File:      DynaBgThread.h
 //
@@ -25,7 +25,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2011-2015.  RoadNarrows
+ * (C) 2011-2016.  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */

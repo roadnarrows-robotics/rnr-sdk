@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2015-01-12 10:56:06 -0700 (Mon, 12 Jan 2015) $
 $Rev: 3845 $
 
-\brief
-Make Dynamixel package.
+\brief Make Dynamixel package.
 
 RN Make System Specific Makefile
 
@@ -20,7 +19,7 @@ make [RNMAKE_OPTS] [has_botsense={yes|no}] target
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2011-2015.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 

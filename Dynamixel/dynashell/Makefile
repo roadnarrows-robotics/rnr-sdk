@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin@rnisys.com)
 
 \par Copyright:
-  (C) 2011-2015.  RoadNarrows Intelligent Systems.
+  (C) 2011-2016.  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -68,9 +68,16 @@ READLINE_CPPFLAGS = -DHAVE_READLINE
 LIB_SUBDIR = $(PKG_LIB_PLUGIN_SUBDIR) $(libdir)/botsense
 
 # Libraries to Link With
-dynashell.LIBS      = Dynamixel dxl bsclient_dyna netmsgs botsense rnr \
-											stdc++ $(READLINE_LIBS) gsl gslcblas m
-dynashell.LIBDEPS   = Dynamixel dxl bsclient_dyna
+dynashell.LIBS = \
+	rnr_dynamixel \
+	rnr_dxl \
+	bsclient_dyna \
+	rnr_netmsgs \
+	botsense \
+	rnr \
+	stdc++ $(READLINE_LIBS) gsl gslcblas m
+
+dynashell.LIBDEPS   = rnr_dynamixel rnr_dxl bsclient_dyna
 
 #------------------------------------------------------------------------------
 # Sources
@@ -96,6 +103,9 @@ dynashell.SRC.CXX = \
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
+
+# Link Library Extra Library Directories (exluding local library)
+EXTRA_LD_LIBDIRS = $(DISTROOT_LIB)/rnr $(DISTROOT_LIB)/botsense
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DHAVE_READLINE -DLOG -DLOGMOD="\"dynashell\""

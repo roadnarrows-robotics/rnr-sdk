@@ -41,8 +41,8 @@ endif
 # The Package Definition
 PKG 								= PanTilt
 PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 2
-PKG_VERSION_RELEASE = 2
+PKG_VERSION_MINOR   = 3
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "RoadNarrows"
 PKG_OWNERS					= "RoadNarrows LLC"

@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2012-04-25 18:46:22 -0600 (Wed, 25 Apr 2012) $
 $Rev: 1896 $
 
-\brief
-Make bsProxy server dll and bs client library for the MouseBot robot.
+\brief Make bsProxy server dll and bs client library for the MouseBot robot.
 
 RN Make System Specific Makefile
 
@@ -19,7 +18,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com)
 
 \par Copyright:
-  (C) 2012.  RoadNarrows LLC.
+  (C) 2012-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -27,6 +26,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -50,6 +50,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 

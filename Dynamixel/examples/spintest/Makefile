@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2011-07-15 14:10:46 -0600 (Fri, 15 Jul 2011) $
 $Rev: 1139 $
 
-\brief
-Make spintest test application.
+\brief Make spintest test application.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin@rnisys.com)
 
 \par Copyright:
-  (C) 2011.  RoadNarrows Intelligent Systems.
+  (C) 2011-2016.  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # RoadNarrows Intelligent Systesm End User License Agreement
 #
 # This open source file provided by RoadNarrows Intelligent Systems is covered
@@ -51,6 +51,7 @@ endif
 # hereunder is on an “as-is” basis, and the authors and distributors have no
 # obligation to provide maintenance, support, updates, enhancements, or
 # modifications.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -70,8 +71,8 @@ READLINE_CPPFLAGS = -DHAVE_READLINE
 
 
 # Libraries to Link With
-spintest.LIBS      = Dynamixel dxl rnr $(READLINE_LIBS) m
-spintest.LIBDEPS   = Dynamixel dxl
+spintest.LIBS      = rnr_dynamixel rnr_dxl rnr $(READLINE_LIBS) m
+spintest.LIBDEPS   = rnr_dynamixel rnr_dxl
 
 #------------------------------------------------------------------------------
 # Sources
@@ -84,6 +85,9 @@ spintest.SRC.C = spintest.c
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
+
+# Link Library Extra Library Directories (exluding local library)
+EXTRA_LD_LIBDIRS = $(DISTROOT_LIB)/rnr
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DHAVE_READLINE -DLOG -DLOGMOD="\"spintest\""

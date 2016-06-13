@@ -1,6 +1,6 @@
 ################################################################################
 #
-# ./dynashell/Makefile
+# ./examples/botsensetest/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2012-05-12 14:04:56 -0600 (Sat, 12 May 2012) $
 $Rev: 1985 $
 
-\brief
-Make dynashell simple shell.
+\brief Make botsensetest example.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin@rnisys.com)
 
 \par Copyright:
-  (C) 2011.  RoadNarrows Intelligent Systems.
+  (C) 2011-2016.  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # RoadNarrows Intelligent Systesm End User License Agreement
 #
 # This open source file provided by RoadNarrows Intelligent Systems is covered
@@ -51,6 +51,7 @@ endif
 # hereunder is on an “as-is” basis, and the authors and distributors have no
 # obligation to provide maintenance, support, updates, enhancements, or
 # modifications.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -72,9 +73,11 @@ READLINE_CPPFLAGS = -DHAVE_READLINE
 LIB_SUBDIR = $(PKG_LIB_PLUGIN_SUBDIR) $(libdir)/botsense
 
 # Libraries to Link With
-botsensetest.LIBS      = Dynamixel dxl bsclient_dyna netmsgs botsense rnr \
-											stdc++ $(READLINE_LIBS) gsl gslcblas m 
-botsensetest.LIBDEPS   = Dynamixel dxl bsclient_dyna
+botsensetest.LIBS = \
+	rnr_dynamixel rnr_dxl bsclient_dyna rnr_netmsgs botsense rnr \
+	stdc++ $(READLINE_LIBS) gsl gslcblas m 
+
+botsensetest.LIBDEPS   = rnr_dynamixel rnr_dxl bsclient_dyna
 
 #------------------------------------------------------------------------------
 # Sources
@@ -88,6 +91,9 @@ botsensetest.SRC.CXX = \
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
+
+# Link Library Extra Library Directories (exluding local library)
+EXTRA_LD_LIBDIRS = $(DISTROOT_LIB)/rnr
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DHAVE_READLINE -DLOG -DLOGMOD="\"botsensetest\""

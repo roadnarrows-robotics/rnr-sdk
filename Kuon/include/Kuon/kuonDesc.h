@@ -22,7 +22,7 @@
  * \author Robin Knight   (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2014.  RoadNarrows LLC
+ * (C) 2014-2016.  RoadNarrows LLC
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */

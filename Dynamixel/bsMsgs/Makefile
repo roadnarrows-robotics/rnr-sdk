@@ -100,7 +100,7 @@ include $(rnmake)/Rules.netmsgs.mk
 
 SWIG_FILES 				= bsDynaCore.i
 SWIG_EXTMOD_DIR 	= $(pkgroot)/bsPython/modules/BotSense/Dynamixel
-SWIG_EXTMOD_LIBS 	= -lbotsense -lnetmsgs -li2c -lrnr
+SWIG_EXTMOD_LIBS 	= -lbotsense -lrnr_netmsgs -lrnr
 
 # Include Swig Rules Makefile
 include $(rnmake)/Rules.swig.mk

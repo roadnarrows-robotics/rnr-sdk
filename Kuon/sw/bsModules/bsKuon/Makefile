@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2011-01-13 11:05:37 -0700 (Thu, 13 Jan 2011) $
 $Rev: 657 $
 
-\brief
-Make bsProxy server dll and bs client library for the Kuon robot.
+\brief Make bsProxy server dll and bs client library for the Kuon robot.
 
 RN Make System Specific Makefile
 
@@ -19,7 +18,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com)
 
 \par Copyright:
-  (C) 2010.  RoadNarrows LLC.
+  (C) 2010-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -27,6 +26,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -50,6 +50,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -74,7 +75,7 @@ DIST_SHLIBS 			= bsclient_kuon
 DIST_DLLIBS 			= bsserver_kuon 
 
 # Libraries to link dll with
-bsserver_kuon.LIBS	= RS160D MPU imu i2c serial rnr pthread
+bsserver_kuon.LIBS	= RS160D MPU imu rnr_i2c rnr_serial rnr pthread
 
 # Source Files
 bsclient_kuon.SRC.C     =	bsKuonClient.c bsKuonMsgs.c

@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2012-04-25 18:46:22 -0600 (Wed, 25 Apr 2012) $
 $Rev: 1896 $
 
-\brief
-Make the libqik library.
+\brief Make the libqik library.
 
 RN Make System Specific Makefile
 
@@ -18,7 +17,7 @@ RN Make System Specific Makefile
 \author: Rob Shiely   (rob@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -26,6 +25,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -49,6 +49,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -71,14 +72,14 @@ DIST_SHLIBS       = qik
 qik.SRC.C = qikControl.c 
 
 # Linked Libraries 
-qik.LIBS	= rnr serial
+qik.LIBS	= rnr_serial rnr
 
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
 
 # Subpackage C PreProcessor Flags
-EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"qik\""
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libqik\""
 
 #------------------------------------------------------------------------------
 # Make Includes

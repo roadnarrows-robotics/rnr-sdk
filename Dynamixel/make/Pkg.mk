@@ -60,8 +60,8 @@ endif
 # The Package Definition
 PKG 								= Dynamixel
 PKG_VERSION_MAJOR   = 2
-PKG_VERSION_MINOR   = 8
-PKG_VERSION_RELEASE = 3
+PKG_VERSION_MINOR   = 9
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
@@ -83,16 +83,19 @@ PKG_FULL_NAME				= $(PKG)-$(PKG_VERSION_DOTTED)
 # Package Include Directories
 PKG_INCDIRS = \
 	$(pkgroot)/include \
-	$(pkgroot)/botsense/include
+	$(pkgroot)/include/botsense
 
 # Package System Include Directories
 PKG_SYS_INCDIRS			=
 
 # Link Library Extra Library Directories (exluding local library)
-PKG_LD_LIBDIRS = \
-	$(DISTDIR_LIB)/botsense
+#PKG_LD_LIBDIRS = \
+#	$(DISTDIR_LIB)/botsense
 
-# subdirectory under prefix/lib for server modules
+# core libraries subdir
+PKG_LIB_SUBDIR = rnr
+
+# subdirectory under prefix/lib for botsense modules
 PKG_LIB_PLUGIN_SUBDIR = botsense
 
 #------------------------------------------------------------------------------

@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2012-04-25 18:46:22 -0600 (Wed, 25 Apr 2012) $
 $Rev: 1896 $
 
-\brief
-Make bsMouseBotControl test application.
+\brief Make bsMouseBotControl application.
 
 RN Make System Specific Makefile
 
@@ -19,7 +18,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com)
 
 \par Copyright:
-  (C) 2011.  RoadNarrows Intelligent Systems.
+  (C) 2011-2016.  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -27,6 +26,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # RoadNarrows Intelligent Systesm End User License Agreement
 #
 # This open source file provided by RoadNarrows Intelligent Systems is covered
@@ -53,6 +53,7 @@ endif
 # hereunder is on an “as-is” basis, and the authors and distributors have no
 # obligation to provide maintenance, support, updates, enhancements, or
 # modifications.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -69,23 +70,19 @@ DIST_PGMS         = bsMouseBotControl
 
 
 # Libraries to Link With
-bsMouseBotControl.LIBS      = bsclient_mousebot \
+bsMouseBotControl.LIBS = 	bsclient_mousebot \
 													botsense \
-													netmsgs \
+													rnr_netmsgs \
+													rnr_serial \
 													rnr \
-													serial \
 													RS160D \
 													USBcontroller \
 													usb-1.0
 
 bsMouseBotControl.LIBDEPS   = bsclient_mousebot \
 													botsense \
-													netmsgs \
-													rnr \
-													serial\
 													RS160D \
-													USBcontroller \
-													usb-1.0 
+													USBcontroller
 
 #------------------------------------------------------------------------------
 # Sources

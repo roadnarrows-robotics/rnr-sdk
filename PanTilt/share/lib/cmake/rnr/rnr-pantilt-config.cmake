@@ -3,7 +3,7 @@
 #
 
 find_library(LIBHID
-  NAMES hid
+  NAMES rnr_hid
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
@@ -18,12 +18,12 @@ find_library(LIBAPPKIT
 )
 
 find_library(LIBSERIAL
-  NAMES serial
+  NAMES rnr_serial
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 find_library(LIBGPIO
-  NAMES gpio
+  NAMES rnr_gpio
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
@@ -33,18 +33,18 @@ find_library(LIBBOTSENSE
 )
 
 find_library(LIBDXL
-  NAMES dxl
-  PATHS /prj/lib /usr/local/lib
+  NAMES rnr_dxl
+  PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 find_library(LIBDYNAMIXEL
-  NAMES Dynamixel
-  PATHS /prj/lib /usr/local/lib
+  NAMES rnr_dynamixel
+  PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 find_library(LIBNETMSGS
-  NAMES netmsgs
-  PATHS /prj/lib /usr/local/lib
+  NAMES rnr_netmsgs
+  PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 set(rnr-pantilt_LIBRARIES 

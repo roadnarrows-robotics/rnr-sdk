@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2012-08-22 12:36:08 -0600 (Wed, 22 Aug 2012) $
 $Rev: 2174 $
 
-\brief
-Make Dynamixel examples.
+\brief Make Dynamixel examples.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin@rnisys.com)
 
 \par Copyright:
-  (C) 2011.  RoadNarrows Intelligent Systems.
+  (C) 2011-2016.  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # RoadNarrows Intelligent Systesm End User License Agreement
 #
 # This open source file provided by RoadNarrows Intelligent Systems is covered
@@ -51,6 +51,7 @@ endif
 # hereunder is on an “as-is” basis, and the authors and distributors have no
 # obligation to provide maintenance, support, updates, enhancements, or
 # modifications.
+# @EulaEnd@
 #
 ################################################################################
 

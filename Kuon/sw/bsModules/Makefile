@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2010-09-20 09:40:05 -0600 (Mon, 20 Sep 2010) $
 $Rev: 589 $
 
-\brief
-Make all of the KOUN server and client plug-in modules and BotSense
+\brief Make all of the KOUN server and client plug-in modules and BotSense
 python modules.
 
 RN Make System Specific Makefile
@@ -22,9 +21,8 @@ make [RNMAKE_OPTS] [has_botsense={yes|no}] target
 \author: Rob Shiely (rob@roadnarrows.com)
 \author: Daniel Packard (daniel@roadnarrows.com)
          
-
 \par Copyright:
-  (C) 2010.  RoadNarrows LLC.
+  (C) 2010-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -32,6 +30,7 @@ make [RNMAKE_OPTS] [has_botsense={yes|no}] target
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -55,6 +54,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 

@@ -1,6 +1,6 @@
 ################################################################################
 #
-# ./examples/spintest/Makefile
+# ./examples/kuon_teleop/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin@rnisys.com)
 
 \par Copyright:
-  (C) 2013.  RoadNarrows Intelligent Systems.
+  (C) 2013-2016.  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -24,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -47,6 +48,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -66,9 +68,9 @@ DIST_PGMS = kuon_teleop
 kuon_teleop.LIBS = \
 	bsclient_kuon \
 	botsense \
-	netmsgs \
-	serial \
-	hid \
+	rnr_netmsgs \
+	rnr_serial \
+	rnr_hid \
 	RS160D \
 	rnr \
 	usb-1.0 \

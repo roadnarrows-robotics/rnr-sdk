@@ -2,6 +2,8 @@
 //
 // Package:   kuon
 //
+// Library:   libkuon
+//
 // File:      kuon.h
 //
 /*! \file
@@ -16,7 +18,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2010-2014.  RoadNarrows LLC.
+ * (C) 2010-2016.  RoadNarrows LLC.
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */

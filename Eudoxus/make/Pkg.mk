@@ -62,8 +62,8 @@ endif
 # The Package Definition
 PKG 								= Eudoxus
 PKG_VERSION_MAJOR   = 3
-PKG_VERSION_MINOR   = 0
-PKG_VERSION_RELEASE = 1
+PKG_VERSION_MINOR   = 1
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "RoadNarrows"
 PKG_OWNERS					= "RoadNarrows LLC"

@@ -2,6 +2,8 @@
 //
 // Package:   Dynamixel
 //
+// Library:   librnr_dynamixel
+//
 // File:      Dynamixel.h
 //
 /*! \file
@@ -22,7 +24,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2011-2015.  RoadNarrows LLC.
+ * (C) 2011-2016.  RoadNarrows LLC.
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */

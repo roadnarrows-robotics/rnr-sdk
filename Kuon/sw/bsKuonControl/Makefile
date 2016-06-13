@@ -1,6 +1,6 @@
 ################################################################################
 #
-# ./examples/spintest/Makefile
+# ./sw/bsKuonControl/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2011-07-15 14:10:46 -0600 (Fri, 15 Jul 2011) $
 $Rev: 1139 $
 
-\brief
-Make spintest test application.
+\brief Make botsense kuon control application.
 
 RN Make System Specific Makefile
 
@@ -19,7 +18,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com)
 
 \par Copyright:
-  (C) 2011-2013.  RoadNarrows Intelligent Systems.
+  (C) 2011-2014.  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -27,6 +26,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # RoadNarrows Intelligent Systesm End User License Agreement
 #
 # This open source file provided by RoadNarrows Intelligent Systems is covered
@@ -53,6 +53,7 @@ endif
 # hereunder is on an “as-is” basis, and the authors and distributors have no
 # obligation to provide maintenance, support, updates, enhancements, or
 # modifications.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -67,25 +68,19 @@ pkgroot		= ../..
 
 DIST_PGMS         = bsKuonControl 
 
-
 # Libraries to Link With
 bsKuonControl.LIBS      = bsclient_kuon \
 													botsense \
-													netmsgs \
+													rnr_netmsgs \
 													rnr \
-													serial \
+													rnr_serial \
 													RS160D \
 													USBcontroller \
 													usb-1.0
 
 bsKuonControl.LIBDEPS   = bsclient_kuon \
-													botsense \
-													netmsgs \
-													rnr \
-													serial\
 													RS160D \
-													USBcontroller \
-													usb-1.0 
+													USBcontroller
 
 #------------------------------------------------------------------------------
 # Sources

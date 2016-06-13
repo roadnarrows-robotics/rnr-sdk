@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2015-01-12 10:56:06 -0700 (Mon, 12 Jan 2015) $
 $Rev: 3845 $
 
-\brief
-Make bsProxy server dll Dynamixel library.
+\brief Make bsProxy server dll Dynamixel library.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2011-2015.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -67,7 +66,7 @@ DIST_DLLIBS 			= bsserver_dyna
 
 # Libraries to link dll with
 bsserver_dyna.LIBS	= \
-	Dynamixel bsclient_dyna botsense netmsgs rnr pthread stdc++
+	rnr_dynamixel bsclient_dyna botsense rnr_netmsgs rnr pthread stdc++
 
 # Source Files
 bsserver_dyna.SRC.C 	=	bsDynaMsgs.c
@@ -79,6 +78,9 @@ bsserver_dyna.SRC.CXX =	bsDynaServer.cxx
 #------------------------------------------------------------------------------
 # Optional Variables 
 #
+
+# Link Library Extra Library Directories (exluding local library)
+EXTRA_LD_LIBDIRS = $(DISTROOT_LIB)/rnr
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libbsserver_dyna\""

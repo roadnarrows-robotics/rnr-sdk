@@ -10,8 +10,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2011-06-22 08:41:22 -0600 (Wed, 22 Jun 2011) $
 $Rev: 1061 $
 
-\brief
-Make BotSense Dynamixel python modules, extension modules, and scripts.
+\brief Make BotSense Dynamixel python modules, extension modules, and scripts.
 
 RN Make System Specific Makefile
 
@@ -21,7 +20,7 @@ make [RNMAKE_OPTS] [has_botsense={yes|no}] target
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-	(C) 2011.  RoadNarrows LLC.
+	(C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
 	All Rights Reserved
 

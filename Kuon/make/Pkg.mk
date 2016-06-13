@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 	
 
 \par Copyright:
-  (C) 2010-2017.  RoadNarrows LLC.
+  (C) 2010-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -42,8 +42,8 @@ endif
 # The Package Definition
 PKG 								= Kuon
 PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 0
-PKG_VERSION_RELEASE = 2
+PKG_VERSION_MINOR   = 1
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight, Rob Shiely, and Daniel Packard"
 PKG_OWNERS					= "RoadNarrows LLC"

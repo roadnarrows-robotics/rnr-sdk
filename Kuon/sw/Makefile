@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2014-04-04 17:05:03 -0600 (Fri, 04 Apr 2014) $  
 $Rev: 3629 $ 
 
-\brief
-Make the Kuon software package.
+\brief Make the Kuon software package.
 
 RN Make System Specific Makefile
 
@@ -18,7 +17,7 @@ RN Make System Specific Makefile
 \Author: Rob Shiely (rob@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011-2014.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
