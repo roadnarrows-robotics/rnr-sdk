@@ -9,15 +9,15 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2010-09-22 18:08:19 -0600 (Wed, 22 Sep 2010) $
 $Rev: 595 $
 
-\brief
-Make bsProxy server dll and bs client library for raw RS-232 serial devices.
+\brief Make bsProxy server dll and bs client library for raw RS-232 serial
+devices.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2010.  RoadNarrows LLC.
+  (C) 2010-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +25,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -48,6 +49,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -75,6 +77,9 @@ DIST_DLLIBS 			= bsserver_serial
 # Source Files
 bsclient_serial.SRC.C 	=	bsSerialClient.c bsSerialMsgs.c
 bsserver_serial.SRC.C 	=	bsSerialServer.c bsSerialMsgs.c
+
+bsclient_serial.LIBS 	=	rnr_netmsgs rnr
+bsserver_serial.LIBS 	=	rnr_serial rnr_netmsgs rnr
 
 #------------------------------------------------------------------------------
 # Interface Headers
@@ -136,7 +141,7 @@ include $(rnmake)/Rules.netmsgs.mk
 
 SWIG_FILES 				= bsSerial.i
 SWIG_EXTMOD_DIR 	= $(pkgroot)/bsPython/modules/BotSense
-SWIG_EXTMOD_LIBS 	= -lbsclient_serial -lbotsense -lnetmsgs -lrnr
+SWIG_EXTMOD_LIBS 	= -lbsclient_serial -lbotsense -lrnr_netmsgs -lrnr
 
 # Include Swig Rules Makefile
 include $(rnmake)/Rules.swig.mk

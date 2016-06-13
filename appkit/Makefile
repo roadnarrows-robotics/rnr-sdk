@@ -74,7 +74,7 @@ SUBDIRS =  sw examples
 #
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS = tinyxml librnr_appkit librnr_win librnr_wingtk
+DIST_HDRS = tinyxml librnr_appkit # librnr_cam librnr_win librnr_wingtk
 
 #
 # Distribution Headers
@@ -89,25 +89,26 @@ tinyxml.HDRS.H = \
 	rnr/tinyxml/tinyxml.h
 
 librnr_appkit.HDRS.H = \
-	rnr/appkit/Camera.h \
-	rnr/appkit/CameraCv.h \
-	rnr/appkit/CameraGst.h \
 	rnr/appkit/Random.h \
 	rnr/appkit/Session.h \
-	rnr/appkit/SessionWin.h \
 	rnr/appkit/State.h \
 	rnr/appkit/StateKb.h \
 	rnr/appkit/StateMach.h \
-	rnr/appkit/StateWin.h \
-	rnr/appkit/StateWinCamera.h \
 	rnr/appkit/Thread.h \
 	rnr/appkit/Time.h \
 	rnr/appkit/Xml.h
 
-#	rnr/appkit/CameraEcon32.h \
-	rnr/appkit/CameraEcon50.h
+librnr_cam.HDRS.H = \
+	rnr/appkit/Camera.h \
+	rnr/appkit/CameraCv.h \
+	rnr/appkit/CameraEcon32.h \
+	rnr/appkit/CameraEcon50.h \
+	rnr/appkit/CameraGst.h
 
 librnr_win.HDRS.H = \
+	rnr/appkit/SessionWin.h \
+	rnr/appkit/StateWin.h \
+	rnr/appkit/StateWinCamera.h \
 	rnr/appkit/Win.h \
 	rnr/appkit/WinCvIoI.h \
 	rnr/appkit/WinCvMouse.h \

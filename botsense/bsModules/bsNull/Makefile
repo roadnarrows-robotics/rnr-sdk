@@ -9,16 +9,15 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2010-07-27 16:09:05 -0600 (Tue, 27 Jul 2010) $
 $Rev: 514 $
 
-\brief
-Make bsProxy server dll and bs client library for the /dev/null device used
-for testing.
+\brief Make bsProxy server dll and bs client library for the /dev/null device
+used for testing.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2010.  RoadNarrows LLC.
+  (C) 2010-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -26,6 +25,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -49,6 +49,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -75,6 +76,9 @@ DIST_DLLIBS 			= bsserver_null
 # Source Files
 bsclient_null.SRC.C 	=	bsNullClient.c bsNullMsgs.c
 bsserver_null.SRC.C 	=	bsNullServer.c bsNullMsgs.c
+
+bsclient_null.LIBS 	=	rnr_netmsgs rnr
+bsserver_null.LIBS 	=	rnr_netmsgs rnr
 
 #------------------------------------------------------------------------------
 # Interface Headers
@@ -136,7 +140,7 @@ include $(rnmake)/Rules.netmsgs.mk
 
 SWIG_FILES 				= bsNull.i
 SWIG_EXTMOD_DIR 	= $(pkgroot)/bsPython/modules/BotSense
-SWIG_EXTMOD_LIBS 	= -lbsclient_null -lbotsense -lnetmsgs -lrnr
+SWIG_EXTMOD_LIBS 	= -lbsclient_null -lbotsense -lrnr_netmsgs -lrnr
 
 # Include Swig Rules Makefile
 include $(rnmake)/Rules.swig.mk

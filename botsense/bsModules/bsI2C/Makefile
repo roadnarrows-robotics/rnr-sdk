@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2010-07-27 16:09:05 -0600 (Tue, 27 Jul 2010) $
 $Rev: 514 $
 
-\brief
-Make bsProxy server dll and bs client library for raw \h_i2c bus devices.
+\brief Make bsProxy server dll and bs client library for raw \h_i2c bus devices.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2010.  RoadNarrows LLC.
+  (C) 2010-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -48,6 +48,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -74,6 +75,9 @@ DIST_DLLIBS 			= bsserver_i2c
 # Source Files
 bsclient_i2c.SRC.C 	=	bsI2CClient.c bsI2CMsgs.c
 bsserver_i2c.SRC.C 	=	bsI2CServer.c bsI2CMsgs.c
+
+bsclient_i2c.LIBS 	=	rnr_netmsgs rnr
+bsserver_i2c.LIBS 	=	rnr_i2c rnr_netmsgs rnr
 
 #------------------------------------------------------------------------------
 # Interface Headers
@@ -135,7 +139,7 @@ include $(rnmake)/Rules.netmsgs.mk
 
 SWIG_FILES 				= bsI2C.i
 SWIG_EXTMOD_DIR 	= $(pkgroot)/bsPython/modules/BotSense
-SWIG_EXTMOD_LIBS 	= -lbsclient_i2c -lbotsense -lnetmsgs -lrnr
+SWIG_EXTMOD_LIBS 	= -lbsclient_i2c -lbotsense -lrnr_netmsgs -lrnr
 
 # Include Swig Rules Makefile
 include $(rnmake)/Rules.swig.mk

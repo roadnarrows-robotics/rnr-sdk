@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2012-12-06 13:19:13 -0700 (Thu, 06 Dec 2012) $
 $Rev: 2568 $
 
-\brief
-Make libbotsense library.
+\brief Make libbotsense library.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2009-2011.  RoadNarrows LLC.
+  (C) 2009-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -48,6 +48,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -74,7 +75,7 @@ botsense.SRC.C 	=	bsProxyMsgs.c \
 									bsLibUtils.c
 
 # Linked Libraries
-botsense.LIBS		= netmsgs rnr
+botsense.LIBS		= rnr_netmsgs rnr
 
 #------------------------------------------------------------------------------
 # Optional Variables 

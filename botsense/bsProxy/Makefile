@@ -9,15 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2010-04-28 12:13:57 -0600 (Wed, 28 Apr 2010) $
 $Rev: 346 $
 
-\brief
-Make the BotSense proxy server bsProxy.
+\brief Make the BotSense proxy server bsProxy.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2007-2010.  RoadNarrows LLC.
+  (C) 2007-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +24,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -48,6 +48,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -64,7 +65,7 @@ pkgroot		= ..
 DIST_PGMS         = bsProxy
 
 # Libraries to Link With
-bsProxy.LIBS      = botsense netmsgs serial i2c rnr pthread $(DLLIB)
+bsProxy.LIBS      = botsense rnr_netmsgs rnr_serial rnr_i2c rnr pthread $(DLLIB)
 bsProxy.LIBDEPS   = botsense
 
 # C Source Files
