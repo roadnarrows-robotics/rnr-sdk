@@ -66,7 +66,7 @@ SUBDIRS		=
 
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= pan_tilt
+#DIST_HDRS	= pan_tilt
 
 #
 # Distribution Headers
@@ -76,7 +76,7 @@ DIST_HDRS	= pan_tilt
 # Note: Any header file that requires distribution is expected to be in 
 # 			$(topdir)/include. Otherwise, is it really a deliverable header?
 #
-pan_tilt.HDRS.H	=	 $(shell cd include; ls Hekateros/*.h)
+pan_tilt.HDRS.H	=	 $(shell cd include; ls PanTilt/*.h)
 
 
 #------------------------------------------------------------------------------
@@ -175,7 +175,6 @@ show-banner:
 etc-cp-files:
 	@printf "\n"
 	@printf "$(color_tgt_lib)Copying etc files to $(DISTDIR_ETC)$(color_end)\n"
-	#$(call cp_template,$(ETC_PROF_D_PT),$(DISTDIR_ETC)/profile.d/pan_tilt.sh)
 	$(call copyfiles_template,$(ETC_FILES),$(DISTDIR_ETC))
 
 .PHONY: lib-cp-files

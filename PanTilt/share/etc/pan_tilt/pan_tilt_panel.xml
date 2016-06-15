@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- RoadNarrows Pan-Tilt Top-Level Configuration -->
+<pantilt>
+  <!-- pan_tilt_panel configuration -->
+  <pan_tilt_panel>
+    <warn_on_calib>True</warn_on_calib>
+    <warn_on_release>True</warn_on_release>
+    <sweep>
+      <pan_min_pos>-120.0</pan_min_pos>
+      <pan_max_pos>120.0</pan_max_pos>
+      <pan_vel>20.0</pan_vel>
+      <tilt_min_pos>-45.0</tilt_min_pos>
+      <tilt_max_pos>45.0</tilt_max_pos>
+      <tilt_vel>20.0</tilt_vel>
+    </sweep>
+    <force_recalib>True</force_recalib>
+    <pan>
+      <pan_max_pos>120.0</pan_max_pos>
+      <pan_min_pos>-120.0</pan_min_pos>
+      <pan_vel>20.0</pan_vel>
+    </pan>
+  </pan_tilt_panel>
+</pantilt>
