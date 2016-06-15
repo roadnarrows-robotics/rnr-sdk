@@ -946,6 +946,7 @@ namespace sensor
       // Types
       //
       typedef std::map<std::string, LaeVL6180SensorInfo>  SensorInfoMap;
+                                        ///< Sensor information map type
 
       /*!
        * \brief Initialization constructor.

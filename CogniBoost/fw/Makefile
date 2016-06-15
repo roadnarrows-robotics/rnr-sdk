@@ -1,24 +1,24 @@
 ################################################################################
 #
-# ./examples/Makefile
+# ./fw/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2011-06-14 16:08:57 -0600 (Tue, 14 Jun 2011) $
-$Rev: 1000 $
+$LastChangedDate: 2015-04-23 12:07:04 -0600 (Thu, 23 Apr 2015) $
+$Rev: 3951 $
 
-\brief
-Make WMD examples subpackage.
+\brief Make CogniBoost firmware subpackage.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 \author: Daniel Packard (daniel@roadnarrows.com) 
+\author: Brent Wilkins  (brent@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -26,6 +26,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -49,6 +50,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -63,7 +65,9 @@ pkgroot		= ..
 # Subdirectories
 
 # Subdirectories to Build
-SUBDIRS =
+SUBDIRS = # Diag
+
+EXTRA_MAKE_FLAGS = -f Makefile.atmega32uc3.mk
 
 #------------------------------------------------------------------------------
 # Make Includes
@@ -75,6 +79,16 @@ endif
 
 # Include Rules Makefile
 include $(rnmake)/Rules.mk
+
+# -------------------------------------------------------------------------
+# Target:	Last Resort Default - Kinda
+# Desc: 	Recursively make subdirectories with target(s).
+# -------------------------------------------------------------------------
+install-fw distclean-fw:
+	@for fwdir in $(SUBDIRS); \
+	do \
+		$(MAKE) $(EXTRA_MAKE_FLAGS) -C $${fwdir} $(@); \
+	done
 
 
 ifdef RNMAKE_DOXY

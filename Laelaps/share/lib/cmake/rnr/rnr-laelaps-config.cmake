@@ -3,12 +3,12 @@
 #
 
 find_library(LIBHID
-  NAMES hid
+  NAMES rnr_hid
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 find_library(LIBI2C
-  NAMES i2c
+  NAMES rnr_i2c
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
@@ -23,12 +23,12 @@ find_library(LIBAPPKIT
 )
 
 find_library(LIBSERIAL
-  NAMES serial
+  NAMES rnr_serial
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 find_library(LIBGPIO
-  NAMES gpio
+  NAMES rnr_gpio
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
@@ -38,13 +38,13 @@ find_library(LIBBOTSENSE
 )
 
 find_library(LIBDXL
-  NAMES dxl
-  PATHS /prj/lib /usr/local/lib
+  NAMES rnr_dxl
+  PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 find_library(LIBDYNAMIXEL
-  NAMES Dynamixel
-  PATHS /prj/lib /usr/local/lib
+  NAMES rnr_dynamixel
+  PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
 find_library(LIBLAELAPS
@@ -53,15 +53,14 @@ find_library(LIBLAELAPS
 )
 
 find_library(LIBNETMSGS
-  NAMES netmsgs
-  PATHS /prj/lib /usr/local/lib
-)
-
-find_library(LIBIMU
-  NAMES imu
+  NAMES rnr_netmsgs
   PATHS /prj/lib/rnr /usr/local/lib/rnr
 )
 
+find_library(LIBIMU
+  NAMES rnr_imu
+  PATHS /prj/lib/rnr /usr/local/lib/rnr
+)
 
 set(rnr-laelaps_LIBRARIES 
   ${LIBLAELAPS}

@@ -73,9 +73,9 @@ DIST_SHLIBS 			= bsclient_hek
 DIST_DLLIBS 			= bsserver_hek 
 
 # Libraries to link dll with
-bsclient_hek.LIBS	= Dynamixel botsense netmsgs rnr pthread stdc++
+bsclient_hek.LIBS	= rnr_dynamixel botsense rnr_netmsgs rnr pthread stdc++
 bsserver_hek.LIBS	= \
-	hekateros bsclient_hek Dynamixel botsense netmsgs rnr pthread stdc++
+	hekateros bsclient_hek rnr_dynamixel botsense rnr_netmsgs rnr pthread stdc++
 
 # Source Files
 bsclient_hek.SRC.C 	 =	bsHekMsgs.c
@@ -144,7 +144,7 @@ include $(rnmake)/Rules.netmsgs.mk
 
 SWIG_FILES 				= bsHekCore.i
 SWIG_EXTMOD_DIR 	= $(pkgroot)/sw/pyModules/modules/Hekateros
-SWIG_EXTMOD_LIBS 	= -lbsclient_hek -lbotsense -lnetmsgs -li2c -lrnr
+SWIG_EXTMOD_LIBS 	= -lbsclient_hek -lbotsense -lrnr_netmsgs -lrnr_i2c -lrnr
 
 # Include Swig Rules Makefile
 include $(rnmake)/Rules.swig.mk

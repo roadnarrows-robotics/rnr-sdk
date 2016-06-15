@@ -84,7 +84,7 @@ include $(rnmake)/Rules.mk
 
 SWIG_FILES 				= WatchDogMsgs.i RoboClawMsgs.i ImuMspMsgs.i
 SWIG_EXTMOD_DIR 	= ../modules/Laelaps
-SWIG_EXTMOD_LIBS 	= -lrnr
+SWIG_EXTMOD_LIBS 	= -llaelaps -lrnr
 
 # Include Swig Rules Makefile
 include $(rnmake)/Rules.swig.mk

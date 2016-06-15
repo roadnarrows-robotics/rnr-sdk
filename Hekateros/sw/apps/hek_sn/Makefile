@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2014.  RoadNarrows LLC.
+  (C) 2014-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -63,9 +63,7 @@ pkgroot		= ../../..
 DIST_PGMS = hek_sn 
 
 # Libraries to Link With
-hek_sn.LIBS = \
-	rnr \
-	stdc++
+hek_sn.LIBS = rnr stdc++
 
 hek_sn.LIBDEPS  = 
 
@@ -76,8 +74,7 @@ hek_sn.LIBDEPS  =
 #
 # C Source Files
 #
-hek_sn.SRC.CXX = \
-	hek_sn.cxx
+hek_sn.SRC.CXX = hek_sn.cxx
 
 #------------------------------------------------------------------------------
 # Optional Variables 

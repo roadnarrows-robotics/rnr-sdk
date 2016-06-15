@@ -62,8 +62,8 @@ endif
 # The Package Definition
 PKG 								= Laelaps
 PKG_VERSION_MAJOR   = 2
-PKG_VERSION_MINOR   = 1
-PKG_VERSION_RELEASE = 6
+PKG_VERSION_MINOR   = 2
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"

@@ -9,20 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2013-04-01 10:49:02 -0600 (Mon, 01 Apr 2013) $
 $Rev: 2801 $
 
-\brief
-Make all of the Raton server and client plug-in modules and BotSense
-python modules.
+\brief Make all of the Laelaps BotSense server and client plug-in modules.
 
 RN Make System Specific Makefile
 
-\par Usage:
-make [RNMAKE_OPTS] [has_botsense={yes|no}] target
-
 \author: Robin Knight (robin.knight@roadnarrows.com)
-\author: Daniel Packard (daniel@roadnarrows.com)
 
 \par Copyright:
-  (C) 2010.  RoadNarrows LLC.
+  (C) 2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -30,6 +24,7 @@ make [RNMAKE_OPTS] [has_botsense={yes|no}] target
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -53,6 +48,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 

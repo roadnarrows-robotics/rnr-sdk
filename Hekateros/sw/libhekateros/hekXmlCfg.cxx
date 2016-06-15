@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2013-2015.  RoadNarrows LLC
+ * (C) 2013-2016.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -51,8 +51,8 @@
 #include <string>
 
 #include "rnr/rnrconfig.h"
-#include "rnr/Xml.h"
 #include "rnr/log.h"
+#include "rnr/appkit/Xml.h"
 
 #include "Hekateros/hekateros.h"
 #include "Hekateros/hekDescArm.h"

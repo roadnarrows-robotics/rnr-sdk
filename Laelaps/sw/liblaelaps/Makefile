@@ -101,15 +101,15 @@ laelaps.SRC.CXX  = \
 
 # Linked Libraries 
 laelaps.LIBS	= \
-	Dynamixel \
 	botsense \
-	netmsgs \
-	gpio \
-	i2c \
-	serial \
+	rnr_dynamixel \
+	rnr_netmsgs \
+	rnr_gpio \
+	rnr_i2c \
+	rnr_serial \
 	rnr_appkit \
+	rnr_tinyxml \
 	rnr \
-	tinyxml \
 	pthread \
 	stdc++
 

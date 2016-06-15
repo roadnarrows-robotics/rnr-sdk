@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2014.  RoadNarrows LLC
+ * (C) 2014-2016.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -51,8 +51,8 @@
 #include <string>
 
 #include "rnr/rnrconfig.h"
-#include "rnr/Xml.h"
 #include "rnr/log.h"
+#include "rnr/appkit/Xml.h"
 
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeUtils.h"

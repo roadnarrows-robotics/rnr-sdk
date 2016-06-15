@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2016-03-18 12:24:39 -0600 (Fri, 18 Mar 2016) $
 $Rev: 4360 $
 
-\brief
-Make Hekateros python source extensions.
+\brief Make Hekateros python source extensions.
 
 RN Make System Specific Makefile
 

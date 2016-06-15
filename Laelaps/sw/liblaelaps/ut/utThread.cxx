@@ -62,7 +62,7 @@
 #include "rnr/opts.h"
 #include "rnr/pkg.h"
 
-#include "rnr/Random.h"
+#include "rnr/appkit/Random.h"
 
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeThread.h"

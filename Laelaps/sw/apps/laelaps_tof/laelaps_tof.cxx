@@ -504,7 +504,7 @@ static int calibrateSensorOffset()
 static void readSensorCalibTuneRegs()
 {
   byte_t regRangeOffset;
-  byte_t regRangeCrossTalk;
+  u16_t  regRangeCrossTalk;
   byte_t regAlsGain;
   u16_t  regAlsIntPeriod;
 

@@ -1,24 +1,24 @@
 ################################################################################
 #
-# ./examples/Makefile
+# ./fw/Diag/Makefile
 
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2011-06-14 16:08:57 -0600 (Tue, 14 Jun 2011) $
-$Rev: 1000 $
+$LastChangedDate: 2011-09-12 16:10:26 -0600 (Mon, 12 Sep 2011) $
+$Rev: 1282 $
 
-\brief
-Make WMD examples subpackage.
+\brief Make CogniBoost Diagnostic firmware.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 \author: Daniel Packard (daniel@roadnarrows.com) 
+\author: Brent Wilkins  (brent@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -26,6 +26,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -49,6 +50,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -56,14 +58,35 @@ endif
 # Required
 
 # Package Root Directory
-pkgroot		= ..
+pkgroot		= ../..
 
+# only one architecure supported
+override arch := atmega32uc3
+
+# define one, but not both
+TGT_LIB		=
+TGT_PGM 	= Diag
+ 
+# Output format. One of: srec, ihex(defualt), binary
+# Override default ihex output format here.
+#FORMAT = 
+
+# Set High Fuse value.
+# Disable JTAG
+# Preserve EEPROM memory over chip erases (flash downloads)
+FUSE_HIGH = 0xD1
 
 #------------------------------------------------------------------------------
-# Subdirectories
+# Programs
 
-# Subdirectories to Build
-SUBDIRS =
+# Libraries to Link With
+$(TGT_PGM).LIBS  = 
+
+# C Source Files
+$(TGT_PGM).SRC.C = diag.c
+
+# Assembly Source Files
+$(TGT_PGM).SRC.S = 
 
 #------------------------------------------------------------------------------
 # Make Includes
@@ -74,7 +97,7 @@ rnmake := $(realpath $(pkgroot)/../rnmake)
 endif
 
 # Include Rules Makefile
-include $(rnmake)/Rules.mk
+include $(rnmake)/Rules.AtmelMcu.mk
 
 
 ifdef RNMAKE_DOXY

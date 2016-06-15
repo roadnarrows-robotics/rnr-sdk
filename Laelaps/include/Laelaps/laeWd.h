@@ -58,7 +58,7 @@
 
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
-#include "rnr/Time.h"
+#include "rnr/appkit/Time.h"
 
 #include  "Laelaps/laelaps.h"
 #include  "Laelaps/laeUtils.h"

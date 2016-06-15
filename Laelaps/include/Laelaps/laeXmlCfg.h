@@ -54,7 +54,7 @@
 #include "tinyxml.h"
 
 #include "rnr/rnrconfig.h"
-#include "rnr/Xml.h"
+#include "rnr/appkit/Xml.h"
 
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeDesc.h"

@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2014-10-22 10:04:28 -0600 (Wed, 22 Oct 2014) $  
 $Rev: 3791 $ 
 
-\brief
-Make the Hekateros applications.
+\brief Make the Hekateros applications.
 
 RN Make System Specific Makefile
 
@@ -18,7 +17,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011-2014.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -62,9 +61,9 @@ pkgroot		= ../..
 
 # Subdirectories to Build
 SUBDIRS = \
-	arduinodiag \
 	hek_sn
 
+#	arduinodiag \
 #	hek_defend_the_goal \
 #	hek_i2c_monitor \
 #	hek_looking_at_you \

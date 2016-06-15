@@ -11,11 +11,11 @@ CogniBoostMsgs.py
 ##
 ## \brief CogniBoost host client - CogniBoost device server message set.
 ##
-## \warning This file was auto-generated on 2011.10.19 14:55:19 from the NetMsgs
+## \warning This file was auto-generated on 2016.06.15 14:31:53 from the NetMsgs
 ## XML specification CogniBoostMsgs.xml.
 ##
 ## \par Copyright:
-## (C) 2011. RoadNarrows LLC
+## (C) 2016. RoadNarrows LLC
 ## (http://www.roadnarrows.com)
 ## All Rights Reserved
 ##

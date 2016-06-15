@@ -63,9 +63,9 @@ pkgroot		= ..
 # Subdirectories to Build
 SUBDIRS = \
  	libhekateros \
-	scripts \
-	apps \
 	pyModules \
+	scripts \
+	apps
 					
 #	bsModules \
 

@@ -10,8 +10,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2011-06-14 12:11:46 -0600 (Tue, 14 Jun 2011) $
 $Rev: 997 $
 
-\brief
-Package CogniBoost Configuration Makefile.
+\brief Package CogniBoost Configuration Makefile.
 
 RN Make System Specific Makefile
 
@@ -26,6 +25,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -49,6 +49,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
@@ -62,8 +63,8 @@ endif
 # The Package Definition
 PKG 								= CogniBoost
 PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 0
-PKG_VERSION_RELEASE = 1
+PKG_VERSION_MINOR   = 1
+PKG_VERSION_RELEASE = 0
 PKG_VERSION_DATE    = 2016
 PKG_AUTHORS					= "Robin Knight, Daniel Packard, Brent Wilkins"
 PKG_OWNERS					= "RoadNarrows LLC"

@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2015.  RoadNarrows LLC.
+  (C) 2015-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -63,7 +63,7 @@ pkgroot		= ../../..
 DIST_PGMS = laelaps_diag 
 
 # Libraries to Link With
-laelaps_diag.LIBS = laelaps i2c gpio rnr_appkit rnr stdc++
+laelaps_diag.LIBS = laelaps rnr_i2c rnr_gpio rnr_appkit rnr stdc++
 
 laelaps_diag.LIBDEPS  = laelaps
 

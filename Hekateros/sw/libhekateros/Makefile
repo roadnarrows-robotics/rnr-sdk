@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2014-12-07 15:49:48 -0700 (Sun, 07 Dec 2014) $
 $Rev: 3824 $
 
-\brief
-Make the libhekateros library.
+\brief Make the libhekateros library.
 
 RN Make System Specific Makefile
 
@@ -19,7 +18,7 @@ RN Make System Specific Makefile
 \author: Rob Shiely     (rob@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2012-2014. RoadNarrows LLC.
+  (C) 2012-2016. RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -98,15 +97,15 @@ hekateros.SRC.CXX = \
 
 # Linked Libraries 
 hekateros.LIBS	= \
-	Dynamixel \
+	rnr_dynamixel \
 	bsclient_dyna \
 	botsense \
-	netmsgs \
-	i2c \
+	rnr_netmsgs \
+	rnr_i2c \
 	rnr_appkit \
-	serial \
+	rnr_serial \
+	rnr_tinyxml \
 	rnr \
-	tinyxml \
 	stdc++
 
 #------------------------------------------------------------------------------

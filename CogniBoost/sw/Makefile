@@ -8,8 +8,8 @@ ifdef RNMAKE_DOXY
 
 $LastChangedDate: 2011-06-20 12:44:01 -0600 (Mon, 20 Jun 2011) $
 $Rev: 1036 $
-\brief
-Make the CogniBoost software package.
+
+\brief Make the CogniBoost software package.
 
 RN Make System Specific Makefile
 
@@ -17,7 +17,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -25,6 +25,7 @@ RN Make System Specific Makefile
  */
 endif
 
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -48,6 +49,7 @@ endif
 # FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 

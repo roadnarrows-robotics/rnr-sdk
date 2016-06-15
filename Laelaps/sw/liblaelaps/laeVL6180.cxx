@@ -1714,15 +1714,15 @@ void LaeRangeMux::exec()
       
 int LaeRangeMux::cmdGetFwVersion(uint_t &uVerNum)
 {
-  byte_t  cmd[LaeToFMuxMaxCmdLen];
-  byte_t  rsp[LaeToFMuxMaxRspLen];
+  byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
+  byte_t  rsp[LaeToFMuxI2CMaxRspLen];
   size_t  lenCmd = 0;
-  size_t  lenRsp = LaeToFMuxRspLenGetVersion;
+  size_t  lenRsp = LaeToFMuxI2CRspLenGetVersion;
   int     rc;
 
   lock();
 
-  cmd[lenCmd++] = LaeToFMuxCmdIdGetVersion;
+  cmd[lenCmd++] = LaeToFMuxI2CCmdIdGetVersion;
 
   rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
 
@@ -1741,10 +1741,10 @@ int LaeRangeMux::cmdGetFwVersion(uint_t &uVerNum)
 int LaeRangeMux::cmdGetIdent(const std::string &strKey,
                              VL6180xIdentification &ident)
 {
-  byte_t  cmd[LaeToFMuxMaxCmdLen];
-  byte_t  rsp[LaeToFMuxMaxRspLen];
+  byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
+  byte_t  rsp[LaeToFMuxI2CMaxRspLen];
   size_t  lenCmd = 0;
-  size_t  lenRsp = LaeToFMuxRspLenGetIdent;
+  size_t  lenRsp = LaeToFMuxI2CRspLenGetIdent;
   byte_t  sensorIndex;
   u16_t   val_hi, val_lo;
   int     n;
@@ -1762,7 +1762,7 @@ int LaeRangeMux::cmdGetIdent(const std::string &strKey,
 
   lock();
 
-  cmd[lenCmd++] = LaeToFMuxCmdIdGetIdent;
+  cmd[lenCmd++] = LaeToFMuxI2CCmdIdGetIdent;
   cmd[lenCmd++] = sensorIndex;
 
   rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
@@ -1790,64 +1790,12 @@ int LaeRangeMux::cmdGetIdent(const std::string &strKey,
   return rc;
 }
 
-
-int LaeRangeMux::cmdGetTunes(const std::string &strKey,
-                             uint_t            &uRangeOffset,
-                             uint_t            &uRangeCrossTalk,
-                             double            &fAlsGain,
-                             uint_t            &uAlsIntPeriod)
-{
-  byte_t  cmd[LaeToFMuxMaxCmdLen];
-  byte_t  rsp[LaeToFMuxMaxRspLen];
-  size_t  lenCmd = 0;
-  size_t  lenRsp = LaeToFMuxRspLenGetTunes;
-  byte_t  sensorIndex;
-  byte_t  val;
-  uint_t  val_hi, val_lo;
-  int     n;
-  int     rc;
-
-  SensorInfoMap::iterator pos;
-
-  if( (pos = m_mapInfo.find(strKey)) == m_mapInfo.end() )
-  {
-    LOGERROR("VL6180 sensor %s not found.", strKey.c_str());
-    return -LAE_ECODE_BAD_VAL;
-  }
-
-  sensorIndex = pos->second.m_nIndex;
-
-  lock();
-
-  cmd[lenCmd++] = LaeToFMuxCmdIdGetTunes;
-  cmd[lenCmd++] = sensorIndex;
-
-  rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
-
-  if( rc == LAE_OK )
-  {
-    n = 0;
-
-    uRangeOffset    = rsp[n++];
-    uRangeCrossTalk = rsp[n++];
-    val             = rsp[n++];
-    val_hi          = ((uint_t)rsp[n++]) << 8;
-    val_lo          = (uint_t)rsp[n++];
-    fAlsGain        = LaeVL6180Mux::gainEnumToAnalog((vl6180x_als_gain)val);
-    uAlsIntPeriod   = val_hi | val_lo;
-  }
-
-  unlock();
-
-  return rc;
-}
-
 int LaeRangeMux::cmdGetRanges()
 {
-  byte_t  cmd[LaeToFMuxMaxCmdLen];
-  byte_t  rsp[LaeToFMuxMaxRspLen];
+  byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
+  byte_t  rsp[LaeToFMuxI2CMaxRspLen];
   size_t  lenCmd = 0;
-  size_t  lenRsp = LaeToFMuxRspLenGetRanges;
+  size_t  lenRsp = LaeToFMuxI2CRspLenGetRanges;
   int     sensorIndex;
   byte_t  val;
   double  fRange;
@@ -1855,7 +1803,7 @@ int LaeRangeMux::cmdGetRanges()
 
   lock();
 
-  cmd[lenCmd++] = LaeToFMuxCmdIdGetRanges;
+  cmd[lenCmd++] = LaeToFMuxI2CCmdIdGetRanges;
 
   rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
 
@@ -1864,15 +1812,15 @@ int LaeRangeMux::cmdGetRanges()
     for(sensorIndex = 0; sensorIndex < ToFSensorMaxNumOf; ++sensorIndex)
     {
       val = rsp[sensorIndex];
-      if( val <= LaeToFMuxArgRangeMax )
+      if( val <= LaeToFMuxRangeMax )
       {
         fRange = (double)val * 0.001;   // mm to meters
       }
-      else if( val == LaeToFMuxArgRangeNoObj )
+      else if( val == LaeToFMuxRangeNoObj )
       {
         fRange = VL6180X_RANGE_NO_OBJ;
       } 
-      else if( val == LaeToFMuxArgRangeNoDev )
+      else if( val == LaeToFMuxRangeNoDev )
       {
         fRange = VL6180X_RANGE_MIN;
       }
@@ -1905,10 +1853,10 @@ int LaeRangeMux::cmdGetRanges(std::vector<double> &vecRanges)
     
 int LaeRangeMux::cmdGetAmbientLight()
 {
-  byte_t  cmd[LaeToFMuxMaxCmdLen];
-  byte_t  rsp[LaeToFMuxMaxRspLen];
+  byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
+  byte_t  rsp[LaeToFMuxI2CMaxRspLen];
   size_t  lenCmd = 0;
-  size_t  lenRsp = LaeToFMuxRspLenGetLux;
+  size_t  lenRsp = LaeToFMuxI2CRspLenGetLux;
   int     sensorIndex;
   int     n;
   u32_t   val;
@@ -1917,7 +1865,7 @@ int LaeRangeMux::cmdGetAmbientLight()
 
   lock();
 
-  cmd[lenCmd++] = LaeToFMuxCmdIdGetLux;
+  cmd[lenCmd++] = LaeToFMuxI2CCmdIdGetLux;
 
   rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
 
@@ -1934,7 +1882,7 @@ int LaeRangeMux::cmdGetAmbientLight()
         val |= rsp[n++];
       }
 
-      fLux = (double)val * (double)LaeToFMuxArgLuxScale;
+      fLux = (double)val * (double)LaeToFMuxI2CArgLuxScale;
 
       RtDb.m_range[sensorIndex].m_fAmbientLight = fLux;
     }
@@ -1957,15 +1905,79 @@ int LaeRangeMux::cmdGetAmbientLight(std::vector<double> &vecLux)
   return rc;
 }
   
+int LaeRangeMux::cmdGetTunes(const std::string &strKey,
+                             uint_t            &uRangeOffset,
+                             uint_t            &uRangeCrossTalk,
+                             double            &fAlsGain,
+                             uint_t            &uAlsIntPeriod)
+{
+  byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
+  byte_t  rsp[LaeToFMuxI2CMaxRspLen];
+  size_t  lenCmd = 0;
+  size_t  lenRsp = LaeToFMuxI2CRspLenGetTunes;
+  byte_t  sensorIndex;
+  byte_t  val;
+  uint_t  val_hi, val_lo;
+  int     n;
+  int     rc;
+
+  SensorInfoMap::iterator pos;
+
+  if( (pos = m_mapInfo.find(strKey)) == m_mapInfo.end() )
+  {
+    LOGERROR("VL6180 sensor %s not found.", strKey.c_str());
+    return -LAE_ECODE_BAD_VAL;
+  }
+
+  sensorIndex = pos->second.m_nIndex;
+
+  lock();
+
+  cmd[lenCmd++] = LaeToFMuxI2CCmdIdGetTunes;
+  cmd[lenCmd++] = sensorIndex;
+
+  rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+
+  if( rc == LAE_OK )
+  {
+    n = 0;
+
+    uRangeOffset    = rsp[n++];
+
+    if( m_uFwVer >= 2 )
+    {
+      val_hi          = ((uint_t)rsp[n++]) << 8;
+      val_lo          = (uint_t)rsp[n++];
+      uRangeCrossTalk = val_hi | val_lo;
+    }
+    else
+    {
+      uRangeCrossTalk = rsp[n++];
+    }
+
+    val             = rsp[n++];
+    fAlsGain        = LaeVL6180Mux::gainEnumToAnalog((vl6180x_als_gain)val);
+
+    val_hi          = ((uint_t)rsp[n++]) << 8;
+    val_lo          = (uint_t)rsp[n++];
+    uAlsIntPeriod   = val_hi | val_lo;
+  }
+
+  unlock();
+
+  return rc;
+}
+
 int LaeRangeMux::cmdTuneToFSensor(const std::string &strKey,
                                   uint_t             uRangeOffset,
                                   uint_t             uRangeCrossTalk)
 {
-  byte_t  cmd[LaeToFMuxMaxCmdLen];
+  byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   size_t  lenCmd = 0;
   byte_t  sensorIndex;
   byte_t  regOffset;
-  byte_t  regCrossTalk;
+  u16_t   regCrossTalk;
+  byte_t  val_hi, val_lo;
   int     n;
   int     rc;
 
@@ -1984,13 +1996,24 @@ int LaeRangeMux::cmdTuneToFSensor(const std::string &strKey,
   regOffset = (byte_t)(uRangeOffset, (uint_t)VL6180X_RANGE_OFFSET_MIN,
                                      (uint_t)VL6180X_RANGE_OFFSET_MAX);
 
-  regCrossTalk = (byte_t)cap(uRangeCrossTalk, (uint_t)VL6180X_RANGE_XTALK_MIN,
-                                              (uint_t)VL6180X_RANGE_XTALK_MAX);
+  regCrossTalk = (u16_t)cap(uRangeCrossTalk, (uint_t)VL6180X_RANGE_XTALK_MIN,
+                                             (uint_t)VL6180X_RANGE_XTALK_MAX);
 
-  cmd[lenCmd++] = LaeToFMuxCmdIdTuneRangeSensor;
+  cmd[lenCmd++] = LaeToFMuxI2CCmdIdTuneToFSensor;
   cmd[lenCmd++] = sensorIndex;
   cmd[lenCmd++] = regOffset;
-  cmd[lenCmd++] = regCrossTalk;
+
+  if( m_uFwVer >= 2 )
+  {
+    val_hi = (byte_t)((regCrossTalk >> 8) & 0xff);
+    val_lo = (byte_t)(regCrossTalk & 0xff);
+    cmd[lenCmd++] = val_hi;
+    cmd[lenCmd++] = val_lo;
+  }
+  else
+  {
+    cmd[lenCmd++] = regCrossTalk;
+  }
 
   if( (n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd)) == (int)lenCmd )
   {
@@ -2010,7 +2033,7 @@ int LaeRangeMux::cmdTuneAls(const std::string &strKey,
                             double             fAlsGain,
                             uint_t             uAlsIntPeriod)
 {
-  byte_t  cmd[LaeToFMuxMaxCmdLen];
+  byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   size_t  lenCmd = 0;
   byte_t  sensorIndex;
   byte_t  regAlsGain;
@@ -2038,7 +2061,7 @@ int LaeRangeMux::cmdTuneAls(const std::string &strKey,
   val_hi = (byte_t)((uAlsIntPeriod >> 8) & 0xff);
   val_lo = (byte_t)(uAlsIntPeriod & 0xff);
 
-  cmd[lenCmd++] = LaeToFMuxCmdIdTuneAls;
+  cmd[lenCmd++] = LaeToFMuxI2CCmdIdTuneAls;
   cmd[lenCmd++] = sensorIndex;
   cmd[lenCmd++] = regAlsGain;
   cmd[lenCmd++] = val_hi;
