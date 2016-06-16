@@ -1,2 +1,7 @@
 #!/bin/sh
+#
+# Fast install of SDK package. Does not install documentation.
+#
+# Usage: fastinstall
+
 make install-bin; make install-lib; make install-includes

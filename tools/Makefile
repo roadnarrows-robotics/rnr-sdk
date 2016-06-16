@@ -15,6 +15,7 @@
 # (C) 2008-2016.  RoadNarrows LLC
 # All Rights Reserved
 #
+# @EulaBegin@
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -39,35 +40,33 @@
 # HEREUNDER IS ON AN "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO
 # OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR
 # MODIFICATIONS.
+# @EulaEnd@
 #
 ################################################################################
 
 scripts = \
+	cppstrings \
 	cp_to_repostaging \
-	dpkg_repro_status \
-	dpkg_repro_update \
 	eula_update.py \
 	fastinstall \
-	git_pkg_status.sh \
-	git_pull_all.sh \
-	gitpurge \
-	prod_configure \
-	prod_unconfigure \
+	git_ros_status.sh \
+	git_ros_pull_all.sh \
 	rnmake_deb_all \
 	rnmake_all_arch \
 	rnmake_lsarch \
-	rnmake_pkgnew \
-	rnupload2spool \
-	rnupload-dpkg \
-	rpc_repro_status \
-	sgrep \
-	svn_co_sw \
-	svn_pkg_status.sh \
-	svn_update_all.sh \
-	unsvn.sh
+	sgrep
 
 
 bindir = /prj/bin
 
+all: install
+
 install:
 	@cp $(scripts) $(bindir)/.
+
+clean:
+	@for s in $(scripts); \
+	do \
+		echo "rm $(bindir)/$$s"; \
+		rm $(bindir)/$$s; \
+	done

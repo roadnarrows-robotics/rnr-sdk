@@ -1,6 +1,8 @@
 #!/bin/bash
-# Update all ROS packages found in user's workspace.
 #
+# Determine the status all ROS packages found in the user's workspace.
+#
+# Usage: git_ros_status.sh
 
 rosdistro="${ROS_DISTRO}"
 rospkgpath="${ROS_PACKAGE_PATH}"
@@ -41,7 +43,8 @@ fi
 
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 echo " ROS distro: ${rosdistro}"
-echo " Pulling all workspace packages found under ${rosws}"
+echo " Workspace:  ${rosws}"
+echo " Date:       $(date)"
 echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
 for pkg in ${rosws}/*
@@ -51,9 +54,24 @@ do
     continue
   fi
   cd ${pkg}
-  echo
-  echo "-----------------------------------------------------------------------"
-  echo "Pulling package ${pkg}"
-  echo "-----------------------------------------------------------------------"
-  git pull
+  pkgbase=$(basename ${pkg})
+  printf "%-30s " ${pkgbase}
+  f=$(git status -s -uno)
+  if [ -z "${f}" ]
+  then
+    printf "  "
+  else
+    printf "M "
+  fi
+  if [ -f "${pkgbase}/package.xml" ]
+  then
+    version=$(xmllint --xpath "/package/version/text()" ${pkgbase}/package.xml)
+  elif [ -f "./package.xml" ]
+  then
+    version=$(xmllint --xpath "/package/version/text()" ./package.xml)
+  else
+    version=""
+  fi
+  printf "%-10s " ${version}
+  printf "\n"
 done
