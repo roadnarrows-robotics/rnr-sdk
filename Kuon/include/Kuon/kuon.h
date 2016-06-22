@@ -224,7 +224,7 @@ namespace kuon
   #ifdef KUON_ETC_CFG
   const char* const KuonEtcCfg = KUON_ETC_CFG;      /// xml configuration file
   #else
-  const char* const KuonEtcCfg = "/etc/kuon.conf";
+  const char* const KuonEtcCfg = "/etc/kuon/kuon.conf";
                                                     /// xml configuration file
   #endif
 

@@ -107,7 +107,7 @@ ifeq "$(arch)" "linaro"
 	ETC_PROF_D_KUON = share/etc/profile.d/kuon_linaro.sh 
 
 	ETC_FILES	=	share/etc/profile.d/linaro.sh \
-							share/etc/kuon/kuon_tune.conf \
+							share/etc/kuon/kuon.conf \
 							share/etc/kuon/*.xml \
 							share/etc/init.d/* \
 							share/etc/ld.so.conf.d/*.conf \
@@ -122,7 +122,7 @@ else
 ifeq "$(arch)" "odroid"
 	ETC_PROF_D_KUON = share/etc/profile.d/kuon_odroid.sh 
 
-	ETC_FILES	=	share/etc/kuon/kuon_tune.conf \
+	ETC_FILES	=	share/etc/kuon/kuon.conf \
 							share/etc/kuon/*.xml \
 							share/etc/init.d/* \
 							share/etc/ld.so.conf.d/*.conf \
