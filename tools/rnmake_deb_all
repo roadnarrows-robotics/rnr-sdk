@@ -3,7 +3,7 @@
 # Make all debian development RoadNarrow system packages
 #
 
-pkglist='librnr libserial i2c gpio peripherals netmsgs botsense appkit Dynamixel odroid Hekateros Kuon Laelaps PanTilt'
+pkglist='librnr libserial i2c gpio peripherals netmsgs botsense appkit Dynamixel odroid Hekateros Laelaps PanTilt'
 
 pkgroot='/prj/pkg'
 
