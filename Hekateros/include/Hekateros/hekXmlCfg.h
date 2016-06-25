@@ -51,10 +51,9 @@
 
 #include <string>
 
-#include "tinyxml.h"
-
 #include "rnr/rnrconfig.h"
 #include "rnr/appkit/Xml.h"
+#include "rnr/tinyxml/tinyxml.h"
 
 #include "Hekateros/hekateros.h"
 #include "Hekateros/hekDescArm.h"

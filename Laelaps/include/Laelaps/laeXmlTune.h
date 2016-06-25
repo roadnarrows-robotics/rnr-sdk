@@ -51,11 +51,10 @@
 
 #include <string>
 
-#include "tinyxml.h"
-
 #include "rnr/rnrconfig.h"
 #include "rnr/appkit/Xml.h"
 #include "rnr/log.h"
+#include "rnr/tinyxml/tinyxml.h"
 
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeTune.h"

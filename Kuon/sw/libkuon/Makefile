@@ -89,8 +89,8 @@ kuon.LIBS	= \
 	RS160D \
 	rnr_appkit \
 	rnr_serial \
+	rnr_tinyxml \
 	rnr \
-	tinyxml \
 	stdc++
 
 #------------------------------------------------------------------------------
