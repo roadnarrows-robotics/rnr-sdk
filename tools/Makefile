@@ -49,10 +49,11 @@ scripts = \
 	cp_to_repostaging \
 	eula_update.py \
 	fastinstall \
+	ls_sdk_installed.sh \
 	git_ros_status.sh \
 	git_ros_pull_all.sh \
 	rnmake_deb_all \
-	rnmake_all_arch \
+	rnmake_all \
 	rnmake_lsarch \
 	sgrep
 

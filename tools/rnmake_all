@@ -1,17 +1,16 @@
 #!/bin/bash
 #
 # File:
-#   rnmake_deb_all
+#   rnmake_all
 #
 # Usage:
-#   rnmake_deb_all
+#   rnmake_all
 #
 # Description:
-#   Make all debian development RoadNarrow SDK packages. Only packages that
-#   support debian builds will be made
+#   Make clobber, deps, install for all active packages.
 #
 
-pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt'
+pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt Kuon'
 
 pkgroot='/prj/pkg'
 
@@ -27,6 +26,6 @@ do
   echo "----------------------------------------------------------------------"
   echo " ${pkg}"
   echo "----------------------------------------------------------------------"
-  make clobber; make deps; make install; make deb-pkg-dev
+  make clobber; make deps; make install;
   cd -
 done
