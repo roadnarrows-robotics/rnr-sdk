@@ -2,21 +2,25 @@
 //
 // Package:   Laelaps
 //
-// Firmware:  Arduino Compatible Firmware, v2.
+// Firmware:  Arduino Compatible Firmware, v3.
 //
-// File:      laeWatchDogV2.ino
+// File:      laeWatchDogV3.ino
 //
 /*! \file
  *
  * $LastChangedDate$
  * $Rev$
  *
- * \brief Laelaps Arduino compatible firmware.
+ * \brief Laelaps Arduino compatible watchdog firmware.
+ *
+ * * Board: Arduino Leonardo
+ * * CPU:   ATmega32u4 5V 16MHz
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
+ * \author Nick Andersen (nick@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015-2016  RoadNarrows
+ * (C) 2016  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -30,7 +34,7 @@
 // Firmware defines
 //
 #define LAE_ARDUINO       1 ///< arduino target 
-#define LAE_WD_FW_VERSION 2 ///< firmware version
+#define LAE_WD_FW_VERSION 3 ///< firmware version
 
 //
 // Bridge between standard POSIX C/C++ Linux and Arduino constructs.
@@ -43,6 +47,74 @@ typedef byte byte_t;
 using namespace laelaps;
 
 #include <Wire.h>
+
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Pin Mapping and Conversions
+//
+// Arduino Leonardo physical pin to digital/analog number map.
+//  PIN 1  =   -    5V0
+//  PIN 2  =   -    5V0
+//  PIN_3  =   9    RGB Red Channel
+//  PIN_4  =   2    HW I2C SCL
+//  PIN_5  =  10    RGB Green Channel
+//  PIN_6  =   3    HW I2C SDA
+//  PIN_7  =  11    RGB Blue Channel
+//  PIN_8  =   1    UART1 TX
+//  PIN_9  =   4    Aux Enable (12V)
+//  PIN_10 =   0    UART1 RX
+//  PIN_11 =   7    Motors Enable
+//  PIN_12 =  A5    Unused
+//  PIN_13 =   8    Aux 5 Volts Enable
+//  PIN_14 =  A4    Unused
+//  PIN_15 =  A0    Jack voltage (4:1 voltage divider)
+//  PIN_16 =  A3    Unused
+//  PIN_17 =  A1    Battery voltage (4:1 voltage divider)
+//  PIN_18 =  A2    Unused
+//  PIN 19 =   -    GND
+//  PIN 20 =   -    GND
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+//
+// Digital and Analog I/O
+//
+const int MAX_D_PINS = 14;  ///< maximum number of digital pins 0 - 13
+
+//
+// LEDs
+//
+const int RED           = 0;    ///< red channel index
+const int GREEN         = 1;    ///< green channel index
+const int BLUE          = 2;    ///< blue channel index
+const int NUM_CHANS     = 3;    ///< number of channels
+const int MAX_LED_TRANS = 3;    ///< maximum LED transitions per pattern
+const int PIN_PWM_RGB[NUM_CHANS] = {9, 10, 11}; ///< RGB LED PWM pins
+
+// Enable/Disable Hardware Pins
+const int PIN_D_EN_MOTOR_CTLRS    = 7;  ///< motor controllers power enable
+const int PIN_D_EN_AUX_PORT_5V    = 8;  ///< aux. port 5 volt power out enable
+const int PIN_D_EN_AUX_PORT_BATT  = 4;  ///< aux. port battery power out enable
+
+// User Analog Input Pins
+const int PIN_A_USER_MIN  = A0;   ///< minimum user available pin number
+const int PIN_A_USER_MAX  = A3;   ///< maximum user available pin number
+
+// Battery Charging Input Pins
+const int   PIN_A_JACK_V  = A0;         ///< jack voltage into battery charging
+const int   PIN_A_BATT_V  = A1;         ///< battery output voltage
+const float ADC_V_PER_VAL = 0.01953125; ///< 0.0V - 20.0V at 1023 values
+const float JACK_V_MIN    = 13.9;       ///< required minimum voltage to charge
+const float JACK_V_TRIM   = 1.1089;     ///< thru experimentation, hopefully the
+const float BATT_V_TRIM   = 1.0540;     ///< op-amped version of the deckboard
+                                        ///< provides part-to-part consistency
+
+// Digital Pin Shadow State
+int DPinDir[MAX_D_PINS];          ///< direction 
+int DPinVal[MAX_D_PINS];          ///< value
+
+
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// State
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 /*!
  * \brief Operational states in order of highest(0) to lowest priority.
@@ -75,15 +147,6 @@ unsigned long Tcur;         ///< current up time (msec)
 unsigned long Twd;          ///< last time of watchdog pet
 unsigned long Tled;         ///< last time of LED pattern activation/transition
 
-//
-// LEDs
-//
-const int RED       = 0;    ///< red channel
-const int GREEN     = 1;    ///< green channel
-const int BLUE      = 2;    ///< blue channel
-const int NUM_CHANS = 3;    ///< number of channels
-
-const int MAX_LED_TRANS = 3;  ///< maximum LED transitions per pattern
 
 /*!
  * \brief LED pattern indices in order of highest(0) to lowest priority.
@@ -130,32 +193,6 @@ LedPattern_T LedPat[LedPatIdxNumOf] =
   // battery charge pattern - white to dark amber (calculated) [LedPatIdxBatt]
   { 0, 1, {0, 0, 0}, { {0, 0, 0}, {0, 0, 0}, {0, 0, 0}} }
 };
-
-//
-// Digital and Analog I/O
-//
-const int MAX_D_PINS = 14;  ///< maximum number of digital pins 0 - 13
-
-const int PIN_PWM_RGB[NUM_CHANS] = {9, 10, 11}; ///< RGB LED PWM pins
-
-// Enable/Disable Hardware Pins
-const int PIN_D_EN_MOTOR_CTLRS    = 2;  ///< motor controllers power in
-const int PIN_D_EN_AUX_PORT_5V    = 3;  ///< aux. port 5 volt power out
-const int PIN_D_EN_AUX_PORT_BATT  = 4;  ///< aux. port battery power out
-
-// User Analog Input Pins
-const int PIN_A_USER_MIN  = A0;   ///< minimum user available pin number
-const int PIN_A_USER_MAX  = A3;   ///< maximum user available pin number
-
-// Battery Chargin Input Pin
-const int PIN_A_JACK_V  = A6;   ///< jack voltage into battery charging
-const int PIN_A_BATT_V  = A7;   ///< battery output voltage
-const float V_PER_VAL   = 0.020620; ///< 0.0V - 20.0V at 1023 values
-const float V_JACK_MIN  = 13.9;     ///< required minimum voltage to charge
-
-// Digital Pin Shadow State
-int DPinDir[MAX_D_PINS];          ///< direction 
-int DPinVal[MAX_D_PINS];          ///< value
 
 //
 // Response data
@@ -293,8 +330,8 @@ void loop()
 
   // read jack voltage input to battery charging circuitry
   sensorval = analogRead(PIN_A_JACK_V);
-  CurJackV  = (float)sensorval * V_PER_VAL;
-  if( CurJackV >= V_JACK_MIN )
+  CurJackV  = (float)sensorval * ADC_V_PER_VAL * JACK_V_TRIM;
+  if( CurJackV >= JACK_V_MIN )
   {
     CurBattIsCharging = true;
   }
@@ -305,7 +342,7 @@ void loop()
 
   // read battery output voltage
   sensorval = analogRead(PIN_A_BATT_V);
-  CurBattV  = (float)sensorval * V_PER_VAL;
+  CurBattV  = (float)sensorval * ADC_V_PER_VAL * BATT_V_TRIM;
 
   delay(10);
 }
@@ -347,6 +384,8 @@ void receiveCmd(int n)
       case LaeWdCmdIdResetRgbLed:
         bOk = execResetRgbLed();
         break;
+
+#if 0 // DEPRECATED
       case LaeWdCmdIdConfigDPin:
         bOk = execConfigDPin();
         break;
@@ -362,6 +401,8 @@ void receiveCmd(int n)
       case LaeWdCmdIdWriteAPin:
         bOk = execWriteAPin();
         break;
+#endif // DEPRECATED
+
       case LaeWdCmdIdEnableMotorCtlrs:
         bOk = execEnableMotorCtlrs();
         break;
@@ -562,6 +603,7 @@ boolean execResetRgbLed()
   return true;
 }
 
+#if 0 // DEPRECATED
 /*!
  * \brief Execute I2C command to configure a digital pin.
  *
@@ -735,6 +777,7 @@ boolean execWriteAPin()
   flushRead();
   return false;
 }
+#endif // DEPRECATED
 
 /*!
  * \brief Execute I2C command to enable/disable power to motor controllers.

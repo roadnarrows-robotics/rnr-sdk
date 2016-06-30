@@ -358,6 +358,7 @@ namespace laelaps
   // Serial Commands and Responses
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
+  //
   // Print help command and response.
   //
   // Command format:  'h' EOC
