@@ -17,7 +17,7 @@
  * * CPU:   ATmega32u4 5V 16MHz
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
- * \author Nick Andersen (nick@roadnarrows.com)
+ * \author Nick Anderson (nick@roadnarrows.com)
  *
  * \par Copyright:
  * (C) 2016  RoadNarrows
@@ -36,6 +36,11 @@
 #define LAE_ARDUINO       1 ///< arduino target 
 #define LAE_WD_FW_VERSION 3 ///< firmware version
 
+#include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
+#include <Wire.h>
+
 //
 // Bridge between standard POSIX C/C++ Linux and Arduino constructs.
 //
@@ -45,8 +50,6 @@ typedef byte byte_t;
 #include "laeWatchDog.h"
 
 using namespace laelaps;
-
-#include <Wire.h>
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // Pin Mapping and Conversions
@@ -129,16 +132,21 @@ enum OpState
 //
 // Current State
 //
-int     CurOpState;         ///< robot operational state
-float   CurJackV;           ///< current sensed jack input voltage
-float   CurBattV;           ///< current sensed battery output voltage
-boolean CurBattIsCharging;  ///< battery is [not] currently being charged
-int     CurBattSoC;         ///< battery state of charge 0% - 100%
-int     CurAlarms;          ///< current alarms
-int     CurLedPatIdx;       ///< active LED pattern index
-boolean CurUserOverride;    ///< user has [no] RGB LED pattern override
-boolean ForceLedUpdate;     ///< do [not] force RGB LED update
-int     CurSeqNum;          ///< response sequence number (for some commands)
+int           CurOpState;         ///< robot operational state
+float         CurJackV;           ///< current sensed jack input voltage
+float         CurBattV;           ///< current sensed battery output voltage
+boolean       CurBattIsCharging;  ///< battery is [not] currently being charged
+unsigned int  CurBattSoC;         ///< battery state of charge 0% - 100%
+unsigned int  CurAlarms;          ///< current alarms
+byte          CurLed[NUM_CHANS];  ///< current RGB LED values
+int           CurLedPatIdx;       ///< active LED pattern index
+boolean       CurUserOverride;    ///< user has [no] RGB LED pattern override
+int           CurSeqNum;          ///< rsp sequence number (for some commands)
+
+//
+// Pending state modifiers.
+//
+boolean       PleasePetTheDog;    ///< do [not] pet the dog
 
 //
 // Timers
@@ -195,14 +203,19 @@ LedPattern_T LedPat[LedPatIdxNumOf] =
 };
 
 //
-// Response data
+// I2C slave data
 //
-byte        RspBuf[LaeWdMaxRspLen];         ///< response buffer
-int         RspLen;                         ///< response length
-const byte  RspErrorBuf[LaeWdMaxRspLen] =   ///< response error pattern
-{
-  0xde, 0xad, 0x01, 0x02, 0x03, 0x04, 0xfa, 0xce
-};
+byte        I2CRspBuf[LaeWdMaxRspLen];  ///< response buffer
+int         I2CRspLen;                  ///< response length
+
+//
+// Serial CLI
+//
+char      SerLine[LaeWdSerMaxCmdLen+1];
+int       SerLinePos;
+char      SerArgv[LaeWdSerMaxCmdArgc][LaeWdSerMaxCmdArgLen];
+int       SerArgc;
+const int SerCmdIdx = 0;
 
 
 //------------------------------------------------------------------------------
@@ -227,12 +240,17 @@ void setup()
   CurJackV          = 0.0;
   CurBattV          = 0.0;
   CurBattIsCharging = false;
-  CurBattSoC        = LaeWdArgBattChargeMax;
+  CurBattSoC        = LaeWdArgBattSoCMax;
   CurAlarms         = LaeWdArgAlarmNone;
+  CurLed[RED]       = 0;
+  CurLed[GREEN]     = 0;
+  CurLed[BLUE]      = 0;
   CurLedPatIdx      = LedPatIdxNoService;
   CurUserOverride   = false;
-  ForceLedUpdate    = false;
   CurSeqNum         = 0;
+
+  // State modifiers
+  PleasePetTheDog   = false;
 
   //
   // Configure digital pins defaults.
@@ -276,23 +294,27 @@ void setup()
   }
 
   //
+  // I2C slave setup. Receive and send from/to I2C master by asynchronous
+  // callbacks.
+  //
+  I2CRspLen = 0;
+  Wire.begin(LaeI2CAddrArduino);
+  Wire.onReceive(i2cReceiveCmd);
+  Wire.onRequest(i2cSendRsp);
+  
+  //
+  // Serial command-line ASCII interface (baud does not matter over USB) 
+  // 
+  SerLinePos  = 0;
+  SerArgc     = 0;
+  Serial.begin(115200);
+
+  //
   // Timers and timeout periods
   //
   Tcur  = millis();
   Twd   = Tcur;
   Tled  = Tcur;
-
-  //
-  // Response
-  //
-  RspLen = 0;
-
-  //
-  // I2C slave
-  //
-  Wire.begin(LaeI2CAddrArduino);
-  Wire.onReceive(receiveCmd);
-  Wire.onRequest(sendRsp);
 }
 
 /*!
@@ -302,8 +324,6 @@ void setup()
  */
 void loop()
 {
-  int   sensorval;
-
   // current up time
   Tcur = millis();
 
@@ -325,27 +345,40 @@ void loop()
       break;
   }
 
+  // read voltages
+  readVoltages();
+
   // update current LED pattern transition
   updateLedPattern();
 
-  // read jack voltage input to battery charging circuitry
-  sensorval = analogRead(PIN_A_JACK_V);
-  CurJackV  = (float)sensorval * ADC_V_PER_VAL * JACK_V_TRIM;
-  if( CurJackV >= JACK_V_MIN )
+  //
+  // Process any serial command input.
+  //
+  if( serRcvCmd() )
   {
-    CurBattIsCharging = true;
-  }
-  else
-  {
-    CurBattIsCharging = false;
+    if( serParseCmd() )
+    {
+      serExecCmd();
+    }
   }
 
-  // read battery output voltage
-  sensorval = analogRead(PIN_A_BATT_V);
-  CurBattV  = (float)sensorval * ADC_V_PER_VAL * BATT_V_TRIM;
+  //
+  // Update in-service state data.
+  //
+  if( PleasePetTheDog )
+  {
+    updateInServiceState();
+    Twd = millis();
+    PleasePetTheDog = false;
+  }
 
-  delay(10);
+  delay(2);
 }
+
+
+//------------------------------------------------------------------------------
+// Slave Interface to Host
+//------------------------------------------------------------------------------
 
 /*!
  * \brief Arduino Sketch I2C receive callback.
@@ -354,93 +387,89 @@ void loop()
  *
  * This function is called asynchronously by the Arduino I2C slave framework.
  */
-void receiveCmd(int n)
+void i2cReceiveCmd(int n)
 {
   byte    cmdId;
   boolean bOk;
 
   if( Wire.available() > 0 )
   {
-    cmdId   = Wire.read();
-    RspLen  = 0;
+    cmdId     = Wire.read();
+    I2CRspLen = 0;
 
     switch( cmdId )
     {
       case LaeWdCmdIdPetDog:
-        bOk = execPetDog();
+        bOk = i2cExecPetDog();
         break;
       case LaeWdCmdIdGetVersion:
-        bOk = execGetVersion();
+        bOk = i2cExecGetVersion();
         break;
       case LaeWdCmdIdSetBattCharge:
-        bOk = execSetBattCharge();
+        bOk = i2cExecSetBattCharge();
         break;
       case LaeWdCmdIdSetAlarms:
-        bOk = execSetAlarms();
+        bOk = i2cExecSetAlarms();
         break;
       case LaeWdCmdIdSetRgbLed:
-        bOk = execSetRgbLed();
+        bOk = i2cExecSetRgbLed();
         break;
       case LaeWdCmdIdResetRgbLed:
-        bOk = execResetRgbLed();
+        bOk = i2cExecResetRgbLed();
         break;
 
 #if 0 // DEPRECATED
       case LaeWdCmdIdConfigDPin:
-        bOk = execConfigDPin();
+        bOk = i2cExecConfigDPin();
         break;
       case LaeWdCmdIdReadDPin:
-        bOk = execReadDPin();
+        bOk = i2cExecReadDPin();
         break;
       case LaeWdCmdIdWriteDPin:
-        bOk = execWriteDPin();
+        bOk = i2cExecWriteDPin();
         break;
       case LaeWdCmdIdReadAPin:
-        bOk = execReadAPin();
+        bOk = i2cExecReadAPin();
         break;
       case LaeWdCmdIdWriteAPin:
-        bOk = execWriteAPin();
+        bOk = i2cExecWriteAPin();
         break;
 #endif // DEPRECATED
 
       case LaeWdCmdIdEnableMotorCtlrs:
-        bOk = execEnableMotorCtlrs();
+        bOk = i2cExecEnableMotorCtlrs();
         break;
       case LaeWdCmdIdEnableAuxPort:
-        bOk = execEnableAuxPort();
+        bOk = i2cExecEnableAuxPort();
         break;
       case LaeWdCmdIdReadEnables:
-        bOk = execReadEnables();
+        bOk = i2cExecReadEnables();
         break;
       case LaeWdCmdIdReadVolts:
-        bOk = execReadVolts();
+        bOk = i2cExecReadVolts();
         break;
       case LaeWdCmdIdTest:
-        execTest();
+        i2cExecTest();
         break;
       default:
-        flushRead();
+        i2cFlushRead();
         bOk = false;
     }
   }
 
-  // the dog has been mollified
-  if( bOk )
-  {
-    setInServiceState();
-    Twd = millis();
-  }
+  // mollify the dog if received a good command
+  PleasePetTheDog = bOk;
 }
 
 /*!
  * \brief Send any response loaded in response buffer.
  */
-void sendRsp()
+void i2cSendRsp()
 {
-  if( RspLen > 0 )
+  if( I2CRspLen > 0 )
   {
-    Wire.write(RspBuf, RspLen);
-    RspLen = 0;
+    Wire.write(I2CRspBuf, I2CRspLen);
+    I2CRspLen = 0;
   }
 }
 
@@ -449,24 +478,24 @@ void sendRsp()
  *
  * \param n   Length of expected response.
  */
-void errorRsp(int n)
+void i2cErrorRsp(int n)
 {
-  int   i;
+  byte  b;
 
   // flush input 
-  flushRead();
+  i2cFlushRead();
 
-  // fill response buffer with recognizable error pattern
-  for(; RspLen < n; ++RspLen)
+  // fill response buffer with recognizable error pattern ABC...
+  for(b = 'A'; I2CRspLen < n; ++I2CRspLen, ++b)
   {
-    RspBuf[RspLen] = RspErrorBuf[RspLen];
+    I2CRspBuf[I2CRspLen] = b;
   }
 }
 
 /*!
  * \brief Flush the I2C input buffer.
  */
-void flushRead()
+void i2cFlushRead()
 {
   byte  d;
 
@@ -476,19 +505,15 @@ void flushRead()
   }
 }
 
-
-//------------------------------------------------------------------------------
-// Command Functions
-//------------------------------------------------------------------------------
-
 /*!
  * \brief Execute I2C command to pet the watchdog.
  *
  * \return Returns true on success, false on failure.
  */
-boolean execPetDog()
+boolean i2cExecPetDog()
 {
-  RspBuf[RspLen++] = CurBattIsCharging? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
+  I2CRspBuf[I2CRspLen++] = CurBattIsCharging?
+                              LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
   return true;
 }
 
@@ -497,9 +522,9 @@ boolean execPetDog()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execGetVersion()
+boolean i2cExecGetVersion()
 {
-  RspBuf[RspLen++] = (byte)LAE_WD_FW_VERSION;
+  I2CRspBuf[I2CRspLen++] = (byte)LAE_WD_FW_VERSION;
   return true;
 }
 
@@ -508,32 +533,36 @@ boolean execGetVersion()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execSetBattCharge()
+boolean i2cExecSetBattCharge()
 {
-  byte  len = LaeWdCmdLenSetBattCharge - 1; 
-  byte  batt;
+  byte          len = LaeWdCmdLenSetBattCharge - 1; 
+  unsigned int  batt_soc;
 
   if( Wire.available() == len )
   {
-    batt = Wire.read();
-    if( batt > LaeWdArgBattChargeMax )
+    batt_soc = (unsigned int)Wire.read();
+    if( batt_soc > LaeWdArgBattSoCMax )
     {
-      batt = LaeWdArgBattChargeMax;
+      batt_soc = LaeWdArgBattSoCMax;
+    }
+    else if( batt_soc < LaeWdArgBattSoCMin )
+    {
+      batt_soc = LaeWdArgBattSoCMin;
     }
 
     // new charge state
-    if( batt != CurBattSoC )
+    if( batt_soc != CurBattSoC )
     {
-      updateBatteryRgb(batt);
-      CurBattSoC = batt;
-      ForceLedUpdate = true;
+      CurBattSoC = batt_soc;
+      updateBatteryRgb(batt_soc);
+      updateInServiceState(true);
     }
 
     return true;
   }
 
   // error
-  flushRead();
+  i2cFlushRead();
   return false;
 }
 
@@ -542,7 +571,7 @@ boolean execSetBattCharge()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execSetAlarms()
+boolean i2cExecSetAlarms()
 {
   byte          len = LaeWdCmdLenSetAlarms - 1; 
   unsigned int  val_hi, val_lo;
@@ -558,7 +587,7 @@ boolean execSetAlarms()
   }
 
   // error
-  flushRead();
+  i2cFlushRead();
   return false;
 }
 
@@ -567,7 +596,7 @@ boolean execSetAlarms()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execSetRgbLed()
+boolean i2cExecSetRgbLed()
 {
   byte len = LaeWdCmdLenSetRgbLed - 1; 
 
@@ -578,13 +607,13 @@ boolean execSetRgbLed()
     LedPat[LedPatIdxUser].rgb[0][BLUE]  = Wire.read();
 
     CurUserOverride = true;
-    ForceLedUpdate  = true;
+    updateInServiceState(true);
 
     return true;
   }
 
   // error
-  flushRead();
+  i2cFlushRead();
   return false;
 }
 
@@ -593,12 +622,12 @@ boolean execSetRgbLed()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execResetRgbLed()
+boolean i2cExecResetRgbLed()
 {
   byte len = LaeWdCmdLenResetRgbLed - 1; 
 
   CurUserOverride = false;
-  ForceLedUpdate  = true;
+  updateInServiceState(true);
 
   return true;
 }
@@ -609,7 +638,7 @@ boolean execResetRgbLed()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execConfigDPin()
+boolean i2cExecConfigDPin()
 {
   byte len = LaeWdCmdLenConfigDPin - 1;
   byte pin;
@@ -630,7 +659,7 @@ boolean execConfigDPin()
   }
 
   // error
-  flushRead();
+  i2cFlushRead();
   return false;
 }
 
@@ -639,7 +668,7 @@ boolean execConfigDPin()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execReadDPin()
+boolean i2cExecReadDPin()
 {
   byte len = LaeWdCmdLenReadDPin - 1;
   byte pin;
@@ -652,15 +681,15 @@ boolean execReadDPin()
     if( (pin >= LaeWdArgDPinNumMin) && (pin <= LaeWdArgDPinNumMax) )
     {
       val = digitalRead(pin) == LOW? LaeWdArgDPinValLow: LaeWdArgDPinValHigh;
-      RspBuf[RspLen++] = pin;
-      RspBuf[RspLen++] = val;
+      I2CRspBuf[I2CRspLen++] = pin;
+      I2CRspBuf[I2CRspLen++] = val;
       DPinVal[pin] = val;
       return true;
     }
   }
 
   // error
-  errorRsp(LaeWdRspLenReadDPin);
+  i2cErrorRsp(LaeWdRspLenReadDPin);
 
   return false;
 }
@@ -670,7 +699,7 @@ boolean execReadDPin()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execWriteDPin()
+boolean i2cExecWriteDPin()
 {
   byte  len = LaeWdCmdLenWriteDPin - 1;
   byte  pin;
@@ -694,7 +723,7 @@ boolean execWriteDPin()
   }
 
   // error
-  flushRead();
+  i2cFlushRead();
   return false;
 }
 
@@ -703,7 +732,7 @@ boolean execWriteDPin()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execReadAPin()
+boolean i2cExecReadAPin()
 {
   byte  len = LaeWdCmdLenReadAPin - 1;
   byte  pin;
@@ -726,9 +755,9 @@ boolean execReadAPin()
         val_hi = (byte)((val>>8) & 0x03);
         val_lo = (byte)(val & 0xff);
 
-        RspBuf[RspLen++] = pin;
-        RspBuf[RspLen++] = val_hi;
-        RspBuf[RspLen++] = val_lo;
+        I2CRspBuf[I2CRspLen++] = pin;
+        I2CRspBuf[I2CRspLen++] = val_hi;
+        I2CRspBuf[I2CRspLen++] = val_lo;
 
         return true;
       }
@@ -736,7 +765,7 @@ boolean execReadAPin()
   }
 
   // error
-  errorRsp(LaeWdRspLenReadAPin);
+  i2cErrorRsp(LaeWdRspLenReadAPin);
 
   return false;
 }
@@ -746,7 +775,7 @@ boolean execReadAPin()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execWriteAPin()
+boolean i2cExecWriteAPin()
 {
   byte    len = LaeWdCmdLenWriteAPin - 1;
   byte    pin;
@@ -774,7 +803,7 @@ boolean execWriteAPin()
   }
 
   // error
-  flushRead();
+  i2cFlushRead();
   return false;
 }
 #endif // DEPRECATED
@@ -784,7 +813,7 @@ boolean execWriteAPin()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execEnableMotorCtlrs()
+boolean i2cExecEnableMotorCtlrs()
 {
   byte    len = LaeWdCmdLenEnableMotorCtlrs - 1;
   byte    wval;
@@ -804,18 +833,18 @@ boolean execEnableMotorCtlrs()
     if( rval == wval )
     {
       DPinVal[PIN_D_EN_MOTOR_CTLRS] = wval;
-      RspBuf[RspLen++] = LaeWdArgPass;
+      I2CRspBuf[I2CRspLen++] = LaeWdArgPass;
     }
     else
     {
-      RspBuf[RspLen++] = LaeWdArgFail;
+      I2CRspBuf[I2CRspLen++] = LaeWdArgFail;
     }
 
     return true;
   }
 
   // error
-  errorRsp(LaeWdRspLenEnableMotorCtlrs);
+  i2cErrorRsp(LaeWdRspLenEnableMotorCtlrs);
 
   return false;
 }
@@ -825,7 +854,7 @@ boolean execEnableMotorCtlrs()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execEnableAuxPort()
+boolean i2cExecEnableAuxPort()
 {
   byte    len = LaeWdCmdLenEnableAuxPort - 1;
   byte    pin;
@@ -847,7 +876,7 @@ boolean execEnableAuxPort()
     }
     else
     {
-      flushRead();
+      i2cFlushRead();
       return false;
     }
 
@@ -860,7 +889,7 @@ boolean execEnableAuxPort()
   }
 
   // error
-  flushRead();
+  i2cFlushRead();
   return false;
 }
 
@@ -869,18 +898,18 @@ boolean execEnableAuxPort()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execReadEnables()
+boolean i2cExecReadEnables()
 {
   byte  val;
 
   val = digitalRead(PIN_D_EN_MOTOR_CTLRS);
-  RspBuf[RspLen++] = val == LOW? LaeWdArgDPinValLow: LaeWdArgDPinValHigh;
+  I2CRspBuf[I2CRspLen++] = val == LOW? LaeWdArgDPinValLow: LaeWdArgDPinValHigh;
 
   val = digitalRead(PIN_D_EN_AUX_PORT_5V);
-  RspBuf[RspLen++] = val == LOW? LaeWdArgDPinValLow: LaeWdArgDPinValHigh;
+  I2CRspBuf[I2CRspLen++] = val == LOW? LaeWdArgDPinValLow: LaeWdArgDPinValHigh;
 
   val = digitalRead(PIN_D_EN_AUX_PORT_BATT);
-  RspBuf[RspLen++] = val == LOW? LaeWdArgDPinValLow: LaeWdArgDPinValHigh;
+  I2CRspBuf[I2CRspLen++] = val == LOW? LaeWdArgDPinValLow: LaeWdArgDPinValHigh;
 
   return true;
 }
@@ -890,16 +919,16 @@ boolean execReadEnables()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execReadVolts()
+boolean i2cExecReadVolts()
 {
   byte    len = LaeWdCmdLenReadVolts - 1;
   byte    val;
 
   val = (byte)(CurJackV * LaeWdArgVMult);
-  RspBuf[RspLen++] = val;
+  I2CRspBuf[I2CRspLen++] = val;
 
   val = (byte)(CurBattV * LaeWdArgVMult);
-  RspBuf[RspLen++] = val;
+  I2CRspBuf[I2CRspLen++] = val;
 
   return true;
 }
@@ -909,17 +938,751 @@ boolean execReadVolts()
  *
  * \return Returns true on success, false on failure.
  */
-boolean execTest()
+boolean i2cExecTest()
 {
-  RspBuf[RspLen++] = (byte)CurSeqNum;
-  RspBuf[RspLen++] = (byte)CurOpState;
-  RspBuf[RspLen++] = (byte)(CurAlarms>>8);
-  RspBuf[RspLen++] = (byte)(CurAlarms&0xff);
-  RspBuf[RspLen++] = (byte)CurLedPatIdx;
+  I2CRspBuf[I2CRspLen++] = (byte)CurSeqNum;
+  I2CRspBuf[I2CRspLen++] = (byte)CurOpState;
+  I2CRspBuf[I2CRspLen++] = (byte)(CurAlarms>>8);
+  I2CRspBuf[I2CRspLen++] = (byte)(CurAlarms&0xff);
+  I2CRspBuf[I2CRspLen++] = (byte)CurLedPatIdx;
 
   ++CurSeqNum;
 
   return true;
+}
+
+
+//------------------------------------------------------------------------------
+// Serial Functions
+//------------------------------------------------------------------------------
+
+/*!
+ * \brief Format and print data to ascii serial interface. 
+ *
+ * \param fmt   Print format string. A subset if printf(3). Note that float
+ *              format conversion specifiers are not supported.
+ *
+ * ...          Variable arguments.
+ */
+void p(const char *fmt, ...)
+{
+  va_list args;
+  char    buf[LaeWdSerMaxRspLen];
+
+  va_start(args, fmt);
+  vsnprintf(buf, LaeWdSerMaxRspLen, fmt, args);
+  va_end(args);
+
+  Serial.print(buf);
+}
+
+/*!
+ * \brief Format print float into buffer.
+ *
+ * The arduino print facilities do not normally contain float/double print
+ * formatting  support.
+ *
+ * Format: %<width>.0<precision>f
+ *
+ * \param [out] buf   Output formatted buffer.
+ * \param val         FPN to be formatted.
+ * \param width       Output width.
+ * \param precision   Output precision.
+ */
+void sfloat(char *buf, float val, int width=6, int precision=1)
+{
+  int32_t   val_int, val_frac;
+  int32_t   mult;
+  int       i;
+
+  for(i = 0, mult = 1; i < precision; ++i, mutl *= 10);
+
+  val_int = (int32_t)val;
+  val = val - (float)val_int;
+  if( val < 0.0 )
+  {
+    val = -val;
+  }
+  val_frac = (int32_t)(val * mult);
+
+  sprintf(buf, "%*d.%0*d", width, val_int, precision, val_frac);
+}
+
+/*!
+ * \brief Format and print standard response to ascii serial interface. 
+ *
+ * \param fmt   Print format string. A subset if printf(3). Note that float
+ *              format conversion specifiers are not supported.
+ *
+ * ...          Variable arguments.
+ */
+void serRsp(const char *fmt, ... )
+{
+  String  strFmt;
+  va_list args;
+  char    buf[LaeWdSerMaxRspLen];
+
+  sprintf(buf, "%s ", SerArgv[SerCmdIdx]);
+  strFmt  = buf;
+  strFmt += fmt;
+  strFmt += LaeWdSerEoR;
+
+  va_start(args, fmt);
+  vsnprintf(buf, LaeWdSerMaxRspLen, strFmt.c_str(), args);
+  va_end(args);
+
+  Serial.print(buf);
+}
+
+/*!
+ * \brief Format and print error response to ascii serial interface. 
+ *
+ * \param fmt   Print format string. A subset if printf(3). Note that float
+ *              format conversion specifiers are not supported.
+ *
+ * ...          Variable arguments.
+ */
+void serErrorRsp(const char *fmt, ... )
+{
+  String  strFmt;
+  va_list args;
+  char    buf[LaeWdSerMaxRspLen];
+
+  sprintf(buf, "%s %s ", LaeWdSerArgErrRsp, SerArgv[SerCmdIdx]);
+  strFmt  = buf;
+  strFmt += fmt;
+  strFmt += LaeWdSerEoR;
+
+  va_start(args, fmt);
+  vsnprintf(buf, LaeWdSerMaxRspLen, strFmt.c_str(), args);
+  va_end(args);
+
+  Serial.print(buf);
+}
+
+/*!
+ * \brief Test is character c is whitespace.
+ *
+ * \return Returns true or false.
+ */
+inline boolean whitespace(char c)
+{
+  return((c == ' ') || (c == '\t'));
+}
+
+/*!
+ * \brief Test is character c is end-of-line.
+ *
+ * \return Returns true or false.
+ */
+inline boolean eol(char c)
+{
+  return((c == '\n') || (c == '\r'));
+}
+
+/*!
+ * \brief Receive serial characters and build command.
+ *
+ * \return Returns true when a complete command has been received. Otherwise
+ * false is returned.
+ */
+boolean serRcvCmd()
+{
+  char    c;
+
+  while( Serial.available() > 0 )
+  {
+    c = Serial.read();
+
+    // command too long - truncate (could still be a valid command).
+    if( SerLinePos >= LaeWdSerMaxCmdLen )
+    {
+      SerLine[LaeWdSerMaxCmdLen] = 0;
+      SerLinePos = 0;
+      return true;
+    }
+
+    // end-of-line
+    else if( eol(c) )
+    {
+      SerLine[SerLinePos] = 0;
+      SerLinePos = 0;
+      return true;
+    }
+
+    // command character
+    else
+    {
+      SerLine[SerLinePos++] = c;
+    }
+  }
+
+  return false;
+}
+
+/*!
+ * \brief Parse received command into a series of arguments.
+ *
+ * \return Returns true if cmdid [arg arg...] found. False otherwise.
+ */
+boolean serParseCmd()
+{
+  int i, j;
+  int len;
+
+  SerArgc = 0;
+  len     = strlen(SerLine);
+  i       = 0;
+
+  do
+  {
+    // skip leading white space
+    while( (i < len) && whitespace(SerLine[i]) )
+    {
+      ++i;
+    }
+
+    // no more arguments
+    if( i >= len )
+    {
+      break;
+    }
+
+    j = 0;
+
+    // copy argument
+    while((i < len) && (j < LaeWdSerMaxCmdArgLen-1) && !whitespace(SerLine[i]))
+    {
+      SerArgv[SerArgc][j++] = SerLine[i++];
+    }
+
+    SerArgv[SerArgc++][j] = 0;
+
+  } while( SerArgc < LaeWdSerMaxCmdArgc );
+
+  return SerArgc > 0;
+}
+
+/*!
+ * \brief Check received argument count vs. expected.
+ *
+ * \param nExpected   Number of expected arguments.
+ *
+ * \return Returns true if matched. Else prints error response and returns
+ * false.
+ */
+boolean serChkArgCnt(int nExpected)
+{
+  if( SerArgc != nExpected )
+  {
+    serErrorRsp("requires %d args, got %d", nExpected-1, SerArgc-1);
+    return false;
+  }
+
+  return true;
+}
+
+/*!
+ * \brief Parse command get/set/reset operator.
+ *
+ * \param sArg  Operator argument.
+ *
+ * \return Returns 'g' (get), 's' (set), or 'r' (reset) on success.
+ * Prints error response and returns '?' on failure.
+ */
+int serParseOp(char *sArg, boolean bIncludeReset=false)
+{
+  String  str(sArg);
+
+  // cmd_id op ...
+  if( SerArgc < 2 )
+  {
+    serErrorRsp("requires >= 1 args, got %d", SerArgc-1);
+    return LaeWdSerOpBad;
+  }
+  else if( str == LaeWdSerArgGet )
+  {
+    return LaeWdSerOpGet;
+  }
+  else if( str == LaeWdSerArgSet )
+  {
+    return LaeWdSerOpSet;
+  }
+  else if( bIncludeReset && (str == LaeWdSerArgReset) )
+  {
+    return LaeWdSerOpReset;
+  }
+  else
+  {
+    serErrorRsp("unknown operator %s", sArg);
+    return LaeWdSerOpBad;
+  }
+}
+
+/*!
+ * \brief Parse and convert decimal number string argument.
+ *
+ * \param sName       Argument name.
+ * \param sVal        Argument string value to convert.
+ * \param nMin        Minimum value.
+ * \param nMax        Maximum value.
+ * \param [out] nVal  Converted value.
+ *
+ * \return Returns true on success. On error, prints error response and returns
+ * false.
+ */
+boolean serParseNumber(const char *sName, const char *sVal,
+                       long  nMin,  long nMax,
+                       long &nVal)
+{
+  char *sEnd;
+
+  if( (sVal == NULL) || (*sVal == 0) )
+  {
+    serErrorRsp("no %s argument", sName);
+    return false;
+  }
+
+  nVal = strtol(sVal, &sEnd, 0);
+  
+  if( *sEnd != 0 )
+  {
+    serErrorRsp("%s %s is not a number", sName, sVal);
+    return false;
+  }
+  else if( (nVal < nMin) || (nVal > nMax) )
+  {
+    serErrorRsp("%s %s is out-of-range", sName, sVal);
+    return false;
+  }
+
+  return true;
+}
+
+/*!
+ * \brief Execute recieved command.
+ */
+void serExecCmd()
+{
+  char    cmdId;
+  boolean bMode;
+
+  if( strlen(SerArgv[SerCmdIdx]) > 1 )
+  {
+    serErrorRsp("bad command");
+    return;
+  }
+
+  switch( SerArgv[SerCmdIdx][0] )
+  {
+    case LaeWdSerCmdIdHelp:
+      serExecHelp();
+      break;
+    case LaeWdSerCmdIdGetVersion:
+      serExecGetVersion();
+      break;
+    case LaeWdSerCmdIdPetTheDog:
+      serExecPetTheDog();
+      break;
+    case LaeWdSerCmdIdOpBattSoC:
+      serExecOpBattSoC();
+      break;
+    case LaeWdSerCmdIdOpAlarms:
+      serExecOpAlarms();
+      break;
+    case LaeWdSerCmdIdOpLed:
+      serExecOpLed();
+      break;
+    case LaeWdSerCmdIdOpEnMotorCtlrs:
+      serExecOpEnMotorCtlrs();
+      break;
+    case LaeWdSerCmdIdOpEnAuxPorts:
+      serExecOpEnAuxPorts();
+      break;
+    case LaeWdSerCmdIdReadVolts:
+      serExecReadVolts();
+      break;
+     default:
+      serErrorRsp("unknown command");
+      return;
+  }
+
+  PleasePetTheDog = true;
+}
+
+/*!
+ * \brief Execute serial command to print help.
+ */
+void serExecHelp()
+{
+  const char *cmds[][2] = 
+  {
+    {"a {g|s} [alarm_bits]", "get/set robot alarms"},
+    {"b {g|s} [batt_soc]", "get/set battery state of charge"},
+    {"l {g|s|r} [red green blue]", "get/set/reset user led color"},
+    {"m {g|s} [motor_ctlrs]", "get/set motor controllers enable line"},
+    {"p", "pet the watchdog"},
+    {"r", "read battery and jack voltages"},
+    {"u {g|s} [aux_batt aux_5v]", "get/set auxilliary ports enable lines"},
+    {"v", "get firmware version"},
+    {NULL, NULL}
+  };
+
+  for(i = 0; cmds[i][0] != NULL; ++i)
+  {
+    p("%-28s- %s%c", cmds[i][0], cmds[i][1], LaeWdSerEoR);
+  }
+}
+
+/*!
+ * \brief Execute serial command to get the firmware version.
+ */
+void serExecGetVersion()
+{
+  if( serChkArgCnt(LaeWdSerCmdArgcGetVersion) )
+  {
+    serRsp("%d", LAE_WD_FW_VERSION);
+  }
+}
+
+/*!
+ * \brief Execute serial command to pet the watchdog.
+ */
+void serExecPetTheDog()
+{
+  int   isCharging;
+
+  if( serChkArgCnt(LaeWdSerCmdArgcPetTheDog) )
+  {
+    isCharging = CurBattIsCharging? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
+    serRsp("%d", isCharging);
+  }
+}
+
+/*!
+ * \brief Execute serial command to get/set the battery state of charge.
+ */
+void serExecOpBattSoC()
+{
+  boolean       ok;
+  int           op;
+  long          val;
+  unsigned int  batt_soc;
+
+  op = serParseOp(SerArgv[1]);
+
+  switch( op )
+  {
+    //
+    // Get
+    //
+    case LaeWdSerOpGet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcGetBattSoC);
+      break;
+
+    //
+    // Set
+    //
+    case LaeWdSerOpSet:
+      if( (ok = serChkArgCnt(LaeWdSerCmdArgcSetBattSoC)) )
+      {
+        ok = serParseNumber("batt_soc", SerArgv[2],
+                      (long)LaeWdArgBattSoCMin, (long)LaeWdArgBattSoCMax,
+                      val);
+      }
+
+      if( ok )
+      {
+        batt_soc = (unsigned int)val;
+
+        // new charge state
+        if( batt_soc != CurBattSoC )
+        {
+          CurBattSoC = batt_soc;
+          updateBatteryRgb(batt_soc)
+          updateInServiceState(true);
+        }
+      }
+      break;
+
+    //
+    // Bad
+    //
+    case LaeWdSerOpBad:
+    default:
+      ok = false;
+      break;
+  }
+
+  // successful command
+  if( ok )
+  {
+    serRsp("%d", CurBattSoC);
+  }
+}
+
+/*!
+ * \brief Execute serial command to get/set robot alarms.
+ */
+void serExecOpAlarms()
+{
+  boolean       ok;
+  int           op;
+  long          val;
+  unsigned int  alarms;
+
+  op = serParseOp(SerArgv[1]);
+
+  switch( op )
+  {
+    //
+    // Get
+    //
+    case LaeWdSerOpGet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcGetAlarms);
+      break;
+
+    //
+    // Set
+    //
+    case LaeWdSerOpSet:
+      if( (ok = serChkArgCnt(LaeWdSerCmdArgcSetAlarms)) )
+      {
+        ok = serParseNumber("alarm_bits", SerArgv[2],
+                        (long)LaeWdArgAlarmNone, (long)LaeWdArgAlarmMask,
+                        val);
+      }
+
+      if( ok )
+      {
+        CurAlarms = (unsigned int)val;
+      }
+      break;
+
+    //
+    // Bad
+    //
+    case LaeWdSerOpBad:
+    default:
+      ok = false;
+      break;
+  }
+
+  // successful command
+  if( ok )
+  {
+    serRsp("0x%04x", CurAlarms);
+  }
+}
+
+/*!
+ * \brief Execute serial command to get/set/reset RGB LED.
+ */
+void serExecOpLed()
+{
+  boolean   ok;
+  int       op;
+  long      val;
+  byte      rgb[NUM_CHANS];
+  int       chan;
+
+  op = serParseOp(SerArgv[1], true);
+
+  switch( op )
+  {
+    //
+    // Get
+    //
+    case LaeWdSerOpGet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcGetLed);
+      break;
+
+    //
+    // Set
+    //
+    case LaeWdSerOpSet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcSetLed);
+
+      for(chan = 0; ok && (chan < NUM_CHANS); ++chan)
+      {
+          ok = serParseNumber("color", SerArgv[2+chan],
+                        (long)LaeWdArgRgbLedMin, (long)LaeWdArgRgbLedMax,
+                        val);
+          rgb[chan] = (byte)val;
+      }
+
+      if( ok )
+      {
+        LedPat[LedPatIdxUser].rgb[0][RED]   = rgb[RED];
+        LedPat[LedPatIdxUser].rgb[0][GREEN] = rgb[GREEN];
+        LedPat[LedPatIdxUser].rgb[0][BLUE]  = rgb[BLUE];
+
+        CurUserOverride = true;
+        updateInServiceState(true);
+      }
+      break;
+
+    //
+    // Reset
+    //
+    case LaeWdSerOpReset:
+      if( (ok = serChkArgCnt(LaeWdSerCmdArgcResetLed)) )
+      {
+        CurUserOverride = false;
+        updateInServiceState(true);
+      }
+      break;
+
+    //
+    // Bad
+    //
+    case LaeWdSerOpBad:
+    default:
+      ok = false;
+      return;
+  }
+
+  // successful command
+  if( ok )
+  {
+    serRsp("0x%02x 0x%02x 0x%02x", CurLed[RED], CurLed[GREEN], CurLed[BLUE]);
+  }
+}
+
+/*!
+ * \brief Execute serial command to get/set mootor controllers power-in enable
+ * line.
+ */
+void serExecOpEnMotorCtlrs()
+{
+  boolean       ok;
+  int           op;
+  long          val;
+  byte          enable;
+
+  op = serParseOp(SerArgv[1]);
+
+  switch( op )
+  {
+    //
+    // Get
+    //
+    case LaeWdSerOpGet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcGetEnMotorCtlrs);
+      break;
+
+    //
+    // Set
+    //
+    case LaeWdSerOpSet:
+      if( (ok = serChkArgCnt(LaeWdSerCmdArgcSetEnMotorCtlrs)) )
+      {
+        ok = serParseNumber("motor_ctlrs", SerArgv[2], 0, 1, val);
+      }
+
+      if( ok )
+      {
+        enable = val? HIGH: LOW;
+        digitalWrite(PIN_D_EN_MOTOR_CTLRS, enable);
+        delayMicroseconds(5);
+      }
+      break;
+
+    //
+    // Bad
+    //
+    case LaeWdSerOpBad:
+    default:
+      ok = false;
+      break;
+  }
+
+  // successful command
+  if( ok )
+  {
+    enable = digitalRead(PIN_D_EN_MOTOR_CTLRS);
+    serRsp("%d", enable);
+  }
+}
+
+/*!
+ * \brief Execute serial command to get/set mootor controllers power-in enable
+ * line.
+ */
+void serExecOpEnAuxPorts()
+{
+  boolean       ok;
+  int           op;
+  long          val;
+  byte          en_batt, en_5v;
+
+  op = serParseOp(SerArgv[1]);
+
+  switch( op )
+  {
+    //
+    // Get
+    //
+    case LaeWdSerOpGet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcGetEnMotorCtlrs);
+      break;
+
+    //
+    // Set
+    //
+    case LaeWdSerOpSet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcSetEnMotorCtlrs);
+      if( ok )
+      {
+        ok = serParseNumber("aux_batt", SerArgv[2], 0, 1, val);
+        en_batt = val? HIGH: LOW;
+      }
+      if( ok )
+      {
+        ok = serParseNumber("aux_5v", SerArgv[3], 0, 1, val);
+        en_5v = val? HIGH: LOW;
+      }
+
+      if( ok )
+      {
+        digitalWrite(PIN_D_EN_AUX_PORT_BATT, en_batt);
+        digitalWrite(PIN_D_EN_AUX_PORT_5V, en_5v);
+        delayMicroseconds(5);
+      }
+      break;
+
+    //
+    // Bad
+    //
+    case LaeWdSerOpBad:
+    default:
+      ok = false;
+      break;
+  }
+
+  // successful command
+  if( ok )
+  {
+    en_batt = digitalRead(PIN_D_EN_AUX_PORT_BATT);
+    en_5v   = digitalRead(PIN_D_EN_AUX_PORT_5V);
+    serRsp("%d %d", en_batt, en_5v);
+  }
+}
+
+/*!
+ * \brief Execute serial command to read voltages.
+ */
+void serExecReadVolts()
+{
+  char  buf_batt_v[16], buf_jack_v[16];
+
+  if( serChkArgCnt(LaeWdSerCmdArgcReadVolts) )
+  {
+    readVoltages();
+    sfloat(buf_batt_v, CurBattV, 4, 1);
+    sfloat(buf_jack_v, CurJackV, 4, 1);
+    serRsp("%s %s", buf_batt_v, buf_jack_v);
+  }
 }
 
 
@@ -969,11 +1732,12 @@ byte mapToAn(byte pin)
 void enterNoServiceState()
 {
   CurOpState      = OpStateNoService;
-  CurBattSoC      = LaeWdArgBattChargeMax;
+  CurBattSoC      = LaeWdArgBattSoCMax;
   CurAlarms       = LaeWdArgAlarmNone;
   CurLedPatIdx    = LedPatIdxNoService;
   CurUserOverride = false;
-  ForceLedUpdate  = false;
+
+  PleasePetTheDog = false;
 
   digitalWrite(PIN_D_EN_MOTOR_CTLRS, LOW);
   DPinVal[PIN_D_EN_MOTOR_CTLRS] = LOW;
@@ -983,12 +1747,12 @@ void enterNoServiceState()
 }
 
 /*!
- * \brief Change operational state. 
+ * \brief Update change operational state data. 
  *
- * The new state is determined from the current operational state, alarms, and
- * user overrides.
+ * The new state is determined from the current operational state, battery
+ * state of charge, alarms, and user overrides.
  */
-void setInServiceState()
+void updateInServiceState(boolean bForceUpdate = false)
 {
   int newOpState    = CurOpState;
   int newLedPatIdx  = CurLedPatIdx;
@@ -1032,10 +1796,9 @@ void setInServiceState()
   // new LED pattern
   if( (newOpState != CurOpState) ||
       (newLedPatIdx != CurLedPatIdx) ||
-      ForceLedUpdate )
+      bForceLedUpdate )
   {
     CurOpState      = newOpState;
-    ForceLedUpdate  = false;
     activateLedPattern(newLedPatIdx);
   }
 }
@@ -1043,17 +1806,17 @@ void setInServiceState()
 /*!
  * \brief Update battery charge state.
  */
-void updateBatteryRgb(byte batt)
+void updateBatteryRgb(unsigned int batt_soc)
 {
   float h, s, v;
 
-  if( batt >= 95 )
+  if( batt_soc >= 95 )
   {
     LedPat[LedPatIdxBatt].rgb[0][RED]   = LaeWdArgRgbLedMax;
     LedPat[LedPatIdxBatt].rgb[0][GREEN] = LaeWdArgRgbLedMax;
     LedPat[LedPatIdxBatt].rgb[0][BLUE]  = LaeWdArgRgbLedMax;
   }
-  else if( batt <= 5 )
+  else if( batt_soc <= 5 )
   {
     LedPat[LedPatIdxBatt].rgb[0][RED]   = 0x7b;
     LedPat[LedPatIdxBatt].rgb[0][GREEN] = 0x4a;
@@ -1062,8 +1825,8 @@ void updateBatteryRgb(byte batt)
   else
   {
     h = 35.0;
-    s = (float)(LaeWdArgBattChargeMax - batt);
-    v = (float)(LaeWdArgBattChargeMax + batt) / 2.0;
+    s = (float)(LaeWdArgBattSoCMax - batt_soc);
+    v = (float)(LaeWdArgBattSoCMax + batt_soc) / 2.0;
 
     // white to amber
     HSVtoRGB(h, s, v, LedPat[LedPatIdxBatt].rgb[0]);
@@ -1120,13 +1883,14 @@ void updateLedPattern()
 void lightLed()
 {
   byte    curPos;   // current light switch position
-  int     i;
+  int     chan;     // RBG channel
 
   curPos = LedPat[CurLedPatIdx].curPos;
 
-  for(i = 0; i < NUM_CHANS; ++i)
+  for(chan = 0; chan < NUM_CHANS; ++chan)
   {
-    analogWrite(PIN_PWM_RGB[i], LedPat[CurLedPatIdx].rgb[curPos][i]);
+    CurLed[chan] = LedPat[CurLedPatIdx].rgb[curPos][chan];
+    analogWrite(PIN_PWM_RGB[chan], CurLed[chan]);
   }
 }
 
@@ -1209,4 +1973,29 @@ void HSVtoRGB(float h, float s, float v, byte rgb[])
   rgb[RED]   = (byte)(r * 255.0);
   rgb[GREEN] = (byte)(g * 255.0);
   rgb[BLUE]  = (byte)(b * 255.0);
+}
+
+/*!
+ * \brief Read all monitored voltages.
+ */
+void readVoltages()
+{
+  int   sensorval;
+
+  // read jack voltage input to battery charging circuitry
+  sensorval = analogRead(PIN_A_JACK_V);
+  CurJackV  = (float)sensorval * ADC_V_PER_VAL * JACK_V_TRIM;
+
+  if( CurJackV >= JACK_V_MIN )
+  {
+    CurBattIsCharging = true;
+  }
+  else
+  {
+    CurBattIsCharging = false;
+  }
+
+  // read battery output voltage
+  sensorval = analogRead(PIN_A_BATT_V);
+  CurBattV  = (float)sensorval * ADC_V_PER_VAL * BATT_V_TRIM;
 }

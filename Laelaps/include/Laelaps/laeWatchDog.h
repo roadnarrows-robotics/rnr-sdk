@@ -77,8 +77,33 @@ namespace laelaps
   //
   // Pass/Fail
   //
-  const byte_t LaeWdArgFail   = 0;   ///< command failure response
-  const byte_t LaeWdArgPass   = 1;   ///< command success response
+  const byte_t LaeWdArgFail = 0;   ///< command failure response
+  const byte_t LaeWdArgPass = 1;   ///< command success response
+
+  //
+  // Batgtery State of Charge
+  //
+  const unsigned int LaeWdArgBattSoCMin = 0;    ///< 0% charge
+  const unsigned int LaeWdArgBattSoCMax = 100;  ///< 100% charge
+
+  //
+  // Alarm bits
+  //
+  const unsigned int LaeWdArgAlarmNone     = 0x0000;  ///< no/clear alarms
+  const unsigned int LaeWdArgAlarmGen      = 0x0001;  ///< general alarm
+  const unsigned int LaeWdArgAlarmBatt     = 0x0002;  ///< battery low alarm
+  const unsigned int LaeWdArgAlarmTemp     = 0x0004;  ///< temperature alarm
+  const unsigned int LaeWdArgAlarmEStop    = 0x0008;  ///< emergency stop
+  const unsigned int LaeWdArgAlarmBattCrit = 0x1000;  ///< batt crit modifier
+  const unsigned int LaeWdArgAlarmCrit     = 0x2000;  ///< crit alarm modifier
+  const unsigned int LaeWdArgAlarmTypeMask = 0x0fff;  ///< alarm types mask
+  const unsigned int LaeWdArgAlarmMask     = 0x3fff;  ///< alarm valid bits mask
+
+  //
+  // LED values
+  //
+  const byte_t LaeWdArgRgbLedMin    = 0;    ///< no channel color
+  const byte_t LaeWdArgRgbLedMax    = 255;  ///< full channel color
 
   //
   // Common digital pin arguments.
@@ -186,9 +211,6 @@ namespace laelaps
   const byte_t LaeWdCmdLenSetBattCharge = 2;    ///< command length (bytes)
   const byte_t LaeWdRspLenSetBattCharge = 0;    ///< response length (bytes)
 
-  const byte_t LaeWdArgBattChargeMin    = 0;    ///< 0% charge
-  const byte_t LaeWdArgBattChargeMax    = 100;  ///< 100% charge
-
   // ---
  
   //
@@ -204,16 +226,6 @@ namespace laelaps
   const byte_t LaeWdCmdIdSetAlarms  = 3;  ///< command id
   const byte_t LaeWdCmdLenSetAlarms = 3;  ///< command length (bytes)
   const byte_t LaeWdRspLenSetAlarms = 0;  ///< response length (bytes)
-
-  const int LaeWdArgAlarmNone     = 0x0000;  ///< no/clear alarms
-  const int LaeWdArgAlarmGen      = 0x0001;  ///< general, unspecified alarm
-  const int LaeWdArgAlarmBatt     = 0x0002;  ///< battery low alarm
-  const int LaeWdArgAlarmTemp     = 0x0004;  ///< temperature alarm
-  const int LaeWdArgAlarmEStop    = 0x0008;  ///< emergency stop
-  const int LaeWdArgAlarmBattCrit = 0x1000;  ///< battery critical modifier bit
-  const int LaeWdArgAlarmCrit     = 0x2000;  ///< critical alarm modifier bit
-  const int LaeWdArgAlarmTypeMask = 0x0fff;  ///< alarm types mask
-  const int LaeWdArgAlarmMask     = 0xffff;  ///< alarm valid bits mask
 
   // ---
  
@@ -231,9 +243,6 @@ namespace laelaps
   const byte_t LaeWdCmdIdSetRgbLed  = 4;    ///< command id
   const byte_t LaeWdCmdLenSetRgbLed = 4;    ///< command length (bytes)
   const byte_t LaeWdRspLenSetRgbLed = 0;    ///< response length (bytes)
-
-  const byte_t LaeWdArgRgbLedMin    = 0;    ///< no channel color
-  const byte_t LaeWdArgRgbLedMax    = 255;  ///< full channel color
 
   // ---
  
@@ -431,25 +440,20 @@ namespace laelaps
   //
   // The (Partial) BNF
   //
-  // cmd          ::= CMD_ID, {arg}, EOC
-  // rsp          ::=   CMD_ID, {arg}, EOR
-  //                  | ERROR_RSP_ID, CMD_ID, {arg}, EOR
+  // cmd  ::=   CMD_ID, {arg}, EOC
+  // rsp  ::=   CMD_ID, {arg}, EOR
+  //          | ERROR_RSP_ID, CMD_ID, {arg}, EOR
   //
-  // CMD_ID       ::= 'a' | 'c' | 'd' | 'i' | 'p' | 'r' | 't' | 'v' | 'w'
+  // CMD_ID       ::= 'a' | 'b' | 'h' | 'l' | 'm' | 'p' | 'r' | 'u' | 'v'
   // ERROR_RSP_ID ::= 'E'
   // EOC          ::= '\n'
   // EOR          ::= '\n'
   //
-  // OP_GET_SET   ::= 'g' | 's'
-  // OP_RESET     ::= 'r'
-  // OP_STET      ::= '-'
-  // OFF_ON       ::= '0' | '1'
-  // MEASUREMENT  ::= ALS | TOF
-  // ALS          ::= 'a'
-  // TOF          ::= 'd'
-  // NO_SENSOR    ::= '-'
-  // SENSOR_ERROR ::= 'error'
-  // NO_OBJ       ::= 'noobj'
+  // OP_GET_SET       ::= 'g' | 's'
+  // OP_RESET         ::= 'r'
+  // OP_GET_SET_RESET ::= OP_GET_SET | OP_RESET
+  // OFF_ON           ::= '0' | '1'
+  // STET             ::= '-'
   //
   // INT          ::= OCTAL | DECIMAL | HEX
   //
@@ -466,9 +470,9 @@ namespace laelaps
   // hex_alpha_lower  ::= 'a' | 'b' | 'c' | 'd' | 'e' | 'f'
   // hex_alpha_upper  ::= 'A' | 'B' | 'C' | 'D' | 'E' | 'F'
   //
-  // FLOAT        ::=   ['-'], dec_digit, {dec_digit}
-  //                  | ['-'], dec_digit, {dec_digit}, '.', {dec_digit}
-  //                  | ['-'], {dec_digit}, '.', dec_digit, {dec_digit}
+  // FLOAT  ::=   ['-'], dec_digit, {dec_digit}
+  //            | ['-'], dec_digit, {dec_digit}, '.', {dec_digit}
+  //            | ['-'], {dec_digit}, '.', dec_digit, {dec_digit}
   //----------------------------------------------------------------------------
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -477,25 +481,31 @@ namespace laelaps
 
   // sizes
   const byte_t LaeWdSerMaxCmdLen    =  80;  ///< max command length (bytes)
-  const byte_t LaeWdSerMaxCmdArgs   =   8;  ///< max cmd argument count
+  const byte_t LaeWdSerMaxCmdArgc   =   8;  ///< max cmd argument count
   const byte_t LaeWdSerMaxCmdArgLen =   8;  ///< max cmd arg length (bytes)
   const byte_t LaeWdSerMaxRspLen    =  80;  ///< max rsp line length (bytes)
-  const byte_t LaeWdSerMaxRspArgs   =   8;  ///< max rsp argument count
+  const byte_t LaeWdSerMaxRspArgc   =   8;  ///< max rsp argument count
   const byte_t LaeWdSerMaxRspArgLen =  16;  ///< max rsp arg length (bytes)
 
   // separators
   const char LaeWdSerEoC            = '\n'; ///< end of command
-  const char LaeWdSerEoR[]          = "\n"; ///< end of response
+  const char LaeWdSerEoR            = '\n'; ///< end of response
   const char LaeWdSerSep            = ' ';  ///< argument separator(s)
 
-  // common arguments
-  const char LaeWdSerArgOff[]       = "0";  ///< off state
-  const char LaeWdSerArgOn[]        = "1";  ///< on state
-  const char LaeWdSerArgGet[]       = "g";  ///< get operator
-  const char LaeWdSerArgSet[]       = "s";  ///< set operator
-  const char LaeWdSerArgReset[]     = "r";  ///< reset operator
-  const char LaeWdSerArgStet[]      = "-";  ///< leave as is operator
-  const char LaeWdSerArgErrRsp[]    = "E";  ///< response error
+  // common string arguments
+  const char LaeWdSerArgOff[]       = "0";  ///< off state argument string
+  const char LaeWdSerArgOn[]        = "1";  ///< on state argument string
+  const char LaeWdSerArgGet[]       = "g";  ///< get operator argument string
+  const char LaeWdSerArgSet[]       = "s";  ///< set operator argument string
+  const char LaeWdSerArgReset[]     = "r";  ///< reset operator argument string
+  const char LaeWdSerArgStet[]      = "-";  ///< leave as is operator arg string
+  const char LaeWdSerArgErrRsp[]    = "E";  ///< response error argument string
+
+  // common values
+  const char LaeWdSerOpGet          = 'g';  ///< get operator value
+  const char LaeWdSerOpSet          = 's';  ///< set operator value
+  const char LaeWdSerOpReset        = 'r';  ///< reset operator value
+  const char LaeWdSerOpBad          = '?';  ///< unknown/bad operator
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
   // Serial Commands and Responses
@@ -522,11 +532,11 @@ namespace laelaps
   //  fw_version ::= DECIMAL
   //
   const char   LaeWdSerCmdIdGetVersion    = 'v';  ///< serial command id
-  const byte_t LaeWdSerCmdArgsGetVersion  = 0;    ///< cmd argument count
-  const byte_t LaeWdSerRspArgsGetVersion  = 1;    ///< rsp argument count
+  const byte_t LaeWdSerCmdArgcGetVersion  = 1;    ///< cmd argument count
+  const byte_t LaeWdSerRspArgcGetVersion  = 2;    ///< rsp argument count
 
   //
-  // Pet watchdog command and response.
+  // Pet the watchdog command and response.
   //
   // Command format:  'p' EOC
   // Response format: 'p' is_charging EOR
@@ -534,25 +544,25 @@ namespace laelaps
   //  is_charging ::= OFF_ON
   //
   const char   LaeWdSerCmdIdPetTheDog   = 'p';  ///< serial command id
-  const byte_t LaeWdSerCmdArgsPetTheDog = 0;    ///< cmd argument count
-  const byte_t LaeWdSerRspArgsPetTheDog = 1;    ///< rsp argument count
+  const byte_t LaeWdSerCmdArgcPetTheDog = 1;    ///< cmd argument count
+  const byte_t LaeWdSerRspArgcPetTheDog = 2;    ///< rsp argument count
 
   //
   // Get/set battery state of charge command and response.
   //
-  // Command format:  'b' op [batt_charge] EOC
-  // Response format: 'b' batt_charge EOR
+  // Command format:  'b' op [batt_soc] EOC
+  // Response format: 'b' batt_soc EOR
   // Arguments:
   //  op          ::= OP_GET_SET
   //  batt_charge ::= INT [0-100]
   //
-  const char   LaeWdSerCmdIdBattSoC       = 'b';  ///< serial command id
-  const byte_t LaeWdSerCmdArgsGetBattSoC  = 1;    ///< cmd set argument count
-  const byte_t LaeWdSerCmdArgsSetBattSoC  = 2;    ///< cmd argument count
-  const byte_t LaeWdSerRspArgsBattSoC     = 1;    ///< rsp argument count
+  const char   LaeWdSerCmdIdOpBattSoC     = 'b';  ///< serial command id
+  const byte_t LaeWdSerCmdArgcGetBattSoC  = 2;    ///< get cmd argument count
+  const byte_t LaeWdSerCmdArgcSetBattSoC  = 3;    ///< set cmd argument count
+  const byte_t LaeWdSerRspArgcOpBattSoC   = 2;    ///< rsp argument count
 
   //
-  // Set robot alarms command and response.
+  // Get/set robot alarms command and response.
   //
   // Command format:  'a' op [alarm_bits] EOC
   // Response format: 'a' alarm_bits EOR
@@ -560,24 +570,70 @@ namespace laelaps
   //  op         ::= OP_GET_SET
   //  alarm_bits ::= INT
   //
-  const char   LaeWdSerCmdIdAlarms      = 'a';  ///< serial command id
-  const byte_t LaeWdSerCmdArgsGetAlarms = 1;    ///< cmd argument count
-  const byte_t LaeWdSerCmdArgsSetAlarms = 2;    ///< cmd argument count
-  const byte_t LaeWdSerRspArgsAlarms    = 1;    ///< rsp argument count
+  const char   LaeWdSerCmdIdOpAlarms    = 'a';  ///< serial command id
+  const byte_t LaeWdSerCmdArgcGetAlarms = 2;    ///< get cmd argument count
+  const byte_t LaeWdSerCmdArgcSetAlarms = 3;    ///< set cmd argument count
+  const byte_t LaeWdSerRspArgcOpAlarms  = 2;    ///< rsp argument count
 
   //
-  // Set LED RGB color command and response.
+  // Get/set/reset LED RGB color command and response.
   //
   // Command format:  'l' op [red green blue] EOC
   // Response format: 'l' red green blue EOR
-  //
-  // Argument data types and ranges:
   // Arguments:
-  //  op    ::= OP_GET_SET
+  //  op    ::= OP_GET_SET_RESET
   //  red   ::= color
   //  green ::= color
   //  blue  ::= color
   //  color ::= INT [0-255]
+  //
+  const char   LaeWdSerCmdIdOpLed       = 'l';  ///< serial command id
+  const byte_t LaeWdSerCmdArgcGetLed    = 2;    ///< get cmd argument count
+  const byte_t LaeWdSerCmdArgcSetLed    = 5;    ///< set cmd argument count
+  const byte_t LaeWdSerCmdArgcResetLed  = 2;    ///< reset cmd argument count
+  const byte_t LaeWdSerRspArgcOpLed     = 4;    ///< rsp argument count
+
+  //
+  // Get/set motor controlers power-in enable line.
+  //
+  // Command format:  'm' op [motor_ctlrs] EOC
+  // Response format: 'm' motor_ctlrs EOR
+  // Arguments:
+  //  op          ::= OP_GET_SET
+  //  motor_ctlrs ::= OFF_ON
+  //
+  const char   LaeWdSerCmdIdOpEnMotorCtlrs    = 'm'; ///< serial command id
+  const byte_t LaeWdSerCmdArgcGetEnMotorCtlrs = 2;  ///< get cmd argument count
+  const byte_t LaeWdSerCmdArgcSetEnMotorCtlrs = 3;  ///< set cmd argument count
+  const byte_t LaeWdSerRspArgcOpEnMotorCtlrs  = 2;  ///< rsp argument count
+
+  //
+  // Get/set auxilliary ports power-out enable line.
+  //
+  // Command format:  'u' op [aux_batt aux_5v] EOC
+  // Response format: 'u' aux_port_batt aux_port_5v EOR
+  // Arguments:
+  //  op            ::= OP_GET_SET
+  //  aux_port_batt ::= OFF_ON
+  //  aux_port_5v   ::= OFF_ON
+  //
+  const char   LaeWdSerCmdIdOpEnAuxPorts    = 'u'; ///< serial command id
+  const byte_t LaeWdSerCmdArgcGetEnAuxPorts = 2;  ///< get cmd argument count
+  const byte_t LaeWdSerCmdArgcSetEnAuxPorts = 4;  ///< set cmd argument count
+  const byte_t LaeWdSerRspArgcOpEnAuxPorts  = 3;  ///< rsp argument count
+
+  //
+  // Read sensed volatages.
+  //
+  // Command format:  'r' EOC
+  // Response format: 'r' jack_v batt_v EOR
+  // Arguments:
+  //  jack_v  ::= FLOAT
+  //  batt_v  ::= FLOAT
+  //
+  const byte_t LaeWdSerCmdIdReadVolts   = 'r'; ///< serial command id
+  const byte_t LaeWdSerCmdArgcReadVolts = '1'; ///< cmd argument count
+  const byte_t LaeWdSerRspArgcReadVolts = '3'; ///< rsp argument count
 
 #ifndef SWIG
 } // namespace laelaps

@@ -35,6 +35,11 @@
 #define LAE_ARDUINO             1 ///< arduino target 
 #define LAE_TOF_MUX_FW_VERSION  2 ///< firmware version
 
+#include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
+#include <Wire.h>
+#include <SoftwareWire.h>
 //
 // Bridge between standard POSIX C/C++ Linux and Arduino constructs.
 //
@@ -42,16 +47,9 @@ typedef byte byte_t;
 
 // Interface between firmware and software.
 #include "laeToFMux.h"
+#include "VL6180X.h"
 
 using namespace laelaps;
-
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <Wire.h>
-#include <SoftwareWire.h>
-
-#include "VL6180X.h"
 
 //
 // SoftwareWire constructors.
@@ -375,7 +373,6 @@ void measureAmbient(int sensor)
   }
 }
 #endif // INCLUDE_EXTRAS
-
 
 
 //------------------------------------------------------------------------------
