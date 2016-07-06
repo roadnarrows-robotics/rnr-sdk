@@ -149,12 +149,19 @@ volts()
   printf "%2d.%1d" "${x}" "${y}"
 }
 
+echo "========================================================================"
 echo "Monitoring Watchdog Subprocessor on I2C Bus ${dev} at address ${addr}"
 
 # read fw version command
 i2cwrite --log=error --device=${dev} --address=${addr} ${cmdid_getver}
 ver=$(i2cread --log=error --device=${dev} --address=${addr} --count=1)
-echo "version:         ${ver}"
+echo "Firmware version: ${ver}"
+echo ""
+
+echo "          enables                 voltages            is"
+echo "motor_ctlr aux_batt aux_5v    jack_in  batt_out    charging"
+echo "---------- -------- ------    -------  --------    ---------"
+#cho "     x        x       x         vv.v     vv.v          x\r"
 
 declare -i en_motor_ctlr
 declare -i en_aux_port_batt
@@ -163,39 +170,22 @@ declare -i jackv
 declare -i battv
 declare -i chrg
 
-printf "          enables                 voltages            is\n"
-printf "motor_ctlr aux_batt aux_5v    jack_in  batt_out    charging\n"
-printf "---------- -------- ------    -------  --------    --------\n"
-#rintf "     x        x       x         vv.v     vv.v          x\r"
-
 while :
 do
   # read enables command
   i2cwrite --log=error --fd=3 --address=${addr} ${cmdid_read_enables}
   rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=3)
-  echo ${rsp} | while read en_motor_ctlr en_aux_port_batt en_aux_port_5v
-  do
-    #echo "motor ctlr enable:    ${en_motor_ctlr}"
-    #echo "aux port batt enable: ${en_aux_port_batt}"
-    #echo "aux port 5v enable:   ${en_aux_port_5v}"
-  done
+  read en_motor_ctlr en_aux_port_batt en_aux_port_5v <<<${rsp}
 
   # read voltages command
   i2cwrite --log=error --fd=3 --address=${addr} ${cmdid_read_volts}
   rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=2)
-  echo ${rsp} | while read jackv battv
-  do
-    #echo "jack volts(10x):      ${jackv}"
-    #echo "batt volts(10x):      ${battv}"
-  done
+  read jackv battv <<<${rsp}
 
   # pet dog command
   i2cwrite --log=error --fd=3 --address=${addr} ${cmdid_pet_the_dog}
   rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=1)
-  echo ${rsp} | while read chrg
-  do
-    #echo "charging:             ${chrg}"
-  done
+  read chrg <<<${rsp}
 
   printf "     %d        %d       %d         %s     %s          %d\r" \
     "${en_motor_ctlr}" "${en_aux_port_batt}" "${en_aux_port_5v}" \
