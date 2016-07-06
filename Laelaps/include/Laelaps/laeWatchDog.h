@@ -81,6 +81,13 @@ namespace laelaps
   const byte_t LaeWdArgPass = 1;   ///< command success response
 
   //
+  // Watchdog timeout (msec)
+  //
+  const unsigned long LaeWdTimeoutDft =  6000;  ///< watchdog timeout default
+  const unsigned long LaeWdTimeoutMin =    10;  ///< watchdog timeout minimum
+  const unsigned long LaeWdTimeoutMax = 60000;  ///< watchdog timeout maximum
+
+  //
   // Batgtery State of Charge
   //
   const unsigned int LaeWdArgBattSoCMin = 0;    ///< 0% charge
@@ -149,7 +156,6 @@ namespace laelaps
   // cmd_id ::= u8
   //----------------------------------------------------------------------------
  
-  //
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
   // I2C Addressing and Packet Format
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
@@ -158,9 +164,6 @@ namespace laelaps
 
   const int    LaeWdMaxCmdLen = 8;   ///< maximum command length
   const int    LaeWdMaxRspLen = 8;   ///< maximum response length
-
-  const unsigned long LaeWdTimeout  = 6000; ///< watchdog timeout (msec)
-  
   
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
   // I2C Commands and Responses
@@ -273,7 +276,9 @@ namespace laelaps
   const byte_t LaeWdCmdIdConfigDPin   = 6;    ///< command id
   const byte_t LaeWdCmdLenConfigDPin  = 3;    ///< command length (bytes)
   const byte_t LaeWdRspLenConfigDPin  = 0;    ///< response length (bytes)
-
+  
+  // ---
+ 
   //
   // Read digital pin command and response.
   //
@@ -289,6 +294,8 @@ namespace laelaps
   const byte_t LaeWdCmdIdReadDPin   = 7;    ///< command id
   const byte_t LaeWdCmdLenReadDPin  = 2;    ///< command length (bytes)
   const byte_t LaeWdRspLenReadDPin  = 2;    ///< response length (bytes)
+  
+  // ---
 
   //
   // Write digital pin command and response.
@@ -356,6 +363,8 @@ namespace laelaps
   const byte_t LaeWdCmdIdEnableMotorCtlrs   = 11; ///< command id
   const byte_t LaeWdCmdLenEnableMotorCtlrs  = 2;  ///< command length (bytes)
   const byte_t LaeWdRspLenEnableMotorCtlrs  = 1;  ///< response length (bytes)
+  
+  // ---
 
   //
   // Enable/disable power to auxilliary ports.
@@ -373,6 +382,8 @@ namespace laelaps
 
   const byte_t LaeWdArgAuxPortBatt  = 1;  ///< battery auxlliary port
   const byte_t LaeWdArgAuxPort5V    = 2;  ///< regulated 5 volt auxilliary port
+  
+  // ---
 
   //
   // Read enable lines.
@@ -421,6 +432,9 @@ namespace laelaps
   //
   // Test watchdog state command and response.
   //
+  // Deprecated in v3+.
+  //
+  //
   // Command format:  cmd_id 
   // Response format: seq_num op_state alarm_bits_high alarm_bits_low led_index
   //
@@ -434,6 +448,28 @@ namespace laelaps
   const byte_t LaeWdCmdIdTest     = 15;   ///< command id
   const byte_t LaeWdCmdLenTest    = 1;    ///< command length (bytes)
   const byte_t LaeWdRspLenTest    = 5;    ///< v1 response length (bytes)
+
+  // ---
+
+  //
+  // Configure firmware operation.
+  //
+  // V3+ command only.
+  //
+  // Command format:  cmd_id timeout_high timeout_low
+  // Response format: N/A
+  //
+  // Argument data types and ranges:
+  //  timeout_high  ::= u8
+  //  timeout_low   ::= u8
+  //
+  // Conversions:
+  //  timeout = timeout_high << 8 + timeout_low
+  //
+  const byte_t LaeWdCmdIdConfigFw   = 16;   ///< command id
+  const byte_t LaeWdCmdLenConfigFw  = 3;    ///< command length (bytes)
+  const byte_t LaeWdRspLenConfigFw  = 0;    ///< v1 response length (bytes)
+  
 
   //----------------------------------------------------------------------------
   // Serial ASCII Interface
@@ -527,13 +563,13 @@ namespace laelaps
   // Get firmware version command and response.
   //
   // Command format:  'v' EOC
-  // Response format: 'v' fw_version EOR
+  // Response format: 'v' product subproc fw_version EOR
   // Arguments:
   //  fw_version ::= DECIMAL
   //
   const char   LaeWdSerCmdIdGetVersion    = 'v';  ///< serial command id
   const byte_t LaeWdSerCmdArgcGetVersion  = 1;    ///< cmd argument count
-  const byte_t LaeWdSerRspArgcGetVersion  = 2;    ///< rsp argument count
+  const byte_t LaeWdSerRspArgcGetVersion  = 4;    ///< rsp argument count
 
   //
   // Pet the watchdog command and response.
@@ -546,6 +582,21 @@ namespace laelaps
   const char   LaeWdSerCmdIdPetTheDog   = 'p';  ///< serial command id
   const byte_t LaeWdSerCmdArgcPetTheDog = 1;    ///< cmd argument count
   const byte_t LaeWdSerRspArgcPetTheDog = 2;    ///< rsp argument count
+
+  //
+  // Get/set firmware operation configuration.
+  //
+  // Command format:  'c' op [config] EOC
+  // Response format: 'c' config EOR
+  // Arguments:
+  //  op      ::= OP_GET_SET
+  //  config  ::= timeout
+  //  timeout ::= INT [10-60000]
+  //
+  const char   LaeWdSerCmdIdOpConfig    = 'c';  ///< serial command id
+  const byte_t LaeWdSerCmdArgcGetConfig = 2;    ///< get cmd argument count
+  const byte_t LaeWdSerCmdArgcSetConfig = 3;    ///< set cmd argument count
+  const byte_t LaeWdSerRspArgcOpConfig  = 2;    ///< rsp argument count
 
   //
   // Get/set battery state of charge command and response.
@@ -610,14 +661,14 @@ namespace laelaps
   //
   // Get/set auxilliary ports power-out enable line.
   //
-  // Command format:  'u' op [aux_batt aux_5v] EOC
-  // Response format: 'u' aux_port_batt aux_port_5v EOR
+  // Command format:  'x' op [aux_batt aux_5v] EOC
+  // Response format: 'x' aux_port_batt aux_port_5v EOR
   // Arguments:
   //  op            ::= OP_GET_SET
   //  aux_port_batt ::= OFF_ON
   //  aux_port_5v   ::= OFF_ON
   //
-  const char   LaeWdSerCmdIdOpEnAuxPorts    = 'u'; ///< serial command id
+  const char   LaeWdSerCmdIdOpEnAuxPorts    = 'x'; ///< serial command id
   const byte_t LaeWdSerCmdArgcGetEnAuxPorts = 2;  ///< get cmd argument count
   const byte_t LaeWdSerCmdArgcSetEnAuxPorts = 4;  ///< set cmd argument count
   const byte_t LaeWdSerRspArgcOpEnAuxPorts  = 3;  ///< rsp argument count
@@ -632,8 +683,8 @@ namespace laelaps
   //  batt_v  ::= FLOAT
   //
   const byte_t LaeWdSerCmdIdReadVolts   = 'r'; ///< serial command id
-  const byte_t LaeWdSerCmdArgcReadVolts = '1'; ///< cmd argument count
-  const byte_t LaeWdSerRspArgcReadVolts = '3'; ///< rsp argument count
+  const byte_t LaeWdSerCmdArgcReadVolts = 1; ///< cmd argument count
+  const byte_t LaeWdSerRspArgcReadVolts = 3; ///< rsp argument count
 
 #ifndef SWIG
 } // namespace laelaps

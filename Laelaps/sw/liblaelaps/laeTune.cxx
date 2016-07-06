@@ -95,6 +95,11 @@ namespace laelaps
   const double LaeTuneThreadRangeHzDft=LaeThreadRange::ThreadRangeHzDft;
   const double LaeTuneThreadHzMin    = LaeThread::ThreadMinHz;
 
+  // watchdog timeout
+  const ulong_t LaeTuneWdTimeoutDft = LaeWdTimeoutDft;
+  const ulong_t LaeTuneWdTimeoutMin = LaeWdTimeoutMin;
+  const ulong_t LaeTuneWdTimeoutMax = LaeWdTimeoutMax;
+ 
   // velocity limits
   const double LaeTuneVelDerateDft = 100.0;
   const double LaeTuneVelDerateMin = 10.0;

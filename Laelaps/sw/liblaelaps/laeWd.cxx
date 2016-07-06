@@ -100,8 +100,10 @@ using namespace laelaps;
 #endif // WD_DBG_ENABLE
 
 //
-// Times
+// Local data.
 //
+static uint_t FWVER_UNKNOWN = 0;  ///< unknown firmware version
+
 static long TStd = 100;     ///< standard wait time between write_read (usec)
 static long TMc  = 250000;  ///< motor controller power up wait time (usec)
 
@@ -114,11 +116,12 @@ LaeWd::LaeWd(LaeI2C &i2cBus, uint_t addr) :
     m_i2cBus(i2cBus), m_addrSubProc(addr)
 {
   // shadow values
-  m_uFwVer              = 0;
+  m_uFwVer              = FWVER_UNKNOWN;
+  m_uWatchdogTimeout    = LaeWdTimeoutDft;
   m_bBatteryIsCharging  = false;
   m_fBatteryVoltage     = 0.0;
   m_fJackVoltage        = 0.0;
-  m_uBatterySoC         = LaeWdArgBattChargeMax;
+  m_uBatterySoC         = LaeWdArgBattSoCMax;
   m_uAlarms             = LaeWdArgAlarmNone;
   m_bMotorCtlrEn        = false;
   m_bAuxPortBattEn      = false;
@@ -148,7 +151,7 @@ void LaeWd::sync()
   cmdEnableAuxPort5V(true);
   cmdEnableAuxPortBatt(true);
   cmdReadVoltages(fJackV, fBattV);
-  cmdSetBatterySoC(LaeWdArgBattChargeMax);
+  cmdSetBatterySoC(LaeWdArgBattSoCMax);
   cmdSetAlarms(LaeWdArgAlarmNone);
   cmdResetRgbLed();
   cmdPetTheDog();
@@ -205,8 +208,14 @@ int LaeWd::cmdPetTheDog()
 
   cmd[lenCmd++] = LaeWdCmdIdPetDog;
 
+  // unknown version
+  if( m_uFwVer == FWVER_UNKNOWN )
+  {
+    rc = LAE_OK;
+  }
+
   // version 1
-  if( m_uFwVer <= 1 )
+  else if( m_uFwVer <= 1 )
   {
     n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
 
@@ -268,9 +277,9 @@ int LaeWd::cmdSetBatterySoC(uint_t uBatterySoC)
 
   lock();
 
-  if( uBatterySoC > LaeWdArgBattChargeMax )
+  if( uBatterySoC > LaeWdArgBattSoCMax )
   {
-    uBatterySoC = LaeWdArgBattChargeMax;
+    uBatterySoC = LaeWdArgBattSoCMax;
   }
 
   cmd[lenCmd++] = LaeWdCmdIdSetBattCharge;
@@ -375,23 +384,39 @@ int LaeWd::cmdConfigDPin(uint_t pin, uint_t dir)
 
   lock();
 
-  if( (pin < LaeWdArgDPinNumWMin) || (pin > LaeWdArgDPinNumWMax) )
+  // unknown firmware version
+  if( m_uFwVer == FWVER_UNKNOWN )
   {
-    LOGERROR("Pin %u: Out-of-range.", pin);
-    rc = -LAE_ECODE_BAD_VAL;
+    rc = LAE_OK;
   }
 
+  // deprecated
+  else if( m_uFwVer >= 3 )
+  {
+    rc = LAE_OK;
+  }
+
+  // supported
   else
   {
-    dir = dir > 0? LaeWdArgDPinDirOut: LaeWdArgDPinDirIn;
+    if( (pin < LaeWdArgDPinNumWMin) || (pin > LaeWdArgDPinNumWMax) )
+    {
+      LOGERROR("Pin %u: Out-of-range.", pin);
+      rc = -LAE_ECODE_BAD_VAL;
+    }
 
-    cmd[lenCmd++] = LaeWdCmdIdConfigDPin;
-    cmd[lenCmd++] = (byte_t)pin;
-    cmd[lenCmd++] = (byte_t)dir;
+    else
+    {
+      dir = dir > 0? LaeWdArgDPinDirOut: LaeWdArgDPinDirIn;
 
-    n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+      cmd[lenCmd++] = LaeWdCmdIdConfigDPin;
+      cmd[lenCmd++] = (byte_t)pin;
+      cmd[lenCmd++] = (byte_t)dir;
 
-    rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+      n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+
+      rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+    }
   }
 
   unlock();
@@ -409,31 +434,49 @@ int LaeWd::cmdReadDPin(uint_t pin, uint_t &val)
 
   lock();
 
-  if( (pin < LaeWdArgDPinNumMin) || (pin > LaeWdArgDPinNumMax) )
+  // unknown firmware version
+  if( m_uFwVer == FWVER_UNKNOWN )
   {
-    LOGERROR("Pin %u: Out-of-range.", pin);
-    rc = -LAE_ECODE_BAD_VAL;
+    val = 0;
+    rc  = LAE_OK;
   }
 
+  // deprecated
+  else if( m_uFwVer >= 3 )
+  {
+    val = 0;
+    rc  = LAE_OK;
+  }
+
+  // supported
   else
   {
-    cmd[lenCmd++] = LaeWdCmdIdReadDPin;
-    cmd[lenCmd++] = (byte_t)pin;
-
-    rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
-  }
-
-  if( rc == LAE_OK )
-  {
-    if( (uint_t)rsp[0] != pin )
+    if( (pin < LaeWdArgDPinNumMin) || (pin > LaeWdArgDPinNumMax) )
     {
-      WD_DBG_BUF(LaeWdCmdIdReadDPin, rsp, n, "pin=%d rsp=", pin);
-      LOGERROR("Response pin %u != pin %u.", (uint_t)rsp[0], pin);
+      LOGERROR("Pin %u: Out-of-range.", pin);
       rc = -LAE_ECODE_BAD_VAL;
     }
+
     else
     {
-      val = (uint_t)rsp[1];
+      cmd[lenCmd++] = LaeWdCmdIdReadDPin;
+      cmd[lenCmd++] = (byte_t)pin;
+
+      rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+
+      if( rc == LAE_OK )
+      {
+        if( (uint_t)rsp[0] != pin )
+        {
+          WD_DBG_BUF(LaeWdCmdIdReadDPin, rsp, n, "pin=%d rsp=", pin);
+          LOGERROR("Response pin %u != pin %u.", (uint_t)rsp[0], pin);
+          rc = -LAE_ECODE_BAD_VAL;
+        }
+        else
+        {
+          val = (uint_t)rsp[1];
+        }
+      }
     }
   }
 
@@ -451,23 +494,39 @@ int LaeWd::cmdWriteDPin(uint_t pin, uint_t val)
 
   lock();
 
-  if( (pin < LaeWdArgDPinNumWMin) || (pin > LaeWdArgDPinNumWMax) )
+  // unknown firmware version
+  if( m_uFwVer == FWVER_UNKNOWN )
   {
-    LOGERROR("Pin %u: Out-of-range.", pin);
-    rc = -LAE_ECODE_BAD_VAL;
+    rc = LAE_OK;
   }
 
+  // deprecated
+  else if( m_uFwVer >= 3 )
+  {
+    rc = LAE_OK;
+  }
+
+  // supported
   else
   {
-    val = val > 0? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
+    if( (pin < LaeWdArgDPinNumWMin) || (pin > LaeWdArgDPinNumWMax) )
+    {
+      LOGERROR("Pin %u: Out-of-range.", pin);
+      rc = -LAE_ECODE_BAD_VAL;
+    }
 
-    cmd[lenCmd++] = LaeWdCmdIdWriteDPin;
-    cmd[lenCmd++] = (byte_t)pin;
-    cmd[lenCmd++] = (byte_t)val;
+    else
+    {
+      val = val > 0? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
 
-    n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+      cmd[lenCmd++] = LaeWdCmdIdWriteDPin;
+      cmd[lenCmd++] = (byte_t)pin;
+      cmd[lenCmd++] = (byte_t)val;
 
-    rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+      n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+
+      rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+    }
   }
 
   unlock();
@@ -485,31 +544,49 @@ int LaeWd::cmdReadAPin(uint_t pin, uint_t &val)
 
   lock();
 
-  if( (pin < LaeWdArgAInPinNumMin) || (pin > LaeWdArgAInPinNumMax) )
+  // unknown firmware version
+  if( m_uFwVer == FWVER_UNKNOWN )
   {
-    LOGERROR("Pin %u: Out-of-range.", pin);
-    rc = -LAE_ECODE_BAD_VAL;
+    val = 0;
+    rc  = LAE_OK;
   }
 
+  // deprecated
+  else if( m_uFwVer >= 3 )
+  {
+    val = 0;
+    rc  = LAE_OK;
+  }
+
+  // supported
   else
   {
-    cmd[lenCmd++] = LaeWdCmdIdReadAPin;
-    cmd[lenCmd++] = (byte_t)pin;
-
-    rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
-  }
-
-  if( rc == LAE_OK )
-  {
-    if( (uint_t)rsp[0] != pin )
+    if( (pin < LaeWdArgAInPinNumMin) || (pin > LaeWdArgAInPinNumMax) )
     {
-      WD_DBG_BUF(LaeWdCmdIdReadAPin, rsp, n, "pin=%d rsp=", pin);
-      LOGERROR("Response pin %u != pin %u.", (uint_t)rsp[0], pin);
+      LOGERROR("Pin %u: Out-of-range.", pin);
       rc = -LAE_ECODE_BAD_VAL;
     }
+
     else
     {
-      val = (uint_t)((((uint_t)rsp[1]) << 8) | (((uint_t)rsp[2]) & 0xff));
+      cmd[lenCmd++] = LaeWdCmdIdReadAPin;
+      cmd[lenCmd++] = (byte_t)pin;
+
+      rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+
+      if( rc == LAE_OK )
+      {
+        if( (uint_t)rsp[0] != pin )
+        {
+          WD_DBG_BUF(LaeWdCmdIdReadAPin, rsp, n, "pin=%d rsp=", pin);
+          LOGERROR("Response pin %u != pin %u.", (uint_t)rsp[0], pin);
+          rc = -LAE_ECODE_BAD_VAL;
+        }
+        else
+        {
+          val = (uint_t)((((uint_t)rsp[1]) << 8) | (((uint_t)rsp[2]) & 0xff));
+        }
+      }
     }
   }
 
@@ -527,26 +604,42 @@ int LaeWd::cmdWriteAPin(uint_t pin, uint_t val)
 
   lock();
 
-  if( (pin < LaeWdArgAOutPinNumMin) || (pin > LaeWdArgAOutPinNumMax) )
+  // unknown firmware version
+  if( m_uFwVer == FWVER_UNKNOWN )
   {
-    LOGERROR("Pin %u: Out-of-range.", pin);
-    rc = -LAE_ECODE_BAD_VAL;
+    rc = LAE_OK;
   }
 
+  // deprecated
+  else if( m_uFwVer >= 3 )
+  {
+    rc = LAE_OK;
+  }
+
+  // supported
   else
   {
-    if( val > LaeWdArgAOutPinValMax )
+    if( (pin < LaeWdArgAOutPinNumMin) || (pin > LaeWdArgAOutPinNumMax) )
     {
-      val = LaeWdArgAOutPinValMax;
+      LOGERROR("Pin %u: Out-of-range.", pin);
+      rc = -LAE_ECODE_BAD_VAL;
     }
 
-    cmd[lenCmd++] = LaeWdCmdIdWriteAPin;
-    cmd[lenCmd++] = (byte_t)pin;
-    cmd[lenCmd++] = (byte_t)val;
+    else
+    {
+      if( val > LaeWdArgAOutPinValMax )
+      {
+        val = LaeWdArgAOutPinValMax;
+      }
 
-    n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+      cmd[lenCmd++] = LaeWdCmdIdWriteAPin;
+      cmd[lenCmd++] = (byte_t)pin;
+      cmd[lenCmd++] = (byte_t)val;
 
-    rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+      n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+
+      rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+    }
   }
 
   unlock();
@@ -565,70 +658,79 @@ int LaeWd::cmdEnableMotorCtlrs(bool bEnable)
   int     nMaxTries = 3;
   int     rc;
 
-  // old version had no hardware control to enable power
-  if( m_uFwVer == 0 ) // unknown
-  {
-    return LAE_OK;
-  }
-  else if( m_uFwVer == 1 ) // always enabled
-  {
-    m_bMotorCtlrEn              = true;
-    RtDb.m_gpio.m_bMotorCtlrEn  = m_bMotorCtlrEn;
-    return LAE_OK;
-  }
-
   lock();
 
-  cmd[lenCmd++] = LaeWdCmdIdEnableMotorCtlrs;
-  cmd[lenCmd++] = bEnable? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
-
-  //
-  // Really try to set the motor controller power in state.
-  //
-  for(nTries = 0, bPass = false; (nTries < nMaxTries) && !bPass; ++nTries)
+  // old versions had no hardware control to enable power - always enabled
+  if( m_uFwVer < 2 )
   {
-    rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, 5000);
+    bEnable = true;
+    rc      = LAE_OK;
+  }
 
-    if( (rc == LAE_OK) && (rsp[0] == LaeWdArgPass) )
+  // new versions control in-power to motor controllers
+  else
+  {
+    cmd[lenCmd++] = LaeWdCmdIdEnableMotorCtlrs;
+    cmd[lenCmd++] = bEnable? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
+
+    // really try to set the motor controller power-in state
+    for(nTries = 0, bPass = false; (nTries < nMaxTries) && !bPass; ++nTries)
     {
-      bPass = true;
+      rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, 5000);
+
+      if( (rc == LAE_OK) && (rsp[0] == LaeWdArgPass) )
+      {
+        bPass = true;
+      }
+      else
+      {
+        usleep(50);
+      }
     }
+
+    // pass
+    if( bPass )
+    {
+      // give time for motor controllers to power up
+      if( bEnable )
+      {
+        usleep(TMc);
+      }
+
+      rc = LAE_OK;
+    }
+
+    // fail
     else
     {
-      usleep(50);
+      rc = -LAE_ECODE_IO;
     }
   }
 
-  // Success.
-  if( bPass )
+  if( rc == LAE_OK )
   {
-    // give time for motor controllers to power up
-    if( bEnable )
+    // disable to enable
+    if( !m_bMotorCtlrEn && bEnable)
     {
-      usleep(TMc);
-
-      // disable to enable
-      if( !m_bMotorCtlrEn )
-      {
-        m_timeMotorCtlrs.markNow();
-      }
+      LOGDIAG1("Motor controllers enabled.");
+      m_timeMotorCtlrs.markNow();
     }
+
     // enable to disable
-    else if( m_bMotorCtlrEn )
+    else if( m_bMotorCtlrEn && !bEnable )
     {
       double t = m_timeMotorCtlrs.now();
-      LOGDIAG1("Motor controllers uptime: %.4lfs.", t - m_timeMotorCtlrs.t());
+      LOGDIAG1("Motor controllers disabled: Uptime: %.4lfs.",
+          t - m_timeMotorCtlrs.t());
     }
 
     m_bMotorCtlrEn              = bEnable;
     RtDb.m_gpio.m_bMotorCtlrEn  = m_bMotorCtlrEn;
   }
 
-  // Failure.
   else
   {
     LOGERROR("Failed to %s motor controllers.", (bEnable? "enable": "disable"));
-    rc = -LAE_ECODE_IO;
   }
 
   unlock();
@@ -643,38 +745,41 @@ int LaeWd::cmdEnableAuxPort5V(bool bEnable)
   int     n;
   int     rc;
 
-  // old version had no hardware control to enable power
-  if( m_uFwVer < 2 )
-  {
-    return LAE_OK;
-  }
-  if( m_uFwVer == 0 ) // unknown
-  {
-    return LAE_OK;
-  }
-  else if( m_uFwVer == 1 ) // always enabled
-  {
-    m_bAuxPort5vEn              = true; 
-    RtDb.m_gpio.m_bAuxPort5vEn  = m_bAuxPort5vEn;
-    return LAE_OK;
-  }
-
-
   lock();
 
-  cmd[lenCmd++] = LaeWdCmdIdEnableAuxPort;
-  cmd[lenCmd++] = LaeWdArgAuxPort5V;
-  cmd[lenCmd++] = bEnable? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
+  // old versions had no hardware control to enable power - always enabled
+  if( m_uFwVer < 2 )
+  {
+    bEnable = true;
+    rc      = LAE_OK;
+  }
 
-  // enable/disable aux port
-  n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+  // new versions control out-power to deck auxilliary ports
+  else
+  {
+    cmd[lenCmd++] = LaeWdCmdIdEnableAuxPort;
+    cmd[lenCmd++] = LaeWdArgAuxPort5V;
+    cmd[lenCmd++] = bEnable? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
 
-  rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+    // enable/disable aux port
+    n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+
+    rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+  }
 
   if( rc == LAE_OK )
   {
+    if( m_bAuxPort5vEn != bEnable )
+    {
+      LOGDIAG2("Aux 5V port %s.", (bEnable? "enabled": "disabled"));
+    }
     m_bAuxPort5vEn              = bEnable; 
     RtDb.m_gpio.m_bAuxPort5vEn  = m_bAuxPort5vEn;
+  }
+
+  else
+  {
+    LOGERROR("Failed to %s aux 5V port.", (bEnable? "enable": "disable"));
   }
 
   unlock();
@@ -689,34 +794,41 @@ int LaeWd::cmdEnableAuxPortBatt(bool bEnable)
   int     n;
   int     rc;
 
-  // old version had no hardware control to enable power
-  if( m_uFwVer == 0 ) // unknown
-  {
-    return LAE_OK;
-  }
-  else if( m_uFwVer == 1 ) // always enabled
-  {
-    m_bAuxPortBattEn              = true;
-    RtDb.m_gpio.m_bAuxPortBattEn  = m_bAuxPortBattEn;
-    return LAE_OK;
-  }
-
-
   lock();
 
-  cmd[lenCmd++] = LaeWdCmdIdEnableAuxPort;
-  cmd[lenCmd++] = LaeWdArgAuxPortBatt;
-  cmd[lenCmd++] = bEnable? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
+  // old versions had no hardware control to enable power - always enabled
+  if( m_uFwVer < 2 )
+  {
+    bEnable = true;
+    rc      = LAE_OK;
+  }
 
-  // enable/disable aux port
-  n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+  // new versions control out-power to deck auxilliary ports
+  else
+  {
+    cmd[lenCmd++] = LaeWdCmdIdEnableAuxPort;
+    cmd[lenCmd++] = LaeWdArgAuxPortBatt;
+    cmd[lenCmd++] = bEnable? LaeWdArgDPinValHigh: LaeWdArgDPinValLow;
 
-  rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+    // enable/disable aux port
+    n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+
+    rc = (n == (int)lenCmd)? LAE_OK: -LAE_ECODE_IO;
+  }
 
   if( rc == LAE_OK )
   {
+    if( m_bAuxPortBattEn != bEnable )
+    {
+      LOGDIAG2("Aux battery port %s.", (bEnable? "enabled": "disabled"));
+    }
     m_bAuxPortBattEn              = bEnable;
     RtDb.m_gpio.m_bAuxPortBattEn  = m_bAuxPortBattEn;
+  }
+
+  else
+  {
+    LOGERROR("Failed to %s aux batter port.", (bEnable? "enable": "disable"));
   }
 
   unlock();
@@ -734,55 +846,49 @@ int LaeWd::cmdReadEnables(bool &bMotorCtlrEn,
   size_t  lenRsp = LaeWdRspLenReadEnables;
   int     rc;
 
-  // old version had no hardware enables
-  if( m_uFwVer == 0 ) // unknown
-  {
-    return LAE_OK;
-  }
+  lock();
 
-  else if( m_uFwVer == 1 ) // always enabled
+  // old versions had no hardware control to enable power - always enabled
+  if( m_uFwVer < 2 )
   {
     // return values
     bMotorCtlrEn    = true;
     bAuxPort5vEn    = true;
     bAuxPortBattEn  = true;
-
-    // shadow
-    m_bMotorCtlrEn    = bMotorCtlrEn;
-    m_bAuxPort5vEn    = bAuxPort5vEn;
-    m_bAuxPortBattEn  = bAuxPortBattEn;
-
-    // real-time db
-    RtDb.m_gpio.m_bMotorCtlrEn    = m_bMotorCtlrEn;
-    RtDb.m_gpio.m_bAuxPort5vEn    = m_bAuxPort5vEn;
-    RtDb.m_gpio.m_bAuxPortBattEn  = m_bAuxPortBattEn;
-
-    return LAE_OK;
+    rc              = LAE_OK;
   }
 
-  lock();
+  // new versions control power enable lines
+  else
+  {
+    cmd[lenCmd++] = LaeWdCmdIdReadEnables;
 
-  cmd[lenCmd++] = LaeWdCmdIdReadEnables;
+    rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
 
-  rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+    if( rc == LAE_OK )
+    {
+      // return values
+      bMotorCtlrEn    = rsp[0] > 0? true: false;
+      bAuxPort5vEn    = rsp[1] > 0? true: false;
+      bAuxPortBattEn  = rsp[2] > 0? true: false;
+    }
+  }
 
   if( rc == LAE_OK )
   {
-    // return values
-    bMotorCtlrEn    = rsp[0] > 0? true: false;
-    bAuxPort5vEn    = rsp[1] > 0? true: false;
-    bAuxPortBattEn  = rsp[2] > 0? true: false;
-
     // disable to enable
     if( !m_bMotorCtlrEn && bMotorCtlrEn )
     {
+      LOGDIAG1("Motor controllers enabled.");
       m_timeMotorCtlrs.markNow();
     }
+
     // enable to disable
     else if( m_bMotorCtlrEn && !bMotorCtlrEn )
     {
       double t = m_timeMotorCtlrs.now();
-      LOGDIAG1("Motor controllers uptime: %.4lfs.", t - m_timeMotorCtlrs.t());
+      LOGDIAG1("Motor controllers disabled: Uptime: %.4lfs.",
+          t - m_timeMotorCtlrs.t());
     }
 
     // shadow
@@ -794,6 +900,11 @@ int LaeWd::cmdReadEnables(bool &bMotorCtlrEn,
     RtDb.m_gpio.m_bMotorCtlrEn    = m_bMotorCtlrEn;
     RtDb.m_gpio.m_bAuxPort5vEn    = m_bAuxPort5vEn;
     RtDb.m_gpio.m_bAuxPortBattEn  = m_bAuxPortBattEn;
+  }
+
+  else
+  {
+    LOGERROR("Failed to read enable lines.");
   }
 
   unlock();
@@ -809,31 +920,43 @@ int LaeWd::cmdReadVoltages(double &fJackV, double &fBattV)
   size_t  lenRsp = LaeWdRspLenReadVolts;
   int     rc;
 
-  // old version had no hardware to sense voltages
-  if( m_uFwVer < 2 )
-  {
-    fJackV = 0.0;
-    fBattV = 0.0;
-    return LAE_OK;
-  }
-
   lock();
 
-  cmd[lenCmd++] = LaeWdCmdIdReadVolts;
+  // old versions had no hardware to sense voltages
+  if( m_uFwVer < 2 )
+  {
+    fJackV  = 0.0;
+    fBattV  = 0.0;
+    rc      = LAE_OK;
+  }
 
-  rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+  // new versions can sense input jack and battery output voltages
+  else
+  {
+    cmd[lenCmd++] = LaeWdCmdIdReadVolts;
+
+    rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+
+    if( rc == LAE_OK )
+    {
+      fJackV = (double)(rsp[0]) * LaeWdArgVScale;
+      fBattV = (double)(rsp[1]) * LaeWdArgVScale;
+    }
+  }
 
   if( rc == LAE_OK )
   {
-    fJackV = (double)(rsp[0]) * LaeWdArgVScale;
-    fBattV = (double)(rsp[1]) * LaeWdArgVScale;
+    m_fBatteryVoltage = fBattV;
+    m_fJackVoltage    = fJackV;
+
+    RtDb.m_energy.m_fBatteryVoltage = m_fBatteryVoltage;
+    RtDb.m_energy.m_fJackVoltage    = m_fJackVoltage;
   }
 
-  m_fBatteryVoltage = fBattV;
-  m_fJackVoltage    = fJackV;
-
-  RtDb.m_energy.m_fBatteryVoltage = m_fBatteryVoltage;
-  RtDb.m_energy.m_fJackVoltage    = m_fJackVoltage;
+  else
+  {
+    LOGERROR("Failed to read voltages.");
+  }
 
   unlock();
 
@@ -853,16 +976,69 @@ int LaeWd::cmdTest(uint_t &uSeqNum,
 
   lock();
 
-  cmd[lenCmd++] = LaeWdCmdIdTest;
-
-  rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
-
-  if( rc == LAE_OK )
+  // old versions had a test command - deprecated
+  if( (m_uFwVer != FWVER_UNKNOWN) && (m_uFwVer < 3) )
   {
-    uSeqNum   = (uint_t)rsp[0];
-    uOpState  = (uint_t)rsp[1];
-    uAlarms   = (uint_t)((((uint_t)rsp[2]) << 8) | (((uint_t)rsp[3]) & 0xff));
-    uLedIndex = (uint_t)rsp[4];
+    cmd[lenCmd++] = LaeWdCmdIdTest;
+
+    rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+
+    if( rc == LAE_OK )
+    {
+      uSeqNum   = (uint_t)rsp[0];
+      uOpState  = (uint_t)rsp[1];
+      uAlarms   = (uint_t)((((uint_t)rsp[2]) << 8) | (((uint_t)rsp[3]) & 0xff));
+      uLedIndex = (uint_t)rsp[4];
+    }
+  }
+
+  // deprecated
+  else
+  {
+    uSeqNum   = 0;
+    uOpState  = 0;
+    uAlarms   = 0;
+    uLedIndex = 0;
+    rc        = LAE_OK;
+  }
+
+  unlock();
+
+  return rc;
+}
+
+int LaeWd::cmdConfigOperation(unsigned long uTimeout)
+{
+  byte_t  cmd[LaeWdMaxCmdLen];
+  size_t  lenCmd = 0;
+  int     n;
+  int     rc;
+
+  lock();
+
+  // no support in older versions
+  if( m_uFwVer < 3 )
+  {
+    rc = LAE_OK;
+  }
+
+  else
+  {
+    cmd[lenCmd++] = LaeWdCmdIdConfigFw;
+    cmd[lenCmd++] = (byte_t)((uTimeout >> 8) & 0xff);
+    cmd[lenCmd++] = (byte_t)(uTimeout & 0xff);
+
+    n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd);
+
+    if( n == (int)lenCmd )
+    {
+      m_uWatchdogTimeout = uTimeout;
+      rc = LAE_OK;
+    }
+    else
+    {
+      rc = -LAE_ECODE_IO;
+    }
   }
 
   unlock();

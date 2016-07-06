@@ -186,6 +186,10 @@ namespace laelaps
     /*!
      * \brief Configure a digital pin command.
      *
+     * \note
+     * Deprecated in robot v2.2+ since there now exist an accessory
+     * subprocessor to support various gpio.
+     *
      * \param pin   Digital pin number.
      * \param dir   Pin direction. 0 == input, 1 == output.
      *
@@ -195,6 +199,10 @@ namespace laelaps
 
     /*!
      * \brief Read the value of a digital pin command.
+     *
+     * \note
+     * Deprecated in robot v2.2+ since there now exist an accessory
+     * subprocessor to support various gpio.
      *
      * \param pin         Digital pin number.
      * \param [out] val   Digital pin low (0) or high (1) value.
@@ -206,6 +214,10 @@ namespace laelaps
     /*!
      * \brief Write a value to a digital pin command.
      *
+     * \note
+     * Deprecated in robot v2.2+ since there now exist an accessory
+     * subprocessor to support various gpio.
+     *
      * \param pin     Digital pin number.
      * \param val     Digital pin low (0) or high (1) value.
      *
@@ -216,6 +228,10 @@ namespace laelaps
     /*!
      * \brief Read the value of an analog pin command.
      *
+     * \note
+     * Deprecated in robot v2.2+ since there now exist an accessory
+     * subprocessor to support various gpio.
+     *
      * \param pin         Analog pin number.
      * \param [out] val   Analog 10-bit value [0-1023].
      *
@@ -225,6 +241,10 @@ namespace laelaps
 
     /*!
      * \brief Write the value to an analog pin command.
+     *
+     * \note
+     * Deprecated in robot v2.2+ since there now exist an accessory
+     * subprocessor to support various gpio.
      *
      * \param pin   Analog pin number.
      * \param val   Analog 10-bit value [0-1023].
@@ -299,6 +319,15 @@ namespace laelaps
                         uint_t &uLedIndex);
 
     /*!
+     * \brief Configure firmware operation.
+     *
+     * \param uTimeout  Watchdog timeout (msec).
+     *
+     * \copydoc doc_return_std
+     */
+    virtual int cmdConfigOperation(unsigned long uTimeout);
+
+    /*!
      * \brief Enable/disable power in to motor controllers.
      *
      * \param pArg      Recast pointer to this class instance.
@@ -315,6 +344,7 @@ namespace laelaps
     uint_t    m_uFwVer;       ///< firmware version number
 
     // shadow values
+    ulong_t   m_uWatchdogTimeout;   ///< watchdog timeout (msec)
     bool      m_bBatteryIsCharging; ///< battery is [not] charging
     double    m_fBatteryVoltage;    ///< sensed battery voltage
     double    m_fJackVoltage;       ///< sensed power supply jack voltage

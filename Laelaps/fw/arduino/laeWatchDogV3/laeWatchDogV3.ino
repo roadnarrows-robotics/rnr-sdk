@@ -101,18 +101,26 @@ const int PIN_D_EN_AUX_PORT_BATT  = 4;  ///< aux. port battery power out enable
 const int PIN_A_USER_MIN  = A0;   ///< minimum user available pin number
 const int PIN_A_USER_MAX  = A3;   ///< maximum user available pin number
 
-// Battery Charging Input Pins
-const int   PIN_A_JACK_V  = A0;         ///< jack voltage into battery charging
-const int   PIN_A_BATT_V  = A1;         ///< battery output voltage
-const float ADC_V_PER_VAL = 0.01953125; ///< 0.0V - 20.0V at 1023 values
-const float JACK_V_MIN    = 13.9;       ///< required minimum voltage to charge
-const float JACK_V_TRIM   = 1.1089;     ///< thru experimentation, hopefully the
-const float BATT_V_TRIM   = 1.0540;     ///< op-amped version of the deckboard
-                                        ///< provides part-to-part consistency
+//
+// Battery Charging Input Pins and values
+// Through experimentation, the op-amp version of the deckboard input voltage
+// biases and trims are part-to-part stable.
+//
+const int   PIN_A_JACK_V  = A0;       ///< jack voltage into battery charging
+const int   PIN_A_BATT_V  = A1;       ///< battery output voltage
+const float ADC_V_PER_BIT = 0.01955;  ///< v/bit = 0.0V - 20.0V in 1023 values
+const float JACK_V_MIN    = 13.9;     ///< required minimum voltage to charge
+const float JACK_V_BIAS   = 0.7;      ///< jack bias
+const float JACK_V_TRIM   = 1.1089;   ///< jack trim
+const float BATT_V_BIAS   = 0.7;      ///< battery bias
+//const float BATT_V_TRIM   = 1.0540;   ///< battery trim
+const float BATT_V_TRIM   = 0.95385;  ///< battery trim
 
+#if 0 // DEPRECATED
 // Digital Pin Shadow State
 int DPinDir[MAX_D_PINS];          ///< direction 
 int DPinVal[MAX_D_PINS];          ///< value
+#endif // DEPRECATED
 
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -133,6 +141,7 @@ enum OpState
 // Current State
 //
 int           CurOpState;         ///< robot operational state
+unsigned long CurTimeout;         ///< watchdog timeout (msec)
 float         CurJackV;           ///< current sensed jack input voltage
 float         CurBattV;           ///< current sensed battery output voltage
 boolean       CurBattIsCharging;  ///< battery is [not] currently being charged
@@ -217,6 +226,11 @@ char      SerArgv[LaeWdSerMaxCmdArgc][LaeWdSerMaxCmdArgLen];
 int       SerArgc;
 const int SerCmdIdx = 0;
 
+//
+// Forward declarations
+//
+void updateInServiceState(boolean bForceUpdate=false);
+
 
 //------------------------------------------------------------------------------
 // Arduino Hook Functions
@@ -237,6 +251,7 @@ void setup()
   // State
   //
   CurOpState        = OpStateNoService;
+  CurTimeout        = LaeWdTimeoutDft;
   CurJackV          = 0.0;
   CurBattV          = 0.0;
   CurBattIsCharging = false;
@@ -283,15 +298,19 @@ void setup()
       digitalWrite(pin, val);
     }
 
+#if 0 // DEPRECATED
     DPinDir[pin] = dir;
     DPinVal[pin] = val;
+#endif // DEPRECATED
   }
 
+#if 0 // DEPRECATED
   // configure analog input pins
   for(pin = PIN_A_USER_MIN; pin <= PIN_A_USER_MIN; ++pin)
   {
     digitalWrite(pin, LOW);   // no pull-ups
   }
+#endif // DEPRECATED
 
   //
   // I2C slave setup. Receive and send from/to I2C master by asynchronous
@@ -328,7 +347,7 @@ void loop()
   Tcur = millis();
 
   // watchdog timed out
-  if( (CurOpState != OpStateNoService) && (dt(Tcur, Twd) >= LaeWdTimeout) )
+  if( (CurOpState != OpStateNoService) && (dt(Tcur, Twd) > CurTimeout) )
   {
     enterNoServiceState();
   }
@@ -373,6 +392,326 @@ void loop()
   }
 
   delay(2);
+}
+
+
+//------------------------------------------------------------------------------
+// Core Functions and Utilities
+//------------------------------------------------------------------------------
+
+/*!
+ * \brief Elapse delta time.
+ *
+ * \param t1  Most recent time (e.g. current time).
+ * \param t0  Some earlier, previous time.
+ *
+ * \return Milliseconds.
+ */
+unsigned long dt(unsigned long t1, unsigned long t0)
+{
+  // time t1 is later than t0
+  if( t1 >= t0 )
+  {
+    return t1 - t0;
+  }
+  // must haved wrapped - happens about every 50 days of up time.
+  else
+  {
+    return 4294967295 - t0 + t1;
+  }
+}
+
+#if 0 // DEPRECATED
+/*!
+ * \brief Map user pin number to analog input pin.
+ * 
+ * \param pin   User pin number.
+ *
+ * \return Hardware analog input pin number.
+ */
+byte mapToAn(byte pin)
+{
+  return A0 + (pin - LaeWdArgAInPinNumMin);
+}
+#endif // DEPRECATED
+
+/*
+ * \brief Enter no-service operational state. 
+ *
+ * Some state information is reset here.
+ */
+void enterNoServiceState()
+{
+  CurOpState      = OpStateNoService;
+  CurBattSoC      = LaeWdArgBattSoCMax;
+  CurAlarms       = LaeWdArgAlarmNone;
+  CurLedPatIdx    = LedPatIdxNoService;
+  CurUserOverride = false;
+
+  PleasePetTheDog = false;
+
+  digitalWrite(PIN_D_EN_MOTOR_CTLRS, LOW);
+
+#if 0 // DEPRECATED
+  DPinVal[PIN_D_EN_MOTOR_CTLRS] = LOW;
+#endif // DEPRECATED
+
+  updateBatteryRgb(CurBattSoC);
+  activateLedPattern(CurLedPatIdx);
+}
+
+/*!
+ * \brief Update change operational state data. 
+ *
+ * The new state is determined from the current operational state, battery
+ * state of charge, alarms, and user overrides.
+ */
+void updateInServiceState(boolean bForceUpdate)
+{
+  int newOpState    = CurOpState;
+  int newLedPatIdx  = CurLedPatIdx;
+
+  // robot is critically alarmed
+  if( CurAlarms & LaeWdArgAlarmCrit )
+  {
+    newOpState   = OpStateAlarmed;
+    newLedPatIdx = LedPatIdxAlarmCrit;
+  }
+
+  // battery is critically alarmed
+  else if( CurAlarms & LaeWdArgAlarmBattCrit )
+  {
+    newOpState   = OpStateAlarmed;
+    newLedPatIdx = LedPatIdxBattCrit;
+  }
+
+  // robot is alarmed
+  else if( CurAlarms & LaeWdArgAlarmTypeMask )
+  {
+    newOpState   = OpStateAlarmed;
+    newLedPatIdx = LedPatIdxAlarm;
+  }
+
+  // robot is nominal, but user has overridden the RGB LED
+  else if( CurUserOverride )
+  {
+    newOpState   = OpStateNominal;
+    newLedPatIdx = LedPatIdxUser;
+  }
+
+  // robot is nominal
+  else
+  {
+    newOpState   = OpStateNominal;
+    newLedPatIdx = LedPatIdxBatt;
+    updateBatteryRgb(CurBattSoC);
+  }
+
+  // new LED pattern
+  if( (newOpState != CurOpState) ||
+      (newLedPatIdx != CurLedPatIdx) ||
+      bForceUpdate )
+  {
+    CurOpState      = newOpState;
+    activateLedPattern(newLedPatIdx);
+  }
+}
+
+/*!
+ * \brief Update battery charge state.
+ */
+void updateBatteryRgb(unsigned int batt_soc)
+{
+  float h, s, v;
+
+  if( batt_soc >= 95 )
+  {
+    LedPat[LedPatIdxBatt].rgb[0][RED]   = LaeWdArgRgbLedMax;
+    LedPat[LedPatIdxBatt].rgb[0][GREEN] = LaeWdArgRgbLedMax;
+    LedPat[LedPatIdxBatt].rgb[0][BLUE]  = LaeWdArgRgbLedMax;
+  }
+  else if( batt_soc <= 5 )
+  {
+    LedPat[LedPatIdxBatt].rgb[0][RED]   = 0x7b;
+    LedPat[LedPatIdxBatt].rgb[0][GREEN] = 0x4a;
+    LedPat[LedPatIdxBatt].rgb[0][BLUE]  = 0x03;
+  }
+  else
+  {
+    h = 35.0;
+    s = (float)(LaeWdArgBattSoCMax - batt_soc);
+    v = (float)(LaeWdArgBattSoCMax + batt_soc) / 2.0;
+
+    // white to amber
+    HSVtoRGB(h, s, v, LedPat[LedPatIdxBatt].rgb[0]);
+  }
+}
+
+/*!
+ * \brief Active new LED pattern.
+ *
+ * \param newLedPatIdx  New LED pattern index.
+ */
+void activateLedPattern(int newLedPatIdx)
+{
+  CurLedPatIdx = newLedPatIdx;
+  LedPat[CurLedPatIdx].curPos = 0;
+  Tled = millis();
+
+  lightLed();
+}
+
+/*!
+ * \brief Update LED pattern state.
+ */
+void updateLedPattern()
+{
+  byte          numPos;   // number of different colors in pattern
+  byte          curPos;   // current light switch position
+
+  numPos = LedPat[CurLedPatIdx].numPos;
+  curPos = LedPat[CurLedPatIdx].curPos;
+
+  // only one fixed illumination transition
+  if( numPos <= 1 )
+  {
+    return;
+  }
+
+  // the current illumination has not timed out
+  else if( dt(Tcur, Tled) < LedPat[CurLedPatIdx].msec[curPos] )
+  {
+    return;
+  }
+
+  // new illumination transition
+  LedPat[CurLedPatIdx].curPos = (curPos + 1) % numPos;
+  Tled = millis();
+
+  lightLed();
+}
+
+/*!
+ * \brief Light the RGB LED.
+ */
+void lightLed()
+{
+  byte    curPos;   // current light switch position
+  int     chan;     // RBG channel
+
+  curPos = LedPat[CurLedPatIdx].curPos;
+
+  for(chan = 0; chan < NUM_CHANS; ++chan)
+  {
+    CurLed[chan] = LedPat[CurLedPatIdx].rgb[curPos][chan];
+    analogWrite(PIN_PWM_RGB[chan], CurLed[chan]);
+  }
+}
+
+/*!
+ * \brief Convert color in HSV space to equivalent in RGB space.
+ *
+ * \param h           Hue [0.0, 360.0).
+ * \param s           Saturation [0.0, 100.0].
+ * \param v           Value [0.0, 100.0].
+ * \param [out] rgb   Array of three bytes holding the RGB values [0, 255].
+ */
+void HSVtoRGB(float h, float s, float v, byte rgb[])
+{
+  int   sector;
+  float f, p, q, t;
+  float r, g, b;
+
+  // normalize
+  s /= 100.0;
+  v /= 100.0;
+
+  //
+  // cap
+  if( h >= 360.0 )
+  {
+    h = 359.9;
+  }
+  if( s > 1.0 )
+  {
+    s = 1.0;
+  }
+  if( v > 1.0 )
+  {
+    v = 1.0;
+  }
+
+  // gray
+  if( s <= 0.0 )
+  {
+    rgb[RED]   = (byte)(v * 255.0);
+    rgb[GREEN] = (byte)(v * 255.0);
+    rgb[BLUE]  = (byte)(v * 255.0);
+    return;
+  }
+
+  h /= 60.0;                // hue sector
+  sector = (int)h;          // sector
+  f = h - (float)sector;    // fraction in sector
+  p = v * (1.0 - s); 
+  q = v * (1.0 - s * f);
+  t = v * (1.0 - s * (1.0 - f));
+
+  //
+  // RGB' [0.0, 1.0]
+  //
+  switch( sector )
+  {
+    case 0:
+      r = v; g = t; b = p;
+      break;
+    case 1:
+      r = q; g = v; b = p;
+      break;
+    case 2:
+      r = p; g = v; b = t;
+      break;
+    case 3:
+      r = p; g = q; b = v;
+      break;
+    case 4:
+      r = t; g = p; b = v;
+      break;
+    case 5:
+    default:
+      r = v; g = p; b = q;
+      break;
+  }
+
+  // conversion
+  rgb[RED]   = (byte)(r * 255.0);
+  rgb[GREEN] = (byte)(g * 255.0);
+  rgb[BLUE]  = (byte)(b * 255.0);
+}
+
+/*!
+ * \brief Read all monitored voltages.
+ */
+void readVoltages()
+{
+  int   sensorval;
+
+  // read jack voltage input to battery charging circuitry
+  sensorval = analogRead(PIN_A_JACK_V);
+  CurJackV  = ((float)sensorval * ADC_V_PER_BIT - JACK_V_BIAS) * JACK_V_TRIM;
+
+  if( CurJackV >= JACK_V_MIN )
+  {
+    CurBattIsCharging = true;
+  }
+  else
+  {
+    CurBattIsCharging = false;
+  }
+
+  // read battery output voltage
+  sensorval = analogRead(PIN_A_BATT_V);
+  CurBattV  = ((float)sensorval * ADC_V_PER_BIT - BATT_V_BIAS) * BATT_V_TRIM;
 }
 
 
@@ -448,13 +787,23 @@ void i2cReceiveCmd(int n)
       case LaeWdCmdIdReadVolts:
         bOk = i2cExecReadVolts();
         break;
+#if 0 // DEPRECATED
       case LaeWdCmdIdTest:
-        i2cExecTest();
+        bOk = i2cExecTest();
+        break;
+#endif // DEPRECATED
+      case LaeWdCmdIdConfigFw:
+        bOk = i2cExecConfigFw();
         break;
       default:
-        i2cFlushRead();
         bOk = false;
+        break;
     }
+  }
+
+  if( !bOk )
+  {
+    i2cFlushRead();
   }
 
   // mollify the dog if received a good command
@@ -562,7 +911,6 @@ boolean i2cExecSetBattCharge()
   }
 
   // error
-  i2cFlushRead();
   return false;
 }
 
@@ -587,7 +935,6 @@ boolean i2cExecSetAlarms()
   }
 
   // error
-  i2cFlushRead();
   return false;
 }
 
@@ -613,7 +960,6 @@ boolean i2cExecSetRgbLed()
   }
 
   // error
-  i2cFlushRead();
   return false;
 }
 
@@ -659,7 +1005,6 @@ boolean i2cExecConfigDPin()
   }
 
   // error
-  i2cFlushRead();
   return false;
 }
 
@@ -723,7 +1068,6 @@ boolean i2cExecWriteDPin()
   }
 
   // error
-  i2cFlushRead();
   return false;
 }
 
@@ -803,7 +1147,6 @@ boolean i2cExecWriteAPin()
   }
 
   // error
-  i2cFlushRead();
   return false;
 }
 #endif // DEPRECATED
@@ -832,7 +1175,9 @@ boolean i2cExecEnableMotorCtlrs()
 
     if( rval == wval )
     {
+#if 0 // DEPRECATED
       DPinVal[PIN_D_EN_MOTOR_CTLRS] = wval;
+#endif // DEPRECATED
       I2CRspBuf[I2CRspLen++] = LaeWdArgPass;
     }
     else
@@ -876,20 +1221,20 @@ boolean i2cExecEnableAuxPort()
     }
     else
     {
-      i2cFlushRead();
       return false;
     }
 
     val = val? HIGH: LOW;
 
     digitalWrite(pin, val);
+#if 0 // DEPRECATED
     DPinVal[pin] = val;
+#endif // DEPRECATED
 
     return true;
   }
 
   // error
-  i2cFlushRead();
   return false;
 }
 
@@ -933,6 +1278,7 @@ boolean i2cExecReadVolts()
   return true;
 }
 
+#if 0 // DEPRECATED
 /*!
  * \brief Execute I2C command to test interface.
  *
@@ -949,6 +1295,40 @@ boolean i2cExecTest()
   ++CurSeqNum;
 
   return true;
+}
+#endif // DEPRECATED
+
+/*!
+ * \brief Execute I2C command to configure firmware operation
+ *
+ * \return Returns true on success, false on failure.
+ */
+boolean i2cExecConfigFw()
+{
+  byte          len = LaeWdCmdLenConfigFw - 1; 
+  unsigned int  val_hi, val_lo;
+
+  if( Wire.available() == len )
+  {
+    val_hi = Wire.read();
+    val_lo = Wire.read();
+
+    CurTimeout = (val_hi << 8) | val_lo;
+    
+    if( CurTimeout < LaeWdTimeoutMin )
+    {
+      CurTimeout = LaeWdTimeoutMin;
+    }
+    else if( CurTimeout > LaeWdTimeoutMin )
+    {
+      CurTimeout = LaeWdTimeoutMax;
+    }
+
+    return true;
+  }
+
+  // error
+  return false;
 }
 
 
@@ -995,7 +1375,7 @@ void sfloat(char *buf, float val, int width=6, int precision=1)
   int32_t   mult;
   int       i;
 
-  for(i = 0, mult = 1; i < precision; ++i, mutl *= 10);
+  for(i = 0, mult = 1; i < precision; ++i, mult *= 10);
 
   val_int = (int32_t)val;
   val = val - (float)val_int;
@@ -1005,7 +1385,10 @@ void sfloat(char *buf, float val, int width=6, int precision=1)
   }
   val_frac = (int32_t)(val * mult);
 
-  sprintf(buf, "%*d.%0*d", width, val_int, precision, val_frac);
+  // don't work with width fileds
+  //sprintf(buf, "%*d.%0*d", width, val_int, precision, val_frac);
+ 
+  sprintf(buf, "%d.%d", val_int, val_frac);
 }
 
 /*!
@@ -1302,7 +1685,10 @@ void serExecCmd()
     case LaeWdSerCmdIdReadVolts:
       serExecReadVolts();
       break;
-     default:
+    case LaeWdSerCmdIdOpConfig:
+      serExecOpConfig();
+      break;
+    default:
       serErrorRsp("unknown command");
       return;
   }
@@ -1317,16 +1703,21 @@ void serExecHelp()
 {
   const char *cmds[][2] = 
   {
-    {"a {g|s} [alarm_bits]", "get/set robot alarms"},
-    {"b {g|s} [batt_soc]", "get/set battery state of charge"},
-    {"l {g|s|r} [red green blue]", "get/set/reset user led color"},
-    {"m {g|s} [motor_ctlrs]", "get/set motor controllers enable line"},
-    {"p", "pet the watchdog"},
-    {"r", "read battery and jack voltages"},
-    {"u {g|s} [aux_batt aux_5v]", "get/set auxilliary ports enable lines"},
-    {"v", "get firmware version"},
+    {"a {g|s} [alarm_bits]",        "get/set robot alarms"},
+    {"b {g|s} [batt_soc]",          "get/set battery state of charge"},
+    {"c {g|s} [timeout]",           "get/set firmare configuration"},
+    {"l {g|s|r} [red green blue]",  "get/set/reset user led override"},
+    {"m {g|s} [motor_ctlrs]",       "get/set motor controllers enable line"},
+    {"p",                           "pet the watchdog"},
+    {"r",                           "read battery and jack voltages"},
+    {"v",                           "get firmware version"},
+    {"x {g|s} [aux_batt aux_5v]",   "get/set auxilliary port enable lines"},
     {NULL, NULL}
   };
+
+  int   i;
+
+  p("%c", LaeWdSerEoR);
 
   for(i = 0; cmds[i][0] != NULL; ++i)
   {
@@ -1341,7 +1732,7 @@ void serExecGetVersion()
 {
   if( serChkArgCnt(LaeWdSerCmdArgcGetVersion) )
   {
-    serRsp("%d", LAE_WD_FW_VERSION);
+    serRsp("Laelaps WatchDog v%d", LAE_WD_FW_VERSION);
   }
 }
 
@@ -1373,16 +1764,12 @@ void serExecOpBattSoC()
 
   switch( op )
   {
-    //
     // Get
-    //
     case LaeWdSerOpGet:
       ok = serChkArgCnt(LaeWdSerCmdArgcGetBattSoC);
       break;
 
-    //
     // Set
-    //
     case LaeWdSerOpSet:
       if( (ok = serChkArgCnt(LaeWdSerCmdArgcSetBattSoC)) )
       {
@@ -1399,15 +1786,13 @@ void serExecOpBattSoC()
         if( batt_soc != CurBattSoC )
         {
           CurBattSoC = batt_soc;
-          updateBatteryRgb(batt_soc)
+          updateBatteryRgb(batt_soc);
           updateInServiceState(true);
         }
       }
       break;
 
-    //
     // Bad
-    //
     case LaeWdSerOpBad:
     default:
       ok = false;
@@ -1435,16 +1820,12 @@ void serExecOpAlarms()
 
   switch( op )
   {
-    //
     // Get
-    //
     case LaeWdSerOpGet:
       ok = serChkArgCnt(LaeWdSerCmdArgcGetAlarms);
       break;
 
-    //
     // Set
-    //
     case LaeWdSerOpSet:
       if( (ok = serChkArgCnt(LaeWdSerCmdArgcSetAlarms)) )
       {
@@ -1459,9 +1840,7 @@ void serExecOpAlarms()
       }
       break;
 
-    //
     // Bad
-    //
     case LaeWdSerOpBad:
     default:
       ok = false;
@@ -1490,16 +1869,12 @@ void serExecOpLed()
 
   switch( op )
   {
-    //
     // Get
-    //
     case LaeWdSerOpGet:
       ok = serChkArgCnt(LaeWdSerCmdArgcGetLed);
       break;
 
-    //
     // Set
-    //
     case LaeWdSerOpSet:
       ok = serChkArgCnt(LaeWdSerCmdArgcSetLed);
 
@@ -1522,9 +1897,7 @@ void serExecOpLed()
       }
       break;
 
-    //
     // Reset
-    //
     case LaeWdSerOpReset:
       if( (ok = serChkArgCnt(LaeWdSerCmdArgcResetLed)) )
       {
@@ -1533,9 +1906,7 @@ void serExecOpLed()
       }
       break;
 
-    //
     // Bad
-    //
     case LaeWdSerOpBad:
     default:
       ok = false;
@@ -1550,7 +1921,7 @@ void serExecOpLed()
 }
 
 /*!
- * \brief Execute serial command to get/set mootor controllers power-in enable
+ * \brief Execute serial command to get/set motor controllers power-in enable
  * line.
  */
 void serExecOpEnMotorCtlrs()
@@ -1564,16 +1935,12 @@ void serExecOpEnMotorCtlrs()
 
   switch( op )
   {
-    //
     // Get
-    //
     case LaeWdSerOpGet:
       ok = serChkArgCnt(LaeWdSerCmdArgcGetEnMotorCtlrs);
       break;
 
-    //
     // Set
-    //
     case LaeWdSerOpSet:
       if( (ok = serChkArgCnt(LaeWdSerCmdArgcSetEnMotorCtlrs)) )
       {
@@ -1588,9 +1955,7 @@ void serExecOpEnMotorCtlrs()
       }
       break;
 
-    //
     // Bad
-    //
     case LaeWdSerOpBad:
     default:
       ok = false;
@@ -1606,7 +1971,7 @@ void serExecOpEnMotorCtlrs()
 }
 
 /*!
- * \brief Execute serial command to get/set mootor controllers power-in enable
+ * \brief Execute serial command to get/set motor controllers power-in enable
  * line.
  */
 void serExecOpEnAuxPorts()
@@ -1620,25 +1985,23 @@ void serExecOpEnAuxPorts()
 
   switch( op )
   {
-    //
     // Get
-    //
     case LaeWdSerOpGet:
-      ok = serChkArgCnt(LaeWdSerCmdArgcGetEnMotorCtlrs);
+      ok = serChkArgCnt(LaeWdSerCmdArgcGetEnAuxPorts);
       break;
 
-    //
     // Set
-    //
     case LaeWdSerOpSet:
-      ok = serChkArgCnt(LaeWdSerCmdArgcSetEnMotorCtlrs);
+      ok = serChkArgCnt(LaeWdSerCmdArgcSetEnAuxPorts);
       if( ok )
       {
+        val = 0;
         ok = serParseNumber("aux_batt", SerArgv[2], 0, 1, val);
         en_batt = val? HIGH: LOW;
       }
       if( ok )
       {
+        val = 0;
         ok = serParseNumber("aux_5v", SerArgv[3], 0, 1, val);
         en_5v = val? HIGH: LOW;
       }
@@ -1651,9 +2014,7 @@ void serExecOpEnAuxPorts()
       }
       break;
 
-    //
     // Bad
-    //
     case LaeWdSerOpBad:
     default:
       ok = false;
@@ -1675,327 +2036,63 @@ void serExecOpEnAuxPorts()
 void serExecReadVolts()
 {
   char  buf_batt_v[16], buf_jack_v[16];
+  int bv, jv;
 
   if( serChkArgCnt(LaeWdSerCmdArgcReadVolts) )
   {
     readVoltages();
-    sfloat(buf_batt_v, CurBattV, 4, 1);
-    sfloat(buf_jack_v, CurJackV, 4, 1);
-    serRsp("%s %s", buf_batt_v, buf_jack_v);
-  }
-}
-
-
-//------------------------------------------------------------------------------
-// Utilities
-//------------------------------------------------------------------------------
-
-/*!
- * \brief Elapse delta time.
- *
- * \param t1  Most recent time (e.g. current time).
- * \param t0  Some earlier, previous time.
- *
- * \return Milliseconds.
- */
-unsigned long dt(unsigned long t1, unsigned long t0)
-{
-  // time t1 is later than t0
-  if( t1 >= t0 )
-  {
-    return t1 - t0;
-  }
-  // must haved wrapped - happens about every 50 days of up time.
-  else
-  {
-    return 4294967295 - t0 + t1;
+    //sfloat(buf_batt_v, CurBattV, 4, 1);
+    //sfloat(buf_jack_v, CurJackV, 4, 1);
+    //serRsp("%s %s", buf_jack_v, buf_batt_v);
+    bv = (int)(CurBattV * 10.0);
+    jv = (int)(CurJackV * 10.0);
+    serRsp("%d %d", jv, bv);
   }
 }
 
 /*!
- * \brief Map user pin number to analog input pin.
- * 
- * \param pin   User pin number.
- *
- * \return Hardware analog input pin number.
+ * \brief Execute serial command to get/set firmware operation configuration.
  */
-byte mapToAn(byte pin)
+void serExecOpConfig()
 {
-  return A0 + (pin - LaeWdArgAInPinNumMin);
-}
+  boolean       ok;
+  int           op;
+  long          val;
 
-/*
- * \brief Enter no-service operational state. 
- *
- * Some state information is reset here.
- */
-void enterNoServiceState()
-{
-  CurOpState      = OpStateNoService;
-  CurBattSoC      = LaeWdArgBattSoCMax;
-  CurAlarms       = LaeWdArgAlarmNone;
-  CurLedPatIdx    = LedPatIdxNoService;
-  CurUserOverride = false;
+  op = serParseOp(SerArgv[1]);
 
-  PleasePetTheDog = false;
-
-  digitalWrite(PIN_D_EN_MOTOR_CTLRS, LOW);
-  DPinVal[PIN_D_EN_MOTOR_CTLRS] = LOW;
-
-  updateBatteryRgb(CurBattSoC);
-  activateLedPattern(CurLedPatIdx);
-}
-
-/*!
- * \brief Update change operational state data. 
- *
- * The new state is determined from the current operational state, battery
- * state of charge, alarms, and user overrides.
- */
-void updateInServiceState(boolean bForceUpdate = false)
-{
-  int newOpState    = CurOpState;
-  int newLedPatIdx  = CurLedPatIdx;
-
-  // robot is critically alarmed
-  if( CurAlarms & LaeWdArgAlarmCrit )
+  switch( op )
   {
-    newOpState   = OpStateAlarmed;
-    newLedPatIdx = LedPatIdxAlarmCrit;
-  }
-
-  // battery is critically alarmed
-  else if( CurAlarms & LaeWdArgAlarmBattCrit )
-  {
-    newOpState   = OpStateAlarmed;
-    newLedPatIdx = LedPatIdxBattCrit;
-  }
-
-  // robot is alarmed
-  else if( CurAlarms & LaeWdArgAlarmTypeMask )
-  {
-    newOpState   = OpStateAlarmed;
-    newLedPatIdx = LedPatIdxAlarm;
-  }
-
-  // robot is nominal, but user has overridden the RGB LED
-  else if( CurUserOverride )
-  {
-    newOpState   = OpStateNominal;
-    newLedPatIdx = LedPatIdxUser;
-  }
-
-  // robot is nominal
-  else
-  {
-    newOpState   = OpStateNominal;
-    newLedPatIdx = LedPatIdxBatt;
-    updateBatteryRgb(CurBattSoC);
-  }
-
-  // new LED pattern
-  if( (newOpState != CurOpState) ||
-      (newLedPatIdx != CurLedPatIdx) ||
-      bForceLedUpdate )
-  {
-    CurOpState      = newOpState;
-    activateLedPattern(newLedPatIdx);
-  }
-}
-
-/*!
- * \brief Update battery charge state.
- */
-void updateBatteryRgb(unsigned int batt_soc)
-{
-  float h, s, v;
-
-  if( batt_soc >= 95 )
-  {
-    LedPat[LedPatIdxBatt].rgb[0][RED]   = LaeWdArgRgbLedMax;
-    LedPat[LedPatIdxBatt].rgb[0][GREEN] = LaeWdArgRgbLedMax;
-    LedPat[LedPatIdxBatt].rgb[0][BLUE]  = LaeWdArgRgbLedMax;
-  }
-  else if( batt_soc <= 5 )
-  {
-    LedPat[LedPatIdxBatt].rgb[0][RED]   = 0x7b;
-    LedPat[LedPatIdxBatt].rgb[0][GREEN] = 0x4a;
-    LedPat[LedPatIdxBatt].rgb[0][BLUE]  = 0x03;
-  }
-  else
-  {
-    h = 35.0;
-    s = (float)(LaeWdArgBattSoCMax - batt_soc);
-    v = (float)(LaeWdArgBattSoCMax + batt_soc) / 2.0;
-
-    // white to amber
-    HSVtoRGB(h, s, v, LedPat[LedPatIdxBatt].rgb[0]);
-  }
-}
-
-/*!
- * \brief Active new LED pattern.
- *
- * \param newLedPatIdx  New LED pattern index.
- */
-void activateLedPattern(int newLedPatIdx)
-{
-  CurLedPatIdx = newLedPatIdx;
-  LedPat[CurLedPatIdx].curPos = 0;
-  Tled = millis();
-
-  lightLed();
-}
-
-/*!
- * \brief Update LED pattern state.
- */
-void updateLedPattern()
-{
-  byte          numPos;   // number of different colors in pattern
-  byte          curPos;   // current light switch position
-
-  numPos = LedPat[CurLedPatIdx].numPos;
-  curPos = LedPat[CurLedPatIdx].curPos;
-
-  // only one fixed illumination transition
-  if( numPos <= 1 )
-  {
-    return;
-  }
-
-  // the current illumination has not timed out
-  else if( dt(Tcur, Tled) < LedPat[CurLedPatIdx].msec[curPos] )
-  {
-    return;
-  }
-
-  // new illumination transition
-  LedPat[CurLedPatIdx].curPos = (curPos + 1) % numPos;
-  Tled = millis();
-
-  lightLed();
-}
-
-/*!
- * \brief Light the RGB LED.
- */
-void lightLed()
-{
-  byte    curPos;   // current light switch position
-  int     chan;     // RBG channel
-
-  curPos = LedPat[CurLedPatIdx].curPos;
-
-  for(chan = 0; chan < NUM_CHANS; ++chan)
-  {
-    CurLed[chan] = LedPat[CurLedPatIdx].rgb[curPos][chan];
-    analogWrite(PIN_PWM_RGB[chan], CurLed[chan]);
-  }
-}
-
-/*!
- * \brief Convert color in HSV space to equivalent in RGB space.
- *
- * \param h           Hue [0.0, 360.0).
- * \param s           Saturation [0.0, 100.0].
- * \param v           Value [0.0, 100.0].
- * \param [out] rgb   Array of three bytes holding the RGB values [0, 255].
- */
-void HSVtoRGB(float h, float s, float v, byte rgb[])
-{
-  int   sector;
-  float f, p, q, t;
-  float r, g, b;
-
-  // normalize
-  s /= 100.0;
-  v /= 100.0;
-
-  //
-  // cap
-  if( h >= 360.0 )
-  {
-    h = 359.9;
-  }
-  if( s > 1.0 )
-  {
-    s = 1.0;
-  }
-  if( v > 1.0 )
-  {
-    v = 1.0;
-  }
-
-  // gray
-  if( s <= 0.0 )
-  {
-    rgb[RED]   = (byte)(v * 255.0);
-    rgb[GREEN] = (byte)(v * 255.0);
-    rgb[BLUE]  = (byte)(v * 255.0);
-    return;
-  }
-
-  h /= 60.0;                // hue sector
-  sector = (int)h;          // sector
-  f = h - (float)sector;    // fraction in sector
-  p = v * (1.0 - s); 
-  q = v * (1.0 - s * f);
-  t = v * (1.0 - s * (1.0 - f));
-
-  //
-  // RGB' [0.0, 1.0]
-  //
-  switch( sector )
-  {
-    case 0:
-      r = v; g = t; b = p;
+    // Get
+    case LaeWdSerOpGet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcGetConfig);
       break;
-    case 1:
-      r = q; g = v; b = p;
+
+    // Set
+    case LaeWdSerOpSet:
+      ok = serChkArgCnt(LaeWdSerCmdArgcSetConfig);
+      if( ok )
+      {
+        ok = serParseNumber("timeout", SerArgv[2],
+            (long)LaeWdTimeoutMin, (long)LaeWdTimeoutMax, val);
+      }
+
+      if( ok )
+      {
+        CurTimeout = (unsigned long)val;
+      }
       break;
-    case 2:
-      r = p; g = v; b = t;
-      break;
-    case 3:
-      r = p; g = q; b = v;
-      break;
-    case 4:
-      r = t; g = p; b = v;
-      break;
-    case 5:
+
+    // Bad
+    case LaeWdSerOpBad:
     default:
-      r = v; g = p; b = q;
+      ok = false;
       break;
   }
 
-  // conversion
-  rgb[RED]   = (byte)(r * 255.0);
-  rgb[GREEN] = (byte)(g * 255.0);
-  rgb[BLUE]  = (byte)(b * 255.0);
-}
-
-/*!
- * \brief Read all monitored voltages.
- */
-void readVoltages()
-{
-  int   sensorval;
-
-  // read jack voltage input to battery charging circuitry
-  sensorval = analogRead(PIN_A_JACK_V);
-  CurJackV  = (float)sensorval * ADC_V_PER_VAL * JACK_V_TRIM;
-
-  if( CurJackV >= JACK_V_MIN )
+  // successful command
+  if( ok )
   {
-    CurBattIsCharging = true;
+    serRsp("%u", CurTimeout);
   }
-  else
-  {
-    CurBattIsCharging = false;
-  }
-
-  // read battery output voltage
-  sensorval = analogRead(PIN_A_BATT_V);
-  CurBattV  = (float)sensorval * ADC_V_PER_VAL * BATT_V_TRIM;
 }

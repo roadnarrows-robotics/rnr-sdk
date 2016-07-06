@@ -138,6 +138,17 @@ then
   exit 2
 fi
 
+volts()
+{
+  declare -i v w x y
+  v=$1
+  x=$v
+  let x/=10
+  let w=${x}*10
+  let y=${v}-${w}
+  printf "%2d.%1d" "${x}" "${y}"
+}
+
 echo "Monitoring Watchdog Subprocessor on I2C Bus ${dev} at address ${addr}"
 
 # read fw version command
@@ -152,6 +163,11 @@ declare -i jackv
 declare -i battv
 declare -i chrg
 
+printf "          enables                 voltages            is\n"
+printf "motor_ctlr aux_batt aux_5v    jack_in  batt_out    charging\n"
+printf "---------- -------- ------    -------  --------    --------\n"
+#rintf "     x        x       x         vv.v     vv.v          x\r"
+
 while :
 do
   # read enables command
@@ -159,9 +175,9 @@ do
   rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=3)
   echo ${rsp} | while read en_motor_ctlr en_aux_port_batt en_aux_port_5v
   do
-    echo "motor ctlr enable:    ${en_motor_ctlr}"
-    echo "aux port batt enable: ${en_aux_port_batt}"
-    echo "aux port 5v enable:   ${en_aux_port_5v}"
+    #echo "motor ctlr enable:    ${en_motor_ctlr}"
+    #echo "aux port batt enable: ${en_aux_port_batt}"
+    #echo "aux port 5v enable:   ${en_aux_port_5v}"
   done
 
   # read voltages command
@@ -169,8 +185,8 @@ do
   rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=2)
   echo ${rsp} | while read jackv battv
   do
-    echo "jack volts(10x):      ${jackv}"
-    echo "batt volts(10x):      ${battv}"
+    #echo "jack volts(10x):      ${jackv}"
+    #echo "batt volts(10x):      ${battv}"
   done
 
   # pet dog command
@@ -178,7 +194,13 @@ do
   rsp=$(i2cread --log=error --fd=3 --address=${addr} --count=1)
   echo ${rsp} | while read chrg
   do
-    echo "charging:             ${chrg}"
+    #echo "charging:             ${chrg}"
   done
+
+  printf "     %d        %d       %d         %s     %s          %d\r" \
+    "${en_motor_ctlr}" "${en_aux_port_batt}" "${en_aux_port_5v}" \
+    "$(volts ${jackv})" "$(volts ${battv})" \
+    "${chrg}"
+    
   sleep 1
 done 3<>${dev}

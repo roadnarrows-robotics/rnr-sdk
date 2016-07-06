@@ -114,6 +114,35 @@ namespace laelaps
 
 
   // . .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .
+  // Watchdog Tuning
+
+  /*!
+   * \brief Default Laelaps watchdog timeout
+   *
+   * The watchdog sub-processor must be petted at a faster rate than its 
+   * timeout. Any received valid I2C or serial command by the watchdog
+   * results in a reset of the watchdog timer. If the watchdog timer times out,
+   * the no-service state is entered. Power to the motor controllers and motors
+   * is disabled and the deck status LED flashes green.
+   *
+   * Units: milliseconds
+   * Range: [\ref LaeTuneWdTimeoutMin, \ref LaeTuneWdTimeoutMax]
+   * Scope: global
+   */
+  extern const ulong_t LaeTuneWdTimeoutDft;
+
+  /*!
+   * \brief Minimum watchdog timeout (msec).
+   */
+  extern const ulong_t LaeTuneWdTimeoutMin;
+
+  /*!
+   * \brief Maximum watchdog timeout (msec).
+   */
+  extern const ulong_t LaeTuneWdTimeoutMax;
+
+
+  // . .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .
   // Derated Velocity Tuning
 
   /*!

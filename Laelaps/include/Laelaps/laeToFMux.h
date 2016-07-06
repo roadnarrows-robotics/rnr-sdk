@@ -374,13 +374,13 @@ namespace laelaps
   // Get firmware version command and response.
   //
   // Command format:  'v' EOC
-  // Response format: 'v' fw_version EOR
+  // Response format: 'v' product subproc fw_version EOR
   // Arguments:
   //  fw_version ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdGetVersion    = 'v';  ///< serial command id
   const byte_t LaeToFMuxSerCmdArgsGetVersion  = 0;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsGetVersion  = 1;    ///< rsp argument count
+  const byte_t LaeToFMuxSerRspArgsGetVersion  = 3;    ///< rsp argument count
 
   //
   // Configure firmware operation.
@@ -549,7 +549,7 @@ namespace laelaps
   // Arguments:
   //  level ::= INT
   //
-  const char   LaeToFMuxSerCmdIdDebug   = 'x';  ///< command id
+  const char   LaeToFMuxSerCmdIdDebug   = 'X';  ///< command id
   const byte_t LaeToFMuxSerCmdArgsDebug = 1;    ///< cmd argument count
   const byte_t LaeToFMuxSerRspArgsDebug = 1;    ///< rsp argument count
 

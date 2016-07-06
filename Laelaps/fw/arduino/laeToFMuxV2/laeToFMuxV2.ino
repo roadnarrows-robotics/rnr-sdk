@@ -1215,7 +1215,7 @@ void serExecGetVersion()
 {
   if( serChkArgCnt(LaeToFMuxSerCmdArgsGetVersion) )
   {
-    serRsp("%d", LAE_TOF_MUX_FW_VERSION);
+    serRsp("Laelaps ToFMux v%d", LAE_TOF_MUX_FW_VERSION);
   }
 }
 
