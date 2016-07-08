@@ -109,12 +109,11 @@ const int PIN_A_USER_MAX  = A3;   ///< maximum user available pin number
 const int   PIN_A_JACK_V  = A0;       ///< jack voltage into battery charging
 const int   PIN_A_BATT_V  = A1;       ///< battery output voltage
 const float ADC_V_PER_BIT = 0.01955;  ///< v/bit = 0.0V - 20.0V in 1023 values
-const float JACK_V_MIN    = 13.9;     ///< required minimum voltage to charge
-const float JACK_V_BIAS   = 0.7;      ///< jack bias
-const float JACK_V_TRIM   = 1.1089;   ///< jack trim
-const float BATT_V_BIAS   = 0.7;      ///< battery bias
-//const float BATT_V_TRIM   = 1.0540;   ///< battery trim
-const float BATT_V_TRIM   = 0.95385;  ///< battery trim
+const float JACK_V_MIN    = 13.0;     ///< required minimum voltage to charge
+const float JACK_V_BIAS   = 0.0;      ///< jack volt bias
+const float JACK_V_MULT   = 1.0;      ///< jack volt multiplier
+const float BATT_V_BIAS   = 0.0;      ///< battery volt bias
+const float BATT_V_MULT   = 1.0;      ///< battery volt multiplier
 
 #if 0 // DEPRECATED
 // Digital Pin Shadow State
@@ -698,7 +697,7 @@ void readVoltages()
 
   // read jack voltage input to battery charging circuitry
   sensorval = analogRead(PIN_A_JACK_V);
-  CurJackV  = ((float)sensorval * ADC_V_PER_BIT - JACK_V_BIAS) * JACK_V_TRIM;
+  CurJackV  = ((float)sensorval * ADC_V_PER_BIT - JACK_V_BIAS) * JACK_V_MULT;
 
   if( CurJackV >= JACK_V_MIN )
   {
@@ -711,7 +710,7 @@ void readVoltages()
 
   // read battery output voltage
   sensorval = analogRead(PIN_A_BATT_V);
-  CurBattV  = ((float)sensorval * ADC_V_PER_BIT - BATT_V_BIAS) * BATT_V_TRIM;
+  CurBattV  = ((float)sensorval * ADC_V_PER_BIT - BATT_V_BIAS) * BATT_V_MULT;
 }
 
 
@@ -1357,38 +1356,30 @@ void p(const char *fmt, ...)
 }
 
 /*!
- * \brief Format print float into buffer.
+ * \brief Buffer format print voltage float.
  *
  * The arduino print facilities do not normally contain float/double print
  * formatting  support.
  *
- * Format: %<width>.0<precision>f
+ * Format: %d.%d
  *
  * \param [out] buf   Output formatted buffer.
- * \param val         FPN to be formatted.
- * \param width       Output width.
- * \param precision   Output precision.
+ * \param volts       FPN to be formatted.
  */
-void sfloat(char *buf, float val, int width=6, int precision=1)
+void svolts(char buf[], float volts)
 {
-  int32_t   val_int, val_frac;
-  int32_t   mult;
-  int       i;
+  int v_int, v_frac;
 
-  for(i = 0, mult = 1; i < precision; ++i, mult *= 10);
-
-  val_int = (int32_t)val;
-  val = val - (float)val_int;
-  if( val < 0.0 )
+  if( volts < 0.0 )
   {
-    val = -val;
+    volts = -volts;
   }
-  val_frac = (int32_t)(val * mult);
 
-  // don't work with width fileds
-  //sprintf(buf, "%*d.%0*d", width, val_int, precision, val_frac);
- 
-  sprintf(buf, "%d.%d", val_int, val_frac);
+  v_int   = (int)volts;
+  volts   = (volts - (float)v_int) * 10.0;
+  v_frac  = (int)(volts);
+
+  sprintf(buf, "%d.%d", v_int, v_frac);
 }
 
 /*!
@@ -2041,12 +2032,9 @@ void serExecReadVolts()
   if( serChkArgCnt(LaeWdSerCmdArgcReadVolts) )
   {
     readVoltages();
-    //sfloat(buf_batt_v, CurBattV, 4, 1);
-    //sfloat(buf_jack_v, CurJackV, 4, 1);
-    //serRsp("%s %s", buf_jack_v, buf_batt_v);
-    bv = (int)(CurBattV * 10.0);
-    jv = (int)(CurJackV * 10.0);
-    serRsp("%d %d", jv, bv);
+    svolts(buf_jack_v, CurJackV);
+    svolts(buf_batt_v, CurBattV);
+    serRsp("%s %s", buf_jack_v, buf_batt_v);
   }
 }
 

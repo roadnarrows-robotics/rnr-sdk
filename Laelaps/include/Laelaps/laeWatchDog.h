@@ -551,9 +551,12 @@ namespace laelaps
   // Print help command and response.
   //
   // Command format:  'h' EOC
-  // Response format: 'h' cmd_id_0 ... EOR
+  // Response format: synopsis_0 EOR
+  //                  synopsis_1 EOR
+  //                  ...
+  //                  synopsis_n EOR
   // Arguments:
-  //  cmd_id_k ::= CMD_ID
+  //  synopsis_k ::= CMD_ID [args] '-' brief 
   //
   // Note: This command's use is intended only in user interactive mode.
   //
@@ -565,7 +568,9 @@ namespace laelaps
   // Command format:  'v' EOC
   // Response format: 'v' product subproc fw_version EOR
   // Arguments:
-  //  fw_version ::= DECIMAL
+  //  product     ::= ROADNARROWS_PRODUCT_NAME
+  //  subproc     ::= SUBPROCESSOR_NAME
+  //  fw_version  ::= DECIMAL
   //
   const char   LaeWdSerCmdIdGetVersion    = 'v';  ///< serial command id
   const byte_t LaeWdSerCmdArgcGetVersion  = 1;    ///< cmd argument count

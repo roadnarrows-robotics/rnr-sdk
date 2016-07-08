@@ -100,12 +100,17 @@ int         I2CRspLen;                      ///< response length
 //
 char      SerLine[LaeToFMuxSerMaxCmdLen+1];
 int       SerLinePos;
-char      SerArgs[LaeToFMuxSerMaxCmdArgs][LaeToFMuxSerMaxCmdArgLen];
-int       SerArgCnt;
+char      SerArgv[LaeToFMuxSerMaxCmdArgc][LaeToFMuxSerMaxCmdArgLen];
+int       SerArgc;
 const int SerCmdIdx = 0;
 boolean   SerContinuousMode;
 byte      SerContinuousOutput;
 
+//
+// Define level of serial help output. There is limited global variable space.
+// Choices are: HELP_MIN HELP_FULL HELP_SYN
+//
+#define HELP_SYN
 
 //------------------------------------------------------------------------------
 // Arduino Hook Functions
@@ -152,7 +157,7 @@ void setup()
   // Serial command-line ASCII interface (baud does not matter over USB) 
   // 
   SerLinePos        = 0;
-  SerArgCnt         = 0;
+  SerArgc           = 0;
   SerContinuousMode = false;
   Serial.begin(115200);
 }
@@ -738,7 +743,7 @@ void serRsp(const char *fmt, ... )
   va_list args;
   char    buf[LaeToFMuxSerMaxRspLen];
 
-  sprintf(buf, "%s ", SerArgs[SerCmdIdx]);
+  sprintf(buf, "%s ", SerArgv[SerCmdIdx]);
   strFmt  = buf;
   strFmt += fmt;
   strFmt += LaeToFMuxSerEoR;
@@ -764,7 +769,7 @@ void serErrorRsp(const char *fmt, ... )
   va_list args;
   char    buf[LaeToFMuxSerMaxRspLen];
 
-  sprintf(buf, "%s %s ", LaeToFMuxSerArgErrRsp, SerArgs[SerCmdIdx]);
+  sprintf(buf, "%s %s ", LaeToFMuxSerArgErrRsp, SerArgv[SerCmdIdx]);
   strFmt  = buf;
   strFmt += fmt;
   strFmt += LaeToFMuxSerEoR;
@@ -916,7 +921,7 @@ boolean serParseCmd()
   int i, j;
   int len;
 
-  SerArgCnt = 0;
+  SerArgc   = 0;
   len       = strlen(SerLine);
   i         = 0;
 
@@ -941,14 +946,14 @@ boolean serParseCmd()
             (j < LaeToFMuxSerMaxCmdArgLen-1) &&
             !whitespace(SerLine[i]) )
     {
-      SerArgs[SerArgCnt][j++] = SerLine[i++];
+      SerArgv[SerArgc][j++] = SerLine[i++];
     }
 
-    SerArgs[SerArgCnt++][j] = 0;
+    SerArgv[SerArgc++][j] = 0;
 
-  } while( SerArgCnt < LaeToFMuxSerMaxCmdArgs );
+  } while( SerArgc < LaeToFMuxSerMaxCmdArgc );
 
-  return SerArgCnt > 0;
+  return SerArgc > 0;
 }
 
 /*!
@@ -961,13 +966,9 @@ boolean serParseCmd()
  */
 boolean serChkArgCnt(int nExpected)
 {
-  int   argCnt;
-
-  argCnt = SerArgCnt - 1;
-
-  if( argCnt != nExpected )
+  if( SerArgc != nExpected )
   {
-    serErrorRsp("requires %d args, got %d", nExpected, argCnt);
+    serErrorRsp("requires %d args, got %d", nExpected-1, SerArgc-1);
     return false;
   }
 
@@ -979,25 +980,31 @@ boolean serChkArgCnt(int nExpected)
  *
  * \param sArg  Operator argument.
  *
- * \return Returns 'g' (get) or 's' (set) on success. Prints error response
- * and returns '?' on failure.
+ * \return Returns 'g' (get) or 's' (set) on success.
+ * Prints error response and returns '?' on failure.
  */
 int serParseOp(char *sArg)
 {
   String  str(sArg);
 
+  // cmd_id op ...
+  if( SerArgc < 2 )
+  {
+    serErrorRsp("requires >= 1 args, got %d", SerArgc-1);
+    return LaeToFMuxSerOpBad;
+  }
   if( str == LaeToFMuxSerArgGet )
   {
-    return 'g';
+    return LaeToFMuxSerOpGet;
   }
   else if( str == LaeToFMuxSerArgSet )
   {
-    return 's';
+    return LaeToFMuxSerOpSet;
   }
   else
   {
     serErrorRsp("unknown operator %s", sArg);
-    return '?';
+    return LaeToFMuxSerOpBad;
   }
 }
 
@@ -1118,7 +1125,7 @@ void serExecCmd()
   char    cmdId;
   boolean bMode;
 
-  if( strlen(SerArgs[SerCmdIdx]) > 1 )
+  if( strlen(SerArgv[SerCmdIdx]) > 1 )
   {
     serErrorRsp("bad command");
     return;
@@ -1127,7 +1134,7 @@ void serExecCmd()
   // any command turns off continuous output mode
   bMode = false;
 
-  switch( SerArgs[SerCmdIdx][0] )
+  switch( SerArgv[SerCmdIdx][0] )
   {
     case LaeToFMuxSerCmdIdHelp:
       serExecHelp();
@@ -1181,6 +1188,7 @@ void serExecCmd()
  */
 void serExecHelp()
 {
+#ifdef HELP_MIN
   int i;
 
   char cmdids[] =
@@ -1206,6 +1214,62 @@ void serExecHelp()
   }
 
   Serial.print(LaeToFMuxSerEoR);
+#endif // HELP_MIN
+
+#ifdef HELP_FULL
+  const char *cmds[][2] = 
+  {
+    {"a",                           "get als measurements"},
+    {"c {g|s} [als_state]",         "get/set firmare configuration"},
+    {"d",                           "get tof measurements"},
+    {"i sensor",                    "get sensor information"},
+    {"l",                           "list connected sensors"},
+    {"o {a|d}",                     "set continuous als/tof output"},
+    {"p",                           "probe for sensors"},
+    {"r sensor addr {1|2}",         "read sensor register"},
+    {"t {g|s} sensor [offset xtalk gain period]",
+                                    "get/set tune params"},
+    {"v",                           "get firmware version"},
+    {"w sensor addr {1|2} val",     "write sensor register"},
+    {NULL, NULL}
+  };
+
+  int   i;
+
+  p("%c", LaeToFMuxSerEoR);
+
+  for(i = 0; cmds[i][0] != NULL; ++i)
+  {
+    p("%-42s- %s%c", cmds[i][0], cmds[i][1], LaeToFMuxSerEoR);
+  }
+#endif // HELP_FULL
+
+#ifdef HELP_SYN
+  const char *cmds[] = 
+  {
+    "a",
+    "c {g|s} [als_state]",
+    "d",
+    "i sensor",
+    "l",
+    "o {a|d}",
+    "p",
+    "r sensor addr {1|2}",
+    "t {g|s} sensor [offset xtalk gain period]",
+    "v",
+    "w sensor addr {1|2} val",
+    NULL
+  };
+
+  int   i;
+
+  p("%c", LaeToFMuxSerEoR);
+
+  for(i = 0; cmds[i][0] != NULL; ++i)
+  {
+    p("%s%c", cmds[i], LaeToFMuxSerEoR);
+  }
+#endif // HELP_SYN
 }
 
 /*!
@@ -1213,7 +1277,7 @@ void serExecHelp()
  */
 void serExecGetVersion()
 {
-  if( serChkArgCnt(LaeToFMuxSerCmdArgsGetVersion) )
+  if( serChkArgCnt(LaeToFMuxSerCmdArgcGetVersion) )
   {
     serRsp("Laelaps ToFMux v%d", LAE_TOF_MUX_FW_VERSION);
   }
@@ -1224,54 +1288,57 @@ void serExecGetVersion()
  */
 void serExecConfig()
 {
-  int   op;
-  long  state;
+  boolean     ok;
+  int         op;
+  long        state;
 
-  if( (SerArgCnt - 1) == 0 )
+  op = serParseOp(SerArgv[1]);
+
+  switch( op )
   {
-    serErrorRsp("no operator");
-  }
-  else if( (op = serParseOp(SerArgs[1])) == '?' )
-  {
-    return;
+    // Get
+    case LaeToFMuxSerOpGet:
+      ok = serChkArgCnt(LaeToFMuxSerCmdArgcGetConfig);
+      break;
+
+    // Set
+    case LaeToFMuxSerOpSet:
+      if( (ok = serChkArgCnt(LaeToFMuxSerCmdArgcSetConfig)) )
+      {
+        ok = serParseNumber("als_state", SerArgv[2], 0, 1, state);
+      }
+
+      if( ok )
+      {
+        if( state == 0 )
+        {
+          AlsSensorId = -1;
+        }
+        else
+        {
+          AlsSensorId = AlsSensorId < 0? nextSensor(0): AlsSensorId;
+        }
+      }
+      break;
+
+    // Bad
+    case LaeToFMuxSerOpBad:
+    default:
+      ok = false;
+      break;
   }
 
-  if( op == 'g' )
+  // successful command
+  if( ok )
   {
-    if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetConfig) )
+    if( AlsSensorId < 0 )
     {
-      return;
-    }
-  }
-  else if( op == 's' )
-  {
-    if( !serChkArgCnt(LaeToFMuxSerCmdArgsSetConfig) )
-    {
-      return;
-    }
-    
-    if( !serParseNumber("als_state", SerArgs[2], 0, 1, state) )
-    {
-      return;
-    }
-
-    if( state == 0 )
-    {
-      AlsSensorId = -1;
+      serRsp("%s", LaeToFMuxSerArgOff);
     }
     else
     {
-      AlsSensorId = AlsSensorId < 0? nextSensor(0): AlsSensorId;
+      serRsp("%s", LaeToFMuxSerArgOn);
     }
-  }
-
-  if( AlsSensorId < 0 )
-  {
-    serRsp("%s", LaeToFMuxSerArgOff);
-  }
-  else
-  {
-    serRsp("%s", LaeToFMuxSerArgOn);
   }
 }
 
@@ -1283,11 +1350,11 @@ void serExecGetIdent()
   int                   sensor;
   VL6180xIdentification ident;
  
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetIdent) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcGetIdent) )
   {
     return;
   }
-  else if( !serParseSensorId(SerArgs[1], sensor) ) 
+  else if( !serParseSensorId(SerArgv[1], sensor) ) 
   {
     return;
   }
@@ -1308,12 +1375,12 @@ void serExecGetIdent()
  */
 void serExecGetDist()
 {
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetDist) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcGetDist) )
   {
     return;
   }
 
-  Serial.print(SerArgs[SerCmdIdx]);
+  Serial.print(SerArgv[SerCmdIdx]);
 
   serPrintDist();
 
@@ -1325,12 +1392,12 @@ void serExecGetDist()
  */
 void serExecGetLux()
 {
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsGetLux) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcGetLux) )
   {
     return;
   }
 
-  Serial.print(SerArgs[SerCmdIdx]);
+  Serial.print(SerArgv[SerCmdIdx]);
 
   serPrintLux();
 
@@ -1350,41 +1417,33 @@ void serExecTunes()
   uint16_t  alsIntPeriod, alsIntPeriodDft;
   long      val;
 
-  if( (SerArgCnt - 1) == 0 )
-  {
-    serErrorRsp("no operator");
-    return;
-  }
-  else if( (op = serParseOp(SerArgs[1])) == '?' )
-  {
-    return;
-  }
-  else if( !serParseSensorId(SerArgs[2], sensor) )
-  {
-    return;
-  }
+  op = serParseOp(SerArgv[1]);
 
-  // get current tune values
-  ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
-                              alsGain,     alsIntPeriod);
-
-  //
-  // get
-  //
-  if( op == 'g' )
+  switch( op )
   {
-    if( serChkArgCnt(LaeToFMuxSerCmdArgsGetTunes) )
-    {
-      serRsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
-    }
-    return;
+    // Get
+    case LaeToFMuxSerOpGet:
+      if( !serChkArgCnt(LaeToFMuxSerCmdArgcGetTunes) )
+      {
+        return;
+      }
+      break;
+
+    // Set
+    case LaeToFMuxSerOpSet:
+      if( !serChkArgCnt(LaeToFMuxSerCmdArgcSetTunes) )
+      {
+        return;
+      }
+      break;
+
+    // Bad
+    case LaeToFMuxSerOpBad:
+    default:
+      return;
   }
 
-  //
-  // set
-  //
-
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsSetTunes) )
+  if( !serParseSensorId(SerArgv[2], sensor) )
   {
     return;
   }
@@ -1393,69 +1452,65 @@ void serExecTunes()
   ToFSensor[sensor]->getDefaultTunes(rangeOffsetDft, rangeCrossTalkDft,
                                      alsGainDft,     alsIntPeriodDft);
 
-  //
-  // parse tune arguments
-  //
+  // get current tune values
+  ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
+                              alsGain,     alsIntPeriod);
 
-  if( serParseTuneParam("tof_offset", SerArgs[3],
-                          rangeOffset, rangeOffsetDft,
-                          VL6180X_RANGE_OFFSET_MIN, VL6180X_RANGE_OFFSET_MIN,
-                          val) )
+
+  if( op == LaeToFMuxSerOpSet )
   {
+    // tof range sensor offset
+    if( !serParseTuneParam("tof_offset", SerArgv[3],
+                        rangeOffset, rangeOffsetDft,
+                        VL6180X_RANGE_OFFSET_MIN, VL6180X_RANGE_OFFSET_MIN,
+                        val) )
+    {
+      return;
+    }
+
     rangeOffset = (byte)val;
-  }
-  else
-  {
-    return;
-  }
 
-  if( serParseTuneParam("tof_cross_talk", SerArgs[4],
+    // tof range sensor cross talk
+    if( !serParseTuneParam("tof_cross_talk", SerArgv[4],
                           rangeCrossTalk, rangeCrossTalkDft,
                           VL6180X_RANGE_XTALK_MIN, VL6180X_RANGE_XTALK_MIN,
                           val) )
-  {
-    rangeCrossTalk = (uint16_t)val;
-  }
-  else
-  {
-    return;
-  }
+    {
+      return;
+    }
 
-  if( serParseTuneParam("als_gain", SerArgs[5],
+    rangeCrossTalk = (uint16_t)val;
+
+    // ambient light sensor gain
+    if( !serParseTuneParam("als_gain", SerArgv[5],
                           alsGain, alsGainDft,
                           VL6180X_AMBIENT_GAIN_MIN, VL6180X_AMBIENT_GAIN_MAX,
                           val) )
-  {
-    alsGain = (byte)val;
-  }
-  else
-  {
-    return;
-  }
+    {
+      return;
+    }
 
-  if( serParseTuneParam("als_int_period", SerArgs[6],
+    alsGain = (byte)val;
+        
+    if( !serParseTuneParam("als_int_period", SerArgv[6],
                           alsIntPeriod, alsIntPeriodDft,
                           VL6180X_AMBIENT_INT_T_MIN, VL6180X_AMBIENT_INT_T_MAX,
                           val) )
-  {
+    {
+      return;
+    }
+
     alsIntPeriod = (uint16_t)val;
-  }
-  else
-  {
-    return;
+
+    // mark changes for tuning
+    ToFSensor[sensor]->markRangeForTuning(rangeOffset, rangeCrossTalk);
+    ToFSensor[sensor]->markAlsForTuning(alsGain, alsIntPeriod);
   }
 
-  ToFSensor[sensor]->markRangeForTuning(rangeOffset, rangeCrossTalk);
-  ToFSensor[sensor]->markAlsForTuning(alsGain, alsIntPeriod);
-  
-  //
-  // Get new current tune values. Note that tune parameters are updated 
-  // asynchronously, so the current value may not match the target set values
-  // yet.
-  //
-  //ToFSensor[sensor]->getTunes(rangeOffset, rangeCrossTalk,
-  //                            alsGain,     alsIntPeriod);
 
+  // successful command
+  // Note:  The tune parameters are updated asynchronously, so the current
+  //        values may not match the target set values yet.
   serRsp("%u %u %u %u", rangeOffset, rangeCrossTalk, alsGain, alsIntPeriod);
 }
 
@@ -1464,7 +1519,7 @@ void serExecTunes()
  */
 void serExecProbe()
 {
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsProbe) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcProbe) )
   {
     return;
   }
@@ -1481,12 +1536,12 @@ void serExecList()
 {
   int   i;
 
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsList) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcList) )
   {
     return;
   }
 
-  Serial.print(SerArgs[SerCmdIdx]);
+  Serial.print(SerArgv[SerCmdIdx]);
 
   for(i = 0; i < LaeToFMuxNumOfChan; ++i)
   {
@@ -1510,12 +1565,12 @@ void serExecCont()
 {
   String  str;
 
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsCont) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcCont) )
   {
     return; 
   }
 
-  str = SerArgs[1];
+  str = SerArgv[1];
 
   if( str == "a" )
   {
@@ -1564,21 +1619,21 @@ void serExecReadReg()
   long      regSize;
   uint16_t  regVal;
  
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsReadReg) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcReadReg) )
   {
     return;
   }
-  else if( !serParseSensorId(SerArgs[1], sensor) ) 
+  else if( !serParseSensorId(SerArgv[1], sensor) ) 
   {
     return;
   }
-  else if( !serParseNumber("addr", SerArgs[2],
+  else if( !serParseNumber("addr", SerArgv[2],
         VL6180X_IDENTIFICATION_MODEL_ID, VL6180X_INTERLEAVED_MODE_ENABLE,
         regAddr) )
   {
     return;
   }
-  else if( !serParseNumber("size", SerArgs[3], 1, 2, regSize) )
+  else if( !serParseNumber("size", SerArgv[3], 1, 2, regSize) )
   {
     return;
   }
@@ -1608,25 +1663,25 @@ void serExecWriteReg()
   long      regWVal;
   uint16_t  regRVal;
  
-  if( !serChkArgCnt(LaeToFMuxSerCmdArgsWriteReg) )
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcWriteReg) )
   {
     return;
   }
-  else if( !serParseSensorId(SerArgs[1], sensor) ) 
+  else if( !serParseSensorId(SerArgv[1], sensor) ) 
   {
     return;
   }
-  else if( !serParseNumber("addr", SerArgs[2],
+  else if( !serParseNumber("addr", SerArgv[2],
         VL6180X_IDENTIFICATION_MODEL_ID, VL6180X_INTERLEAVED_MODE_ENABLE,
         regAddr) )
   {
     return;
   }
-  else if( !serParseNumber("size", SerArgs[3], 1, 2, regSize) )
+  else if( !serParseNumber("size", SerArgv[3], 1, 2, regSize) )
   {
     return;
   }
-  else if( !serParseNumber("val", SerArgs[4], 0, 0xffff, regWVal) )
+  else if( !serParseNumber("val", SerArgv[4], 0, 0xffff, regWVal) )
   {
     return;
   }

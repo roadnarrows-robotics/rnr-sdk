@@ -331,18 +331,18 @@ namespace laelaps
 
   // sizes
   const byte_t LaeToFMuxSerMaxCmdLen    =  80; ///< max command length (bytes)
-  const byte_t LaeToFMuxSerMaxCmdArgs   =   8; ///< max cmd argument count
+  const byte_t LaeToFMuxSerMaxCmdArgc   =   8; ///< max cmd argument count
   const byte_t LaeToFMuxSerMaxCmdArgLen =   8; ///< max cmd arg length (bytes)
   const byte_t LaeToFMuxSerMaxRspLen    = 100; ///< max rsp line length (bytes)
-  const byte_t LaeToFMuxSerMaxRspArgs   =  10; ///< max rsp argument count
+  const byte_t LaeToFMuxSerMaxRspArgc   =  10; ///< max rsp argument count
   const byte_t LaeToFMuxSerMaxRspArgLen =  16; ///< max rsp arg length (bytes)
 
   // separators
   const char LaeToFMuxSerEoC        = '\n';     ///< end of command
-  const char LaeToFMuxSerEoR[]      = "\n";     ///< end of response
+  const char LaeToFMuxSerEoR        = '\n';     ///< end of response
   const char LaeToFMuxSerSep        = ' ';      ///< argument separator(s)
 
-  // common arguments
+  // common string arguments
   const char LaeToFMuxSerArgNoSensor[]    = "-";      ///< sensor not present
   const char LaeToFMuxSerArgNoObj[]       = "noobj";  ///< no object detected
   const char LaeToFMuxSerArgSensorErr[]   = "error";  ///< sensor meas. error
@@ -354,6 +354,13 @@ namespace laelaps
   const char LaeToFMuxSerArgStet[]        = "-";      ///< leave as is
   const char LaeToFMuxSerArgErrRsp[]      = "E";      ///< response error
 
+  // common values
+  const char LaeToFMuxSerOpGet    = 'g';  ///< get operator value
+  const char LaeToFMuxSerOpSet    = 's';  ///< set operator value
+  const char LaeToFMuxSerOpReset  = 'r';  ///< reset operator value
+  const char LaeToFMuxSerOpStet   = '-';  ///< reset operator value
+  const char LaeToFMuxSerOpBad    = '?';  ///< unknown/bad operator
+
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
   // Serial Commands and Responses
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -362,9 +369,12 @@ namespace laelaps
   // Print help command and response.
   //
   // Command format:  'h' EOC
-  // Response format: 'h' cmd_id_0 ... EOR
+  // Response format: synopsis_0 EOR
+  //                  synopsis_1 EOR
+  //                  ...
+  //                  synopsis_n EOR
   // Arguments:
-  //  cmd_id_k ::= CMD_ID
+  //  synopsis_k ::= CMD_ID [args]
   //
   // Note: This command's use is intended only in user interactive mode.
   //
@@ -376,11 +386,13 @@ namespace laelaps
   // Command format:  'v' EOC
   // Response format: 'v' product subproc fw_version EOR
   // Arguments:
-  //  fw_version ::= DECIMAL
+  //  product     ::= ROADNARROWS_PRODUCT_NAME
+  //  subproc     ::= SUBPROCESSOR_NAME
+  //  fw_version  ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdGetVersion    = 'v';  ///< serial command id
-  const byte_t LaeToFMuxSerCmdArgsGetVersion  = 0;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsGetVersion  = 3;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcGetVersion  = 1;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcGetVersion  = 4;    ///< rsp argument count
 
   //
   // Configure firmware operation.
@@ -393,9 +405,9 @@ namespace laelaps
   //  als_state ::= OFF_ON
   //
   const char   LaeToFMuxSerCmdIdConfig      = 'c';  ///< serial command id
-  const byte_t LaeToFMuxSerCmdArgsGetConfig = 1;    ///< cmd get argument count
-  const byte_t LaeToFMuxSerCmdArgsSetConfig = 2;    ///< cmd set argument count
-  const byte_t LaeToFMuxSerRspArgsConfig    = 1;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcGetConfig = 2;    ///< get cmd argument count
+  const byte_t LaeToFMuxSerCmdArgcSetConfig = 3;    ///< set cmd argument count
+  const byte_t LaeToFMuxSerRspArgcConfig    = 2;    ///< rsp argument count
 
   //
   // Get sensor identity command and response.
@@ -413,8 +425,8 @@ namespace laelaps
   //  minor       ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdGetIdent    = 'i';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsGetIdent  = 1;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsGetIdent  = 5;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcGetIdent  = 2;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcGetIdent  = 6;    ///< rsp argument count
  
   //
   // Get measured distances.
@@ -428,8 +440,8 @@ namespace laelaps
   //  dist_k ::= DECIMAL | NO_OBJ | SENSOR_ERROR | NO_SENSOR
   //
   const char   LaeToFMuxSerCmdIdGetDist   = 'd';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsGetDist = 0;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsGetDist = 8;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcGetDist = 1;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcGetDist = 9;    ///< rsp argument count
 
   //
   // Get measured ambient light sensor lux values.
@@ -440,8 +452,8 @@ namespace laelaps
   //  lux_k ::= FLOAT | SENSOR_ERROR | NO_SENSOR
   //
   const char   LaeToFMuxSerCmdIdGetLux    = 'a';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsGetLux  = 0;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsGetLux  = 8;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcGetLux  = 1;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcGetLux  = 9;    ///< rsp argument count
 
   //
   // Get/set tune parameters.
@@ -458,9 +470,9 @@ namespace laelaps
   //  als_int_period  ::= INT | OP_RESET | OP_STET
   //
   const char   LaeToFMuxSerCmdIdTunes       = 't';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsGetTunes  = 2;    ///< cmd get argument count
-  const byte_t LaeToFMuxSerCmdArgsSetTunes  = 6;    ///< cmd set argument count
-  const byte_t LaeToFMuxSerRspArgsTunes     = 4;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcGetTunes  = 3;    ///< cmd get argument count
+  const byte_t LaeToFMuxSerCmdArgcSetTunes  = 7;    ///< cmd set argument count
+  const byte_t LaeToFMuxSerRspArgcTunes     = 5;    ///< rsp argument count
  
   //
   // Probe for connected ToF sensors.
@@ -471,8 +483,8 @@ namespace laelaps
   //  count ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdProbe   = 'p';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsProbe = 0;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsProbe = 1;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcProbe = 1;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcProbe = 2;    ///< rsp argument count
 
  
   //
@@ -485,8 +497,8 @@ namespace laelaps
   //  sensor    ::= DECIMAL
   //
   const char   LaeToFMuxSerCmdIdList   = 'l';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsList = 0;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsList = 1;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcList = 1;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcList = 9;    ///< rsp argument count
 
   //
   // Enable serial continuous output mode.
@@ -508,8 +520,8 @@ namespace laelaps
   // Note: Any command, except this command, turns off continuous output mode.
   //
   const char LaeToFMuxSerCmdIdCont     = 'o'; ///< serial command id
-  const byte_t LaeToFMuxSerCmdArgsCont = 1;   ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsCont = 1;   ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcCont = 2;   ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcCont = 2;   ///< rsp argument count
 
   //
   // Read register value.
@@ -523,8 +535,8 @@ namespace laelaps
   //  val     ::= HEX
   //
   const char   LaeToFMuxSerCmdIdReadReg   = 'r';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsReadReg = 3;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsReadReg = 1;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcReadReg = 4;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcReadReg = 2;    ///< rsp argument count
 
   //
   // Write register value.
@@ -538,8 +550,8 @@ namespace laelaps
   //  val     ::= INT
   //
   const char   LaeToFMuxSerCmdIdWriteReg    = 'w';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsWriteReg  = 4;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsWriteReg  = 1;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcWriteReg  = 5;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcWriteReg  = 2;    ///< rsp argument count
 
   //
   // Debug (not implemented)
@@ -550,8 +562,8 @@ namespace laelaps
   //  level ::= INT
   //
   const char   LaeToFMuxSerCmdIdDebug   = 'X';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgsDebug = 1;    ///< cmd argument count
-  const byte_t LaeToFMuxSerRspArgsDebug = 1;    ///< rsp argument count
+  const byte_t LaeToFMuxSerCmdArgcDebug = 2;    ///< cmd argument count
+  const byte_t LaeToFMuxSerRspArgcDebug = 2;    ///< rsp argument count
 
 #ifndef SWIG
 } // namespace laelaps
