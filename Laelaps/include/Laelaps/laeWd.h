@@ -62,6 +62,7 @@
 
 #include  "Laelaps/laelaps.h"
 #include  "Laelaps/laeUtils.h"
+#include  "Laelaps/laeDesc.h"
 #include  "Laelaps/laeTune.h"
 
 #include  "Laelaps/laeI2C.h"
@@ -103,7 +104,18 @@ namespace laelaps
     virtual void sync();
 
     /*!
-     * \brief Configure watchdog.
+     * \brief Configure watchdog from product description.
+     *
+     * Call after connection is opened.
+     *
+     * \param desc    Product description.
+     *
+     * \copydoc doc_return_std
+     */
+    virtual int configure(const LaeDesc &desc);
+  
+    /*!
+     * \brief Configure watchdog from tunable parameters.
      *
      * Call after connection is opened.
      *

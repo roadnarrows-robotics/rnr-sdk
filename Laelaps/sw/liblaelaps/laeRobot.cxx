@@ -258,7 +258,17 @@ int LaeRobot::connect()
   }
 
   //
+  // Connect to all standard built-in sensors.
+  //
+  if( rc == LAE_OK )
+  {
+    rc = connSensors();
+  }
+
+  //
   // Connect to the external watchdog arduino subprocessor.
+  // Note:  The watchdog connection must preceed connection to the motor
+  //        controllers.
   //
   if( rc == LAE_OK )
   {
@@ -271,22 +281,6 @@ int LaeRobot::connect()
   if( rc == LAE_OK )
   {
     rc = connMotorControllers(LaeDevMotorCtlrs, LaeBaudRateMotorCtlrs);
-  }
-
-  //
-  // Connect to the CleanFlight Intertial Measrurement Unit.
-  //
-  if( rc == LAE_OK )
-  {
-    rc = connImu(LaeDevIMU, LaeBaudRateIMU);
-  }
-
-  //
-  // Connect to all other built-in sensors.
-  //
-  if( rc == LAE_OK )
-  {
-    rc = connSensors();
   }
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -307,7 +301,7 @@ int LaeRobot::connect()
  
   if( rc == LAE_OK )
   {
-    rc = startThreads();
+    rc = startCoreThreads();
   }
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -385,24 +379,28 @@ int LaeRobot::reload()
   // reload tune XML file and set tuning parameter overrides
   xml.load(m_tunes, LaeSysCfgPath, LaeEtcTune);
 
+  // re-tune Kinodynamics thread and hardware i/f
   if( (rc = m_threadKin.reload(m_tunes)) != LAE_OK )
   {
     LOGERROR("Failed to reload kinodynamics tune parameters.");
     return rc;
   }
 
+  // re-tune IMU thread and hardware i/f
   else if( (rc = m_threadImu.reload(m_tunes)) != LAE_OK )
   {
     LOGERROR("Failed to reload IMU tune parameters.");
     return rc;
   }
 
+  // re-tune Range thread and hardware i/f
   else if( (rc = m_threadRange.reload(m_tunes)) != LAE_OK )
   {
     LOGERROR("Failed to reload range sensing tune parameters.");
     return rc;
   }
 
+  // re-tune WatchDog thread and hardware i/f
   else if( (rc = m_threadWatchDog.reload(m_tunes)) != LAE_OK )
   {
     LOGERROR("Failed to reload WatchDog tune parameters.");
@@ -860,6 +858,65 @@ void LaeRobot::syncDb()
 // Hardare Connection and Configuration Methods.
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
+int LaeRobot::connSensors()
+{
+  string  strIdent;
+  int     rc;
+  uint_t  uVerMajor, uVerMinor, uFwVer;
+
+  //
+  // Connect to the CleanFlight Intertial Measrurement Unit.
+  //
+  if( (rc = m_imu.open(LaeDevIMU, LaeBaudRateIMU)) < 0 )
+  {
+    LOGERROR("%s: Failed to open IMU at %d baud.", LaeDevIMU, LaeBaudRateIMU);
+    return rc;
+  }
+
+  else if( (rc = m_imu.readIdentity(strIdent)) < 0 )
+  {
+    LOGERROR("%s: Failed to read IMU identity.", LaeDevIMU);
+    return rc;
+  }
+
+  else
+  {
+    LOGDIAG2("Connected to IMU %s.", strIdent.c_str());
+  }
+
+  if( (rc = m_range.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer)) < 0 )
+  {
+    LOGERROR("Failed to read range sensor group interface version.");
+    return rc;
+  }
+  else
+  {
+    LOGDIAG2("Connected to Range Sensor Group %u.%u, fwver=%u.",
+        uVerMajor, uVerMinor, uFwVer);
+  }
+
+  return rc;
+}
+
+int LaeRobot::connWatchDog()
+{
+  uint_t  uFwVer;
+
+  if( m_watchdog.cmdGetFwVersion(uFwVer) < 0 )
+  {
+    LOGWARN("WatchDog: Failed to get firmware version.");
+  }
+  else
+  {
+    LOGDIAG3("Connected to WatchDog sub-processor, fwver=%u.", uFwVer);
+
+    // sync watchdog state with subprocessor
+    m_watchdog.sync();
+  }
+
+  return LAE_OK;
+}
+
 int LaeRobot::connMotorControllers(const std::string &strDevMotorCtlrs,
                                    const int         nBaudRate)
 {
@@ -880,140 +937,117 @@ int LaeRobot::connMotorControllers(const std::string &strDevMotorCtlrs,
   return rc;
 }
 
-int LaeRobot::connImu(const std::string &strDevImu, const int nBaudRate)
-{
-  string  strIdent;
-  int     rc;
-
-  if( (rc = m_imu.open(strDevImu, nBaudRate)) < 0 )
-  {
-    LOGERROR("%s: Failed to open IMU at %d baud.",
-        strDevImu.c_str(), nBaudRate);
-  }
-
-  else if( (rc = m_imu.readIdentity(strIdent)) < 0 )
-  {
-    LOGERROR("%s: Failed to read IMU identity.", strDevImu.c_str());
-  }
-
-  LOGDIAG2("Connected to %s.", strIdent.c_str());
-
-  return rc;
-}
-
-int LaeRobot::connSensors()
-{
-  return m_range.configure(m_descLaelaps);
-}
-
-int LaeRobot::connWatchDog()
-{
-  uint_t  uVerNum;
-
-  if( m_watchdog.cmdGetFwVersion(uVerNum) < 0 )
-  {
-    LOGWARN("WatchDog: Failed to get firmware version.");
-  }
-  else
-  {
-    LOGDIAG3("Connected to WatchDog sub-processor, fwver=%u.",
-        uVerNum);
-
-    // sync watchdog state with subprocessor
-    m_watchdog.sync();
-  }
-
-  return LAE_OK;
-}
-
 int LaeRobot::configForOperation()
 {
   int     rc;                 // return code
 
   //
-  // Configure watchdog.
+  // Configure watchdog from product description
   //
   if( (rc = m_watchdog.configure(m_tunes)) != LAE_OK )
   {
     LOGERROR("Failed to configure WatchDog.");
-    return rc;
+  }
+
+  //
+  // Configure watchdog from tunable parameters
+  //
+  else if( (rc = m_watchdog.configure(m_tunes)) != LAE_OK )
+  {
+    LOGERROR("Failed to tune WatchDog.");
   }
 
   //
   // Configure kinodynamics from product description.
   //
-  if( (rc = m_kin.configure(m_descLaelaps)) != LAE_OK )
+  else if( (rc = m_kin.configure(m_descLaelaps)) != LAE_OK )
   {
     LOGERROR("Failed to configure kinodynamics.");
-    return rc;
   }
 
   //
   // Configure kinodynamics from tunable parameters.
   //
-  if( (rc = m_kin.configure(m_tunes)) != LAE_OK )
+  else if( (rc = m_kin.configure(m_tunes)) != LAE_OK )
   {
     LOGERROR("Failed to tune kinodynamics.");
-    return rc;
   }
 
   //
-  // Configure IMU.
+  // Configure IMU from product description.
   //
-  if( (rc = m_imu.configure()) != LAE_OK )
+  else if( (rc = m_imu.configure(m_descLaelaps)) != LAE_OK )
   {
     LOGERROR("Failed to configure IMU.");
-    return rc;
   }
 
   //
-  // Configure range sensors.
+  // Configure IMU from tunable parameters.
   //
-  if( (rc = m_range.configure(m_tunes)) != LAE_OK )
+  else if( (rc = m_imu.configure(m_tunes)) != LAE_OK )
+  {
+    LOGERROR("Failed to tune IMU.");
+  }
+
+  //
+  // Configure range sensors from product description.
+  //
+  else if( (rc = m_range.configure(m_descLaelaps)) != LAE_OK )
+  {
+    LOGERROR("Failed to configure IMU.");
+  }
+
+  //
+  // Configure range sensors from tunable parameters.
+  //
+  else if( (rc = m_range.configure(m_tunes)) != LAE_OK )
   {
     LOGERROR("Failed to configure range sensor group.");
-    return rc;
   }
 
   //
-  // Enable power to top deck battery and regulated 5V power outputs.
-  // Note: Moved to watchdog subprocessor.
+  // Good
   //
-  //m_powerBatt.enable();
-  //m_power5V.enable();
+  else
+  {
+    //
+    // Enable power to top deck battery and regulated 5V power outputs.
+    // Note: Moved to watchdog subprocessor.
+    //
+    //m_powerBatt.enable();
+    //m_power5V.enable();
+    rc = LAE_OK;
+  }
 
   LOGDIAG2("Configured for operation.");
 
-  return LAE_OK;
+  return rc;
 }
 
-int LaeRobot::startThreads()
+int LaeRobot::startCoreThreads()
 {
-  string  strName;
   int     nPriority;
   double  fHz;
   int     rc;
 
   //
+  // WatchDog thread.
+  //
+  nPriority = LaeThreadWd::ThreadWdPrioDft;
+  fHz       = LaeThreadWd::optimizeHz(m_tunes.getWatchDogTimeout());
+
+  if( (rc = startThread(&m_threadWatchDog, nPriority, fHz)) != LAE_OK )
+  {
+    return rc;
+  }
+
+  //
   // Time-of-Flight range sensors thread.
   //
-  strName   = m_threadRange.getThreadName();
   nPriority = LaeThreadRange::ThreadRangePrioDft;
   fHz       = m_tunes.getRangeHz();
 
-  if( (rc == m_threadRange.createThread(nPriority)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to create.", strName.c_str());
-  }
-  else if( (rc == m_threadRange.runThread(fHz)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to start.", strName.c_str());
-  }
-  else if( rc == LAE_OK )
-  {
-    LOGDIAG2("%s thread started at %.3lfHz.", strName.c_str(), fHz); 
-  }
-  else
+  if( (rc = startThread(&m_threadRange, nPriority, fHz)) != LAE_OK )
   {
     return rc;
   }
@@ -1021,23 +1055,10 @@ int LaeRobot::startThreads()
   //
   // Inertia Measurement Unit thread.
   //
-  strName   = m_threadImu.getThreadName();
   nPriority = LaeThreadImu::ThreadImuPrioDft;
   fHz       = m_tunes.getImuHz();
 
-  if( (rc == m_threadImu.createThread(nPriority)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to create.", strName.c_str());
-  }
-  else if( (rc == m_threadImu.runThread(fHz)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to start.", strName.c_str());
-  }
-  else if( rc == LAE_OK )
-  {
-    LOGDIAG2("%s thread started at %.3lfHz.", strName.c_str(), fHz); 
-  }
-  else
+  if( (rc = startThread(&m_threadImu, nPriority, fHz)) != LAE_OK )
   {
     return rc;
   }
@@ -1045,52 +1066,40 @@ int LaeRobot::startThreads()
   //
   // Kinodynamics thread.
   //
-  strName   = m_threadKin.getThreadName();
   nPriority = LaeThreadKin::ThreadKinPrioDft;
   fHz       = m_tunes.getKinematicsHz();
 
-  if( (rc == m_threadKin.createThread(nPriority)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to create.", strName.c_str());
-  }
-  else if( (rc == m_threadKin.runThread(fHz)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to start.", strName.c_str());
-  }
-  else if( rc == LAE_OK )
-  {
-    LOGDIAG2("%s thread started at %.3lfHz.", strName.c_str(), fHz); 
-  }
-  else
-  {
-    return rc;
-  }
-
-  //
-  // WatchDog thread.
-  //
-  strName   = m_threadWatchDog.getThreadName();
-  nPriority = LaeThreadWd::ThreadWdPrioDft;
-  fHz       = LaeThreadWd::ThreadWdHzDft;
-
-  if( (rc == m_threadWatchDog.createThread(nPriority)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to create.", strName.c_str());
-  }
-  else if( (rc == m_threadWatchDog.runThread(fHz)) < 0 )
-  {
-    LOGERROR("%s thread: Failed to start.", strName.c_str());
-  }
-  else if( rc == LAE_OK )
-  {
-    LOGDIAG2("%s thread started at %.3lfHz.", strName.c_str(), fHz); 
-  }
-  else
+  if( (rc = startThread(&m_threadKin, nPriority, fHz)) != LAE_OK )
   {
     return rc;
   }
 
   return LAE_OK;
+}
+
+int LaeRobot::startThread(LaeThread *pThread, int nPriority, double fHz)
+{
+  string  strName;
+  int     rc;
+
+  strName = pThread->getThreadName();
+
+  if( (rc = pThread->createThread(nPriority)) < 0 )
+  {
+    LOGERROR("%s thread: Failed to create.", strName.c_str());
+  }
+  else if( (rc = pThread->runThread(fHz)) < 0 )
+  {
+    LOGERROR("%s thread: Failed to start.", strName.c_str());
+  }
+  else
+  {
+    LOGDIAG2("%s thread started at %.3lfHz with priority %d.",
+        strName.c_str(), fHz, nPriority); 
+    rc = LAE_OK;
+  }
+
+  return rc;
 }
 
 int LaeRobot::runAsyncJob()

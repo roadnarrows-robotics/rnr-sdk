@@ -93,6 +93,15 @@ namespace laelaps
     static const double ThreadWdHzDft   = 1.0;  ///< default run rate
 
     /*!
+     * \brief Optimize thread hertz rate given the watchdog timeout value.
+     *
+     * \param fWatchDogTimeout    Seconds.
+     *
+     * \return Returns hertz.
+     */
+    static double optimizeHz(const double fWatchDogTimeout);
+
+    /*!
      * \brief Default constructor.
      */
     LaeThreadWd(LaeWd &hwif);

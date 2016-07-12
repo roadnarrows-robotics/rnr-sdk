@@ -685,6 +685,24 @@ namespace laelaps
     // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
     /*!
+     * \brief Connect to the \h_laelaps built-in sensors.
+     *
+     * \par Sensors:
+     * * IMU
+     * * ToF infrared distance sensors
+     *
+     * \copydoc doc_return_std
+     */
+    int connSensors();
+
+    /*!
+     * \brief Connect to the watchdog subprocessor.
+     *
+     * \copydoc doc_return_std
+     */
+    int connWatchDog();
+
+    /*!
      * \brief Connect to the \h_laelaps motor controllers
      *
      * Motors controller serial interface support multi-drop, so one serial
@@ -697,34 +715,6 @@ namespace laelaps
      */
     int connMotorControllers(const std::string &strDevMotorCtlrs,
                              const int         nBaudRate);
-
-    /*!
-     * \brief Connect to the \h_laelaps Intertial Measurement Unit.
-     *
-     * \param strDevImu     IMU serial device name.
-     * \param nBaudRate     IMU serial baudrate.
-     *
-     * \copydoc doc_return_std
-     */
-    int connImu(const std::string &strDevImu, const int nBaudRate);
-
-    /*!
-     * \brief Connect to the \h_laelaps built-in sensors.
-     *
-     * \par Sensors:
-     * 720p front camera\n
-     * N ToF infrared distance sensors
-     *
-     * \copydoc doc_return_std
-     */
-    int connSensors();
-
-    /*!
-     * \brief Connect to the watchdog arduino subprocessor.
-     *
-     * \copydoc doc_return_std
-     */
-    int connWatchDog();
 
     /*!
      * \brief Configure \h_laelaps for normal operation.
@@ -742,11 +732,22 @@ namespace laelaps
     // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
     /*!
-     * \brief Start all real-time persistent threads.
+     * \brief Create and start all real-time persistent core threads.
      *
      * \copydoc doc_return_std
      */
-    int startThreads();
+    int startCoreThreads();
+
+    /*!
+     * \brief Create and start a thread at the given priority and hertz.
+     *
+     * \param pThread   Pointer the thread object.
+     * \param nPriority Thread priority.
+     * \param fHz       Thread execution hertz.
+     *
+     * \copydoc doc_return_std
+     */
+    int startThread(LaeThread *pThread, int nPriority, double fHz);
 
 
     // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .

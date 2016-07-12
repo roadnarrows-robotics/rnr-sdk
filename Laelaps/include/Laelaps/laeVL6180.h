@@ -1241,6 +1241,19 @@ namespace sensor
       void clear();
 
       /*!
+       * \brief Get interface version.
+       *
+       * \param [out] uVerMajor   Interface version major number.
+       * \param [out] uVerMinor   Interface version minor number.
+       * \param [out] uFwVer      Firmware version.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getInterfaceVersion(uint_t &uVerMajor,
+                                      uint_t &uVerMinor,
+                                      uint_t &uFwVer);
+
+      /*!
        * \brief Configure sensor group from product description.
        *
        * \param desc    Product description.
@@ -1329,7 +1342,6 @@ namespace sensor
        */
       virtual int getAmbientLight(std::vector<std::string> &vecNames,
                                   std::vector<double> &vecAmbient);
-
 
       /*!
        * \brief Execute task in one cycle to take measurements.

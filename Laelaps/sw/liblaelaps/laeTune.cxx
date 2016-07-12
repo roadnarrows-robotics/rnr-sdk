@@ -96,9 +96,9 @@ namespace laelaps
   const double LaeTuneThreadHzMin    = LaeThread::ThreadMinHz;
 
   // watchdog timeout
-  const ulong_t LaeTuneWdTimeoutDft = LaeWdTimeoutDft;
-  const ulong_t LaeTuneWdTimeoutMin = LaeWdTimeoutMin;
-  const ulong_t LaeTuneWdTimeoutMax = LaeWdTimeoutMax;
+  const double LaeTuneWdTimeoutDft = (double)LaeWdTimeoutDft / 1000.0;
+  const double LaeTuneWdTimeoutMin = (double)LaeWdTimeoutMin / 1000.0;
+  const double LaeTuneWdTimeoutMax = (double)LaeWdTimeoutMax / 1000.0;
  
   // velocity limits
   const double LaeTuneVelDerateDft = 100.0;
@@ -300,6 +300,7 @@ LaeTunes::LaeTunes()
   m_fImuHz              = LaeTuneThreadImuHzDft;
   m_fKinematicsHz       = LaeTuneThreadKinHzDft;
   m_fRangeHz            = LaeTuneThreadRangeHzDft;
+  m_fWatchDogTimeout    = LaeTuneWdTimeoutDft;
   m_fVelDerate          = LaeTuneVelDerateDft / 100.0;
   m_eTrajNorm           = LaeTuneTrajNormDft;
   m_fTrajEpsilon        = degToRad(LaeTuneTrajEpsilonDft);
@@ -311,7 +312,7 @@ LaeTunes::LaeTunes()
 
   for(i = 0; i < ToFSensorMaxNumOf; ++i)
   {
-    m_mapVL6180[LaeDesc::KeyRangeSensor[i]] = dftVL6180;
+    m_mapVL6180[LaeDesc::KeyRangeSensorMax[i]] = dftVL6180;
   }
 }
 
@@ -328,6 +329,11 @@ double LaeTunes::getKinematicsHz() const
 double LaeTunes::getRangeHz() const
 {
   return m_fRangeHz;
+}
+
+double LaeTunes::getWatchDogTimeout() const
+{
+  return m_fWatchDogTimeout;
 }
 
 double LaeTunes::getVelocityDerate() const

@@ -85,6 +85,7 @@ LaeThreadRange::~LaeThreadRange()
 int LaeThreadRange::reload(const LaeTunes &tunes)
 {
   double  fHz;
+  int     rc;
 
   lock();
 
@@ -95,9 +96,11 @@ int LaeThreadRange::reload(const LaeTunes &tunes)
     setHz(fHz);
   }
 
+  rc = m_hwif.reload(tunes);
+
   unlock();
 
-  return LAE_OK;
+  return rc;
 }
 
 void LaeThreadRange::exec()

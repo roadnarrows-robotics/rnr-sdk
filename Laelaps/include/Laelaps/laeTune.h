@@ -125,21 +125,21 @@ namespace laelaps
    * the no-service state is entered. Power to the motor controllers and motors
    * is disabled and the deck status LED flashes green.
    *
-   * Units: milliseconds
+   * Units: seconds
    * Range: [\ref LaeTuneWdTimeoutMin, \ref LaeTuneWdTimeoutMax]
    * Scope: global
    */
-  extern const ulong_t LaeTuneWdTimeoutDft;
+  extern const double LaeTuneWdTimeoutDft;
 
   /*!
    * \brief Minimum watchdog timeout (msec).
    */
-  extern const ulong_t LaeTuneWdTimeoutMin;
+  extern const double LaeTuneWdTimeoutMin;
 
   /*!
    * \brief Maximum watchdog timeout (msec).
    */
-  extern const ulong_t LaeTuneWdTimeoutMax;
+  extern const double LaeTuneWdTimeoutMax;
 
 
   // . .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .. .
@@ -573,12 +573,13 @@ namespace laelaps
     typedef std::map<std::string, LaeTunesVL6180>  LaeTunesMapVL6180;
 
     // global tuning
-    double    m_fImuHz;         ///< kinematic thread rate (hertz)
-    double    m_fKinematicsHz;  ///< kinematic thread rate (hertz)
-    double    m_fRangeHz;       ///< kinematic thread rate (hertz)
-    double    m_fVelDerate;     ///< velocity derate (fraction)
-    LaeNorm   m_eTrajNorm;      ///< trajectory distanct norm
-    double    m_fTrajEpsilon;   ///< trajectory epsilon distance (radians)
+    double    m_fImuHz;           ///< kinematic thread rate (hertz)
+    double    m_fKinematicsHz;    ///< kinematic thread rate (hertz)
+    double    m_fRangeHz;         ///< kinematic thread rate (hertz)
+    double    m_fWatchDogTimeout; ///< watchdog timeout (seconds)
+    double    m_fVelDerate;       ///< velocity derate (fraction)
+    LaeNorm   m_eTrajNorm;        ///< trajectory distanct norm
+    double    m_fTrajEpsilon;     ///< trajectory epsilon distance (radians)
 
     // subsystem tuning
     LaeTunesBattery   m_battery;        ///< battery tuning
@@ -616,6 +617,13 @@ namespace laelaps
      * \return Hertz.
      */
     double getRangeHz() const;
+
+    /*!
+     * \brief Get watchdog timeout (seconds).
+     *
+     * \return Seconds.
+     */
+    double getWatchDogTimeout() const;
 
     /*!
      * \brief Get derated velocity tune parameter (normalized).

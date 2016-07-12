@@ -61,6 +61,8 @@
 #include "rnr/rnrconfig.h"
 
 #include  "Laelaps/laelaps.h"
+#include  "Laelaps/laeDesc.h"
+#include  "Laelaps/laeTune.h"
 
 
 #ifdef SWIG
@@ -254,13 +256,35 @@ namespace sensor
       }
 
       /*!
-       * \brief Configure sensor and class instance data.
+       * \brief Configure IMU from product description.
        *
        * Call after connection is opened.
        *
+       * \param desc    Product description.
+       *
        * \copydoc doc_return_std
        */
-      virtual int configure() = 0;
+      virtual int configure(const laelaps::LaeDesc &desc);
+  
+      /*!
+       * \brief Configure IMU from tunable parameters.
+       *
+       * Call after connection is opened.
+       *
+       * \param tunes   Laelaps tuning parameters.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int configure(const laelaps::LaeTunes &tunes);
+  
+      /*!
+       * \brief Reload with new tuning parameters.
+       *
+       * \param tunes   Laelaps tuning parameters.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int reload(const laelaps::LaeTunes &tunes);
   
       /*!
        * \brief Read sensor identity values.
@@ -674,27 +698,12 @@ namespace sensor
         return true;
       }
 
-      /*!
-       * \brief Configure sensor and class instance data.
-       *
-       * Call after connection is opened.
-       *
-       * The CleanFlight defaults are acceptable. No configuration is
-       * necessary todate.
-       *
-       * \copydoc doc_return_std
+      /*
+       * ----
+       * The CleanFlight defaults are acceptable. No special configuration 
+       * nor tuning parameters are required todate.
+       * ----
        */
-      virtual int configure();
-  
-      /*!
-       * \brief Reload with new configuration.
-       *
-       * The CleanFlight defaults are acceptable. No re-configuration is
-       * necessary todate.
-       *
-       * \copydoc doc_return_std
-       */
-      virtual int reload();
   
       /*!
        * \brief Read sensor identity values.

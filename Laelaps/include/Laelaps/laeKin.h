@@ -93,8 +93,8 @@
 
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeUtils.h"
-#include "Laelaps/laeTune.h"
 #include "Laelaps/laeDesc.h"
+#include "Laelaps/laeTune.h"
 
 #include "Laelaps/laeMotor.h"
 #include "Laelaps/laeGpio.h"

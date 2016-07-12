@@ -61,6 +61,7 @@
 
 #include  "Laelaps/laelaps.h"
 #include  "Laelaps/laeUtils.h"
+#include  "Laelaps/laeDesc.h"
 #include  "Laelaps/laeTune.h"
 #include  "Laelaps/laeDb.h"
 #include  "Laelaps/laeI2C.h"
@@ -154,17 +155,31 @@ void LaeWd::sync()
   cmdSetBatterySoC(LaeWdArgBattSoCMax);
   cmdSetAlarms(LaeWdArgAlarmNone);
   cmdResetRgbLed();
+  cmdConfigOperation(LaeWdTimeoutDft);
   cmdPetTheDog();
+}
+
+int LaeWd::configure(const LaeDesc &desc)
+{
+  return LAE_OK;
 }
 
 int LaeWd::configure(const LaeTunes &tunes)
 {
-  return LAE_OK;
+  unsigned long uTimeout;
+  int           rc;
+
+  // convert to milliseconds
+  uTimeout = (unsigned long)(tunes.getWatchDogTimeout() * 1000.0);
+
+  rc = cmdConfigOperation(uTimeout);
+
+  return rc;
 }
 
 int LaeWd::reload(const LaeTunes &tunes)
 {
-  return LAE_OK;
+  return configure(tunes);
 }
 
 void LaeWd::exec()

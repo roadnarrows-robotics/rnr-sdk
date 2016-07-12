@@ -389,6 +389,56 @@ namespace laelaps
 
 
   // ---------------------------------------------------------------------------
+  // Class LaeDescOptions
+  // ---------------------------------------------------------------------------
+ 
+  /*!
+   * \brief Package options class
+   */
+  class LaeDescOptions
+  {
+  public:
+    static const char* const  PkgOptStd;    ///< standard package option
+    static const char* const  PkgOptDeluxe; ///< deluxe package option
+
+    std::string   m_strPkgToF;    ///< range time-of-flight package
+    std::string   m_strPkgFCam;   ///< front camera package 
+
+    /*!
+     * \brief Default constructor.
+     */
+    LaeDescOptions();
+
+    /*!
+     * \brief Destructor.
+     */
+    virtual ~LaeDescOptions();
+
+    /*!
+     * \brief Assignment operator.
+     *
+     * \param rhs   Right hand side object.
+     *
+     * \return this.
+     */
+    LaeDescOptions operator=(const LaeDescOptions &rhs);
+
+    /*!
+     * \brief Clear description.
+     */
+    void clear();
+
+    /*!
+     * \brief Print out description to stdout.
+     *
+     * \param indent  Left indentation.
+     */ 
+    virtual void print(int indent = 0);
+
+  }; // class LaeDescImu
+
+
+  // ---------------------------------------------------------------------------
   // Class LaeDesc
   // ---------------------------------------------------------------------------
 
@@ -412,8 +462,8 @@ namespace laelaps
     static const char* const  KeyMotorCtlr[];     ///< motor controller keys
     static const char* const  KeyPowertrain[];    ///< powertrain keys
     static const char* const  KeyImu;             ///< built-in IMU keys
-    static const char* const  KeyRangeSensor[];   ///< full opt range sensr keys
-    static const char* const  KeyRangeSensorStd[]; ///< std opt range sensr keys
+    static const char* const  KeyRangeSensorMax[];///< max range sensor keys
+    static const char* const  KeyRangeSensorStd[];///< std range sensor keys
     static const char* const  KeyFCam;            ///< front camera keys
 
     /*!
@@ -465,6 +515,9 @@ namespace laelaps
     std::string   m_strProdBrief;   ///< product brief
     std::string   m_strProdHwVer;   ///< product hardware version string
     uint_t        m_uProdHwVer;     ///< product hardware version number
+
+    // RoadNarrows package options
+    LaeDescOptions      m_options;
 
     // RoadNarrows product descriptions
     LaeDescBase        *m_pDescBase;          ///< base description

@@ -62,6 +62,8 @@
 
 #include  "Laelaps/laelaps.h"
 #include  "Laelaps/laeUtils.h"
+#include  "Laelaps/laeDesc.h"
+#include  "Laelaps/laeTune.h"
 #include  "Laelaps/laeImu.h"
 #include  "Laelaps/laeDb.h"
 
@@ -196,6 +198,21 @@ int LaeImu::close()
   return LAE_OK;
 }
 
+int LaeImu::configure(const LaeDesc &desc)
+{
+  return LAE_OK;
+}
+
+int LaeImu::configure(const LaeTunes &tunes)
+{
+  return LAE_OK;
+}
+
+int LaeImu::reload(const LaeTunes &tunes)
+{
+  return LAE_OK;
+}
+
 void LaeImu::zeroData()
 {
   for(int i = 0; i < NumOfAxes; ++i)
@@ -313,16 +330,6 @@ LaeImuCleanFlight::LaeImuCleanFlight() :
 
 LaeImuCleanFlight::~LaeImuCleanFlight()
 {
-}
-
-int LaeImuCleanFlight::configure()
-{
-  return LAE_OK;
-}
-
-int LaeImuCleanFlight::reload()
-{
-  return LAE_OK;
 }
 
 int LaeImuCleanFlight::readIdentity(string &strIdent)

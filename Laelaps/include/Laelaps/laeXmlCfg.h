@@ -78,13 +78,7 @@ namespace laelaps
       Xml("laelaps", LaeXsiUrl, LaeXslUrl),
 
       m_strMajElemBase("base"),
-
-      m_strAttrProdId("product_id"),
-      m_strElemProdName("product_name"),
-      m_strElemProdBrief("product_brief"),
-      m_strElemProdFamily("product_family"),
-      m_strElemProdModel("product_model"),
-      m_strElemProdHwVer("hw_version")
+      m_strMajElemOptions("options")
     {
     }
 
@@ -174,7 +168,7 @@ namespace laelaps
      *
      * \copydoc doc_return_std
      */
-    virtual int setLaelapsDescFromDOM(LaeDesc &desc);
+    virtual int setDescFromDOM(LaeDesc &desc);
 
     /*!
      * \brief Set the DOM from the \h_laelaps description.
@@ -183,18 +177,12 @@ namespace laelaps
      *
      * \copydoc doc_return_std
      */
-    virtual int setDOMFromLaelapsDesc(const LaeDesc &desc);
+    virtual int setDOMFromDesc(const LaeDesc &desc);
 
   protected:
     // <base product_id=ID> ...</base>
     std::string m_strMajElemBase;     ///< robotic base major element name
-    std::string m_strAttrProdId;      ///< product id attribute name
-
-    std::string m_strElemProdName;    ///< product name element name
-    std::string m_strElemProdBrief;   ///< product brief element name
-    std::string m_strElemProdFamily;  ///< product family element name
-    std::string m_strElemProdModel;   ///< product model element name
-    std::string m_strElemProdHwVer;   ///< product hardware version element name
+    std::string m_strMajElemOptions;  ///< package options major element name
 
     /*!
      * \brief Set \h_laelaps robotic base description for DOM.
@@ -204,8 +192,17 @@ namespace laelaps
      *
      * \copydoc doc_return_std
      */
-    virtual int setLaelapsBaseDescFromDOM(TiXmlElement *pElemMaj,
-                                          LaeDesc  &desc);
+    virtual int setBaseDesc(TiXmlElement *pElemMaj, LaeDesc  &desc);
+
+    /*!
+     * \brief Set \h_laelaps package options descriptions for DOM.
+     *
+     * \param pElemMaj  Pointer to major DOM base description element.
+     * \param desc      \h_laelaps robot description.
+     *
+     * \copydoc doc_return_std
+     */
+    virtual int setOptionsDesc(TiXmlElement *pElemMaj, LaeDesc  &desc);
 
     /*!
      * \brief Warn on unknown element.

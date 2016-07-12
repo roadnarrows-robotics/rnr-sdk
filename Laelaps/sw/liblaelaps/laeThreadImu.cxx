@@ -94,7 +94,7 @@ int LaeThreadImu::reload(const LaeTunes &tunes)
     setHz(fHz);
   }
 
-  rc = m_hwif.reload();
+  rc = m_hwif.reload(tunes);
 
   unlock();
 

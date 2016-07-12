@@ -73,6 +73,18 @@ using namespace laelaps;
 // LaeThreadWd Class
 //------------------------------------------------------------------------------
   
+double LaeThreadWd::optimizeHz(const double fWatchDogTimeout)
+{
+  double  t;
+
+  t = fWatchDogTimeout / 2.0 - 0.001;
+  if( t > LaeThreadWd::ThreadWdHzDft )
+  {
+    t = LaeThreadWd::ThreadWdHzDft;
+  }
+  return t;
+}
+
 LaeThreadWd::LaeThreadWd(LaeWd &hwif) : LaeThread("WatchDog"), m_hwif(hwif)
 {
 }

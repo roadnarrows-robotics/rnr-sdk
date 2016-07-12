@@ -519,6 +519,47 @@ void LaeDescImu::print(int indent)
 
 
 // -----------------------------------------------------------------------------
+// Class LaeDescOptions
+// -----------------------------------------------------------------------------
+
+const char* const LaeDescOptions::PkgOptStd     = "standard";
+const char* const LaeDescOptions::PkgOptDeluxe  = "deluxe";
+
+LaeDescOptions::LaeDescOptions() :
+  m_strPkgToF(LaeDescOptions::PkgOptStd),
+  m_strPkgFCam(LaeDescOptions::PkgOptStd)
+{
+}
+
+LaeDescOptions::~LaeDescOptions()
+{
+}
+
+LaeDescOptions LaeDescOptions::operator=(const LaeDescOptions &rhs)
+{
+  m_strPkgToF   = rhs.m_strPkgToF;
+  m_strPkgFCam  = rhs.m_strPkgFCam;
+
+  return *this;
+}
+
+void LaeDescOptions::clear()
+{
+  m_strPkgToF.clear();
+  m_strPkgFCam.clear();
+}
+
+void LaeDescOptions::print(int indent)
+{
+  printf("%*sPackage Options =\n", indent, "");
+  printf("%*s{\n", indent, "");
+  printf("%*sTime-of-Flight Package = %s\n", indent+2, "", m_strPkgToF.c_str());
+  printf("%*sFront Camera Package   = %s\n", indent+2, "",m_strPkgFCam.c_str());
+  printf("%*s}\n", indent, "");
+}
+
+
+// -----------------------------------------------------------------------------
 // Class LaeDesc
 // -----------------------------------------------------------------------------
 
@@ -539,7 +580,7 @@ const char* const LaeDesc::KeyPowertrain[] =
 
 const char* const LaeDesc::KeyImu = "imu";
 
-const char* const LaeDesc::KeyRangeSensor[] =
+const char* const LaeDesc::KeyRangeSensorMax[] =
 {
   "front", "left_front", "left", "left_rear",
   "rear", "right_rear", "right", "right_front"
@@ -640,20 +681,37 @@ int LaeDesc::markAsDescribed()
   {
     case LaeProdIdStd:
     case LaeProdIdLarge:
-      if( m_uProdHwVer < LAE_VERSION(2, 2, 0) )
+      if( m_uProdHwVer < LAE_VERSION(2, 3, 0) )
       {
-        m_pDescBase = new LaeDescBase();
+        m_pDescBase    = new LaeDescBase();
         m_pDescBattery = new LaeDescBattery();
+
         for(i = 0; i < LaeMotorsNumOf; ++i)
         {
           sKey = KeyPowertrain[i];
           m_mapDescPowertrain[sKey] = new LaeDescPowertrain(sKey);
         }
-        for(i = 0; i < ToFSensorStdNumOf; ++i)
+
+        // deluxe time-of-flight sensor package
+        if( m_options.m_strPkgToF == LaeDescOptions::PkgOptDeluxe )
         {
-          sKey = KeyRangeSensorStd[i];
-          m_mapDescRangeSensor[sKey] = new LaeDescRangeSensor(sKey);
+          for(i = 0; i < ToFSensorMaxNumOf; ++i)
+          {
+            sKey = KeyRangeSensorMax[i];
+            m_mapDescRangeSensor[sKey] = new LaeDescRangeSensor(sKey);
+          }
         }
+        // standard time-of-flight sensor package
+        else
+        {
+          for(i = 0; i < ToFSensorStdNumOf; ++i)
+          {
+            sKey = KeyRangeSensorStd[i];
+            m_mapDescRangeSensor[sKey] = new LaeDescRangeSensor(sKey);
+          }
+        }
+
+        // imu built-in package
         m_pDescImu = new LaeDescImu();
 
         RtDb.m_product.m_eProdId    = m_eProdId;
@@ -696,6 +754,8 @@ void LaeDesc::clear()
   m_strProdBrief.clear();
   m_strProdHwVer.clear();
   m_uProdHwVer    = 0;
+
+  m_options.clear();
 
   if( m_pDescBase != NULL )
   {

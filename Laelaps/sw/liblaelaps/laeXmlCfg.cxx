@@ -100,7 +100,7 @@ int LaeXmlCfg::load(LaeDesc      &desc,
       }
       else
       {
-        rc = setLaelapsDescFromDOM(desc);
+        rc = setDescFromDOM(desc);
       }
 
       if( rc == LAE_OK )
@@ -140,7 +140,7 @@ int LaeXmlCfg::loadFile(LaeDesc &desc, const string &strXmlFileName)
 
   if( (rc = Xml::loadFile(strXmlFileName)) == OK )
   {
-        rc = setLaelapsDescFromDOM(desc);
+        rc = setDescFromDOM(desc);
   }
 
   return rc < 0? -LAE_ECODE_XML: LAE_OK;
@@ -159,7 +159,7 @@ int LaeXmlCfg::saveFile(const LaeDesc &desc, const string &strXmlFileName)
 {
   int   rc;
 
-  if( (rc = setDOMFromLaelapsDesc(desc)) == LAE_OK )
+  if( (rc = setDOMFromDesc(desc)) == LAE_OK )
   {
     rc = Xml::saveFile(strXmlFileName);
   }
@@ -209,6 +209,16 @@ int LaeXmlCfg::createTemplateFile(const string &strXmlFileName)
   fprintf(fp, "  </%s>\n\n", m_strMajElemBase.c_str());
 
   //
+  // Package options major element.
+  //
+  fprintf(fp, "  <!-- Laelaps package options -->\n");
+  fprintf(fp, "  <%s>\n", m_strMajElemOptions.c_str());
+
+  fprintf(fp, "    <!-- OPTION ELEMENTS HERE -->\n");
+
+  fprintf(fp, "  </%s>\n\n", m_strMajElemOptions.c_str());
+
+  //
   // XML tail
   //
   fprintf(fp, "%s", m_strXmlTail.c_str());
@@ -220,7 +230,7 @@ int LaeXmlCfg::createTemplateFile(const string &strXmlFileName)
   return LAE_OK;
 }
 
-int LaeXmlCfg::setLaelapsDescFromDOM(LaeDesc &desc)
+int LaeXmlCfg::setDescFromDOM(LaeDesc &desc)
 {
   TiXmlElement *pElem;
   const char   *sValue;
@@ -229,10 +239,7 @@ int LaeXmlCfg::setLaelapsDescFromDOM(LaeDesc &desc)
   int           n;
   int           rc;
 
-  //
-  // Subsection descriptions.
-  //
-
+  // root element
   if( m_pElemRoot == NULL )
   {
     setErrorMsg("Missing DOM and/or <%s> root element missing.",
@@ -254,26 +261,45 @@ int LaeXmlCfg::setLaelapsDescFromDOM(LaeDesc &desc)
     // robotic base description
     if( !strcasecmp(sValue, m_strMajElemBase.c_str()) )
     {
-      setLaelapsBaseDescFromDOM(pElem, desc);
+      setBaseDesc(pElem, desc);
+    }
+
+    // robotic package options descriptions
+    else if( !strcasecmp(sValue, m_strMajElemOptions.c_str()) )
+    {
+      setOptionsDesc(pElem, desc);
+    }
+
+    else
+    {
+      warnUnknownElem(sValue);
     }
   }
 
   return LAE_OK;
 }
 
-int LaeXmlCfg::setLaelapsBaseDescFromDOM(TiXmlElement *pElemMaj, LaeDesc &desc)
+int LaeXmlCfg::setBaseDesc(TiXmlElement *pElemMaj, LaeDesc &desc)
 {
+  // sub-elements
+  string strAttrProdId("product_id");
+  string strElemProdName("product_name");
+  string strElemProdBrief("product_brief");
+  string strElemProdFamily("product_family");
+  string strElemProdModel("product_model");
+  string strElemProdHwVer("hw_version");
+
   TiXmlElement *pElem;
   const char   *sValue;
   string        str;
   int           iVal;
   int           rc;
 
-  if( (rc = strToInt(elemAttr(pElemMaj, m_strAttrProdId), iVal)) < 0 )
+  if( (rc = strToInt(elemAttr(pElemMaj, strAttrProdId), iVal)) < 0 )
   {
     setErrorMsg("%s: No %s attribute of <%s> found or value not an integer.",
       m_strXmlFileName.c_str(),
-      m_strAttrProdId.c_str(),
+      strAttrProdId.c_str(),
       m_strMajElemBase.c_str());
     LOGERROR("%s", m_bufErrMsg);
     return -LAE_ECODE_XML;
@@ -292,31 +318,31 @@ int LaeXmlCfg::setLaelapsBaseDescFromDOM(TiXmlElement *pElemMaj, LaeDesc &desc)
     }
 
     // product name
-    else if( !strcasecmp(sValue, m_strElemProdName.c_str()) )
+    else if( !strcasecmp(sValue, strElemProdName.c_str()) )
     {
       desc.m_strProdName = elemText(pElem);
     }
 
     // product brief
-    else if( !strcasecmp(sValue, m_strElemProdBrief.c_str()) )
+    else if( !strcasecmp(sValue, strElemProdBrief.c_str()) )
     {
       desc.m_strProdBrief = elemText(pElem);
     }
 
     // product family
-    else if( !strcasecmp(sValue, m_strElemProdFamily.c_str()) )
+    else if( !strcasecmp(sValue, strElemProdFamily.c_str()) )
     {
       desc.m_strProdFamily = elemText(pElem);
     }
 
     // product model
-    else if( !strcasecmp(sValue, m_strElemProdModel.c_str()) )
+    else if( !strcasecmp(sValue, strElemProdModel.c_str()) )
     {
       desc.m_strProdModel = elemText(pElem);
     }
 
     // product hardware version
-    else if( !strcasecmp(sValue, m_strElemProdHwVer.c_str()) )
+    else if( !strcasecmp(sValue, strElemProdHwVer.c_str()) )
     {
       desc.m_strProdHwVer = elemText(pElem);
       desc.m_uProdHwVer   = strToVersion(desc.m_strProdHwVer);
@@ -334,7 +360,74 @@ int LaeXmlCfg::setLaelapsBaseDescFromDOM(TiXmlElement *pElemMaj, LaeDesc &desc)
   return LAE_OK;
 }
 
-int LaeXmlCfg::setDOMFromLaelapsDesc(const LaeDesc &desc)
+int LaeXmlCfg::setOptionsDesc(TiXmlElement *pElemMaj, LaeDesc &desc)
+{
+  // sub-elements
+  string strElemOptToF("tof_option");
+  string strElemOptFCam("fcam_option");
+
+  TiXmlElement *pElem;
+  const char   *sValue;
+  string        strText;
+
+  // child elements
+	for(pElem = pElemMaj->FirstChildElement();
+      pElem != NULL;
+      pElem = pElem->NextSiblingElement())
+  {
+    if( (sValue = pElem->Value()) == NULL )
+    {
+      continue;
+    }
+
+    // time-of-flight range sensor package
+    else if( !strcasecmp(sValue, strElemOptToF.c_str()) )
+    {
+      strText = elemText(pElem);
+      if( !strcasecmp(strText.c_str(), LaeDescOptions::PkgOptStd) )
+      {
+        desc.m_options.m_strPkgToF = LaeDescOptions::PkgOptStd;
+      }
+      else if( !strcasecmp(strText.c_str(), LaeDescOptions::PkgOptDeluxe) )
+      {
+        desc.m_options.m_strPkgToF = LaeDescOptions::PkgOptDeluxe;
+      }
+      else
+      {
+        LOGWARN("%s: unknown %s package option - assuming %s.",
+            strText.c_str(), strElemOptToF.c_str(), LaeDescOptions::PkgOptStd);
+        desc.m_options.m_strPkgToF = LaeDescOptions::PkgOptStd;
+      }
+    }
+
+    // front camera sensor package
+    else if( !strcasecmp(sValue, strElemOptFCam.c_str()) )
+    {
+      strText = elemText(pElem);
+      if( !strcasecmp(strText.c_str(), LaeDescOptions::PkgOptStd) )
+      {
+        desc.m_options.m_strPkgFCam = LaeDescOptions::PkgOptStd;
+      }
+      else
+      {
+        LOGWARN("%s: unknown %s package option - assuming %s.",
+            strText.c_str(), strElemOptFCam.c_str(), LaeDescOptions::PkgOptStd);
+        desc.m_options.m_strPkgFCam = LaeDescOptions::PkgOptStd;
+      }
+    }
+
+    else
+    {
+      warnUnknownElem(sValue);
+    }
+  }
+
+  LOGDIAG3("%s: Laelaps package options set.", m_strXmlFileName.c_str());
+
+  return LAE_OK;
+}
+
+int LaeXmlCfg::setDOMFromDesc(const LaeDesc &desc)
 {
   // TODO
   return -LAE_ECODE_GEN;

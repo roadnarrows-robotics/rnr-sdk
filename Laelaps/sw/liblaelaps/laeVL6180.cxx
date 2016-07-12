@@ -2185,6 +2185,29 @@ void LaeRangeSensorGroup::clear()
   m_interface_2_1.clear();
 }
 
+int LaeRangeSensorGroup::getInterfaceVersion(uint_t &uVerMajor,
+                                             uint_t &uVerMinor,
+                                             uint_t &uFwVer)
+{
+  int   rc;
+
+  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  {
+    uVerMajor = 2;
+    uVerMinor = 1;
+    rc        = m_interface_2_1.cmdGetFwVersion(uFwVer);
+  }
+  else
+  {
+    uVerMajor = 2;
+    uVerMinor = 0;
+    uFwVer    = 0;
+    rc        = LAE_OK;
+  }
+
+  return rc;
+}
+
 int LaeRangeSensorGroup::configure(const LaeDesc &desc)
 {
   if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )

@@ -320,6 +320,7 @@ int LaeXmlTune::setGlobalTunes(TiXmlElement *pElemSec, LaeTunes &tunes)
   string strSubSecElemThreads("threads");
   string strSubSecElemTraj("trajectory");
   string strElemVelDerate("velocity_derate");
+  string strElemWdTimeout("watchdog_timeout");
 
   TiXmlElement *pElem;    // working xml element
   const char   *sValue;   // working xml element name
@@ -364,6 +365,19 @@ int LaeXmlTune::setGlobalTunes(TiXmlElement *pElemSec, LaeTunes &tunes)
       rc = setGlobalTrajTunes(pElem, tunes);
     }
 
+    // <watchdog_timeout> ... </watchdog_timeout>
+    else if( !strcasecmp(sValue, strElemWdTimeout.c_str()) )
+    {
+      rc = strToDoubleWithinRange(strElemWdTimeout, elemText(pElem),
+                    LaeTuneWdTimeoutMin, LaeTuneWdTimeoutMax,
+                    tunes.m_fWatchDogTimeout);
+
+      // xml units are percentages - normalize
+      if( rc == LAE_OK )
+      {
+        tunes.m_fVelDerate /= 100.0;
+      }
+    }
     // unknown
     else
     {
@@ -982,7 +996,7 @@ int LaeXmlTune::setVL6180Tunes(TiXmlElement *pElemSec,
 
   for(i = 0, bFound = false; i < ToFSensorMaxNumOf; ++i)
   {
-    if( !strcasecmp(strLoc.c_str(), LaeDesc::KeyRangeSensor[i]) )
+    if( !strcasecmp(strLoc.c_str(), LaeDesc::KeyRangeSensorMax[i]) )
     {
       bFound = true;
       break;
