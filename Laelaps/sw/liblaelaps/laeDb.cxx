@@ -56,6 +56,8 @@
 #include  "Laelaps/laeImu.h"
 #include  "Laelaps/laeAlarms.h"
 #include  "Laelaps/laeTune.h"
+#include  "Laelaps/laeThread.h"
+#include  "Laelaps/laeThreadWd.h"
 #include  "Laelaps/laeDb.h"
 
 using namespace std;
@@ -68,16 +70,29 @@ using namespace sensor::vl6180;
 //
 LaeDb  laelaps::RtDb = 
 {
-  LAE_VERSION(1, 0, 0),   // db version keep first
+  // header
+  {0, },                  // signature (keep first)
+  LAE_VERSION(1, 1, 0),   // db version
 
   // product
   {
-    LaeProdIdUnknown,       // RoadNarrows product id
-    LAE_VERSION(0, 0, 0),   // hardware version
-    {0, 0},                 // motor controllers firmware version
-    0,                      // IMU firmware version
-    0,                      // watchdog sub-processor firmware version
-    0,                      // time-of-flight mux sub-processor firmware version
+    LaeProdIdUnknown,     // RoadNarrows product id
+    LAE_VERSION(0, 0, 0), // hardware version
+    {0, 0},               // motor controllers firmware version
+    0,                    // IMU firmware version
+    0,                    // watchdog sub-processor firmware version
+    0,                    // time-of-flight mux sub-processor firmware version
+    0                     // accessory sub-processor firmware version
+  },
+
+  // configuration
+  {
+    LaeTuneThreadKinHzDft,      ///< kinodynamics thread exec rate (Hertz)
+    LaeTuneThreadImuHzDft,      ///< imu thread exec rate (Hertz)
+    LaeTuneThreadRangeHzDft,    ///< range thread exec rate (Hertz)
+    LaeThreadWd::ThreadWdHzDft, ///< watchdog thread exec rate (Hertz)
+    LaeTuneWdTimeoutDft,        ///< watchdog timeout (seconds)
+    LaeTuneVelDerateDft         ///< velocity derate (percent)
   },
 
   // robot top-level status

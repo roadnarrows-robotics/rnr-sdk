@@ -1034,6 +1034,7 @@ int LaeWd::cmdConfigOperation(unsigned long uTimeout)
   // no support in older versions
   if( m_uFwVer < 3 )
   {
+    m_uWatchdogTimeout = LaeWdTimeoutDft;
     rc = LAE_OK;
   }
 
@@ -1054,6 +1055,11 @@ int LaeWd::cmdConfigOperation(unsigned long uTimeout)
     {
       rc = -LAE_ECODE_IO;
     }
+  }
+
+  if( rc == LAE_OK )
+  {
+    RtDb.m_config.m_fWatchDogTimeout = (double)m_uWatchdogTimeout / 1000.0;
   }
 
   unlock();

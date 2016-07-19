@@ -69,6 +69,8 @@
  */
 namespace laelaps
 {
+#define RTDB_SIG_LEN  32  ///< database signature length (bytes)
+
   /*!
    * \brief Product data.
    */
@@ -80,8 +82,22 @@ namespace laelaps
                                 ///< motor controllers firmware versions
     uint_t  m_uImuFwVer;        ///< IMU sub-processor firmware version
     uint_t  m_uWatchDogFwVer;   ///< watchdog sub-processor firmware version
-    uint_t  m_uToFMuxFwVer;     ///< tof mux sub-processor firmware version
+    uint_t  m_uToFMuxFwVer;     ///< ToF Mux sub-processor firmware version
+    uint_t  m_uAccFwVer;        ///< accessory sub-processor firmware version
   }; // LaeDbProduct
+
+  /*!
+   * \brief Robot configuration parameters.
+   */
+  struct LaeDbConfig
+  {
+    double  m_fKinThreadHz;         ///< kinodynamics thread exec rate (hertz)
+    double  m_fImuThreadHz;         ///< IMU thread exec rate (Hertz)
+    double  m_fRangeThreadHz;       ///< range group thread exec rate (Hertz)
+    double  m_fWatchDogThreadHz;    ///< watchdog thread exec rate (Hertz)
+    double  m_fWatchDogTimeout;     ///< watchdog timeout (seconds)
+    double  m_fVelocityDerate;      ///< velocity derate (percent)
+  }; // LaeDbConfig
 
   /*!
    * \brief Robot top-level status.
@@ -199,8 +215,10 @@ namespace laelaps
    */
   struct LaeDb
   {
+    char              m_signature[RTDB_SIG_LEN]; ///< database signature
     u32_t             m_uDbVer;           ///< database version
     LaeDbProduct      m_product;          ///< product data
+    LaeDbConfig       m_config;           ///< configuration data
     LaeDbRobotStatus  m_robotstatus;      ///< robot status data
     LaeDbGpio         m_gpio;             ///< key gpio state data
     LaeDbMotorCtlr    m_motorctlr[LaeNumMotorCtlrs];
