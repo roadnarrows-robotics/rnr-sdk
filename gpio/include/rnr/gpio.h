@@ -20,7 +20,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows LLC.
+ * (C) 2015-2016. RoadNarrows LLC.
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -62,11 +62,29 @@
 
 C_DECLS_BEGIN
 
+//
+// GPIO direction
+//
 #define GPIO_DIR_IN       0           ///< input
 #define GPIO_DIR_OUT      1           ///< output
 #define GPIO_DIR_IN_STR   "in"        ///< input string
 #define GPIO_DIR_OUT_STR  "out"       ///< output string
 
+//
+// GPIO edge to make select trigger
+//
+#define GPIO_EDGE_NONE        0           ///< no edge
+#define GPIO_EDGE_RISING      1           ///< rising edge
+#define GPIO_EDGE_FALLING     2           ///< falling edge
+#define GPIO_EDGE_BOTH        3           ///< both edges
+#define GPIO_EDGE_NONE_STR    "none"      ///< no edge string
+#define GPIO_EDGE_RISING_STR  "rising"    ///< rising edge string
+#define GPIO_EDGE_FALLING_STR "falling"   ///< falling edge string
+#define GPIO_EDGE_BOTH_STR    "both"      ///< both edges string
+
+//
+// GPIO pull ups
+//
 #define GPIO_PULL_DS      0           ///< disable pullup/down
 #define GPIO_PULL_UP      1           ///< enable pullup
 #define GPIO_PULL_DN      2           ///< enable pulldown
@@ -81,10 +99,8 @@ typedef struct
 {
   int           gpio;     ///< sysfs exported gpio number
   int           pin;      ///< external header pin number
-  off_t         base;     ///< memory mapped base address
-  int           channel;  ///< memory mapped gpio channel offset
-  int           bit;      //<< memory mapped gpio bit
   int           dir;      ///< gpio direction
+  int           edge;     ///< gpio edge type trigger 
   int           pull;     ///< pull state
   int           value;    ///< current value
 } gpio_info_t;
@@ -94,38 +110,17 @@ typedef struct
 // Prototypes
 //-----------------------------------------------------------------------------
 
-
 //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-// GPIO utility functions.
+// GPIO access methods using the sysfs system.
 //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-/*!
- * \brief Find the external header pin number from system exported GPIO number.
- *
- * \param gpio  The sysfs exported GPIO number.
- *
- * \return On success returns the associated header pin number.
- * On error, RC_ERROR(-1) is returned.
- */
-extern int gpioExportedToPin(int gpio);
-
-/*!
- * \brief Find the system exported GPIO number from external header pin number.
- *
- * \param pin   External CON10 header pin number.
- *
- * \return On success returns the associated exported GPIO number.
- * On error, RC_ERROR(-1) is returned.
- */
-extern int gpioPinToExported(int pin);
 
 /*!
  * \brief Make GPIO directory name.
  *
  * Director name: /sys/class/gpio/gpio<gpio>
  *
- * The base directory holds key special files such as <em>value</em> and
- * <em>direction</em>.
+ * The base directory holds key special files such as <em>value</em>,
+ * <em>direction</em>, and <em>edge</em>.
  *
  * Method: sysfs
  *
@@ -134,11 +129,6 @@ extern int gpioPinToExported(int pin);
  * \param size        Size of buffer in bytes.
  */
 extern void gpioMakeDirname(int gpio, char buf[], size_t size);
-
-
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-// GPIO access methods using the sysfs system.
-//. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
 /*!
  * \brief Export (create) a GPIO interface.
@@ -177,6 +167,19 @@ extern int gpioUnexport(int gpio);
  * \return On success OK(0) is returned, otherwise RC_ERROR(-1) is returned.
  */
 extern int gpioSetDirection(int gpio, int dir);
+
+/*!
+ * \brief Set GPIO edge trigger type. 
+ *
+ * Method: sysfs
+ *
+ * \param gpio  The sysfs exported GPIO number.
+ * \param edge  Edge. One of: GPIO_EDGE_NONE(0)    GPIO_EDGE_RISING(1)
+ *                            GPIO_EDGE_FALLING(2) GPIO_EDGE_BOTH(3)
+ *
+ * \return On success OK(0) is returned, otherwise RC_ERROR(-1) is returned.
+ */
+extern int gpioSetEdge(int gpio, int edge);
 
 /*!
  * \brief Set GPIO pull.
@@ -229,6 +232,23 @@ extern int gpioRead(int gpio);
  * \return On success OK(0) is returned, otherwise RC_ERROR(-1) is returned.
  */
 extern int gpioWrite(int gpio, int value);
+
+/*!
+ * \brief Notify on GPIO input value change.
+ *
+ * This function blocks until 1) value has changed, 2) a timeout has occurred,
+ * or 3) an error was encoutered.
+ *
+ * Method: sysfs
+ *
+ * \param gpio  The sysfs exported GPIO number.
+ * \param timeout Wait timeout. A value of 0.0 is no timeout.
+ *
+ * \return
+ * On success the pin value 0 or 1 is returned.
+ * Otherwise RC_ERROR(-1) is returned. Use errno to determine error.
+ */
+extern int gpioNotify(int gpio, double timeout);
 
 /*!
  * \brief Open GPIO pin.
@@ -309,9 +329,47 @@ extern int gpioBitBang(int           fd,
                        unsigned int  usecIbd);
 
 
+#ifdef MMAP_GPIO
+
 //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // GPIO access methods using memory mapped I/O.
 //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+/*!
+ * \brief GPIO info structure.
+ */
+typedef struct
+{
+  int           gpio;     ///< sysfs exported gpio number
+  int           pin;      ///< external header pin number
+  off_t         base;     ///< memory mapped base address
+  int           channel;  ///< memory mapped gpio channel offset
+  int           bit;      //<< memory mapped gpio bit
+  int           dir;      ///< gpio direction
+  int           edge;     ///< gpio edge type trigger 
+  int           pull;     ///< pull state
+  int           value;    ///< current value
+} mmap_gpio_info_t;
+
+/*!
+ * \brief Find the external header pin number from system exported GPIO number.
+ *
+ * \param gpio  The sysfs exported GPIO number.
+ *
+ * \return On success returns the associated header pin number.
+ * On error, RC_ERROR(-1) is returned.
+ */
+extern int gpioExportedToPin(int gpio);
+
+/*!
+ * \brief Find the system exported GPIO number from external header pin number.
+ *
+ * \param pin   External CON10 header pin number.
+ *
+ * \return On success returns the associated exported GPIO number.
+ * On error, RC_ERROR(-1) is returned.
+ */
+extern int gpioPinToExported(int pin);
 
 /*!
  * \brief Map the memory block of GPIO.
@@ -372,7 +430,7 @@ extern int mmapGpioSetPull(int gpio, int pull);
  *
  * \return On success OK(0) is returned, otherwise RC_ERROR(-1) is returned.
  */
-extern int mmapGpioProbe(int gpio, gpio_info_t *p);
+extern int mmapGpioProbe(int gpio, mmap_gpio_info_t *p);
 
 /*!
  * \brief Read GPIO pin's current value.
@@ -440,6 +498,9 @@ extern int mmapGpioBitBang(int           gpio,
                            byte_t        pattern[],
                            size_t        bitCount,
                            unsigned int  usecIbd);
+
+#endif // MMAP_GPIO
+
 
 C_DECLS_END
 

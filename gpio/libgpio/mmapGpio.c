@@ -72,6 +72,8 @@
 
 #include "rnr/gpio.h"
 
+#ifdef MMAP_GPIO
+
 #if defined(ARCH_odroid)
 
 // ---------------------------------------------------------------------------
@@ -966,3 +968,5 @@ int mmapGpioBitBang(int           pin,
 }
 
 #endif  // architecture
+
+#endif // MMAP_GPIO

@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016.  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -27,9 +27,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 #include <string>
 
@@ -57,7 +59,12 @@ using namespace std;
 static char  *Argv0;              ///< the command
 static char  *OptsMode  = NULL;   ///< permissions
 
-static int    ArgsGpio;           ///< gpio number 
+#define NO_ARG  -1                ///< no argument
+
+static int    ArgsGpioNum;        ///< gpio number 
+static int    ArgsGpioDir;        ///< gpio direction 
+static int    ArgsGpioEdge;       ///< gpio edge trigger type
+static mode_t Permissions;        ///< gpio permissions
 
 /*!
  * \brief Program information.
@@ -65,14 +72,22 @@ static int    ArgsGpio;           ///< gpio number
 static OptsPgmInfo_T PgmInfo =
 {
   // usage_args
-  "<gpio>",
+  "<gpio> [{in|out} [{none|rising|falling|both}]]",
 
   // synopsis
   "Create GPIO exported interface.",
 
   // long_desc = 
   "The %P command creates a GPIO exported interface for the specified GPIO "
-  "pin number.\n\n"
+  "number. Optionally, the direction and edge of the GPIO can also be "
+  "specified.\n\n"
+  "Arguments:\n"
+  "  <gpio>         Exported GPIO number.\n"
+  "  <direction>    GPIO direction. One of: in out.\n"
+  "                   Default: System defined.\n"
+  "  <edge>         Input GPIO trigger. One of: none rising falling both.\n"
+  "                   Default: System defined. N/A for output GPIO."
+  "\n\n"
   "NOTE: This command requires root privileges.",
 
   // diagnostics
@@ -85,22 +100,35 @@ static OptsPgmInfo_T PgmInfo =
 static OptsInfo_T OptsInfo[] =
 {
   // -m, --mode
-  //{
-  //  "mode",               // long_opt
-  //  'm',                  // short_opt
-  //  required_argument,    // has_arg
-  //  false,                // has_default
-  //  &OptsMode,            // opt_addr
-  //  OptsCvtArgStr,        // fn_cvt
-  //  OptsFmtStr,           // fn_fmt
-  //  "<MODE>",             // arg_name
-  //                        // opt desc
-  //  "Change GPIO exported interface permissions."
-  //},
+  {
+    "mode",               // long_opt
+    'm',                  // short_opt
+    required_argument,    // has_arg
+    false,                // has_default
+    &OptsMode,            // opt_addr
+    OptsCvtArgStr,        // fn_cvt
+    OptsFmtStr,           // fn_fmt
+    "<MODE>",             // arg_name
+                          // opt desc
+    "Change GPIO exported interface permissions. "
+    "Format: 0[0-7]+ for user,group,other."
+  },
 
   {NULL, }
 };
 
+/*!
+ * \brief Exit program on bad command-line values.
+ */
+static void badCmdExit()
+{
+  fprintf(stderr, "Try '%s --help' for more information.\n", Argv0);
+  exit(APP_EC_ARGS);
+}
+
+/*!
+ * \brief Convert string to integer.
+ */
 static int strToInt(const string &str, int &val)
 {
   long long int val1; // must use 64-bit for arm 32-bit compilers
@@ -116,6 +144,49 @@ static int strToInt(const string &str, int &val)
 }
 
 /*!
+ * \brief Convert string to file permissions.
+ */
+static int strToMode(const string &str, mode_t &mode)
+{
+  int   val;
+
+  mode = 0;
+
+  if( strToInt(str, val) < 0 )
+  {
+    return RC_ERROR;
+  }
+
+  // negative
+  if( val < 0 )
+  {
+    return RC_ERROR;
+  }
+  // [0-7]
+  else if( val <= 7 )
+  {
+    mode = (mode_t)((val << 6) & S_IRWXU);
+  }
+  // [0-7][0-7]
+  else if( val <= 077 )
+  {
+    mode = (mode_t)((val << 3) & (S_IRWXU|S_IRWXG));
+  }
+  // [0-7][0-7][0-7]
+  else if( val <= 0777 )
+  {
+    mode = (mode_t)(val & (S_IRWXU|S_IRWXG|S_IRWXO));
+  }
+  // out-of-range error
+  else
+  {
+    return RC_ERROR;
+  }
+
+  return OK;
+}
+
+/*!
  * \brief Main initialization.
  *
  * \param argc    Command-line argument count.
@@ -123,6 +194,9 @@ static int strToInt(const string &str, int &val)
  *
  * \par Exits:
  * Program terminates on conversion error.
+ *
+ * \return
+ * Exit code.
  */
 static void mainInit(int argc, char *argv[])
 {
@@ -132,18 +206,81 @@ static void mainInit(int argc, char *argv[])
   // parse input options
   argv = OptsGet(Argv0, &PkgInfo, &PgmInfo, OptsInfo, true, &argc, argv);
 
+  if( OptsMode != NULL )
+  {
+    if( strToMode(OptsMode, Permissions) < 0 )
+    {
+      fprintf(stderr, "%s: '%s': Bad permissions mode.\n", Argv0, OptsMode);
+      badCmdExit();
+    }
+  }
+
   if( argc == 0 )
   {
     fprintf(stderr, "%s: No GPIO pin number <gpio> specified.\n", Argv0);
-    fprintf(stderr, "Try '%s --help' for more information.\n", Argv0);
-    exit(APP_EC_ARGS);
+    badCmdExit();
   }
 
-  else if( strToInt(argv[0], ArgsGpio) < 0 )
+  else if( strToInt(argv[0], ArgsGpioNum) < 0 )
   {
     fprintf(stderr, "%s: '%s': Bad GPIO number.\n", Argv0, argv[0]);
-    fprintf(stderr, "Try '%s --help' for more information.\n", Argv0);
-    exit(APP_EC_ARGS);
+    badCmdExit();
+  }
+
+  if( argc >= 2 )
+  {
+    if( !strcasecmp(argv[1], GPIO_DIR_IN_STR) )
+    {
+      ArgsGpioDir = GPIO_DIR_IN;
+    }
+    else if( !strcasecmp(argv[1], GPIO_DIR_OUT_STR) )
+    {
+      ArgsGpioDir = GPIO_DIR_OUT;
+    }
+    else
+    {
+      fprintf(stderr, "%s: '%s': Bad GPIO direction.\n", Argv0, argv[1]);
+      badCmdExit();
+    }
+  }
+  else
+  {
+    ArgsGpioDir = NO_ARG;
+  }
+
+  if( argc >= 3 )
+  {
+    if( !strcasecmp(argv[2], GPIO_EDGE_NONE_STR) )
+    {
+      ArgsGpioEdge = GPIO_EDGE_NONE;
+    }
+    else if( !strcasecmp(argv[2], GPIO_EDGE_RISING_STR) )
+    {
+      ArgsGpioEdge = GPIO_EDGE_RISING;
+    }
+    else if( !strcasecmp(argv[2], GPIO_EDGE_FALLING_STR) )
+    {
+      ArgsGpioEdge = GPIO_EDGE_FALLING;
+    }
+    else if( !strcasecmp(argv[2], GPIO_EDGE_BOTH_STR) )
+    {
+      ArgsGpioEdge = GPIO_EDGE_BOTH;
+    }
+    else
+    {
+      fprintf(stderr, "%s: '%s': Bad GPIO edge.\n", Argv0, argv[2]);
+      badCmdExit();
+    }
+  }
+  else
+  {
+    ArgsGpioEdge = NO_ARG;
+  }
+
+  if( argc >= 4 )
+  {
+    fprintf(stderr, "%s: '%s...': What is this?.\n", Argv0, argv[3]);
+    badCmdExit();
   }
 }
 
@@ -157,26 +294,41 @@ static void mainInit(int argc, char *argv[])
  */
 int main(int argc, char* argv[])
 {
-  char  cmd[MAX_PATH]; 
-  char  dir[MAX_PATH]; 
-  
   mainInit(argc, argv);
 
-  if( gpioExport(ArgsGpio) < 0 )
+  if( gpioExport(ArgsGpioNum) < 0 )
   {
     return APP_EC_EXEC;
   }
 
-  gpioMakeDirname(ArgsGpio, dir, sizeof(dir));
+  if( ArgsGpioDir != NO_ARG )
+  {
+    if( gpioSetDirection(ArgsGpioNum, ArgsGpioDir) < 0 )
+    {
+      return APP_EC_EXEC;
+    }
+  }
 
-  // RDK gpiox, value, direction
+  if( ArgsGpioEdge != NO_ARG )
+  {
+    if( gpioSetEdge(ArgsGpioNum, ArgsGpioEdge) < 0 )
+    {
+      return APP_EC_EXEC;
+    }
+  }
+
   if( OptsMode != NULL )
   {
-    snprintf(cmd, sizeof(cmd), "/bin/chmod --recursive %s %s", OptsMode, dir);
-    cmd[sizeof(cmd)-1] = 0;
-    if( system(cmd) < 0 )
+    char  gpioPath[MAX_PATH]; 
+    char  path[MAX_PATH]; 
+  
+    gpioMakeDirname(ArgsGpioNum, gpioPath, sizeof(gpioPath));
+
+    sprintf(path, "%s/%s", gpioPath, "value");
+
+    if( chmod(path, Permissions) < 0 )
     {
-      LOGERROR("%s: Command failed.", cmd);
+      LOGSYSERROR("chmod(%s, %o)", path, Permissions);
       return APP_EC_EXEC;
     }
   }

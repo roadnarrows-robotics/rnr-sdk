@@ -71,7 +71,8 @@ static OptsPgmInfo_T PgmInfo =
   "Write a value to a GPIO pin.",
 
   // long_desc = 
-  "The %P command writes the specified value to the specified GPIO pin. "
+  "The %P command writes the specified value to the GPIO at the given "
+  "<gpio> exported number."
   "A value of 0 sets the pin low. "
   "A value of 1 set the pin high.",
 
@@ -84,6 +85,7 @@ static OptsPgmInfo_T PgmInfo =
  */
 static OptsInfo_T OptsInfo[] =
 {
+#ifdef MMAP_GPIO
   // -m, --method
   {
     "method",             // long_opt
@@ -97,6 +99,7 @@ static OptsInfo_T OptsInfo[] =
                           // opt desc
     "GPIO access method. One of: sysfs mmap."
   },
+#endif // MMAP_GPIO
 
   {NULL, }
 };
@@ -185,6 +188,7 @@ static int sysfsWrite()
   return ec;
 }
 
+#ifdef MMAP_GPIO
 /*!
  * \brief Write value to GPIO.
  *
@@ -214,6 +218,7 @@ static int mmapWrite()
 
   return ec;
 }
+#endif // MMAP_GPIO
 
 /*!
  * \brief Main.
@@ -235,10 +240,12 @@ int main(int argc, char* argv[])
     ec = sysfsWrite();
   }
 
+#ifdef MMAP_GPIO
   else if( !strcmp(OptsMethod, "mmap") )
   {
     ec = mmapWrite();
   }
+#endif // MMAP_GPIO
 
   else
   {

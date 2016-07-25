@@ -79,6 +79,7 @@ rnr_gpio.LIBS	= rnr
 #
 
 # Subpackage C PreProcessor Flags
+# -DMMAP_GPIO to enable memory mapped gpio TODO
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD=\"librnr_gpio\"
 
 #------------------------------------------------------------------------------

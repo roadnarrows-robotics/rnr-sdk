@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016. RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -58,8 +58,6 @@ static char    *Argv0;                          ///< the command
 static char    *OptsMethod  = (char *)"sysfs";  ///< system file system 
 static int      ArgsGpio;                       ///< gpio number 
 
-//gpioprobe --log=LOG --method=mmap GPIO 0xff 0b101100
-
 /*!
  * \brief Program information.
  */
@@ -83,6 +81,7 @@ static OptsPgmInfo_T PgmInfo =
  */
 static OptsInfo_T OptsInfo[] =
 {
+#ifdef MMAP_GPIO
   // -m, --method
   {
     "method",             // long_opt
@@ -96,6 +95,7 @@ static OptsInfo_T OptsInfo[] =
                           // opt desc
     "GPIO access method. One of: sysfs mmap."
   },
+#endif // MMAP_GPIO
 
   {NULL, }
 };
@@ -209,6 +209,70 @@ static int sysfsProbe(gpio_info_t *pInfo)
   return ec;
 }
 
+static int sysfsProbeAndPrint()
+{
+  gpio_info_t     info;
+  const char     *s;
+  int             ec;
+
+  ec = sysfsProbe(&info);
+
+  if( ec != APP_EC_OK )
+  {
+    fprintf(stderr, "Error: sysfs GPIO Probe failed.\n");
+    return ec;
+  }
+
+  printf("GPIO Info\n");
+  printf("  exported gpio number: %d\n", info.gpio);
+  if( info.pin > 0 )
+  {
+    printf("  external pin number:  %d\n", info.pin);
+  }
+  else
+  {
+    printf("  external pin number:  N/A\n");
+  }
+
+  switch( info.dir )
+  {
+    case GPIO_DIR_IN:
+      s = GPIO_DIR_IN_STR;
+      break;
+    case GPIO_DIR_OUT:
+      s = GPIO_DIR_OUT_STR;
+      break;
+    default:
+      s = "?";
+      break;
+  }
+  printf("  direction:            %s\n", s);
+
+  switch( info.edge )
+  {
+    case GPIO_EDGE_NONE:
+      s = GPIO_EDGE_NONE_STR;
+      break;
+    case GPIO_EDGE_RISING:
+      s = GPIO_EDGE_RISING_STR;
+      break;
+    case GPIO_EDGE_FALLING:
+      s = GPIO_EDGE_FALLING_STR;
+      break;
+    case GPIO_EDGE_BOTH:
+      s = GPIO_EDGE_BOTH_STR;
+      break;
+    default:
+      s = "?";
+      break;
+  }
+  printf("  edge:                 %s\n", s);
+
+  printf("  pull:                 N/A\n");
+  printf("  value:                %d\n", info.value);
+}
+
+#ifdef MMAP_GPIO
 /*!
  * \brief Probe GPIO state.
  *
@@ -218,7 +282,7 @@ static int sysfsProbe(gpio_info_t *pInfo)
  *
  * \return Application exit code.
  */
-static int mmapProbe(gpio_info_t *pInfo)
+static int mmapProbe(mmap_gpio_info_t *pInfo)
 {
   int   ec;
 
@@ -241,6 +305,90 @@ static int mmapProbe(gpio_info_t *pInfo)
   return ec;
 }
 
+static int mmapProbeAndPrint()
+{
+  mmap_gpio_info_t  info;
+  const char       *s;
+  int               ec;
+
+  ec = mmapProbe(&info);
+
+  if( ec != APP_EC_OK )
+  {
+    fprintf(stderr, "Error: mmapped GPIO Probe failed.\n");
+    return ec;
+  }
+
+  printf("GPIO Info\n");
+  printf("  exported gpio number: %d\n", info.gpio);
+  if( info.pin > 0 )
+  {
+    printf("  external pin number:  %d\n", info.pin);
+  }
+  else
+  {
+    printf("  external pin number:  N/A\n");
+  }
+
+  printf("  mmap base address:    0x%lx\n", info.base);
+  printf("  mmap channel offset:  0x%x\n", info.channel);
+  printf("  mmap bit:             %d\n", info.bit);
+
+  switch( info.dir )
+  {
+    case GPIO_DIR_IN:
+      s = GPIO_DIR_IN_STR;
+      break;
+    case GPIO_DIR_OUT:
+      s = GPIO_DIR_OUT_STR;
+      break;
+    default:
+      s = "?";
+      break;
+  }
+  printf("  direction:            %s\n", s);
+
+  switch( info.edge )
+  {
+    case GPIO_EDGE_NONE:
+      s = GPIO_EDGE_NONE_STR;
+      break;
+    case GPIO_EDGE_RISING:
+      s = GPIO_EDGE_RISING_STR;
+      break;
+    case GPIO_EDGE_FALLING:
+      s = GPIO_EDGE_FALLING_STR;
+      break;
+    case GPIO_EDGE_BOTH:
+      s = GPIO_EDGE_BOTH_STR;
+      break;
+    default:
+      s = "?";
+      break;
+  }
+  printf("  edge:                 %s\n", s);
+
+  switch( info.pull )
+  {
+    case GPIO_PULL_UP:
+      s = GPIO_PULL_UP_STR;
+      break;
+    case GPIO_PULL_DN:
+      s = GPIO_PULL_DN_STR;
+      break;
+    default:
+      s = GPIO_PULL_DS_STR;
+      break;
+  }
+  printf("  pull:                 %s\n", s);
+
+  printf("  value:                %d\n", info.value);
+
+  return APP_EC_OK;
+}
+
+#endif // MMAP_GPIO
+
 /*!
  * \brief Main.
  *
@@ -251,65 +399,24 @@ static int mmapProbe(gpio_info_t *pInfo)
  */
 int main(int argc, char* argv[])
 {
-  gpio_info_t   info;
-  int           ec;
+  int   ec;
 
   mainInit(argc, argv);
 
   if( !strcmp(OptsMethod, "sysfs") )
   {
-    ec = sysfsProbe(&info);
+    ec = sysfsProbeAndPrint();
   }
+#ifdef MMAP_GPIO
   else if( !strcmp(OptsMethod, "mmap") )
   {
-    ec = mmapProbe(&info);
+    ec = mmapProbeAndPrint();
   }
+#endif // MMAP_GPIO
   else
   {
     fprintf(stderr,"%s: Unknown GPIO access method.", OptsMethod);
     ec = APP_EC_ARGS;
-  }
-
-  if( ec == APP_EC_OK )
-  {
-    printf("GPIO Info\n");
-    printf("  exported gpio number: %d\n", info.gpio);
-    if( info.pin > 0 )
-    {
-      printf("  external pin number:  %d\n", info.pin);
-    }
-    else
-    {
-      printf("  external pin number:  N/A\n");
-    }
-
-    if( !strcmp(OptsMethod, "mmap") )
-    {
-      printf("  mmap base address:    0x%lx\n", info.base);
-      printf("  mmap channel offset:  0x%x\n", info.channel);
-      printf("  mmap bit:             %d\n", info.bit);
-    }
-
-    printf("  direction:            %s\n",
-        (info.dir == GPIO_DIR_IN? GPIO_DIR_IN_STR: GPIO_DIR_OUT_STR));
-
-    if( !strcmp(OptsMethod, "mmap") )
-    {
-      printf("  pull:                 %s\n",
-        (info.pull == GPIO_PULL_UP? GPIO_PULL_UP_STR:
-              (info.pull == GPIO_PULL_DN? GPIO_PULL_DN_STR: GPIO_PULL_DS_STR)));
-    }
-    else
-    {
-      printf("  pull:                 N/A\n");
-    }
-
-    printf("  value:                %d\n", info.value);
-  }
-
-  else
-  {
-    printf("Probe failed.\n");
   }
 
   return ec;

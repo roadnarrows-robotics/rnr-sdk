@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016.  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -71,9 +71,10 @@ static OptsPgmInfo_T PgmInfo =
   "Set GPIO pin direction.",
 
   // long_desc = 
-  "The %P command sets the direction for the specified GPIO pin. "
-  "An input (in) direction allows for the value of the pin to be read. "
-  "An output (out) direction allows for writing of a value of the pin.",
+  "The %P command sets the direction for the GPIO associated with the given "
+  "<gpio> exported number."
+  "An input (in) direction allows for the value of the GPIO to be read. "
+  "An output (out) direction allows for writing of values to the GPIO.",
 
   // diagnostics
   NULL
@@ -84,6 +85,7 @@ static OptsPgmInfo_T PgmInfo =
  */
 static OptsInfo_T OptsInfo[] =
 {
+#ifdef MMAP_GPIO
   // -m, --method
   {
     "method",             // long_opt
@@ -97,6 +99,7 @@ static OptsInfo_T OptsInfo[] =
                           // opt desc
     "GPIO access method. One of: sysfs mmap."
   },
+#endif // MMAP_GPIO
 
   {NULL, }
 };
@@ -191,6 +194,7 @@ static int sysfsSetDirection()
   return ec;
 }
 
+#ifdef MMAP_GPIO
 /*!
  * \brief Set GPIO directiion.
  *
@@ -220,6 +224,7 @@ static int mmapSetDirection()
 
   return ec;
 }
+#endif // MMAP_GPIO
 
 /*!
  * \brief Main.
@@ -239,9 +244,16 @@ int main(int argc, char* argv[])
   {
     ec = sysfsSetDirection();
   }
+#ifdef MMAP_GPIO
   else if( !strcmp(OptsMethod, "mmap") )
   {
     ec = mmapSetDirection();
+  }
+#endif // MMAP_GPIO
+  else
+  {
+    fprintf(stderr,"%s: Unknown GPIO access method.", OptsMethod);
+    ec = APP_EC_ARGS;
   }
 
   return ec;

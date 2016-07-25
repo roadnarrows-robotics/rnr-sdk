@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016.  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -71,7 +71,7 @@ static OptsPgmInfo_T PgmInfo =
 
   // long_desc = 
   "The %P command destroys a GPIO exported interface for the specified GPIO "
-  "pin number.\n\n"
+  "number.\n\n"
   "NOTE: This command requires root privileges.",
 
   // diagnostics

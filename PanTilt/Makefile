@@ -114,6 +114,7 @@ ETC_FILES	=	share/etc/pan_tilt/pan_tilt_tune.conf \
 						share/etc/pan_tilt/*.xml \
 						share/etc/init.d/* \
 						share/etc/ld.so.conf.d/*.conf \
+						share/etc/udev/rules.d/*.rules \
 						etc/udev/rules.d/*
 
 LIB_FILES =	share/lib/cmake/rnr/rnr-pantilt-config.cmake

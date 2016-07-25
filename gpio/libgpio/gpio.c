@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015.  RoadNarrows LLC.
+ * (C) 2015-2016.  RoadNarrows LLC.
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
@@ -52,6 +52,9 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/select.h>
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -116,7 +119,67 @@ static int gpioReadDirection(int gpio)
   }
   else
   {
-    LOGERROR("Unknown direction read: \"%s\".", buf);
+    LOGERROR("Unknown direction value: \"%s\".", buf);
+    return RC_ERROR;
+  }
+}
+
+/*!
+ * \brief Read GPIO current edge trigger.
+ *
+ * Method: sysfs
+ *
+ * \param gpio  The sysfs exported GPIO number.
+ *
+ * \return
+ * On success GPIO_EDGE_NONE(0), GPIO_EDGE_RISING(1),
+ * GPIO_EDGE_FALLING(2), or GPIO_EDGE_BOTH(3) is returned.\n
+ * Otherwise RC_ERROR(-1) is returned.
+ */
+static int gpioReadEdge(int gpio)
+{
+  int     fd;
+  char    buf[MAX_PATH]; 
+  ssize_t n;
+
+  sprintf(buf, "%s/gpio%d/edge", GpioRoot, gpio);
+
+  if( (fd = open(buf, O_RDONLY)) < 0 )
+  {
+    LOGSYSERROR("open(\"%s\", O_WRONLY)", buf);
+    return RC_ERROR;
+  }
+
+  if( (n = read(fd, buf, sizeof(buf))) < 0 )
+  {
+    LOGSYSERROR("read(%d, %p, %zu)", fd, buf, sizeof(buf));
+    close(fd);
+    return RC_ERROR;
+  }
+
+  close(fd);
+
+  buf[n] = 0;
+
+  if( !strncmp(buf, GPIO_EDGE_NONE_STR, strlen(GPIO_EDGE_NONE_STR)) )
+  {
+    return GPIO_EDGE_NONE;
+  }
+  else if( !strncmp(buf, GPIO_EDGE_RISING_STR, strlen(GPIO_EDGE_RISING_STR)) )
+  {
+    return GPIO_EDGE_RISING;
+  }
+  else if( !strncmp(buf, GPIO_EDGE_FALLING_STR, strlen(GPIO_EDGE_FALLING_STR)) )
+  {
+    return GPIO_EDGE_FALLING;
+  }
+  else if( !strncmp(buf, GPIO_EDGE_BOTH_STR, strlen(GPIO_EDGE_BOTH_STR)) )
+  {
+    return GPIO_EDGE_BOTH;
+  }
+  else
+  {
+    LOGERROR("Unknown edge value: \"%s\".", buf);
     return RC_ERROR;
   }
 }
@@ -186,14 +249,22 @@ int gpioUnexport(int gpio)
 
 int gpioSetDirection(int gpio, int dir)
 {
-  int   fd;
-  char  buf[MAX_PATH]; 
+  int         fd;
+  char        buf[MAX_PATH]; 
+  const char *sDir;
 
-  if( (dir != GPIO_DIR_IN) && (dir != GPIO_DIR_OUT) )
+  switch( dir )
   {
-    LOGERROR("GPIO %d: \"%s\": Invalid direction. Must be one of: %d %d.",
+    case GPIO_DIR_IN:
+      sDir = GPIO_DIR_IN_STR;
+      break;
+    case GPIO_DIR_OUT:
+      sDir = GPIO_DIR_OUT_STR;
+      break;
+    default:
+      LOGERROR("GPIO %d: \"%s\": Invalid direction. Must be one of: %d %d.",
         gpio, dir, GPIO_DIR_IN, GPIO_DIR_OUT);
-    return RC_ERROR;
+      return RC_ERROR;
   }
 
   sprintf(buf, "%s/gpio%d/direction", GpioRoot, gpio);
@@ -204,18 +275,64 @@ int gpioSetDirection(int gpio, int dir)
     return RC_ERROR;
   }
 
-  sprintf(buf, "%s", (dir == GPIO_DIR_IN? GPIO_DIR_IN_STR: GPIO_DIR_OUT_STR));
-
-  if( write(fd, buf, strlen(buf)) < 0 )
+  if( write(fd, sDir, strlen(sDir)) < 0 )
   {
-    LOGSYSERROR("write(%d, \"%s\", %zu)", fd, buf, strlen(buf));
+    LOGSYSERROR("write(%d, \"%s\", %zu)", fd, sDir, strlen(sDir));
     close(fd);
     return RC_ERROR;
   }
 
   close(fd);
 
-  LOGDIAG3("GPIO %d direction set to %s.", gpio, buf);
+  LOGDIAG3("GPIO %d direction set to %s.", gpio, sDir);
+
+  return OK;
+}
+
+int gpioSetEdge(int gpio, int edge)
+{
+  int         fd;
+  char        buf[MAX_PATH]; 
+  const char *sEdge;
+
+  switch( edge )
+  {
+    case GPIO_EDGE_NONE:
+      sEdge = GPIO_EDGE_NONE_STR;
+      break;
+    case GPIO_EDGE_RISING:
+      sEdge = GPIO_EDGE_RISING_STR;
+      break;
+    case GPIO_EDGE_FALLING:
+      sEdge = GPIO_EDGE_FALLING_STR;
+      break;
+    case GPIO_EDGE_BOTH:
+      sEdge = GPIO_EDGE_BOTH_STR;
+      break;
+    default:
+      LOGERROR("GPIO %d: \"%s\": Invalid edge. Must be in range [%d-%d].",
+        gpio, edge, GPIO_EDGE_NONE, GPIO_EDGE_BOTH);
+      return RC_ERROR;
+  }
+
+  sprintf(buf, "%s/gpio%d/edge", GpioRoot, gpio);
+
+  if( (fd = open(buf, O_WRONLY)) < 0 )
+  {
+    LOGSYSERROR("open(\"%s\", O_WRONLY)", buf);
+    return RC_ERROR;
+  }
+
+  if( write(fd, sEdge, strlen(sEdge)) < 0 )
+  {
+    LOGSYSERROR("write(%d, \"%s\", %zu)", fd, sEdge, strlen(sEdge));
+    close(fd);
+    return RC_ERROR;
+  }
+
+  close(fd);
+
+  LOGDIAG3("GPIO %d edge set to %s.", gpio, sEdge);
 
   return OK;
 }
@@ -232,11 +349,9 @@ int gpioProbe(int gpio, gpio_info_t *p)
   int   rc = OK;
 
   p->gpio     = gpio;
-  p->pin      = gpioExportedToPin(gpio);
-  p->base     = 0;
-  p->channel  = 0;
-  p->bit      = 0;
+  p->pin      = -1; // gpioExportedToPin(gpio);
   p->dir      = GPIO_DIR_IN;
+  p->edge     = GPIO_EDGE_NONE;
   p->pull     = GPIO_PULL_DS;
   p->value    = 0;
 
@@ -247,6 +362,15 @@ int gpioProbe(int gpio, gpio_info_t *p)
   else
   {
     p->dir = v;
+  }
+
+  if( (v = gpioReadEdge(gpio)) < 0 )
+  {
+    rc = RC_ERROR;
+  }
+  else
+  {
+    p->edge = v;
   }
 
   if( (v = gpioRead(gpio)) < 0 )
@@ -313,6 +437,65 @@ int gpioWrite(int gpio, int value)
   LOGDIAG3("Wrote GPIO %d value %c.", gpio, c);
 
   return OK;
+}
+
+int gpioNotify(int gpio, double timeout)
+{
+  int             fd;
+  char            buf[MAX_PATH]; 
+  fd_set          efds;
+  struct timeval  tv;
+  int             rc;
+
+  sprintf(buf, "%s/gpio%d/value", GpioRoot, gpio);
+
+  if( (fd = open(buf, O_RDONLY)) < 0 )
+  {
+    LOGSYSERROR("open(\"%s\", O_RDONLY)", buf);
+    return RC_ERROR;
+  }
+
+  FD_ZERO(&efds);
+  FD_SET(fd, &efds);
+
+  tv.tv_sec  = (long)timeout;
+  tv.tv_usec = (long)(timeout - (double)tv.tv_sec) * 1000000;
+  if( tv.tv_usec > 1000000 )
+  {
+    ++tv.tv_sec;
+    tv.tv_usec = 0;
+  }
+
+  rc = select(fd+1, NULL, NULL, &efds, &tv);
+
+  // change
+  if( rc >= 0 )
+  {
+    if( (rc = gpioQuickRead(fd)) >= 0 )
+    {
+      LOGDIAG3("Triggered GPIO %d change, value is %d.", gpio, rc);
+    }
+  }
+
+  // timeout
+  else if( rc == 0 )
+  {
+    rc = gpioQuickRead(fd);
+    if( (rc = gpioQuickRead(fd)) >= 0 )
+    {
+      LOGDIAG3("Triggered GPIO %d timedout, value is %d.", gpio, rc);
+    }
+  }
+
+  // error
+  else
+  {
+    LOGSYSERROR("select()");
+  }
+
+  close(fd);
+
+  return rc;
 }
 
 int gpioOpen(int gpio)
@@ -409,6 +592,7 @@ int gpioBitBang(int           fd,
 
   return OK;
 }
+
 void gpioMakeDirname(int gpio, char buf[], size_t size)
 {
   snprintf(buf, size, "%s/gpio%d", GpioRoot, gpio);

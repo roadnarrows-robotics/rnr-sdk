@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016.  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -77,7 +77,7 @@ static OptsPgmInfo_T PgmInfo =
 
   // long_desc = 
   "The %P command reads the current GPIO pin value (0 or 1) for the specified "
-  "GPIO pin number.",
+  "GPIO exported number.",
 
   // diagnostics
   NULL
@@ -116,6 +116,7 @@ static OptsInfo_T OptsInfo[] =
     "Wait interval seconds between reads specified as a floating-point number."
   },
 
+#ifdef MMAP_GPIO
   // -m, --method
   {
     "method",             // long_opt
@@ -129,6 +130,7 @@ static OptsInfo_T OptsInfo[] =
                           // opt desc
     "GPIO access method. One of: sysfs mmap."
   },
+#endif // MMAP_GPIO
 
   // -v, --verbose
   {
@@ -263,6 +265,7 @@ static int sysfsRead()
   return APP_EC_OK;
 }
 
+#ifdef MMAP_GPIO
 /*!
  * \brief Read GPIO value(s).
  *
@@ -308,6 +311,7 @@ static int mmapRead()
 
   return APP_EC_OK;
 }
+#endif // MMAP_GPIO
 
 /*!
  * \brief Main.
@@ -327,9 +331,18 @@ int main(int argc, char* argv[])
   {
     ec = sysfsRead();
   }
+
+#ifdef MMAP_GPIO
   else if( !strcmp(OptsMethod, "mmap") )
   {
     ec = mmapRead();
+  }
+#endif // MMAP_GPIO
+
+  else
+  {
+    fprintf(stderr,"%s: Unknown GPIO access method.", OptsMethod);
+    ec = APP_EC_ARGS;
   }
 
   return ec;

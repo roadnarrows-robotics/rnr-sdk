@@ -68,6 +68,7 @@ pkgroot		= ..
 SUBDIRS = gpiobitbang \
 					gpiodirection \
 					gpioexport \
+					gpionotify \
 					gpioprobe \
 					gpioread \
 					gpiounexport \

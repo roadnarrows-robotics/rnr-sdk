@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -62,7 +62,6 @@ static byte_t  *ArgsPattern;                    ///< bit pattern to write
 static size_t   PatByteCount;                   ///< pattern byte count
 static size_t   PatBitCount;                    ///< pattern bit count
 
-//gpiobitbang --log=LOG --method=mmap --ibd=2000 GPIO 0xff 0b101100
 
 /*!
  * \brief Program information.
@@ -76,10 +75,11 @@ static OptsPgmInfo_T PgmInfo =
   "Bit-bang bit pattern out GPIO pin.",
 
   // long_desc = 
-  "The %P command writes the specified bit pattern to the specified GPIO pin. "
+  "The %P command writes the specified bit pattern to the GPIO at the given "
+  "exported number. "
   "A bit value of 0 sets the pin low. "
   "A bit value of 1 set the pin high."
-  "The byte pattern is specified a series of byte arguments of any of the "
+  "The byte pattern is specified as a series of byte arguments of any of the "
   "format:\n"
   "  0xH[H]     hexidecimal      examples: 0x5        0x3C     0xff\n"
   "  0bB[B...]  binary           examples: 0b00000101 0b001111 0b11111111\n"
@@ -108,6 +108,7 @@ static OptsInfo_T OptsInfo[] =
     "Inter-bit delay in microseconds. A 0 value means no delay."
   },
 
+#ifdef MMAP_GPIO
   // -m, --method
   {
     "method",             // long_opt
@@ -121,6 +122,7 @@ static OptsInfo_T OptsInfo[] =
                           // opt desc
     "GPIO access method. One of: sysfs mmap."
   },
+#endif // MMAP_GPIO
 
   {NULL, }
 };
@@ -263,6 +265,7 @@ static int sysfsBitBang()
   return ec;
 }
 
+#ifdef MMAP_GPIO
 /*!
  * \brief Bit bang bit pattern.
  *
@@ -292,6 +295,7 @@ static int mmapBitBang()
 
   return ec;
 }
+#endif // MMAP_GPIO
 
 /*!
  * \brief Main.
@@ -322,10 +326,12 @@ int main(int argc, char* argv[])
   {
     ec = sysfsBitBang();
   }
+#ifdef MMAP_GPIO
   else if( !strcmp(OptsMethod, "mmap") )
   {
     ec = mmapBitBang();
   }
+#endif // MMAP_GPIO
   else
   {
     fprintf(stderr,"%s: Unknown GPIO access method.", OptsMethod);
