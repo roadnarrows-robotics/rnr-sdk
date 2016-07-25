@@ -241,14 +241,14 @@ extern int gpioWrite(int gpio, int value);
  *
  * Method: sysfs
  *
- * \param gpio  The sysfs exported GPIO number.
+ * \param fd      Open GPIO pin file descriptor.
  * \param timeout Wait timeout. A value of 0.0 is no timeout.
  *
  * \return
  * On success the pin value 0 or 1 is returned.
  * Otherwise RC_ERROR(-1) is returned. Use errno to determine error.
  */
-extern int gpioNotify(int gpio, double timeout);
+extern int gpioNotify(int fd, double timeout);
 
 /*!
  * \brief Open GPIO pin.

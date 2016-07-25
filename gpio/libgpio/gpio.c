@@ -439,27 +439,17 @@ int gpioWrite(int gpio, int value)
   return OK;
 }
 
-int gpioNotify(int gpio, double timeout)
+int gpioNotify(int fd, double timeout)
 {
-  int             fd;
-  char            buf[MAX_PATH]; 
   fd_set          efds;
   struct timeval  tv;
   int             rc;
-
-  sprintf(buf, "%s/gpio%d/value", GpioRoot, gpio);
-
-  if( (fd = open(buf, O_RDONLY)) < 0 )
-  {
-    LOGSYSERROR("open(\"%s\", O_RDONLY)", buf);
-    return RC_ERROR;
-  }
 
   FD_ZERO(&efds);
   FD_SET(fd, &efds);
 
   // no timeout
-  if( timeout == 0.0 )
+  if( timeout <= 0.0 )
   {
     rc = select(fd+1, NULL, NULL, &efds, NULL);
   }
@@ -476,30 +466,24 @@ int gpioNotify(int gpio, double timeout)
   }
 
   // change
-  if( rc >= 0 )
+  if( rc > 0 )
   {
-    if( (rc = gpioQuickRead(fd)) >= 0 )
-    {
-      LOGDIAG3("GPIO %d changed, value is %d.", gpio, rc);
-    }
+    LOGDIAG3("GPIO value changed.");
+    rc = gpioQuickRead(fd);
   }
 
   // timeout
   else if( rc == 0 )
   {
-    if( (rc = gpioQuickRead(fd)) >= 0 )
-    {
-      LOGDIAG3("GPIO %d timedout, value is %d.", gpio, rc);
-    }
+    LOGDIAG3("GPIO watch timedout.");
+    rc = gpioQuickRead(fd);
   }
 
   // error
   else
   {
-    LOGSYSERROR("select()");
+    LOGSYSERROR("select(%d, ...)", fd);
   }
-
-  close(fd);
 
   return rc;
 }

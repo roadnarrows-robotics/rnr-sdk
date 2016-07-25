@@ -192,20 +192,30 @@ static void mainInit(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-  fd_set          efds;
-  struct timeval  tv;
-  char    c;
-  int     rc;
+  int   fd;
+  int   rc;
 
+  // parse command line
   mainInit(argc, argv);
 
+  // open sys/class/gpio exported value 
+  if( (fd = gpioOpen(ArgsGpioNum)) < 0 )
+  {
+    return APP_EC_EXEC;
+  }
+
+  // read once, to purge existing gpio triggers
+  gpioQuickRead(fd);
+
+  // now monitor events
   do
   {
-    rc = gpioNotify(ArgsGpioNum, OptsTimeout);
+    rc = gpioNotify(fd, OptsTimeout);
 
-    printf("%d\n", rc);
+    fprintf(stdout, "%d\n", rc);
+    fflush(stdout);
 
-  } while( OptsMonitor );
+  } while( OptsMonitor && (rc >= 0) );
 
   return rc < -1? APP_EC_EXEC: APP_EC_OK;
 }
