@@ -458,32 +458,38 @@ int gpioNotify(int gpio, double timeout)
   FD_ZERO(&efds);
   FD_SET(fd, &efds);
 
-  tv.tv_sec  = (long)timeout;
-  tv.tv_usec = (long)(timeout - (double)tv.tv_sec) * 1000000;
-  if( tv.tv_usec > 1000000 )
+  // no timeout
+  if( timeout == 0.0 )
   {
-    ++tv.tv_sec;
-    tv.tv_usec = 0;
+    rc = select(fd+1, NULL, NULL, &efds, NULL);
   }
-
-  rc = select(fd+1, NULL, NULL, &efds, &tv);
+  else
+  {
+    tv.tv_sec  = (long)timeout;
+    tv.tv_usec = (long)(timeout - (double)tv.tv_sec) * 1000000;
+    if( tv.tv_usec > 1000000 )
+    {
+      ++tv.tv_sec;
+      tv.tv_usec = 0;
+    }
+    rc = select(fd+1, NULL, NULL, &efds, &tv);
+  }
 
   // change
   if( rc >= 0 )
   {
     if( (rc = gpioQuickRead(fd)) >= 0 )
     {
-      LOGDIAG3("Triggered GPIO %d change, value is %d.", gpio, rc);
+      LOGDIAG3("GPIO %d changed, value is %d.", gpio, rc);
     }
   }
 
   // timeout
   else if( rc == 0 )
   {
-    rc = gpioQuickRead(fd);
     if( (rc = gpioQuickRead(fd)) >= 0 )
     {
-      LOGDIAG3("Triggered GPIO %d timedout, value is %d.", gpio, rc);
+      LOGDIAG3("GPIO %d timedout, value is %d.", gpio, rc);
     }
   }
 
