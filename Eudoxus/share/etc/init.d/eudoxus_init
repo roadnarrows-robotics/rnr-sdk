@@ -26,27 +26,47 @@ GPIO_USER_BUTTON=19   # user push button
 #
 # Start GPIO
 #
-# startGpio <gpio> {in|out} [{0|1|""} [force]]
+# startGpio <gpio> in [{both|rising|falling|both} [force]]
+# startGpio <gpio> out [{0|1} [force]]
 #
 startGpio()
 {
   gpio=${1}
   dir=${2}
-  initval=${3}
   force=${4}
+  modmsg=
+
   gpiodir=${SYSGPIO}/gpio${gpio}
 
   if [ ! -d ${gpiodir} -o "${force}" = "force" ]
   then
-    log_action_begin_msg "Exporting GPIO ${gpio} as ${dir}put" || true
-    gpioexport --log-no-color --log=error --logfile=${LOGFILE} ${gpio} 
-    gpiodirection --log-no-color --log=error --logfile=${LOGFILE} ${gpio} ${dir}
-    chmod 666 ${gpiodir}/value >>${LOGFILE} 2>>${LOGFILE}
-    if [ "${dir}" = "out" -a "${initval}" = "0" -o "${initval}" = "1" ]
+    if [ "${dir}" = "out" ]
     then
-      echo "${initval}" > ${gpiodir}/value >>${LOGFILE} 2>>${LOGFILE}
+      initval=${3}
+      if [ "${initval}" = "0" -o "${initval}" = "1" ]
+      then
+        modmsg=" with initial value ${initval}"
+      fi
+      log_action_begin_msg "Exporting GPIO ${gpio} as ${dir}put${modmsg}" || true
+      gpioexport --log-no-color --log=error --logfile=${LOGFILE} --mode=0666 ${gpio} ${dir}
+
+      if [ "${initval}" = "0" -o "${initval}" = "1" ]
+      then
+        echo "${initval}" > ${gpiodir}/value >>${LOGFILE} 2>>${LOGFILE}
+      fi
+      log_action_end_msg 0 || true
+
+    elif [ "${dir}" = "in" ]
+    then
+      edge=${3}
+      if [ "${edge}" != "" ]
+      then
+        modmsg=" ${edge} edge triggered"
+      fi
+      log_action_begin_msg "Exporting GPIO ${gpio} as ${dir}put${modmsg}" || true
+      gpioexport --log-no-color --log=error --logfile=${LOGFILE} --mode=0666 ${gpio} ${dir} ${edge}
+      log_action_end_msg 0 || true
     fi
-    log_action_end_msg 0 || true
   fi
 }
 
@@ -58,7 +78,7 @@ startGpio()
 startdaemon()
 {
   startGpio ${GPIO_USER_LED}  out "0" ${1}
-  startGpio ${GPIO_USER_BUTTON}  in ""  ${1}
+  startGpio ${GPIO_USER_BUTTON}  in "both"  ${1}
 }
 
 #
@@ -85,7 +105,13 @@ statusOfGpio()
     perm=${info%% *}
     val=$(cat ${gpiodir}/value 2>/dev/null)
     dir=$(cat ${gpiodir}/direction 2>/dev/null)
-    log_action_msg "GPIO ${gpio}: ${dir}put ${val} (${perm})" || true
+    edge=$(cat ${gpiodir}/edge 2>/dev/null)
+    if [ "${dir}" = "out" ]
+    then
+      log_action_msg "GPIO ${gpio}: ${dir}put ${val} (${perm})" || true
+    else
+      log_action_msg "GPIO ${gpio}: ${dir}put ${edge} ${val} (${perm})" || true
+    fi
   else
     log_action_msg "GPIO ${gpio}: Not exported" || true
   fi

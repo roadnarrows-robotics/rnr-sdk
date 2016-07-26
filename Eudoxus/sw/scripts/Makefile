@@ -9,14 +9,14 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2016-03-17 12:14:21 -0600 (Thu, 17 Mar 2016) $  
 $Rev: 4350 $ 
 
-\brief Make Laelaps executable scripts.
+\brief Make Eudoxus executable scripts.
 
 RN Make System Specific Makefile
 
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2015-2016  RoadNarrows Intelligent Systems.
+  (C) 2016  RoadNarrows Intelligent Systems.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -61,19 +61,7 @@ pkgroot		= ../..
 # Executable Scripts
 
 SCRIPTS = \
-	laelaps_fcam_udp \
-	laelaps_fcam_client_udp \
-	laelaps_imu.py \
-	laelaps_init.d.py \
-	laelaps_ping_tof \
-	laelaps_service \
-	laelaps_sane.py \
-	laelaps_speed.py \
-	laelaps_stop.py \
-	laelaps_wd_mon \
-
-#	laelaps_diag.py 
-#	laelaps_tune_motors.py
+	eudoxus_shutter.sh \
 
 #------------------------------------------------------------------------------
 # Sources

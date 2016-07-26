@@ -1,32 +1,79 @@
 #!/bin/bash
-# Example script to show how to interface with the user push button and LED.
 #
-# Note:
-# The /sys/class/gpio exported interface is assumed already created.
-# See gpioexport(1) and /etc/init.d/eudoxus_int(1)
+# Script: eudoxus_shutter.sh
 #
-# RoadNarrows LLC
+
+## \file
+##
+## $LastChangedDate$
+## $Rev$
+## 
+## \brief Example script to demonstrate how to interface with the Eudoxus
+##  user push button and LED.
+##
+## \par Note:
+## The /sys/class/gpio exported interface is assumed already created.
+## See gpioexport(1) and /etc/init.d/eudoxus_int(1)
+## 
+## \author: Robin Knight (robin.knight@roadnarrows.com)
+## 
+## \par Copyright:
+##   (C) 2016.  RoadNarrows LLC.
+##   (http://www.roadnarrows.com)
+##   All Rights Reserved
+
+#
+# @EulaBegin@
+# @EulaEnd@
 #
 
 # Exported GPIO numbers.
-declare -r gpio_led=18
-declare -r gpio_bttn=19
+declare -r gpio_led=18      # blue user LED output GPIO
+declare -r gpio_bttn=19     # user push button input GPIO
 
-# GPIO old and current values.
+# GPIO values.
 # For the user button, the released state is 1; pushed state is 0.
-# For the user LED, the LED off is 0, on is 1.
+# For the user LED, the LED off state is 0, the on state is 1.
 declare -i old_button=1   # old push button state
 declare -i button=1       # current push button state
 declare -i led=0          # current led state
 
 # Times
-declare -i t_led=$(date +%s)
-declare -i t_cur
-declare -i t_diff
+declare -i t_led=$(date +%s)    # last led state change time
+declare -i t_cur                # current time
+declare -i t_diff               # time difference
 
 # Some state variables
-declare -i playing=0    # some undefined play state
+declare -i playing=0    # some user defined play state
 
+#
+# Hook to start user defined play function.
+#
+play_start()
+{
+  echo "Play started"
+  playing=1 # start play function
+
+  # ADD HOOK HERE
+}
+
+#
+# Hook to stop user defined play function.
+#
+play_stop()
+{
+  echo "Play stopped"
+  playing=0 # stop play function
+
+  # ADD HOOK HERE
+}
+
+#
+# Set LED
+#   
+# If not playing, thenthe LED should be solid on
+# If playing, then the LED should slowly blink
+#
 setled()
 {
   if [ ${playing} -eq 0 ]
@@ -35,6 +82,7 @@ setled()
     then
       led=1
       gpiowrite ${gpio_led} ${led}
+      t_led=${t_cur}
     fi
   else
     t_cur=$(date +%s)
@@ -54,7 +102,7 @@ setled()
 }
 
 #
-# Block-wait on user button events.
+# Block-wait on user push button events.
 #
 while :
 do
@@ -69,14 +117,11 @@ do
           # pushed --> released
           if [ ${old_button} -eq 0 ]
           then
-            # currently playing
-            if [ ${playing} -eq 1 ]
+            if [ ${playing} -eq 1 ] # currently playing
             then
-              echo "Play stopped"
-              playing=0 # turn off play
-            else
-              echo "Play started"
-              playing=1 # start play
+              play_stop
+            else # currently not playing
+              play_start
             fi
           fi
           ;;
@@ -90,29 +135,3 @@ do
 done
 
 exit 0
-
-oldstate='1'
-clear
-banner "Robin"
-
-while :
-do
-  v=$(cat /sys/class/gpio/gpio19/value)
-  case ${v}
-  in
-    0*) state='0';;
-    1*) state='1';;
-  esac
-
-  if [[ ${state} != ${oldstate} ]]
-  then
-    case ${state}
-    in
-      0) banner "One Sick"; banner "  Dude";;
-      1) clear; banner "Robin";;
-    esac
-    oldstate=${state}
-  fi
-
-  sleep 0.1
-done

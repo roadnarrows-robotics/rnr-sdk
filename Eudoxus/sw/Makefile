@@ -62,12 +62,13 @@ pkgroot		= ..
 #------------------------------------------------------------------------------
 
 # Subdirectories to Build
-SUBDIRS = \
-	external \
-	libEudoxus \
-	gst \
-	apps
-					
+SUBDIRS = pyModules scripts
+
+# Old Eudoxus 1.0
+#	external \
+#	libEudoxus \
+#	gst \
+#	apps
 #	primesense \
 #	openni \
 

@@ -1,4 +1,4 @@
-################################################################################
+
 #
 # ./Makefile
 
@@ -9,8 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2015-11-20 15:52:58 -0700 (Fri, 20 Nov 2015) $
 $Rev: 4213 $
 
-\brief
-Make Eudoxus package.
+\brief Make Eudoxus package.
 
 RN Make System Specific Makefile
 
@@ -79,7 +78,7 @@ SUBDIRS		= sw examples
 
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= ni primesense eudoxus
+#DIST_HDRS	= ni primesense eudoxus
 
 #
 # Distribution Headers
@@ -89,11 +88,10 @@ DIST_HDRS	= ni primesense eudoxus
 # Note: Any header file that requires distribution is expected to be in 
 # 			$(topdir)/include. Otherwise, is it really a deliverable header?
 #
-ni.HDRS.H	=	$(shell cd include; ls ni/*.h ni/Linux-*/*.h) 
+#ni.HDRS.H	=	$(shell cd include; ls ni/*.h ni/Linux-*/*.h) 
 
-primesense.HDRS.H	=	$(shell cd include; ls primesense/*.h primesense/XnEE/*.h) 
-
-eudoxus.HDRS.H	=	$(shell cd include; ls Eudoxus/*.h) 
+#primesense.HDRS.H	=	$(shell cd include; ls primesense/*.h primesense/XnEE/*.h) 
+#eudoxus.HDRS.H	=	$(shell cd include; ls Eudoxus/*.h) 
 
 #------------------------------------------------------------------------------
 # Documentation 
