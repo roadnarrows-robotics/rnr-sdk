@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Package:   Raton
+// Package:   Laelaps
 //
 // File:      page_EULA.doxy
 //
@@ -17,7 +17,7 @@
 
 /*! 
   \page page_eula EULA
-  \section eula_txt Raton Package End User Licence Agreement
+  \section eula_txt Laelaps Package End User Licence Agreement
 
   \subsection eula_permissions Permissions
   Unless otherwise noted, all materials contained are copyrighted and may not
@@ -41,7 +41,7 @@
 
   \subsection eula_copyright Copyright
   All Rights Reserved by RoadNarrows LLC
-  \n (C) 2013.
+  \n (C) 2016.
   \n (http://roadnarrows.com)
 
 */

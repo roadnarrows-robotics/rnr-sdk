@@ -61,6 +61,7 @@ pkgroot		= ../..
 # Executable Scripts
 
 SCRIPTS = \
+	eudoxus_init.d \
 	eudoxus_shutter.sh \
 
 #------------------------------------------------------------------------------

@@ -1,0 +1,47 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Package:   Eudoxus
+//
+// File:      page_EULA.doxy
+//
+/*!
+  \file
+  $LastChangedDate: 2013-04-01 10:32:56 -0600 (Mon, 01 Apr 2013) $
+  $Rev: 2800 $
+*/
+//
+// Description:
+//  This file contains the doxygen directives to generate the EULA page.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+/*! 
+  \page page_eula EULA
+  \section eula_txt Eudoxus Package End User Licence Agreement
+
+  \subsection eula_permissions Permissions
+  Unless otherwise noted, all materials contained are copyrighted and may not
+  be used except as provided in these terms and conditions or in the copyright
+  notice (documents and software ) or other proprietary notice provided with
+  the relevant materials.
+
+  \subsection eula_warranties Warranties
+  IN NO EVENT SHALL THE AUTHOR, RoadNarrows LLC, OR ANY MEMBERS/EMPLOYEES/CONTRACTORS
+  OF RoadNarrows LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+  PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+  DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+  EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+  THE POSSIBILITY OF SUCH DAMAGE.
+
+  THE AUTHORS AND RoadNarrows LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+  FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+  "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+  PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+
+  \subsection eula_copyright Copyright
+  All Rights Reserved by RoadNarrows LLC
+  \n (C) 2016.
+  \n (http://roadnarrows.com)
+
+*/

@@ -68,7 +68,9 @@ _distlib_path=${_pkgroot}/dist/dist.${_utarch}/lib:${_distlib_gst_path}
 pathmunge GST_PLUGIN_PATH ${_distlib_gst_path}
 
 # add made libraries to search path
-LD_LIBRARY_PATH= 
 pathmunge LD_LIBRARY_PATH ${_distlib_path}
+
+# uncomment the following line to to enable package python modules
+pathmunge PYTHONPATH ${_pkgroot}/sw/pyModules/modules
 
 unset _utarg _pkgroot _distlist_bath _py_path
