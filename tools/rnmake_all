@@ -10,7 +10,7 @@
 #   Make clobber, deps, install for all active packages.
 #
 
-pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt Kuon'
+pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt Kuon Eudoxus'
 
 pkgroot='/prj/pkg'
 

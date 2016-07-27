@@ -11,7 +11,7 @@
 #   support debian builds will be made
 #
 
-pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt'
+pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt Eudoxus'
 
 pkgroot='/prj/pkg'
 

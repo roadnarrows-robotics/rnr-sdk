@@ -60,11 +60,13 @@ lscolor ${loc}/lib/cmake/rnr
 lscolor ${loc}/lib/rnr
 lscolor ${loc}/lib/python2.7/site-packages
 lscolor ${loc}/lib/python2.7/site-packages/BotSense
+lscolor ${loc}/lib/python2.7/site-packages/Eudoxus
 lscolor ${loc}/lib/python2.7/site-packages/Hekateros
 lscolor ${loc}/lib/python2.7/site-packages/Laelaps
 lscolor ${loc}/lib/python2.7/site-packages/NetMsgs
 lscolor ${loc}/lib/python2.7/site-packages/rnr
 
+lscolor ${etc}/eudoxus
 lscolor ${etc}/hekateros
 lscolor ${etc}/kuon
 lscolor ${etc}/laelaps
