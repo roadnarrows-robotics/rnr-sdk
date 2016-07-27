@@ -13,7 +13,7 @@
 ##
 ## \par Note:
 ## The /sys/class/gpio exported interface is assumed already created.
-## See gpioexport(1) and /etc/init.d/eudoxus_int(1)
+## See gpioexport(1) and /etc/init.d/eudoxus_init(1)
 ## 
 ## \author: Robin Knight (robin.knight@roadnarrows.com)
 ## 
@@ -43,27 +43,39 @@ declare -i t_led=$(date +%s)    # last led state change time
 declare -i t_cur                # current time
 declare -i t_diff               # time difference
 
-# Some state variables
-declare -i playing=0    # some user defined play state
+# Some user defined state variables
+declare -i action_state=0   # action state, 0 is not running, 1 is running 
 
 #
-# Hook to start user defined play function.
+# Hook to test if user defined action is running.
 #
-play_start()
+# Return 0 or 1.
+#
+action_running()
 {
-  echo "Play started"
-  playing=1 # start play function
+  # ADD HOOK HERE
+
+  echo ${action_state}
+}
+
+#
+# Hook to start user defined action function.
+#
+action_start()
+{
+  echo "Action started"
+  action_state=1 # start action function
 
   # ADD HOOK HERE
 }
 
 #
-# Hook to stop user defined play function.
+# Hook to stop user defined action function.
 #
-play_stop()
+action_stop()
 {
-  echo "Play stopped"
-  playing=0 # stop play function
+  echo "Action stopped"
+  action_state=0 # stop action function
 
   # ADD HOOK HERE
 }
@@ -71,12 +83,12 @@ play_stop()
 #
 # Set LED
 #   
-# If not playing, thenthe LED should be solid on
-# If playing, then the LED should slowly blink
+# If not action_state, thenthe LED should be solid on
+# If action_state, then the LED should slowly blink
 #
 setled()
 {
-  if [ ${playing} -eq 0 ]
+  if [ ${action_state} -eq 0 ]
   then
     if [ ${led} -eq 0 ]
     then
@@ -117,11 +129,12 @@ do
           # pushed --> released
           if [ ${old_button} -eq 0 ]
           then
-            if [ ${playing} -eq 1 ] # currently playing
+            action_state=$(action_running)
+            if [ ${paction_state} -eq 1 ] # currently action_state
             then
-              play_stop
-            else # currently not playing
-              play_start
+              action_stop
+            else # currently not action_state
+              action_start
             fi
           fi
           ;;

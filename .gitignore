@@ -45,6 +45,11 @@ Dynamixel/bsPython/modules/BotSense/Dynamixel/bsDynaMsgs.py
 Dynamixel/include/botsense/bsDynaMsgs.h
 Dynamixel/share/msgs/*.xml
 
+# Eudoxus
+Eudoxus/sw/pyModules/build
+Eudoxus/sw/pyModules/build.*/
+Eudoxus/sw/pyModules/src/*.done
+
 # Hekateros
 Hekateros/sw/pyModules/build
 Hekateros/sw/pyModules/build.*/

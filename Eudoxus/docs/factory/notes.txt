@@ -1,0 +1,48 @@
+================================================================================
+I. ROS
+
+A. /opt/ros/indigo
+rviz (host)
+image_pipeline (target, host)
+
+B. /opt/rnr_ros/indigo
+openni2_camera --branch indigo-devel (target)
+rgbd_launch --branch indigo-devel (target)
+openni2_launch --branch indigo-devel (target)
+
+
+================================================================================
+II. Commands
+
+A. Start camera (target)
+roslaunch openni2_launch openni2.launch
+
+B. Start rgbd_launch (target) 
+   Note: openni2_launch start this plus openni2_camera. 
+roslaunch rgbd_launch roslaunch kinect_frames.launch
+
+C. Show color disparity (target, host)
+rosrun image_view image_view image:=/camera/depth/image
+
+D. rviz (host)
+
+
+================================================================================
+III. Links
+
+A. Drivers for Asus Xtion
+http://wiki.ros.org/openni2_camera
+
+B. Launch files to start the openni2_camera drivers using rgbd_launch
+http://wiki.ros.org/openni2_launch
+
+C. Launch files to open an RGBD device and load all nodelets to convert raw
+depth/RGB/IR streams to depth images, disparity images, and (registered) point
+clouds
+http://wiki.ros.org/rgbd_launch
+
+D. Quick start guide.
+http://wiki.ros.org/openni_launch/Tutorials/QuickStart
+
+E. rviz
+http://wiki.ros.org/rviz

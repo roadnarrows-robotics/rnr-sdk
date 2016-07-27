@@ -38,8 +38,10 @@ startGpio()
 
   gpiodir=${SYSGPIO}/gpio${gpio}
 
+  # not create or force recreate
   if [ ! -d ${gpiodir} -o "${force}" = "force" ]
   then
+    # output gpio
     if [ "${dir}" = "out" ]
     then
       initval=${3}
@@ -56,6 +58,7 @@ startGpio()
       fi
       log_action_end_msg 0 || true
 
+    # input gpio
     elif [ "${dir}" = "in" ]
     then
       edge=${3}
@@ -77,8 +80,8 @@ startGpio()
 #
 startdaemon()
 {
-  startGpio ${GPIO_USER_LED}  out "0" ${1}
-  startGpio ${GPIO_USER_BUTTON}  in "both"  ${1}
+  startGpio ${GPIO_USER_LED}  out 0 ${1}
+  startGpio ${GPIO_USER_BUTTON} in both ${1}
 }
 
 #
