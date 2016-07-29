@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script: eudoxus_shutter.sh
+# Script: eudoxus_openni2
 #
 
 ## \file
@@ -8,13 +8,10 @@
 ## $LastChangedDate$
 ## $Rev$
 ## 
-## \brief Example script to demonstrate how to interface with the Eudoxus
-##  user push button and LED.
+## \brief Script providing service to monitor user push button events to
+## launch or kill openni2 nodes.
+## services
 ##
-## \par Note:
-## The /sys/class/gpio exported interface is assumed already created.
-## See gpioexport(1) and /etc/init.d/eudoxus_init(1)
-## 
 ## \author: Robin Knight (robin.knight@roadnarrows.com)
 ## 
 ## \par Copyright:
@@ -63,10 +60,9 @@ action_running()
 #
 action_start()
 {
-  echo "Action started"
-  action_state=1 # start action function
+  roslaunch openni2_launch openni2_launch
 
-  # ADD HOOK HERE
+  action_state=1 # start action function
 }
 
 #

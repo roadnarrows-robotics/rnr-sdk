@@ -1,0 +1,131 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:       3D sensor ROS publishing nodes via user push button.
+# Required-Start: $remote_fs $syslog
+# Required-Stop:  $remote_fs $syslog
+# Default-Start:  2 3 4 5
+# Default-Stop:   0 1 6
+# Short-Description: 3D sensor ROS publishing nodes via user push button.
+# Description:    The ROS openni2_launch script execs a set of nodes and 
+#                 nodelettes to support RGBD publishing from the 3D point
+#                 cloud sensor. This service attaches to the GPIO associated
+#                 with a user push button to start/stop the nodes.
+### END INIT INFO
+
+if [ -f /etc/profile.d/laelaps.sh ]
+then
+  . /etc/profile.d/laelaps.sh
+elif [ -f /prj/etc/profile.d/laelaps.sh ]
+then
+  . /prj/etc/profile.d/laelaps.sh
+fi
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/bin"
+
+NAME="Eudoxus user button monitor"
+SERVICE=eudoxus_svc_openni2
+DAEMON=$(which ${SERVICE})
+PIDFILE=/var/run/${SERVICE}.pid
+LOGFILE=/var/log/${SERVICE}.log
+
+test -x "${DAEMON}" || exit 0
+
+# standard init sh support functions
+. /lib/lsb/init-functions
+
+#
+# Test if daemon is running.
+#
+is_daemon_running()
+{
+  /bin/ps -e | /bin/grep --quiet "${SERVICE}" 2>/dev/null
+  return $?
+}
+
+#
+# Start service
+#
+startdaemon()
+{
+  if ! is_daemon_running
+  then
+    log_daemon_msg "Starting ${NAME}" "${SERVICE}" || true
+    rm -f "${LOGFILE}"
+    if start-stop-daemon --start --quiet --exec ${DAEMON} --pidfile ${PIDFILE} --make-pidfile --background -- --log-no-color --log=diag1 --logfile=${LOGFILE}
+    then
+      log_end_msg 0 || true
+    else
+      log_end_msg 1 || true
+    fi
+  else
+    log_daemon_msg "${NAME} already running" "" || true
+    log_end_msg 1 || true
+  fi
+}
+
+#
+# Stop service
+#
+stopdaemon()
+{
+  if is_daemon_running
+  then
+    log_daemon_msg "Stopping ${NAME}" "${SERVICE}" || true
+    if start-stop-daemon --stop --quiet --oknodo --pidfile ${PIDFILE}
+    then
+      #/bin/rm -f "${PIDFILE}"
+      log_end_msg 0 || true
+    else
+      log_end_msg 1 || true
+    fi
+  else
+    log_daemon_msg "${NAME} not running" "" || true
+    log_end_msg 1 || true
+  fi
+}
+
+#
+# Restart service
+#
+restartdaemon()
+{
+  stopdaemon
+  startdaemon
+}
+
+#
+# Status (not used)
+#
+pidof_daemon()
+{
+  if [ -e "${PIDFILE}" ]
+  then
+    PID=$(cat ${PIDFILE})
+    pidof ${SERVICE} | grep -q ${PID}
+    return $?
+  fi
+  return 1
+}
+
+case $1 in
+  start)
+    startdaemon
+    ;;
+  stop)
+    stopdaemon
+    ;;
+  restart)
+    restartdaemon
+    ;;
+  reload|force-reload)
+    ;;
+  status)
+	  status_of_proc -p "${PIDFILE}" "${DAEMON}" "${SERVICE}" && exit 0 || exit $?
+    ;;
+  *)
+    log_action_msg "Usage: $0 {start|stop|restart|reload|force-reload|status}" || true
+    exit 1
+    ;;
+esac
+
+exit 0 # good
