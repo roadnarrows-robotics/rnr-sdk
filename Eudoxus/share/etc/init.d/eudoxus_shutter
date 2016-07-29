@@ -51,7 +51,9 @@ startdaemon()
   then
     log_daemon_msg "Starting ${NAME}" "${SERVICE}" || true
     rm -f "${LOGFILE}"
-    if start-stop-daemon --start --quiet --exec ${DAEMON} --pidfile ${PIDFILE} --make-pidfile --background -- --log-no-color --log=diag1 --logfile=${LOGFILE}
+    if start-stop-daemon --start --quiet --make-pidfile --pidfile ${PIDFILE} \
+      --background --exec /bin/bash -- \
+      -c "${DAEMON} >${LOGFILE} 2>&1"
     then
       log_end_msg 0 || true
     else

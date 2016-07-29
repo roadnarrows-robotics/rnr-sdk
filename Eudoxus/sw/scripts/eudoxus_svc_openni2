@@ -72,9 +72,12 @@ action_running()
 #
 action_start()
 {
+  echo
+  echo "*** Started on $(date) ***"
   roslaunch openni2_launch openni2.launch &
   action_pid=$!
   action_state=1
+  sleep 1
 }
 
 #
@@ -82,9 +85,12 @@ action_start()
 #
 action_stop()
 {
-  kill -0 ${action_pid} >/dev/null 2>&1
+  echo
+  echo "*** Stopped on $(date) ***"
+  kill ${action_pid} >/dev/null 2>&1
   action_pid=0
   action_state=0
+  sleep 1
 }
 
 #
