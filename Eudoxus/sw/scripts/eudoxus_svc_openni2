@@ -10,7 +10,8 @@
 ## 
 ## \brief Script providing service to monitor user push button events to
 ## launch or kill openni2 nodes.
-## services
+##
+## This script is used by init.d eudoxus_shutter service.
 ##
 ## \author: Robin Knight (robin.knight@roadnarrows.com)
 ## 
@@ -42,6 +43,7 @@ declare -i t_diff               # time difference
 
 # Some user defined state variables
 declare -i action_state=0   # action state, 0 is not running, 1 is running 
+declare -i action_pid=0     # action process PID
 
 #
 # Hook to test if user defined action is running.
@@ -50,7 +52,17 @@ declare -i action_state=0   # action state, 0 is not running, 1 is running
 #
 action_running()
 {
-  # ADD HOOK HERE
+  action_state=0
+  if [ ${action_pid} -gt 0 ]
+  then
+    kill -0 ${action_pid} >/dev/null 2>&1
+    if [ $? -eq 0 ]
+    then
+      action_state=1
+    else
+      action_pid=0
+    fi
+  fi
 
   echo ${action_state}
 }
@@ -60,9 +72,9 @@ action_running()
 #
 action_start()
 {
-  roslaunch openni2_launch openni2_launch
-
-  action_state=1 # start action function
+  roslaunch openni2_launch openni2.launch &
+  action_pid=$!
+  action_state=1
 }
 
 #
@@ -70,10 +82,9 @@ action_start()
 #
 action_stop()
 {
-  echo "Action stopped"
-  action_state=0 # stop action function
-
-  # ADD HOOK HERE
+  kill -0 ${action_pid} >/dev/null 2>&1
+  action_pid=0
+  action_state=0
 }
 
 #
