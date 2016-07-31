@@ -2,7 +2,7 @@
 
 ###############################################################################
 #
-# Package:   RoadNarrows Robotics Eudoxus System V Init.d Console
+# Package:   RoadNarrows Robotics Eudoxus Console
 #
 # Link:      https://github.com/roadnarrows-robotics/eudoxus
 #
@@ -111,7 +111,7 @@ class window(Frame):
                                       image_paths=imagePath)
 
     Frame.__init__(self, master=master, cnf=cnf, **kw)
-    self.master.title("Eudoxus Init.d Console")
+    self.master.title("Eudoxus Console")
 
     self.m_icons['app_icon'] = \
                     self.m_imageLoader.loadImage("icons/EudoxusInitIcon.png")
@@ -141,14 +141,18 @@ class window(Frame):
     self.m_icons          = {}    # must keep loaded icons referenced
     self.m_wBttn          = {}    # button widgets
     self.m_svcKeys        = [
-      'eudoxus_bsproxy',  'eudoxus_roscore',  'eudoxus_control',
-      'eudoxus_xbox',     'eudoxus_teleop']
+      'eudoxus_roscore',  'eudoxus_shutter',
+      'openni2_launch',   'xcam']
     self.m_svcDesc        = {
-        'eudoxus_bsproxy':  'BotSense Proxy Server',
-        'eudoxus_roscore':  'ROS Master, Parameter Server, rosout logging node',
-        'eudoxus_control':  'Eudoxus Control ROS node',
-        'eudoxus_xbox':     'HID Xbox360 daemon / ROS node',
-        'eudoxus_teleop':   'Eudoxus Teleoperation ROS node'}
+        'eudoxus_roscore':  'ROS Master, Parameter Server, rosout logging node.',
+        'eudoxus_shutter':  'Eudoxus user button monitor.',
+        'openni2_launch':   'ROS OpenNI2 camera drivers and RGBD launch files.',
+        'xcam':             'ROS disparity cam viewer.'}
+    self.m_svcType        = {
+        'eudoxus_roscore':  'init.d',
+        'eudoxus_shutter':  'init.d',
+        'openni2_launch':   'user',
+        'xcam':             'user'}
     self.m_lock = threading.Lock()
 
     if kw.has_key('debug'):
@@ -190,7 +194,7 @@ class window(Frame):
     # top heading
     w = Label(self)
     w['font']   = ('Helvetica', 16)
-    w['text']   = 'Eudoxus Init.d Console'
+    w['text']   = 'Eudoxus Console'
     w['anchor'] = CENTER
     w.grid(row=0, column=1, sticky=E+W)
 
@@ -254,7 +258,7 @@ class window(Frame):
     row = 0
     col = 0
 
-    for text in ['Sel', 'Status', 'Service', 'Description']:
+    for text in ['Sel', 'Status', 'Service', 'Type', 'Description']:
 
       w = Label(wframe, text=text, foreground=fgColors['focus'])
       w['font'] = ('Helvetica', 10, "bold")
@@ -294,6 +298,11 @@ class window(Frame):
       col += 1
 
       w = Label(wframe, bg=bg, anchor=W, justify=LEFT, text=key)
+      w.grid(row=row, column=col, padx=1, pady=3, stick=W+E)
+
+      col += 1
+
+      w = Label(wframe, bg=bg, anchor=W, justify=LEFT, text=self.m_svcType[key])
       w.grid(row=row, column=col, padx=1, pady=3, stick=W+E)
 
       col += 1

@@ -61,8 +61,9 @@ pkgroot		= ../..
 # Executable Scripts
 
 SCRIPTS = \
-	eudoxus_init.d.py \
+	eudoxus_console.py \
 	eudoxus_shutter.sh \
+	eudoxus_svc_openni2.sh \
 
 #------------------------------------------------------------------------------
 # Sources
