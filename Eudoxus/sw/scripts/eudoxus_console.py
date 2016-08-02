@@ -6,7 +6,7 @@
 #
 # Link:      https://github.com/roadnarrows-robotics/eudoxus
 #
-# File: eudoxus_init.d
+# File: eudoxus_console
 #
 ## \file 
 ##
@@ -14,7 +14,7 @@
 ## $Rev: 4354 $
 ##
 ## \brief Graphical user interface console to control the Eudoxus init.d
-## daemons.
+## daemons and user services.
 ##
 ## \author Robin Knight (robin.knight@roadnarrows.com)
 ##  
@@ -33,6 +33,7 @@ import os
 import time
 import math
 import subprocess
+import psutil
 import re
 import threading
 import getopt
@@ -86,6 +87,7 @@ reDoneDone    = re.compile(r"done.*done", re.DOTALL | re.IGNORECASE)
 reFailDone    = re.compile(r"fail.*done", re.DOTALL | re.IGNORECASE)
 reRunning     = re.compile(r"\s*is\s*running", re.IGNORECASE)
 reNotRunning  = re.compile(r"\s*is\s*not\s*running", re.IGNORECASE)
+rePython      = re.compile(r".*python", re.IGNORECASE)
 
 
 # ------------------------------------------------------------------------------
@@ -583,7 +585,7 @@ class window(Frame):
   #
   ## \brief Set service status field.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## \param status  Service status. One of: 'running' 'stopped' 'unknown'
   #
   def setStatus(self, service, status):
@@ -605,7 +607,7 @@ class window(Frame):
   #
   ## \brief Execute 'service <service> start' subprocess.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## 
   ## \return Returns True on success, False on failure.
   #
@@ -627,7 +629,7 @@ class window(Frame):
   #
   ## \brief Execute 'service <service> stop' subprocess.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## 
   ## \return Returns True on success, False on failure.
   #
@@ -649,7 +651,7 @@ class window(Frame):
   #
   ## \brief Execute 'service <service> restart' subprocess.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## 
   ## \return Returns True on success, False on failure.
   #
@@ -671,13 +673,26 @@ class window(Frame):
       return False
 
   #
-  ## \brief Execute 'service <service> status' subprocess.
+  ## \brief Execute determination of service status.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ##
   ## \return Service status. One of: 'running' 'stopped' 'unknown'
   #
   def execStatus(self, service):
+    if self.m_svcType[service] == 'init.d':
+      return self.execStatusInitd(service)
+    else:
+      return self.execStatusUser(service)
+
+  #
+  ## \brief Execute 'service <service> status' subprocess.
+  ##
+  ## \param service Service (key).
+  ##
+  ## \return Service status. One of: 'running' 'stopped' 'unknown'
+  #
+  def execStatusInitd(self, service):  
     s = ''
     hasLock = self.m_lock.acquire()
     try:
@@ -692,6 +707,26 @@ class window(Frame):
       return ('stopped', s)
     else:
       return ('unknown', s)
+
+  #
+  ## \brief Execute user service status.
+  ##
+  ## \param service Service (key).
+  ##
+  ## \return Service status. One of: 'running' 'stopped' 'unknown'
+  #
+  def execStatusUser(self, service):  
+    pids = psutil.pids()
+    for pid in pids:
+      try:
+        p = psutil.Process(pid)
+      except psutil.NoSuchProcess:
+        return ('stopped', service)
+      args = p.cmdline()
+      if rePython.search(args[0]):
+        print args
+        return ('running', service)
+    return ('unknown', s)
 
 
 # ------------------------------------------------------------------------------
