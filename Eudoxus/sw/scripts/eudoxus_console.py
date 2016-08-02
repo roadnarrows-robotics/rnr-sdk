@@ -81,13 +81,17 @@ statusText = {
 }
 
 # pre-compiled regular expressions
-reDone        = re.compile(r"done", re.IGNORECASE)
-reFail        = re.compile(r"fail", re.IGNORECASE)
-reDoneDone    = re.compile(r"done.*done", re.DOTALL | re.IGNORECASE)
-reFailDone    = re.compile(r"fail.*done", re.DOTALL | re.IGNORECASE)
-reRunning     = re.compile(r"\s*is\s*running", re.IGNORECASE)
-reNotRunning  = re.compile(r"\s*is\s*not\s*running", re.IGNORECASE)
-rePython      = re.compile(r".*python", re.IGNORECASE)
+reDone              = re.compile(r"done", re.IGNORECASE)
+reFail              = re.compile(r"fail", re.IGNORECASE)
+reDoneDone          = re.compile(r"done.*done", re.DOTALL | re.IGNORECASE)
+reFailDone          = re.compile(r"fail.*done", re.DOTALL | re.IGNORECASE)
+reRunning           = re.compile(r"\s*is\s*running", re.IGNORECASE)
+reNotRunning        = re.compile(r"\s*is\s*not\s*running", re.IGNORECASE)
+rePython            = re.compile(r".*python", re.IGNORECASE)
+reRosLaunch         = re.compile(r".*roslaunch", re.IGNORECASE)
+reRosOpenni2        = re.compile(r".*openni2\.launch", re.IGNORECASE)
+reRosImageView      = re.compile(r".*image_view", re.IGNORECASE)
+reRosImageViewImage = re.compile(r"image:=/camera/depth/image", re.IGNORECASE)
 
 
 # ------------------------------------------------------------------------------
@@ -144,17 +148,29 @@ class window(Frame):
     self.m_wBttn          = {}    # button widgets
     self.m_svcKeys        = [
       'eudoxus_roscore',  'eudoxus_shutter',
-      'openni2_launch',   'xcam']
-    self.m_svcDesc        = {
-        'eudoxus_roscore':  'ROS Master, Parameter Server, rosout logging node.',
-        'eudoxus_shutter':  'Eudoxus user button monitor.',
-        'openni2_launch':   'ROS OpenNI2 camera drivers and RGBD launch files.',
-        'xcam':             'ROS disparity cam viewer.'}
-    self.m_svcType        = {
-        'eudoxus_roscore':  'init.d',
-        'eudoxus_shutter':  'init.d',
-        'openni2_launch':   'user',
-        'xcam':             'user'}
+      'openni2_launch',   'image_view']
+    self.m_svc = {
+      'eudoxus_roscore': {
+        'desc':   'ROS Master, Parameter Server, rosout logging node.',
+        'type':   'init.d',
+        'status': 'unknown',
+      },
+      'eudoxus_shutter': {
+        'desc':   'Eudoxus user button monitor.',
+        'type':   'init.d',
+        'status': 'unknown',
+      },
+      'openni2_launch': {
+        'desc':   'ROS OpenNI2 camera drivers and RGBD launch files.',
+        'type':   'user',
+        'status': 'unknown',
+      },
+      'image_view': {
+        'desc':   'ROS depth disparity viewer.',
+        'type':   'user',
+        'status': 'unknown',
+      }
+    }
     self.m_lock = threading.Lock()
 
     if kw.has_key('debug'):
@@ -304,12 +320,14 @@ class window(Frame):
 
       col += 1
 
-      w = Label(wframe, bg=bg, anchor=W, justify=LEFT, text=self.m_svcType[key])
+      w = Label(wframe, bg=bg, anchor=W, justify=LEFT,
+          text=self.m_svc[key]['type'])
       w.grid(row=row, column=col, padx=1, pady=3, stick=W+E)
 
       col += 1
 
-      w = Label(wframe, bg=bg, anchor=W, justify=LEFT, text=self.m_svcDesc[key])
+      w = Label(wframe, bg=bg, anchor=W, justify=LEFT,
+          text=self.m_svc[key]['desc'])
       w.grid(row=row, column=col, padx=1, pady=3, stick=W+E)
 
       col += 1
@@ -488,7 +506,7 @@ class window(Frame):
       text = "  Checking {0} status".format(key)
       self.showSbInfo(text)
       self.update_idletasks()
-      status,output = self.execStatus(key)
+      status = self.execStatus(key)
       self.showSbStatus(text, status)
       self.setStatus(key, status)
 
@@ -594,15 +612,15 @@ class window(Frame):
 
   def autoRefresh(self):
     self.refresh()
-    self.after(10000, self.autoRefresh)
+    self.after(50000, self.autoRefresh)
 
   #
   ## \brief Refresh status of all services.
   #
   def refresh(self):
     for key in self.m_svcKeys:
-      status,output = self.execStatus(key)
-      self.setStatus(key, status)
+      self.execStatus(key)
+      self.setStatus(key, self.m_svc[key]['status'])
 
   #
   ## \brief Execute 'service <service> start' subprocess.
@@ -680,7 +698,7 @@ class window(Frame):
   ## \return Service status. One of: 'running' 'stopped' 'unknown'
   #
   def execStatus(self, service):
-    if self.m_svcType[service] == 'init.d':
+    if self.m_svc[service]['type'] == 'init.d':
       return self.execStatusInitd(service)
     else:
       return self.execStatusUser(service)
@@ -702,11 +720,12 @@ class window(Frame):
       s = inst.output
     self.m_lock.release()
     if reRunning.search(s):
-      return ('running', s)
+      self.m_svc[service]['status'] = 'running'
     elif reNotRunning.search(s):
-      return ('stopped', s)
+      self.m_svc[service]['status'] = 'stopped'
     else:
-      return ('unknown', s)
+      self.m_svc[service]['status'] = 'unknown'
+    return self.m_svc[service]['status']
 
   #
   ## \brief Execute user service status.
@@ -716,17 +735,41 @@ class window(Frame):
   ## \return Service status. One of: 'running' 'stopped' 'unknown'
   #
   def execStatusUser(self, service):  
-    pids = psutil.pids()
-    for pid in pids:
+    hasLock = self.m_lock.acquire()
+    self.m_svc[service]['status'] = 'stopped'
+    for p in psutil.process_iter():
       try:
-        p = psutil.Process(pid)
+        argv = p.cmdline
+        #print argv
       except psutil.NoSuchProcess:
-        return ('stopped', service)
-      args = p.cmdline()
-      if rePython.search(args[0]):
-        print args
-        return ('running', service)
-    return ('unknown', s)
+        pass
+      else:
+        if service == 'openni2_launch':
+          if self.findProcess(argv, [rePython, reRosLaunch, reRosOpenni2]):
+            self.m_svc[service]['status'] = 'running'
+        elif service == 'image_view':
+          if self.findProcess(argv, [reRosImageView, reRosImageViewImage]):
+            self.m_svc[service]['status'] = 'running'
+        else:
+          self.m_svc[service]['status'] = 'unknown'
+    self.m_lock.release()
+    return self.m_svc[service]['status']
+
+  # /usr/bin/python /opt/ros/indigo/bin/roslaunch openni2_launch openni2.launch
+
+  def findProcess(self, argv, reList):
+    i = 0
+    b = False
+    for re in reList:
+      b = False
+      for i in range(i, len(argv)):
+        if re.search(argv[i]):
+          b = True;
+          i += 1
+          break
+      if not b:
+        break
+    return b
 
 
 # ------------------------------------------------------------------------------
