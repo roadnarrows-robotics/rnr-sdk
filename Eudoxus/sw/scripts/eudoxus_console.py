@@ -31,7 +31,9 @@
 import sys
 import os
 import time
+import datetime
 import math
+import shlex
 import subprocess
 import psutil
 import re
@@ -87,9 +89,13 @@ reDoneDone          = re.compile(r"done.*done", re.DOTALL | re.IGNORECASE)
 reFailDone          = re.compile(r"fail.*done", re.DOTALL | re.IGNORECASE)
 reRunning           = re.compile(r"\s*is\s*running", re.IGNORECASE)
 reNotRunning        = re.compile(r"\s*is\s*not\s*running", re.IGNORECASE)
+
+# /usr/bin/python /opt/ros/indigo/bin/roslaunch openni2_launch openni2.launch
 rePython            = re.compile(r".*python", re.IGNORECASE)
 reRosLaunch         = re.compile(r".*roslaunch", re.IGNORECASE)
 reRosOpenni2        = re.compile(r".*openni2\.launch", re.IGNORECASE)
+
+# /opt/ros/indigo/lib/image_view/image_view image:=/camera/depth/image
 reRosImageView      = re.compile(r".*image_view", re.IGNORECASE)
 reRosImageViewImage = re.compile(r"image:=/camera/depth/image", re.IGNORECASE)
 
@@ -151,24 +157,36 @@ class window(Frame):
       'openni2_launch',   'image_view']
     self.m_svc = {
       'eudoxus_roscore': {
-        'desc':   'ROS Master, Parameter Server, rosout logging node.',
-        'type':   'init.d',
-        'status': 'unknown',
+        'desc':     'ROS Master, Parameter Server, rosout logging node.',
+        'type':     'init.d',
+        'cmd':      'service eudoxus_roscore %{0}',
+        'status':   'unknown',
+        'relist':   [],
+        'subproc':  None,
       },
       'eudoxus_shutter': {
-        'desc':   'Eudoxus user button monitor.',
-        'type':   'init.d',
-        'status': 'unknown',
+        'desc':     'Eudoxus user button monitor.',
+        'type':     'init.d',
+        'cmd':      'service eudoxus_shutter %{0}',
+        'status':   'unknown',
+        'relist':   [],
+        'subproc':  None,
       },
       'openni2_launch': {
-        'desc':   'ROS OpenNI2 camera drivers and RGBD launch files.',
-        'type':   'user',
-        'status': 'unknown',
+        'desc':     'ROS OpenNI2 camera drivers and RGBD launch files.',
+        'type':     'user',
+        'cmd':      'roslaunch openni2_launch openni2.launch',
+        'status':   'unknown',
+        'relist':   [rePython, reRosLaunch, reRosOpenni2],
+        'subproc':  None,
       },
       'image_view': {
-        'desc':   'ROS depth disparity viewer.',
-        'type':   'user',
-        'status': 'unknown',
+        'desc':     'ROS depth disparity viewer.',
+        'type':     'user',
+        'cmd':      'rosrun image_view image_view image:=/camera/depth/image',
+        'status':   'unknown',
+        'relist':   [reRosImageView, reRosImageViewImage],
+        'subproc':  None,
       }
     }
     self.m_lock = threading.Lock()
@@ -456,14 +474,16 @@ class window(Frame):
   ## \brief Start selected services callback.
   #
   def cbStartServices(self):
-    self.showSbInfo("Starting selected services...\n")
+    now = datetime.datetime.today().strftime("%Y.%m.%d %H:%M:%S")
+    self.showSbInfo("[{0}] Starting selected services...\n".format(now))
     for key in self.m_svcKeys:
       if self.m_service[key]['sel'].get():
         text = "  Starting {0} service".format(key)
         self.showSbInfo(text)
         self.update_idletasks()
-        pf = self.execStart(key)
-        self.showSbResult(text, pf)
+        pf,emsg = self.execStart(key)
+        self.showSbResult(text, pf, emsg)
+        self.showSbInfo('    ('+self.m_svc[key]['cmd'].format('start')+')\n')
     #self.clearSelect()
     self.refresh()
 
@@ -471,14 +491,16 @@ class window(Frame):
   ## \brief Stop selected services callback.
   #
   def cbStopServices(self):
-    self.showSbInfo("Stopping selected services...\n")
+    now = datetime.datetime.today().strftime("%Y.%m.%d %H:%M:%S")
+    self.showSbInfo("[{0}] Stopping selected services...\n".format(now))
     for key in self.m_svcKeys:
       if self.m_service[key]['sel'].get():
         text = "  Stopping {0} service".format(key)
         self.showSbInfo(text)
         self.update_idletasks()
-        pf = self.execStop(key)
-        self.showSbResult(text, pf)
+        pf,emsg = self.execStop(key)
+        self.showSbResult(text, pf, emsg)
+        self.showSbInfo('    ('+self.m_svc[key]['cmd'].format('stop')+')\n')
     #self.clearSelect()
     self.refresh()
 
@@ -486,14 +508,16 @@ class window(Frame):
   ## \brief Restart selected services callback.
   #
   def cbRestartServices(self):
-    self.showSbInfo("Restarting selected services...\n")
+    now = datetime.datetime.today().strftime("%Y.%m.%d %H:%M:%S")
+    self.showSbInfo("[{0}] Restarting selected services...\n".format(now))
     for key in self.m_svcKeys:
       if self.m_service[key]['sel'].get():
         text = "  Restarting {0} service".format(key)
         self.showSbInfo(text)
         self.update_idletasks()
-        pf = self.execRestart(key)
-        self.showSbResult(text, pf)
+        pf,emsg = self.execRestart(key)
+        self.showSbResult(text, pf, emsg)
+        self.showSbInfo('    ('+self.m_svc[key]['cmd'].format('restart')+')\n')
     #self.clearSelect()
     self.refresh()
 
@@ -573,14 +597,17 @@ class window(Frame):
   ## \param text    Prefix text already displayed on current status bar line.
   ## \param success Operation was [not] a success.
   #
-  def showSbResult(self, text, success):
+  def showSbResult(self, text, success, emsg=None):
     n = self.m_wStatusBar['width'] - len(text)
     if success:
-      rc = '[ok]'
-      self.showSbOk("%*s\n" % (n, rc))
+      result = '[ok]'
+      self.showSbOk("%*s\n" % (n, result))
     else:
-      rc = '[failed]'
-      self.showSbError("%*s\n" % (n, rc))
+      if emsg is not None and len(emsg) > 0:
+        result = '[' + emsg + ']'
+      else:
+        result = '[failed]'
+      self.showSbError("%*s\n" % (n, result))
 
   #
   ## \brief Show service status result on status bar.
@@ -612,7 +639,7 @@ class window(Frame):
 
   def autoRefresh(self):
     self.refresh()
-    self.after(50000, self.autoRefresh)
+    self.after(1000, self.autoRefresh)
 
   #
   ## \brief Refresh status of all services.
@@ -623,74 +650,191 @@ class window(Frame):
       self.setStatus(key, self.m_svc[key]['status'])
 
   #
-  ## \brief Execute 'service <service> start' subprocess.
+  ## \brief Start service subprocess.
   ##
   ## \param service Service (key).
   ## 
-  ## \return Returns True on success, False on failure.
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
   #
   def execStart(self, service):
-    s = ''
+    if self.m_svc[service]['type'] == 'init.d':
+      return self.execStartInitd(service)
+    else:
+      return self.execStartUser(service)
+
+  #
+  ## \brief Execute init.d 'service <service> start' subprocess.
+  ##
+  ## \param service Service (key).
+  ## 
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
+  #
+  def execStartInitd(self, service):
+    pf    = False
+    emsg  = None
     hasLock = self.m_lock.acquire()
     try:
       s = subprocess.check_output(["service", service, "start"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
-      self.m_lock.release()
-      return False
-    self.m_lock.release()
-    if reFail.search(s):
-      return False
+      emsg = inst.message
     else:
-      return True
+      if not reFail.search(s):
+        pf = True
+    self.m_lock.release()
+    return pf,emsg
 
   #
-  ## \brief Execute 'service <service> stop' subprocess.
+  ## \brief Execute user service subprocess.
   ##
   ## \param service Service (key).
   ## 
-  ## \return Returns True on success, False on failure.
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
+  #
+  def execStartUser(self, service):
+    pf    = False
+    emsg  = None
+    hasLock = self.m_lock.acquire()
+    if self.findProcess(self.m_svc[service]['relist']) is None:
+      args = shlex.split(self.m_svc[service]['cmd'])
+      try:
+        self.m_svc[service]['subproc'] = subprocess.Popen(args)
+        pf = True
+      except OSError, inst:
+        self.m_svc[service]['subproc'] = None
+        emsg = "{0}: {1}(errno={2}".format(args[0], inst.strerror, inst.errno)
+    else:
+      emsg = 'already running'
+    self.m_lock.release()
+    return pf,emsg
+
+  #
+  ## \brief Stop service subprocess.
+  ##
+  ## \param service Service (key).
+  ## 
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
   #
   def execStop(self, service):
-    s = ''
+    if self.m_svc[service]['type'] == 'init.d':
+      return self.execStopInitd(service)
+    else:
+      return self.execStopUser(service)
+
+  #
+  ## \brief Execute init.d 'service <service> stop' subprocess.
+  ##
+  ## \param service Service (key).
+  ## 
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
+  #
+  def execStopInitd(self, service):
+    pf    = False
+    emsg  = None
     hasLock = self.m_lock.acquire()
     try:
       s = subprocess.check_output(["service", service, "stop"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
-      self.m_lock.release()
-      return False
-    self.m_lock.release()
-    if reFail.search(s):
-      return False
+      emsg = inst.message
     else:
-      return True
+      if not reFail.search(s):
+        pf = True
+    self.m_lock.release()
+    return pf,emsg
 
   #
-  ## \brief Execute 'service <service> restart' subprocess.
+  ## \brief Kill user service subprocess.
   ##
   ## \param service Service (key).
   ## 
-  ## \return Returns True on success, False on failure.
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
+  #
+  def execStopUser(self, service):
+    pf    = False
+    emsg  = None
+    hasLock = self.m_lock.acquire()
+    p = self.findProcess(self.m_svc[service]['relist'])
+    if p is not None:
+      try:
+        self.kill(p)
+        self.m_svc[service]['subproc'] = None
+        pf = True
+      except OSError, inst:
+        emsg = "{0}: {1}(errno={2}".format(args[0], inst.strerror, inst.errno)
+    else:
+      emsg = 'not running'
+    self.m_lock.release()
+    return pf,emsg
+
+  #
+  ## \brief Kill process and all of its children (bwhaaaa).
+  ##
+  ## \param process psutil process.
+  #
+  def kill(self, process):
+    for proc in process.get_children(recursive=True):
+      proc.kill()
+    process.kill()
+
+  #
+  ## \brief Restart service subprocess.
+  ##
+  ## \param service Service (key).
+  ## 
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
   #
   def execRestart(self, service):
-    s = ''
+    if self.m_svc[service]['type'] == 'init.d':
+      return self.execRestartInitd(service)
+    else:
+      return self.execRestartUser(service)
+
+  #
+  ## \brief Execute init.d 'service <service> restart' subprocess.
+  ##
+  ## \param service Service (key).
+  ## 
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
+  #
+  def execRestartInitd(self, service):
+    pf    = False
+    emsg  = None
     hasLock = self.m_lock.acquire()
     try:
       s = subprocess.check_output(["service", service, "restart"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
-      self.m_lock.release()
-      return False
-    self.m_lock.release()
-    if reDoneDone.search(s):
-      return True
-    elif reFailDone.search(s):
-      return True
+      emsg = inst.message
     else:
-      return False
+      if reDoneDone.search(s):
+        pf = True
+      elif reFailDone.search(s):
+        pf = True
+    self.m_lock.release()
+    return pf,emsg
 
   #
+  ## \brief Kill and re-execute user service subprocess.
+  ##
+  ## \param service Service (key).
+  ## 
+  ## \return Returns (pf, emsg) where pf is True on success, False on failure,
+  ## emsg is either an error message or None.
+  #
+  def execRestartUser(self, service):
+    self.execStopUser(service)
+    time.sleep(5)
+    return self.execStartUser(service)
+
   ## \brief Execute determination of service status.
   ##
   ## \param service Service (key).
@@ -711,20 +855,20 @@ class window(Frame):
   ## \return Service status. One of: 'running' 'stopped' 'unknown'
   #
   def execStatusInitd(self, service):  
-    s = ''
     hasLock = self.m_lock.acquire()
     try:
       s = subprocess.check_output(["service", service, "status"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
       s = inst.output
-    self.m_lock.release()
-    if reRunning.search(s):
-      self.m_svc[service]['status'] = 'running'
-    elif reNotRunning.search(s):
-      self.m_svc[service]['status'] = 'stopped'
     else:
-      self.m_svc[service]['status'] = 'unknown'
+      if reRunning.search(s):
+        self.m_svc[service]['status'] = 'running'
+      elif reNotRunning.search(s):
+        self.m_svc[service]['status'] = 'stopped'
+      else:
+        self.m_svc[service]['status'] = 'unknown'
+    self.m_lock.release()
     return self.m_svc[service]['status']
 
   #
@@ -736,34 +880,47 @@ class window(Frame):
   #
   def execStatusUser(self, service):  
     hasLock = self.m_lock.acquire()
-    self.m_svc[service]['status'] = 'stopped'
-    for p in psutil.process_iter():
-      try:
-        argv = p.cmdline
-        #print argv
-      except psutil.NoSuchProcess:
-        pass
-      else:
-        if service == 'openni2_launch':
-          if self.findProcess(argv, [rePython, reRosLaunch, reRosOpenni2]):
-            self.m_svc[service]['status'] = 'running'
-        elif service == 'image_view':
-          if self.findProcess(argv, [reRosImageView, reRosImageViewImage]):
-            self.m_svc[service]['status'] = 'running'
-        else:
-          self.m_svc[service]['status'] = 'unknown'
+    if self.findProcess(self.m_svc[service]['relist']) is not None:
+      self.m_svc[service]['status'] = 'running'
+    else:
+      self.m_svc[service]['status'] = 'stopped'
     self.m_lock.release()
     return self.m_svc[service]['status']
 
-  # /usr/bin/python /opt/ros/indigo/bin/roslaunch openni2_launch openni2.launch
+  #
+  ## \brief Find running process with command line that matches list of
+  ## regular expressions.
+  ##
+  ## \param reList    List of regular expressions.
+  ##
+  ## \return Returns Popen object or None.
+  #
+  def findProcess(self, reList):
+    for p in psutil.process_iter():
+      try:
+        if self.matchProcess(p.cmdline, reList):
+          return p
+      except psutil.NoSuchProcess:
+        pass
+    return None
 
-  def findProcess(self, argv, reList):
+  #
+  ## \brief Match command line arguments against list of regular expressions.
+  ##
+  ## All regular expressions must match.
+  ##
+  ## \param cmdline   List of command line arguments.
+  ## \param reList    List of regular expressions.
+  ##
+  ## \return Returns True if matched, False otherwise.
+  #
+  def matchProcess(self, cmdline, reList):
     i = 0
     b = False
     for re in reList:
       b = False
-      for i in range(i, len(argv)):
-        if re.search(argv[i]):
+      for i in range(i, len(cmdline)):
+        if re.search(cmdline[i]):
           b = True;
           i += 1
           break
