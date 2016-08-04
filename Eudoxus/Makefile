@@ -9,7 +9,7 @@ ifdef RNMAKE_DOXY
 $LastChangedDate: 2015-11-20 15:52:58 -0700 (Fri, 20 Nov 2015) $
 $Rev: 4213 $
 
-\brief Make Eudoxus package.
+\brief Make the Eudoxus package.
 
 RN Make System Specific Makefile
 
@@ -106,8 +106,8 @@ DOXY_CONF_FILE		= $(pkgroot)/make/doxy.conf
 # Optional Variables 
 #
 
-EXTRA_TGT_ALL_POST      = all-extra-post
-EXTRA_TGT_INSTALL       = install-extra
+EXTRA_TGT_ALL_POST      = all-post
+#RDK EXTRA_TGT_INSTALL       = install-extra
 
 
 #------------------------------------------------------------------------------
@@ -124,30 +124,101 @@ include $(rnmake)/Rules.mk
 #------------------------------------------------------------------------------
 # Extras
 
-PKGDIR_SHARE        := $(pkgroot)/share
-PKGDIR_SHARE_MSGS   := $(pkgroot)/share/msgs
-DISTDIR_SHARE_MSGS  := $(DISTDIR_SHARE)/msgs
-PKG_SHARE_FILES     := $(wildcard $(PKGDIR_SHARE)/*.xml) \
-                       $(wildcard $(PKGDIR_SHARE_MSGS)/*.xml)
-DIST_SHARE_FILES    := $(patsubst $(PKGDIR_SHARE)%,$(DISTDIR_SHARE)%,\
-                       $(PKG_SHARE_FILES))
+#
+# Odroid Ubuntu versions of Laelaps
+# 
+ifeq "$(arch)" "odroid"
+	ETC_PROF_D_LAE = share/etc/profile.d/eudoxus_odroid.sh 
 
-# Target: all-post
-# Make share and etc files
-.PHONY: all-extra-post
-all-extra-post:
-	@$(rnmake)/utils/doinstall.sh -s 664 $(pkgroot)/share $(realpath $(pkgroot))/$(DISTDIR_SHARE)
-	@$(rnmake)/utils/doinstall.sh -s 664 $(pkgroot)/etc $(realpath $(pkgroot))/$(DISTDIR_ETC)
+	ETC_FILES	=	share/etc/init.d/* \
+							share/etc/ld.so.conf.d/*.conf \
+							etc/udev/rules.d/*
+
+	LIB_FILES = share/lib/cmake/rnr/rnr-eudoxus-config.cmake
 
 #
-# Install share files from distribution
-.PHONY: install-extra
-install-extra:
-	@echo ""
-	@echo "Installing system share files to $(sharedir)"
-	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_SHARE) $(sharedir)
-	@echo "Installing system etc files to $(sysconfdir)"
-	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_ETC) $(sysconfdir)
+# Off-target host computers
+#
+else
+	ETC_FILES	= share/etc/ld.so.conf.d/*.conf \
+							etc/udev/rules.d/*
+
+	LIB_FILES = share/lib/cmake/rnr/rnr-eudoxus-config.cmake
+
+endif
+
+PKGDIR_SHARE        := $(pkgroot)/share
+
+#
+# Template to copy files from source to destination directory.
+#
+# Usage: copyfiles_template src_files dst_dir
+#
+define copyfiles_template
+	@if [ "$(1)" != "" ]; \
+	then \
+		b=$(notdir $(2)); \
+		flist="$(wildcard $(addprefix $(pkgroot)/,$(1)))"; \
+		for f in $${flist}; \
+		do \
+			tgt=$(2)$${f##*$$b}; \
+			if [ ! -f "$${tgt}" -o "$${f}" -nt "$${tgt}" ]; \
+			then \
+				d=$$(dirname $${tgt}); \
+				test -d $$d || $(MKDIR) $$d; \
+				printf "$(color_tgt_file) $${tgt}$(color_end)\n"; \
+				$(CP) $$f $${tgt}; \
+			fi; \
+		done; \
+	fi
+endef
+
+#
+# Template to copy file from source to destination.
+#
+# Usage: cp_template src_file dst_file
+#
+define cp_template
+	@if [ "$(1)" != "" ]; \
+	then \
+		if [ ! -f "$(2)" -o "$(1)" -nt "$(2)" ]; \
+		then \
+			d=$$(dirname $(2)); \
+			test -d $$d || $(MKDIR) $$d; \
+			printf "$(color_tgt_file) $(2)$(color_end)\n"; \
+			$(CP) $(1) $(2); \
+		fi; \
+	fi
+endef
+
+# post 'all' make target
+.PHONY: all-post
+all-post: show-banner etc-cp-files lib-cp-files share-cp-files
+
+.PHONY: show-banner
+show-banner:
+	$(call dirbanner,.)
+	@printf "Copying Configuration Files\n"
+
+.PHONY: etc-cp-files
+etc-cp-files:
+	@printf "\n"
+	@printf "$(color_tgt_lib)Copying etc files to $(DISTDIR_ETC)$(color_end)\n"
+	$(call cp_template,$(ETC_PROF_D_LAE),$(DISTDIR_ETC)/profile.d/laelaps.sh)
+	$(call copyfiles_template,$(ETC_FILES),$(DISTDIR_ETC))
+
+.PHONY: lib-cp-files
+lib-cp-files:
+	@printf "\n"
+	@printf "$(color_tgt_lib)Copying lib files to $(DISTDIR_LIB)$(color_end)\n"
+	$(call copyfiles_template,$(LIB_FILES),$(DISTDIR_LIB))
+
+.PHONY: share-cp-files
+share-cp-files:
+	@printf "\n"
+	@printf "$(color_tgt_lib)Copying share directory to $(DISTDIR_SHARE)$(color_end)\n"
+	@cp -rp $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
+	@find $(DISTDIR_SHARE) -name '*.svn' -print | xargs rm -fr
 
 
 ifdef RNMAKE_DOXY
