@@ -63,7 +63,7 @@ pkgroot		= ../..
 SCRIPTS = \
 	eudoxus_console.py \
 	eudoxus_shutter.sh \
-	eudoxus_svc_openni2.sh \
+	eudoxus_svc_openni2 \
 
 #------------------------------------------------------------------------------
 # Sources

@@ -1,0 +1,5 @@
+These scripts are obsolete. They are kept here if ever the Eudoxus team decides
+to continue supporting a GStreamer interface. It would require rewriting to
+convert the 0.10 version to the 1.0 version.
+
+ROS works really well, so...
