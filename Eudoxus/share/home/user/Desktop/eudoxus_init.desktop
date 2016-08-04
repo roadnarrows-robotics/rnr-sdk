@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Terminal=false
-Name=eudoxus_init
-Icon=/usr/local/share/Eudoxus/images/icons/EudoxusInitIcon.png
-Exec=gksudo /usr/local/bin/eudoxus_init.d.py
-#Icon=/prj/share/Laelaps/images/icons/EudoxusInitIcon.png
-#Exec=gksudo /prj/bin/eudoxus_init.d.py
