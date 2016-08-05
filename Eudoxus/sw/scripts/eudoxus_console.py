@@ -189,6 +189,23 @@ class window(Frame):
         'subproc':  None,
       }
     }
+    
+    # environment
+    self.m_env = dict(os.environ)
+    rosprefix = '/opt/ros'
+    rnrprefix = '/opt/rnr_ros'
+    rosdistro = 'indigo'
+    self.m_env['ROS_DISTRO'] = rosdistro
+    self.m_env['ROS_ETC_DIR'] = rosprefix + '/' + rosdistro + '/etc/ros'
+    self.m_env['ROS_MASTER_URI'] = "http://localhost:11311"
+    self.m_env['ROS_PACKAGE_PATH'] ="/opt/rnr_ros/indigo/src:/opt/ros/indigo/share:/opt/ros/indigo/stacks"
+    self.m_env['ROS_ROOT']="/opt/ros/indigo/share/ros"
+    self.m_env['PATH']='/prj/bin:/usr/local/bin:' + \
+        rosprefix + '/' + rosdistro + '/bin:' + \
+        self.m_env['PATH']
+    self.m_env['PYTHONPATH']='/opt/rnr_ros/indigo/devel/lib/python2.7/dist-packages:/opt/ros/indigo/lib/python2.7/dist-packages:/prj/lib/python2.7/site-packages:/usr/local/lib/python2.7/site-packages:/prj/lib/python2.7/site-packages:/usr/local/lib/python2.7/site-packages'
+    self.m_env['LD_LIBRARY_PATH'] = '/usr/local/lib/rnr:/opt/rnr_ros/indigo/devel/lib:/opt/ros/indigo/lib:/usr/local/lib/rnr'
+
     self.m_lock = threading.Lock()
 
     if kw.has_key('debug'):
@@ -701,7 +718,7 @@ class window(Frame):
     if self.findProcess(self.m_svc[service]['relist']) is None:
       args = shlex.split(self.m_svc[service]['cmd'])
       try:
-        self.m_svc[service]['subproc'] = subprocess.Popen(args)
+        self.m_svc[service]['subproc'] = subprocess.Popen(args, env=self.m_env)
         pf = True
       except OSError, inst:
         self.m_svc[service]['subproc'] = None

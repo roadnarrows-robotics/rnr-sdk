@@ -128,7 +128,7 @@ include $(rnmake)/Rules.mk
 # Odroid Ubuntu versions of Laelaps
 # 
 ifeq "$(arch)" "odroid"
-	ETC_PROF_D_LAE = share/etc/profile.d/eudoxus_odroid.sh 
+	ETC_PROF_D_EUD = share/etc/profile.d/eudoxus_odroid.sh 
 
 	ETC_FILES	=	share/etc/init.d/* \
 							share/etc/ld.so.conf.d/*.conf \
@@ -204,7 +204,7 @@ show-banner:
 etc-cp-files:
 	@printf "\n"
 	@printf "$(color_tgt_lib)Copying etc files to $(DISTDIR_ETC)$(color_end)\n"
-	$(call cp_template,$(ETC_PROF_D_LAE),$(DISTDIR_ETC)/profile.d/laelaps.sh)
+	$(call cp_template,$(ETC_PROF_D_EUD),$(DISTDIR_ETC)/profile.d/eudoxus.sh)
 	$(call copyfiles_template,$(ETC_FILES),$(DISTDIR_ETC))
 
 .PHONY: lib-cp-files

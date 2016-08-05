@@ -52,10 +52,31 @@ declare -i action_pid=0     # action process PID
 #
 action_running()
 {
-  action_state=0
+  action_pid=$(pgrep -f '.*roslaunch *openni2_launch *openni2.launch')
   if [ ${action_pid} -gt 0 ]
   then
-    kill -0 ${action_pid} >/dev/null 2>&1
+    action_state=1
+  else
+    action_state=0
+  fi
+
+  echo ${action_state}
+}
+
+#
+# Alternative hook to test if user defined action is running. This version
+# assumes that no other process launches the openni2 nodes. That is probably
+# not true.
+#
+# Return 0 or 1.
+#
+als_action_running()
+{
+  action_state=0
+  action_pid=$(pgrep -f '.*roslaunch *openni2_launch *openni2.launch')
+  if [ ${action_pid} -gt 0 ]
+  then
+    #kill -0 ${action_pid} >/dev/null 2>&1
     if [ $? -eq 0 ]
     then
       action_state=1
@@ -131,7 +152,7 @@ setled()
 #
 while :
 do
-  gpionotify --timeout=1.0 --monitor ${gpio_bttn} | \
+  gpionotify --timeout=0.5 --monitor ${gpio_bttn} | \
   while read button
   do
     case ${button}
