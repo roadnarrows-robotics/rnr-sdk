@@ -100,6 +100,10 @@ reRosImageView      = re.compile(r".*image_view", re.IGNORECASE)
 reRosImageViewImage = re.compile(r"image:=/camera/depth/image", re.IGNORECASE)
 
 
+# make absolute path from list of path components
+mkpath = lambda *p: os.path.normpath(os.path.join(os.path.sep, *p))
+
+
 # ------------------------------------------------------------------------------
 # Class window
 # ------------------------------------------------------------------------------
@@ -191,20 +195,8 @@ class window(Frame):
     }
     
     # environment
-    self.m_env = dict(os.environ)
-    rosprefix = '/opt/ros'
-    rnrprefix = '/opt/rnr_ros'
-    rosdistro = 'indigo'
-    self.m_env['ROS_DISTRO'] = rosdistro
-    self.m_env['ROS_ETC_DIR'] = rosprefix + '/' + rosdistro + '/etc/ros'
-    self.m_env['ROS_MASTER_URI'] = "http://localhost:11311"
-    self.m_env['ROS_PACKAGE_PATH'] ="/opt/rnr_ros/indigo/src:/opt/ros/indigo/share:/opt/ros/indigo/stacks"
-    self.m_env['ROS_ROOT']="/opt/ros/indigo/share/ros"
-    self.m_env['PATH']='/prj/bin:/usr/local/bin:' + \
-        rosprefix + '/' + rosdistro + '/bin:' + \
-        self.m_env['PATH']
-    self.m_env['PYTHONPATH']='/opt/rnr_ros/indigo/devel/lib/python2.7/dist-packages:/opt/ros/indigo/lib/python2.7/dist-packages:/prj/lib/python2.7/site-packages:/usr/local/lib/python2.7/site-packages:/prj/lib/python2.7/site-packages:/usr/local/lib/python2.7/site-packages'
-    self.m_env['LD_LIBRARY_PATH'] = '/usr/local/lib/rnr:/opt/rnr_ros/indigo/devel/lib:/opt/ros/indigo/lib:/usr/local/lib/rnr'
+    self.setenv()
+    self.printenv()
 
     self.m_lock = threading.Lock()
 
@@ -217,6 +209,68 @@ class window(Frame):
       pass
 
     return kw
+
+  #
+  ## \brief Set up execution environment.
+  #
+  def setenv(self):
+    pathsep = os.path.pathsep   # ':'
+    sep     = os.path.sep       # '/'
+
+    self.m_env = dict(os.environ)
+
+    rosdistro = self.m_env.get('ROS_DISTRO', 'indigo')
+    rosroot   = self.m_env.get('ROS_ROOT',
+                              mkpath('opt', 'ros', rosdistro, 'share', 'ros'))
+    rosprefix = rosroot[0:rosroot.find(rosdistro)]
+    rospkg    = self.m_env.get('ROS_PACKAGE_PATH', '')
+    rnrprefix = mkpath('opt', 'rnr_ros') # default
+    for path in rospkg.split(pathsep):
+      s = path[0:path.find(rosdistro)]
+      if s != rosprefix:
+        rnrprefix = s
+        break
+
+    ros = mkpath(rosprefix, rosdistro)
+    rnr = mkpath(rnrprefix, rosdistro)
+
+    # fixup PATH - not inherited user environment
+    path = self.m_env.get('PATH', '')
+    for p in [
+        mkpath(ros, 'bin'),
+        mkpath('usr', 'local', 'bin'),
+        mkpath('prj', 'bin')]:
+      path = p + pathsep + path
+    self.m_env['PATH'] = path
+
+    # fixup PYTHONPATH - not inherited user environment
+    python = 'python2.7'
+    path = self.m_env.get('PYTHONPATH', '')
+    for p in [
+        mkpath('usr', 'local', 'lib', python),
+        mkpath('prj', 'lib', python, 'site-packages'),
+        mkpath(ros, 'lib', python, 'dist-packages'),
+        mkpath(rnr, 'devel', 'lib', python, 'dist-packages')]:
+      path = p + os.path.pathsep + path
+    self.m_env['PYTHONPATH'] = path
+
+    # fixup LD_LIBRARY_PATH - not inherited user environment
+    path = self.m_env.get('LD_LIBRARY_PATH', '')
+    for p in [
+        mkpath(ros, 'lib'),
+        mkpath(rnr, 'devel', 'lib')]:
+      path = p + os.path.pathsep + path
+    self.m_env['LD_LIBRARY_PATH'] = path
+
+  #
+  ## \brief (Debug) Print relevant environment values.
+  #
+  def printenv(self):
+    for var in ['LD_LIBRARY_PATH', 'PATH', 'PYTHONPATH',
+                'ROSLISP_PACKAGE_DIRECTORIES', 'ROS_DISTRO', 'ROS_ETC_DIR',
+                'ROS_MASTER_URI', 'ROS_PACKAGE_PATH', 'ROS_ROOT']:
+      val = self.m_env.get(var, '')
+      print "{0}={1}".format(var, val)
 
   #
   ## \brief Create gui widgets with supporting data and show.
@@ -915,7 +969,7 @@ class window(Frame):
   def findProcess(self, reList):
     for p in psutil.process_iter():
       try:
-        if self.matchProcess(p.cmdline, reList):
+        if self.matchProcess(p.cmdline(), reList):
           return p
       except psutil.NoSuchProcess:
         pass
