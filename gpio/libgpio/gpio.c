@@ -456,12 +456,13 @@ int gpioNotify(int fd, double timeout)
   else
   {
     tv.tv_sec  = (long)timeout;
-    tv.tv_usec = (long)(timeout - (double)tv.tv_sec) * 1000000;
+    tv.tv_usec = (long)((timeout - (double)tv.tv_sec) * 1000000.0);
     if( tv.tv_usec > 1000000 )
     {
       ++tv.tv_sec;
       tv.tv_usec = 0;
     }
+    //fprintf(stderr, "%lf --> %ld %ld\n", timeout, tv.tv_sec, tv.tv_usec);
     rc = select(fd+1, NULL, NULL, &efds, &tv);
   }
 

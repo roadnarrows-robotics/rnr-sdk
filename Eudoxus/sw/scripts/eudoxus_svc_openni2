@@ -37,20 +37,21 @@ declare -i button=1       # current push button state
 declare -i led=0          # current led state
 
 # Times
-declare -i t_led=$(date +%s)    # last led state change time
-declare -i t_cur                # current time
-declare -i t_diff               # time difference
+declare -ri billion=1000000000
+declare -ai t_cur                 # current time (sec nsec)
+declare -ai t_led                 # led state change time (sec nsec)
+declare -ai t_hz=(0 400000000)    # led flash hertz (sec nsec)
 
 # Some user defined state variables
 declare -i action_state=0   # action state, 0 is not running, 1 is running 
 declare -i action_pid=0     # action process PID
 
 #
-# Hook to test if user defined action is running.
+# Hook to determine status of user defined action.
 #
-# Return 0 or 1.
+# Sets action_pid and action_state appropriately.
 #
-action_running()
+action_status()
 {
   action_pid=$(pgrep -f '.*roslaunch *openni2_launch *openni2.launch')
   if [ ${action_pid} -gt 0 ]
@@ -59,33 +60,6 @@ action_running()
   else
     action_state=0
   fi
-
-  echo ${action_state}
-}
-
-#
-# Alternative hook to test if user defined action is running. This version
-# assumes that no other process launches the openni2 nodes. That is probably
-# not true.
-#
-# Return 0 or 1.
-#
-als_action_running()
-{
-  action_state=0
-  action_pid=$(pgrep -f '.*roslaunch *openni2_launch *openni2.launch')
-  if [ ${action_pid} -gt 0 ]
-  then
-    #kill -0 ${action_pid} >/dev/null 2>&1
-    if [ $? -eq 0 ]
-    then
-      action_state=1
-    else
-      action_pid=0
-    fi
-  fi
-
-  echo ${action_state}
 }
 
 #
@@ -115,25 +89,63 @@ action_stop()
 }
 
 #
+# Mark time of LED state change.
+#
+led_mark()
+{
+  t_led=($(date "+%s 1%N"))
+}
+
+#
+# Determine if LED on/off state should be transition.
+#
+led_flash()
+{
+  declare -i sec
+  declare -i nsec
+
+  t_cur=($(date "+%s 1%N"))
+  flash=0
+
+  sec=${t_cur[0]}-${t_led[0]}
+  nsec=${t_cur[1]}-${t_led[1]}
+  if [ ${nsec} -lt 0 ]
+  then
+    nsec=${billion}+${nsec}
+  fi
+
+  if [ ${sec} -ge ${t_hz[0]} ]
+  then
+    if [ ${nsec} -ge ${t_hz[1]} ]
+    then
+      flash=1
+    fi
+  fi
+
+  echo ${flash}
+}
+
+#
 # Set LED
 #   
 # If not action_state, thenthe LED should be solid on
 # If action_state, then the LED should slowly blink
 #
-setled()
+led_set()
 {
+  declare -i doflash
+
   if [ ${action_state} -eq 0 ]
   then
     if [ ${led} -eq 0 ]
     then
       led=1
       gpiowrite ${gpio_led} ${led}
-      t_led=${t_cur}
+      led_mark
     fi
   else
-    t_cur=$(date +%s)
-    t_diff=${t_cur}-${t_led}
-    if [ ${t_diff} -ge 1 ]
+    doflash=$(led_flash)
+    if [ ${doflash} -eq 1 ]
     then
       if [ ${led} -eq 0 ]
       then
@@ -141,20 +153,24 @@ setled()
       else
         led=0
       fi
+      #date "+%s.%N"
       gpiowrite ${gpio_led} ${led}
-      t_led=${t_cur}
+      led_mark
     fi
   fi
 }
+
+led_mark
 
 #
 # Block-wait on user push button events.
 #
 while :
 do
-  gpionotify --timeout=0.5 --monitor ${gpio_bttn} | \
+  gpionotify --timeout=0.25 --monitor ${gpio_bttn} | \
   while read button
   do
+    action_status
     case ${button}
     in
       0) #echo "Button is in the pushed state"
@@ -163,7 +179,6 @@ do
           # pushed --> released
           if [ ${old_button} -eq 0 ]
           then
-            action_state=$(action_running)
             if [ ${action_state} -eq 1 ] # currently action_state
             then
               action_stop
@@ -177,7 +192,8 @@ do
           ;;
     esac
     old_button=${button}
-    setled
+    #echo ${old_button} ${button}
+    led_set
   done
 done
 

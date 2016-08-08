@@ -14,7 +14,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin:/prj/bin:/usr/local/bin
 # standard init sh support functions
 . /lib/lsb/init-functions
 
-# Laelaps initialization program
+# Eudoxus initialization program
 SERVICE=eudoxus_init                  # "service"
 LOGFILE=/var/log/${SERVICE}.log       # log file
 SYSGPIO=/sys/class/gpio               # sysfs gpio base directory

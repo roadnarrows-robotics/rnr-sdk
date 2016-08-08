@@ -12,19 +12,20 @@
 #                 with a user push button to start/stop the nodes.
 ### END INIT INFO
 
-if [ -f /etc/profile.d/laelaps.sh ]
+if [ -f /etc/profile.d/eudoxus.sh ]
 then
-  . /etc/profile.d/laelaps.sh
-elif [ -f /prj/etc/profile.d/laelaps.sh ]
+  . /etc/profile.d/eudoxus.sh
+elif [ -f /prj/etc/profile.d/eudoxus.sh ]
 then
-  . /prj/etc/profile.d/laelaps.sh
+  . /prj/etc/profile.d/eudoxus.sh
 fi
 
 export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/bin"
 
-NAME="Eudoxus user button monitor"
-SERVICE=eudoxus_svc_openni2
-DAEMON=$(which ${SERVICE})
+NAME="Eudoxus user button monitor service"
+SERVICE=eudoxus_shutter
+SCRIPT=eudoxus_svc_openni2
+DAEMON=$(which ${SCRIPT})
 PIDFILE=/var/run/${SERVICE}.pid
 LOGFILE=/var/log/${SERVICE}.log
 
@@ -38,7 +39,7 @@ test -x "${DAEMON}" || exit 0
 #
 is_daemon_running()
 {
-  /bin/ps -e | /bin/grep --quiet "${SERVICE}" 2>/dev/null
+  /bin/ps -e | /bin/grep --quiet "${DAEMON}" 2>/dev/null
   return $?
 }
 
@@ -54,6 +55,8 @@ startdaemon()
     if start-stop-daemon --start --quiet --make-pidfile --pidfile ${PIDFILE} \
       --background --exec /bin/bash -- \
       -c "${DAEMON} >${LOGFILE} 2>&1"
+    #if start-stop-daemon -t --start --quiet --make-pidfile --pidfile ${PIDFILE} \
+    #  --background --exec ${DAEMON}
     then
       log_end_msg 0 || true
     else
@@ -103,7 +106,7 @@ pidof_daemon()
   if [ -e "${PIDFILE}" ]
   then
     PID=$(cat ${PIDFILE})
-    pidof ${SERVICE} | grep -q ${PID}
+    pidof ${DAEMON} | grep -q ${PID}
     return $?
   fi
   return 1

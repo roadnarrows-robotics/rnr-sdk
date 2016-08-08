@@ -93,7 +93,8 @@ reNotRunning        = re.compile(r"\s*is\s*not\s*running", re.IGNORECASE)
 # /usr/bin/python /opt/ros/indigo/bin/roslaunch openni2_launch openni2.launch
 rePython            = re.compile(r".*python", re.IGNORECASE)
 reRosLaunch         = re.compile(r".*roslaunch", re.IGNORECASE)
-reRosOpenni2        = re.compile(r".*openni2\.launch", re.IGNORECASE)
+reRosOpenni2Pkg     = re.compile(r".*openni2_launch", re.IGNORECASE)
+reRosOpenni2Launch  = re.compile(r".*openni2\.launch", re.IGNORECASE)
 
 # /opt/ros/indigo/lib/image_view/image_view image:=/camera/depth/image
 reRosImageView      = re.compile(r".*image_view", re.IGNORECASE)
@@ -163,7 +164,7 @@ class window(Frame):
       'eudoxus_roscore': {
         'desc':     'ROS Master, Parameter Server, rosout logging node.',
         'type':     'init.d',
-        'cmd':      'service eudoxus_roscore %{0}',
+        'cmd':      'service eudoxus_roscore {0}',
         'status':   'unknown',
         'relist':   [],
         'subproc':  None,
@@ -171,7 +172,7 @@ class window(Frame):
       'eudoxus_shutter': {
         'desc':     'Eudoxus user button monitor.',
         'type':     'init.d',
-        'cmd':      'service eudoxus_shutter %{0}',
+        'cmd':      'service eudoxus_shutter {0}',
         'status':   'unknown',
         'relist':   [],
         'subproc':  None,
@@ -181,7 +182,7 @@ class window(Frame):
         'type':     'user',
         'cmd':      'roslaunch openni2_launch openni2.launch',
         'status':   'unknown',
-        'relist':   [rePython, reRosLaunch, reRosOpenni2],
+        'relist':   [reRosLaunch, reRosOpenni2Pkg, reRosOpenni2Launch],
         'subproc':  None,
       },
       'image_view': {
@@ -710,6 +711,7 @@ class window(Frame):
 
   def autoRefresh(self):
     self.refresh()
+    #RDK self.after(1000, self.autoRefresh)
     self.after(1000, self.autoRefresh)
 
   #
@@ -769,7 +771,7 @@ class window(Frame):
     pf    = False
     emsg  = None
     hasLock = self.m_lock.acquire()
-    if self.findProcess(self.m_svc[service]['relist']) is None:
+    if self.findProcess(service, self.m_svc[service]['relist']) is None:
       args = shlex.split(self.m_svc[service]['cmd'])
       try:
         self.m_svc[service]['subproc'] = subprocess.Popen(args, env=self.m_env)
@@ -831,7 +833,7 @@ class window(Frame):
     pf    = False
     emsg  = None
     hasLock = self.m_lock.acquire()
-    p = self.findProcess(self.m_svc[service]['relist'])
+    p = self.findProcess(service, self.m_svc[service]['relist'])
     if p is not None:
       try:
         self.kill(p)
@@ -951,7 +953,7 @@ class window(Frame):
   #
   def execStatusUser(self, service):  
     hasLock = self.m_lock.acquire()
-    if self.findProcess(self.m_svc[service]['relist']) is not None:
+    if self.findProcess(service, self.m_svc[service]['relist']) is not None:
       self.m_svc[service]['status'] = 'running'
     else:
       self.m_svc[service]['status'] = 'stopped'
@@ -962,15 +964,20 @@ class window(Frame):
   ## \brief Find running process with command line that matches list of
   ## regular expressions.
   ##
+  ## \param service   Service (key).
   ## \param reList    List of regular expressions.
   ##
   ## \return Returns Popen object or None.
   #
-  def findProcess(self, reList):
+  def findProcess(self, service, reList):
     for p in psutil.process_iter():
       try:
-        if self.matchProcess(p.cmdline(), reList):
-          return p
+        if callable(p.cmdline): # new psutil versions
+          if self.matchProcess(service, p.cmdline(), reList):
+            return p
+          else:                 # old psutil versions
+            if self.matchProcess(service, p.cmdline, reList):
+              return p
       except psutil.NoSuchProcess:
         pass
     return None
@@ -980,20 +987,24 @@ class window(Frame):
   ##
   ## All regular expressions must match.
   ##
+  ## \param service   Service (key).
   ## \param cmdline   List of command line arguments.
   ## \param reList    List of regular expressions.
   ##
   ## \return Returns True if matched, False otherwise.
   #
-  def matchProcess(self, cmdline, reList):
+  def matchProcess(self, service, cmdline, reList):
     i = 0
+    j = 0
     b = False
     for re in reList:
       b = False
-      for i in range(i, len(cmdline)):
-        if re.search(cmdline[i]):
+      i = j + 1
+      for j in range(i, len(cmdline)):
+        if re.search(cmdline[j]):
           b = True;
-          i += 1
+          if service == 'openni2_launch':
+            print cmdline[j]
           break
       if not b:
         break
