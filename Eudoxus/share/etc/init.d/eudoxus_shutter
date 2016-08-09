@@ -35,12 +35,39 @@ test -x "${DAEMON}" || exit 0
 . /lib/lsb/init-functions
 
 #
-# Test if daemon is running.
+# Get daemon process id.
 #
-is_daemon_running()
+# 'Returns' pid or 0.
+#
+get_daemon_pid()
 {
-  /bin/ps -e | /bin/grep --quiet "${DAEMON}" 2>/dev/null
-  return $?
+  pid=$(/usr/bin/pgrep -f "/bin/bash *-c *${DAEMON}")
+  if [ "${pid}" != '' ]
+  then
+    echo "${pid}"
+  else
+    echo 0
+  fi
+  #echo "DBG: pid=${pid}" >>${LOGFILE}
+}
+
+#
+# Get daemon process group id.
+#
+# get_daemon_pgid <pid>
+#
+# 'Returns' pgid or 0.
+#
+get_daemon_pgid()
+{
+  pgid=$(/bin/ps -o pgid= ${1})
+  if [ "${pgid}" != '' ]
+  then
+    echo "${pgid}"
+  else
+    echo 0
+  fi
+  #echo "DBG: pgid=${pgid}" >>${LOGFILE}
 }
 
 #
@@ -48,13 +75,14 @@ is_daemon_running()
 #
 startdaemon()
 {
-  if ! is_daemon_running
+  pid=$(get_daemon_pid)
+
+  if [ "${pid}" -eq 0 ]
   then
     log_daemon_msg "Starting ${NAME}" "${SERVICE}" || true
-    rm -f "${LOGFILE}"
     if start-stop-daemon --start --quiet --make-pidfile --pidfile ${PIDFILE} \
       --background --exec /bin/bash -- \
-      -c "${DAEMON} >${LOGFILE} 2>&1"
+      -c "${DAEMON} >>${LOGFILE} 2>&1"
     #if start-stop-daemon -t --start --quiet --make-pidfile --pidfile ${PIDFILE} \
     #  --background --exec ${DAEMON}
     then
@@ -73,13 +101,24 @@ startdaemon()
 #
 stopdaemon()
 {
-  if is_daemon_running
+  pid=$(get_daemon_pid)
+
+  if [ "${pid}" -ne 0 ]
   then
     log_daemon_msg "Stopping ${NAME}" "${SERVICE}" || true
-    if start-stop-daemon --stop --quiet --oknodo --pidfile ${PIDFILE}
+    
+    pgid=$(get_daemon_pgid ${pid})
+
+    #if start-stop-daemon --stop --quiet --oknodo --pidfile ${PIDFILE}
+    if [ "${pgid}" -ne 0 ]
     then
-      #/bin/rm -f "${PIDFILE}"
-      log_end_msg 0 || true
+      if /bin/kill -15 -"${pgid}"
+      then
+        rm -f "${PIDFILE}"
+        log_end_msg 0 || true
+      else
+        log_end_msg 1 || true
+      fi
     else
       log_end_msg 1 || true
     fi
@@ -125,7 +164,14 @@ case $1 in
   reload|force-reload)
     ;;
   status)
-	  status_of_proc -p "${PIDFILE}" "${DAEMON}" "${SERVICE}" && exit 0 || exit $?
+	  #status_of_proc -p "${PIDFILE}" "${DAEMON}" "${SERVICE}" && exit 0 || exit $?
+    pid=$(get_daemon_pid)
+    if [ "${pid}" -ne 0 ]
+    then
+      log_daemon_msg "${NAME} is running" "" || true
+    else
+      log_daemon_msg "${NAME} is not running" "" || true
+    fi
     ;;
   *)
     log_action_msg "Usage: $0 {start|stop|restart|reload|force-reload|status}" || true

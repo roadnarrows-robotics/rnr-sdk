@@ -1005,8 +1005,6 @@ class window(Frame):
       for j in range(i, len(cmdline)):
         if re.search(cmdline[j]):
           b = True;
-          if service == 'openni2_launch':
-            print 'rdk', re.pattern, '-->', cmdline[j]
           break
       if not b:
         break
