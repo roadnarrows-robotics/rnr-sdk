@@ -104,6 +104,14 @@ reRosImageViewImage = re.compile(r"image:=/camera/depth/image", re.IGNORECASE)
 # make absolute path from list of path components
 mkpath = lambda *p: os.path.normpath(os.path.join(os.path.sep, *p))
 
+#
+# The psutil package changed interfaces sometime between v1.x and v3.x.
+#
+if callable(psutil.Popen.cmdline): # new psutil versions
+  procCmdLine = lambda p: p.cmdline()
+else:                 # old psutil versions
+  procCmdLine = lambda p: p.cmdline
+
 
 # ------------------------------------------------------------------------------
 # Class window
@@ -972,12 +980,8 @@ class window(Frame):
   def findProcess(self, service, reList):
     for p in psutil.process_iter():
       try:
-        if callable(p.cmdline): # new psutil versions
-          if self.matchProcess(service, p.cmdline(), reList):
-            return p
-          else:                 # old psutil versions
-            if self.matchProcess(service, p.cmdline, reList):
-              return p
+        if self.matchProcess(service, procCmdLine(p), reList):
+          return p
       except psutil.NoSuchProcess:
         pass
     return None
@@ -995,19 +999,18 @@ class window(Frame):
   #
   def matchProcess(self, service, cmdline, reList):
     i = 0
-    j = 0
     b = False
     for re in reList:
       b = False
-      i = j + 1
       for j in range(i, len(cmdline)):
         if re.search(cmdline[j]):
           b = True;
           if service == 'openni2_launch':
-            print cmdline[j]
+            print 'rdk', re.pattern, '-->', cmdline[j]
           break
       if not b:
         break
+      i = j + 1
     return b
 
 

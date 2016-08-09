@@ -583,7 +583,7 @@ class window(Frame):
 
   def autoRefresh(self):
     self.refresh()
-    self.after(10000, self.autoRefresh)
+    self.after(2000, self.autoRefresh)
 
   #
   ## \brief Refresh status of all services.
