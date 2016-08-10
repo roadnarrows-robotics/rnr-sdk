@@ -54,6 +54,7 @@ scripts = \
 	rnmake_lsarch \
 	rnros_git_pull_all.sh \
 	rnros_git_status.sh \
+	rnsdk_git_status.sh \
 	rnsdk_ls_installed.sh \
 	sgrep
 

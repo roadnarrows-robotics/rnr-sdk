@@ -2,7 +2,7 @@
 #
 # Determine the status all ROS packages found in the user's workspace.
 #
-# Usage: git_ros_status.sh
+# Usage: rnros_git_status.sh [rosdistro]
 
 rosdistro="${ROS_DISTRO}"
 rospkgpath="${ROS_PACKAGE_PATH}"
@@ -53,9 +53,12 @@ do
   then
     continue
   fi
+
   cd ${pkg}
+
   pkgbase=$(basename ${pkg})
   printf "%-30s " ${pkgbase}
+
   f=$(git status -s -uno)
   if [ -z "${f}" ]
   then
@@ -63,6 +66,7 @@ do
   else
     printf "M "
   fi
+
   if [ -f "${pkgbase}/package.xml" ]
   then
     version=$(xmllint --xpath "/package/version/text()" ${pkgbase}/package.xml)
