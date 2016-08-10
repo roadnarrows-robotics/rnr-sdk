@@ -46,15 +46,15 @@
 
 scripts = \
 	cppstrings \
-	cp_to_repostaging \
-	eula_update.py \
-	fastinstall \
-	ls_sdk_installed.sh \
-	git_ros_status.sh \
-	git_ros_pull_all.sh \
-	rnmake_deb_all \
+	rncp_to_repostaging \
+	rneula_update.py \
 	rnmake_all \
+	rnmake_deb_all \
+	rnmake_fastinstall \
 	rnmake_lsarch \
+	rnros_git_pull_all.sh \
+	rnros_git_status.sh \
+	rnsdk_ls_installed.sh \
 	sgrep
 
 
