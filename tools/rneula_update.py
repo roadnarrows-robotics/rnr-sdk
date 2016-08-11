@@ -3,9 +3,9 @@
 #
 # Package:  tools
 #
-# File:     eula_update.py
+# File:     rneula_update.py
 #
-# TBD   UNDER CONSTRUCTION   TBD
+# Usage: rneula_update.py [OPTIONS] <license> [<dir>]
 #
 # Version:
 #   $LastChangedDate: 2015-04-13 16:03:38 -0600 (Mon, 13 Apr 2015) $

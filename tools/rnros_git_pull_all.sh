@@ -1,8 +1,8 @@
 #!/bin/bash
 #
-# Update all ROS packages found in user's workspace.
+# Update all ROS packages found under user's ROS workspace.
 #
-# Usage: git_ros_pull_all.sh
+# Usage: rnros_git_pull_all.sh
 
 rosdistro="${ROS_DISTRO}"
 rospkgpath="${ROS_PACKAGE_PATH}"

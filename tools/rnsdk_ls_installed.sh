@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # File:
-#   ls_sdk_installed.sh
+#   rnsdk_ls_installed.sh
 #
 # Usage:
 #   ls_sdk_installed.sh [loc]

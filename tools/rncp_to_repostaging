@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# Copy all SDK debian packages to the repo staging area.
+#
+# Usage: rncp_to_repostaging
 
 arch=${RNMAKE_ARCH_DFT:-x86_64}
 pkgdir=/prj/pkg

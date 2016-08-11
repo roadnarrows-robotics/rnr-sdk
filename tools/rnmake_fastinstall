@@ -2,6 +2,6 @@
 #
 # Fast install of SDK package. Does not install documentation.
 #
-# Usage: fastinstall
+# Usage: rnmake_fastinstall
 
 make install-bin; make install-lib; make install-includes

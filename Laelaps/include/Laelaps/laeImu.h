@@ -61,8 +61,10 @@
 #include "rnr/rnrconfig.h"
 
 #include  "Laelaps/laelaps.h"
+#ifndef SWIG
 #include  "Laelaps/laeDesc.h"
 #include  "Laelaps/laeTune.h"
+#endif // SWIG
 
 
 #ifdef SWIG
