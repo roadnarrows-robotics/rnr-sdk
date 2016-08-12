@@ -11,4 +11,6 @@ set -e
 # fi
 #fi
 ldconfig
+
+ln -s /usr/local/share/appkit-@VERSION@ /usr/local/share/appkit
 # End automatically added section
