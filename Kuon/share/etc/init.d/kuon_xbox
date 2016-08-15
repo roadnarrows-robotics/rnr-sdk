@@ -12,28 +12,65 @@
 #                 controller.
 ### END INIT INFO
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+if [ -f /etc/profile.d/kuon.sh ]
+then
+  . /etc/profile.d/kuon.sh
+elif [ -f /prj/etc/profile.d/kuon.sh ]
+then
+  . /prj/etc/profile.d/kuon.sh
+fi
 
-. /etc/profile.d/kuon.sh
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/bin"
 
-ROSRUN=rosrun
+SERVICE=kuon_xbox
 ROSPKG=hid
 ROSNODE=xbox_360
 
-DAEMON=`which ${ROSRUN}`
+DAEMON=$(find_ros_node ${LD_LIBRARY_PATH} ${ROSPKG} ${ROSNODE})
 PIDFILE=/var/run/${ROSNODE}.pid
 LOGFILE=/var/log/${ROSNODE}.log
 
-test -x $DAEMON || exit 0
+test -n "${DAEMON}" || exit 0
+test -x "${DAEMON}" || exit 0
+
+# standard init sh support functions
+. /lib/lsb/init-functions
+
+#
+# Test if daemon is running.
+#
+is_daemon_running()
+{
+  /bin/ps -e | /bin/grep --quiet "${ROSNODE}" 2>/dev/null
+  return $?
+}
 
 #
 # Start service
 #
 startdaemon()
 {
-  echo -n "Starting ${ROSNODE} ROS node... "
-  start-stop-daemon --start -x ${DAEMON} --pidfile ${PIDFILE} --make-pidfile --background -- ${ROSPKG} ${ROSNODE}
-  echo "  done"
+  if do_start_teleop
+  then
+    if ! is_daemon_running
+    then
+      log_daemon_msg "Starting Xbox360 ROS node" "${ROSNODE}" || true
+      rm -f "${LOGFILE}"
+      if start-stop-daemon --start --quiet --exec ${DAEMON} --pidfile ${PIDFILE} --make-pidfile --background -- --daemon --log-no-color --log=diag2 --logfile=${LOGFILE}
+      then
+        log_end_msg 0 || true
+      else
+        log_end_msg 1 || true
+      fi
+    else
+      log_daemon_msg "Xbox360 ROS node already running" "" || true
+      log_end_msg 1 || true
+    fi
+
+  else
+    log_daemon_msg "Local on-target Xbox360 service disabled" "" || true
+    log_end_msg 1 || true
+  fi
 }
 
 #
@@ -41,15 +78,36 @@ startdaemon()
 #
 stopdaemon()
 {
-  echo -n "Stopping ${ROSNODE} ROS node... "
-  start-stop-daemon --stop --pidfile ${PIDFILE}
-  echo "done"
+  if is_daemon_running
+  then
+    log_daemon_msg "Stopping Xbox360 ROS node" "${ROSNODE}" || true
+    if start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile ${PIDFILE} $@
+    then
+      #/bin/rm -f "${PIDFILE}"
+      log_end_msg 0 || true
+    else
+      log_end_msg 1 || true
+    fi
+  else
+    log_daemon_msg "Xbox360 ROS node not running" "" || true
+    log_end_msg 1 || true
+  fi
 }
 
 #
-# Status
+# Restart service
 #
-pidof_daemon() {
+restartdaemon()
+{
+  stopdaemon
+  startdaemon
+}
+
+#
+# Status (not used)
+#
+pidof_daemon()
+{
   if [ -e "${PIDFILE}" ]
   then
     PID=$(cat ${PIDFILE})
@@ -66,25 +124,16 @@ case $1 in
   stop)
     stopdaemon
     ;;
-  restart|force-reload)
-    $0 stop && sleep 2 && $0 start
+  restart)
+    restartdaemon
+    ;;
+  reload|force-reload)
     ;;
   status)
-    if pidof_daemon
-    then
-      echo "${ROSNODE} running, process ${PID}"
-    else
-      echo "${ROSNODE} not running"
-      if [ -e "${PIDFILE}" ]
-      then
-        exit 1  # program is dead and pid file exists.
-      else
-        exit 3  # program is not running
-      fi
-    fi
+	  status_of_proc -p "${PIDFILE}" "${DAEMON}" "${SERVICE}" && exit 0 || exit $?
     ;;
   *)
-    echo "Usage: $0 {start|stop|restart|force-reload|status}"
+    log_action_msg "Usage: $0 {start|stop|restart|reload|force-reload|status}" || true
     exit 1
     ;;
 esac

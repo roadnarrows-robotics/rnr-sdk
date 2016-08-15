@@ -193,7 +193,15 @@ int KuonRobot::connect(const std::string &strDevMotorCtlr0,
   strDevName0 = getRealDeviceName(strDevMotorCtlr0);
   strDevName1 = getRealDeviceName(strDevMotorCtlr1);
 
-  //
+  // RDK Hack
+  // Possible race condition where controller is not fully powered on.
+  // Wait a little bit.
+  // RDK Hack
+  long usec = 3000000;
+  LOGDIAG2("Waiting for motor controllers to power-up");
+  usleep(usec);
+  // RDK Hack
+
   // Open motor controller 0.
   //
   if( RS160DOpenConnection(strDevName0.c_str(), &m_fdMotorCtlr0) < 0 )

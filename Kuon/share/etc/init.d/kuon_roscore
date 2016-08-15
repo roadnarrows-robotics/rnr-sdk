@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:       roscore
+# Provides:       kuon_roscore
 # Required-Start: $remote_fs $syslog
 # Required-Stop:  $remote_fs $syslog
 # Default-Start:  2 3 4 5
@@ -11,26 +11,54 @@
 #                 system. Each Kuon, by default, is a ROS master.
 ### END INIT INFO
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
+#until rostopic list 2>/dev/null; do sleep 1; done
+if [ -f /etc/profile.d/kuon.sh ]
+then
+  . /etc/profile.d/kuon.sh
+elif [ -f /prj/etc/profile.d/kuon.sh ]
+then
+  . /prj/etc/profile.d/kuon.sh
+fi
 
-. /etc/profile.d/kuon.sh
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/bin"
 
+SERVICE=kuon_roscore
 ROSCORE=roscore
-
-DAEMON=`which ${ROSCORE}`
+PORT=$(get_ros_master_port)
+DAEMON=$(which ${ROSCORE})
 PIDFILE=/var/run/${ROSCORE}.pid
 LOGFILE=/var/log/${ROSCORE}.log
 
-test -x ${DAEMON} || exit 0
+test -n "${DAEMON}" || exit 0
+test -x "${DAEMON}" || exit 0
+
+# standard init sh support functions
+. /lib/lsb/init-functions
 
 #
 # Start service
 #
 startdaemon()
 {
-  echo -n "Starting roscore... "
-  start-stop-daemon --start -x ${DAEMON} --pidfile ${PIDFILE} --make-pidfile --background
-  echo "  done"
+  if do_start_roscore
+  then
+    if ! is_ros_running
+    then
+      log_daemon_msg "Starting roscore" "${ROSCORE}" || true
+      if start-stop-daemon --start --quiet --exec ${DAEMON} --pidfile ${PIDFILE} --make-pidfile --background -- --port=${PORT}
+      then
+        log_end_msg 0 || true
+      else
+        log_end_msg 1 || true
+      fi
+    else
+      log_daemon_msg "ROS master already running" "" || true
+      log_end_msg 1 || true
+    fi
+  else
+    log_daemon_msg "ROS master is ${ROS_MASTER_URI}, on-target service disabled" "" || true
+    log_end_msg 1 || true
+  fi
 }
 
 #
@@ -38,22 +66,45 @@ startdaemon()
 #
 stopdaemon()
 {
-  echo -n "Stopping roscore... "
-  start-stop-daemon --stop --pidfile ${PIDFILE}
-  echo "done"
+  if is_ros_running
+  then
+    log_daemon_msg "Stopping roscore" "${ROSCORE}" || true
+    if start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile ${PIDFILE} $@
+    then
+      #/bin/rm -f "${PIDFILE}"
+      log_end_msg 0 || true
+    else
+      log_end_msg 1 || true
+    fi
+  else
+    log_daemon_msg "ROS master not running" "" || true
+    log_end_msg 1 || true
+  fi
 }
 
 #
-# Status
+# Restart service
+#
+restartdaemon()
+{
+  stopdaemon
+  startdaemon
+}
+
+#
+# Status (not used)
 #
 # roscore is a set of processes started by python. Cannot simply do the pidof
 # approach.
 #
-pidof_daemon() {
+pidof_daemon()
+{
   if [ -e "${PIDFILE}" ]
   then
-    PID=$(cat ${PIDFILE})
-    ps ${PID} | grep -q ${ROSCORE}
+    #PID=$(cat ${PIDFILE})
+    #ps ${PID} | grep -q ${ROSCORE}
+    #ps -ef | grep -q rosmaster
+    PID=$(pidof -x ${ROSCORE})
     return $?
   fi
   return 1
@@ -66,25 +117,16 @@ case $1 in
   stop)
     stopdaemon
     ;;
-  restart|force-reload)
-    $0 stop && sleep 2 && $0 start
+  restart)
+    restartdaemon
+    ;;
+  reload|force-reload)
     ;;
   status)
-    if pidof_daemon
-    then
-      echo "${ROSCORE} running, process ${PID}"
-    else
-      echo "${ROSCORE} not running"
-      if [ -e "${PIDFILE}" ]
-      then
-        exit 1  # program is dead and pid file exists.
-      else
-        exit 3  # program is not running
-      fi
-    fi
+	  status_of_proc -p "${PIDFILE}" "${DAEMON}" "${SERVICE}" && exit 0 || exit $?
     ;;
   *)
-    echo "Usage: $0 {start|stop|restart|force-reload|status}"
+    log_action_msg "Usage: $0 {start|stop|restart|reload|force-reload|status}" || true
     exit 1
     ;;
 esac
