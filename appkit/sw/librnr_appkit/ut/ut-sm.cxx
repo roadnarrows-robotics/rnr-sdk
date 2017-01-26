@@ -17,7 +17,7 @@
  *  \author Robin Knight (robin.knight@roadnarrows.com)
  *  
  *  \par Copyright:
- *  (C) 2013, RoadNarrows LLC
+ *  (C) 2013-2016, RoadNarrows LLC
  *  (http://roadnarrows.com)
  *  All rights reserved.
  */
@@ -60,10 +60,10 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
-#include "rnr/Random.h"
-#include "rnr/State.h"
-#include "rnr/StateKb.h"
-#include "rnr/StateMach.h"
+#include "rnr/appkit/Random.h"
+#include "rnr/appkit/State.h"
+#include "rnr/appkit/StateKb.h"
+#include "rnr/appkit/StateMach.h"
 
 #include "gtest/gtest.h"
 

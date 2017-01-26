@@ -17,7 +17,7 @@ RN Make System Specific Makefile
 \author: Daniel Packard (daniel@roadnarrows.com) 
 
 \par Copyright:
-  (C) 2011-2015.  RoadNarrows LLC.
+  (C) 2011-2016.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -61,19 +61,19 @@ pkgroot		= ../../..
 # Programs
 
 # Distribution Static Libraries
-TEST_PGMS = ut-librnr_appkit utThread
+TEST_PGMS = ut-librnr_appkit utThread utLogBook
 
 # Linked Libraries 
 ut-librnr_appkit.LIBS = \
 	gtest rnr_appkit rnr \
-  $(OPENCV_COM_LIBS) \
-	$(GTK_LIB) \
 	pthread stdc++
 
 utThread.LIBS = rnr_appkit rnr pthread stdc++
+utLogBook.LIBS = rnr_appkit rnr stdc++
 
 ut-librnr_appkit.LIBDEPS	= gtest rnr_appkit
 utThread.LIBDEPS = rnr_appkit
+utLogBook.LIBDEPS = rnr_appkit rnr stdc++
 
 #------------------------------------------------------------------------------
 # Sources
@@ -84,6 +84,8 @@ ut-librnr_appkit.SRC.CXX = \
 	ut-sm.cxx
 
 utThread.SRC.CXX = utThread.cxx
+
+utLogBook.SRC.CXX = utLogBook.cxx
 
 #------------------------------------------------------------------------------
 # Optional Variables 

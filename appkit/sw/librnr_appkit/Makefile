@@ -77,7 +77,10 @@ LIB_SUBDIR = rnr
 
 # Source Files
 rnr_appkit.SRC.CXX = \
+	CommandLine.cxx \
+	LogBook.cxx \
 	Random.cxx \
+	ReadLine.cxx \
 	Session.cxx \
 	State.cxx \
 	StateKb.cxx \
@@ -86,7 +89,7 @@ rnr_appkit.SRC.CXX = \
 	Time.cxx \
 	Xml.cxx
 
-rnr_appkit.LIBS  = rnr_tinyxml rnr
+rnr_appkit.LIBS  = rnr_tinyxml rnr readline
 
 #------------------------------------------------------------------------------
 # Optional Variables 

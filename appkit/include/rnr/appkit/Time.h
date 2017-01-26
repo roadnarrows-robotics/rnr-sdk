@@ -34,6 +34,8 @@
 #include <sys/time.h>
 #include <time.h>
 
+#include <iostream>
+
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
@@ -41,6 +43,16 @@ namespace rnr
 {
   const long      MILLION = 1000000;
   const long long BILLION = 1000000000;
+
+  /*!
+   * \brief Time insertion operator.
+   *
+   * \param os  Output stream.
+   * \param b   Object to insert.
+   *
+   * \return Reference to output stream.
+   */
+  extern std::ostream &operator<<(std::ostream &os, const timespec &b);
 
 
   //----------------------------------------------------------------------------
@@ -58,7 +70,7 @@ namespace rnr
   {
   public:
     typedef struct timespec timespec_t;   ///< typedef'ed timespec structure
-    typedef struct timeval timeval_t;     ///< typedef'ed timeval structure
+    typedef struct timeval  timeval_t;    ///< typedef'ed timeval structure
 
     /*!
      * \brief Default constructor.
@@ -557,6 +569,24 @@ namespace rnr
 
 
     // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    // Stream Operators
+    // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+    /*!
+     * \brief os << b
+     *
+     * \param b   Rvalue object.
+     *
+     * \return * Returns ostream.
+     */
+    std::ostream &operator<<(std::ostream &os)
+    {
+      os << m_tsTime;
+      return os;
+    }
+
+
+    // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     // Statics
     // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
@@ -637,6 +667,8 @@ namespace rnr
      * 0 to 999,999,999.
      */
     static timespec_t norm(const timespec_t &a);
+
+    friend std::ostream &operator<<(std::ostream &os, const timespec &b);
 
   protected:
     timespec_t  m_tsTime;   // time in timespec_t format

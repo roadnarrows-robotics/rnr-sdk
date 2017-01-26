@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015  RoadNarrows
+ * (C) 2015-2016  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -42,8 +42,8 @@
 #include "rnr/opts.h"
 #include "rnr/pkg.h"
 
-#include "rnr/Thread.h"
-#include "rnr/Random.h"
+#include "rnr/appkit/Thread.h"
+#include "rnr/appkit/Random.h"
 
 #include "version.h"
 

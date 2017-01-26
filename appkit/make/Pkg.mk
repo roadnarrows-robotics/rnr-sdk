@@ -17,7 +17,7 @@ RN Make System Specific Makefile
 \author: Robin Knight 	(robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2013-2016. RoadNarrows LLC.
+  (C) 2013-2017. RoadNarrows LLC.
   (http://roadnarrows.com)
   All Rights Reserved
 
@@ -40,10 +40,10 @@ PKG 								= appkit
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 3
 PKG_VERSION_RELEASE = 0
-PKG_VERSION_DATE    = 2016
+PKG_VERSION_DATE    = 2017
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
-PKG_DISCLAIMER			= "(C) 2016 RoadNarrows LLC. All rights reserved."
+PKG_DISCLAIMER			= "(C) 2017 RoadNarrows LLC. All rights reserved."
 
 # Dotted full version number
 PKG_VERSION_DOTTED	= $(PKG_VERSION_MAJOR).$(PKG_VERSION_MINOR).$(PKG_VERSION_RELEASE)
@@ -91,7 +91,7 @@ PKG_REL_FILES				= VERSION.txt README.md
 # Flags
 #
 # CPP flags
-PKG_CPPFLAGS				=
+PKG_CPPFLAGS				= -DHAVE_READLINE
 
 # C flags
 PKG_CFLAGS					=

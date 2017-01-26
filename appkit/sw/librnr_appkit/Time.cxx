@@ -36,6 +36,9 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <iostream>
+#include <iomanip>
+
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
@@ -303,3 +306,15 @@ Time::timespec_t Time::norm(const timespec_t &a)
 
   return ts;
 }
+
+ostream &rnr::operator<<(ostream &os, const timespec &b)
+{
+  char    c = os.fill();
+  size_t  w = os.width();
+
+  os << b.tv_sec << "."
+    << setw(9) << setfill('0') << b.tv_nsec
+    << setfill(c) << setw(w);
+  return os;
+}
+
