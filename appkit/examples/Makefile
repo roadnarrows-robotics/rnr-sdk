@@ -17,7 +17,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2013-2016 RoadNarrows LLC
+  (C) 2013-2017 RoadNarrows LLC
   (http://roadnarrows.com)
   All Rights Reserved
 
@@ -62,21 +62,33 @@ endif
 # Package Root Directory
 pkgroot		= ..
 
+#------------------------------------------------------------------------------
+# Programs
+DIST_PGMS = \
+	rnr_eg_cli
+
+# Libraries to Link With
+rnr_eg_cli.LIBS      = rnr_appkit rnr stdc++
+rnr_eg_cli.LIBDEPS   = rnr_appkit
+
+#------------------------------------------------------------------------------
+# Sources
+rnr_eg_cli.SRC.CXX = rnr_eg_cli.cxx
+
+#------------------------------------------------------------------------------
+# Optional Variables 
+#
+
+# Subpackage C PreProcessor Flags
+EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"rnr_eg\"" -DLOGMOD_COLOR=LOG_COLOR_BLUE
+
+#------------------------------------------------------------------------------
+# Make Includes
+
 # Default RoadNarrows make system base directory
 ifndef rnmake
 rnmake := $(realpath $(pkgroot)/../rnmake)
 endif
-
-export rnmake arch
-
-#------------------------------------------------------------------------------
-# Subdirectories
-
-# Subdirectories to Build
-SUBDIRS = 
-
-#------------------------------------------------------------------------------
-# Make Includes
 
 # Include Rules Makefile
 include $(rnmake)/Rules.mk

@@ -2,16 +2,19 @@
 //
 // Package:   appkit
 //
-// Program:   utCommandLine   
+// Program:   rnr_eg_cli   
 //
-// File:      utCommandLine.cxx
+// File:      rnr_eg_cli.cxx
 //
 /*! \file
  *
  * $LastChangedDate: 2015-11-09 17:38:34 -0700 (Mon, 09 Nov 2015) $
  * $Rev: 4195 $
  *
- * \brief Unit test CommandLine class.
+ * \brief Command line interface example program.
+ *
+ * Demonstrates the usage of librnr_appkit's CommandLine, ReadLine, and
+ * LogBook classes to build a command line interface.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
@@ -53,7 +56,7 @@ using namespace rnr::cmd;
 
 /*!
  * \ingroup apps
- * \defgroup unittest utCommandLine
+ * \defgroup appkit_eg rnr_eg_cli
  * \{
  */
 
@@ -72,11 +75,11 @@ static OptsPgmInfo_T PgmInfo =
   NULL,
 
   // synopsis
-  "Unit test librnr_appkit CommandLine class.",
+  "An RoadNarrows Robotics librnr_appkit CLI example program.",
 
   // long_desc = 
-  "The %P command unit tests the librnr_appkit CommandLine and ReadLine "
-  "operation.",
+  "The %P command demonstrates the use of librnr_appkit's CommandLine, "
+  "ReadLine, and LogBook classes to build a command line interface.",
 
   // diagnostics
   NULL
@@ -649,7 +652,7 @@ int main(int argc, char* argv[])
   //cout << cl << endl;
 
   showAsciiArt(AsciiAardvark);
-  printf("%s CommandLine/ReadLine Unit Test\n", strClName.c_str());
+  printf("%s CommandLine/ReadLine/LogBook Example\n", strClName.c_str());
   printf("  (enter 'help' for list of commands)\n\n");
 
   if( run(cl) != OK )
