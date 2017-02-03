@@ -2,11 +2,20 @@
 RoadNarrows Robotics Application Tool Kit
 
 ## Description
-The RoadNarrows application tool kit appkit provides a set of C++ classes
-to rapidly develop applications and packages.
+The RoadNarrows APPlication tool KIT appkit provides a set of C++ class headers
+and libraries to rapidly develop applications and packages.
+
+The target execution platforms are:
+* (Mostly) POSIX compliant platforms such as Linux.
+* Embedded and hosts (laptops and desktops).
+
+To this end, the deliberate design decisions made were to:
+* Use the C++98 standard and compiler tool chain.
+* No Boost.
+* Limit use of additional system libraries other than "readily" available.
 
 ## Copyright
-&#169; 2013-2016 RoadNarrows LLC<br>
+&#169; 2013-2017 RoadNarrows LLC<br>
 [roadnarrows.com](http://roadnarrows.com)<br>
 All Rights Reserved
 

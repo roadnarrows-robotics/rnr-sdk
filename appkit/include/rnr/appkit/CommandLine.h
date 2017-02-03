@@ -71,6 +71,33 @@
 #include "rnr/appkit/LogBook.h"
 #include "rnr/appkit/ReadLine.h"
 
+
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Doxygen "macros"
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+/*!
+ * \defgroup doc_return_cl doc_return_cl
+ * \{
+\return
+On success, Ok(0) is returned.
+On error, a CommandLine error code (\< 0) is returned.
+See \ref getErroStr() and backtrace() to retrieve or print error(s).
+ * \}
+ *
+ * \defgroup doc_return_ssize doc_return_ssize
+ * \{
+\return
+On success, returns size (count).
+On error, a CommandLine error code (\< 0) is returned.
+See \ref getErroStr() and backtrace() to retrieve or print error(s).
+ * \}
+ */
+
+
+/*!
+ * \brief RoadNarrows Robotics Command
+ */
 namespace rnr
 {
   namespace cmd
@@ -99,8 +126,6 @@ namespace rnr
     /*!
      * \brief Print help for commands.
      *
-     * \todo TODO support one help for multiple forms.
-     *
      * \param cmds        Array of commands.
      * \param uNumOfCmds  Number of commands.
      * \param strCmdName  If not an empty string, the command to print help.
@@ -121,6 +146,7 @@ namespace rnr
     static const char *ArgFloat         = "float";    ///< float (double)
     static const char *ArgQuotedString  = "quoted-string"; ///< "c..."
     static const char *ArgFile          = "file";     ///< file path
+    static const char *ArgRegEx         = "re";       ///< regular expression
   
 
     //--------------------------------------------------------------------------
@@ -134,6 +160,7 @@ namespace rnr
     {
     public:
       std::string m_strValue; ///< token string value
+      // TODO replace m_uLineNum,Pos with m_uStartPos, m_uEndPos
       size_t      m_uLineNum; ///< line number (always 0 if interactive mode)
       size_t      m_uLinePos; ///< start to token value in line position
 
@@ -162,6 +189,11 @@ namespace rnr
        * \return *this
        */
       Token &operator=(const Token &rhs);
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Output Methods and Operators
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
        * \brief Ouput token and location of token in line to stream.
@@ -214,10 +246,11 @@ namespace rnr
         TypeUndef   = 0,  ///< undefined argument type
         TypeLiteral,      ///< literal constant
         TypeWord,         ///< any non-whitespace contiguous character sequence
-        TypeInteger,      ///< integer
-        TypeFloat,        ///< float
+        TypeInteger,      ///< integer (long)
+        TypeFloat,        ///< floating point number (double)
         TypeQuotedString, ///< escape sequence supported "c..." dqouted string
-        TypeFile          ///< file path
+        TypeFile,         ///< file path
+        TypeRegEx         ///< regular expression
       };
   
       /*!
@@ -255,6 +288,11 @@ namespace rnr
        * \return *this
        */
       CmdArgDef &operator=(const CmdArgDef &rhs);
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Attribute Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*
        * \brief Test if argument definition is sufficiently defined.
@@ -262,6 +300,26 @@ namespace rnr
        * \return Returns true or false.
        */
       bool isDefined() const;
+
+      /*!
+       * \brief Get parent command's unique id.
+       *
+       * \return Unique id.
+       */
+      int getParentCmdUid() const
+      {
+        return m_nCmdUid;
+      }
+
+      /*!
+       * \brief Get parent command form's index.
+       *
+       * \return Zero based index.
+       */
+      int getParentFormIndex() const
+      {
+        return m_nFormIndex;
+      }
 
       /*!
        * \brief Get argument's command line index.
@@ -320,6 +378,26 @@ namespace rnr
         return m_uFlags;
       }
 
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Pattern Matching Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Match argument string against argument definition pattern.
+       *
+       * \param strArg      Argument value.
+       * \param bIgnoreCase Do [not] ignore case when applying pattern matching.
+       *
+       * \return Returns true or false.
+       */
+      bool match(const std::string &strArg, bool bIgnoreCase = false) const;
+
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Output Methods and Operators
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
       /*!
        * \brief Insert object into output stream.
        *
@@ -331,16 +409,29 @@ namespace rnr
       friend std::ostream &operator<<(std::ostream    &os,
                                       const CmdArgDef &argdef);
   
+      //
+      // Friends
+      //
       friend class CmdFormDef;
       friend class CmdDef;
       friend class CommandLine;
 
     protected:
-      int         m_nIndex;   ///< argument index
-      std::string m_strName;  ///< argument name
-      ArgType     m_eType;    ///< argument type
-      StringVec   m_values;   ///< argument values
-      unsigned    m_uFlags;   ///< argument modifiers
+      int         m_nCmdUid;    ///< parent command's unique id
+      int         m_nFormIndex; ///< parent command's form index
+      int         m_nIndex;     ///< argument index
+      std::string m_strName;    ///< argument name
+      ArgType     m_eType;      ///< argument type
+      StringVec   m_values;     ///< argument values
+      unsigned    m_uFlags;     ///< argument modifiers
+
+      /*!
+       * \brief Set parent's command and form id's.
+       *
+       * \param nCmdUid     Command unique id.
+       * \param nFormIndex  Zero based form index within command.
+       */
+      void setParent(const int nCmdUid, const int nFormIndex);
 
       /*!
        * \brief Set arguments's command line index.
@@ -376,7 +467,6 @@ namespace rnr
        * \param uFlags  Bit list of flags.
        */
       void orFlags(const unsigned uFlags);
-
     };
   
     //
@@ -422,6 +512,11 @@ namespace rnr
        * \return *this
        */
       CmdFormDef &operator=(const CmdFormDef &rhs);
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Attribute Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*
        * \brief Test if form definition is sufficiently defined.
@@ -431,9 +526,19 @@ namespace rnr
       bool isDefined() const;
 
       /*!
+       * \brief Get parent command's unique id.
+       *
+       * \return Unique id.
+       */
+      int getParentCmdUid() const
+      {
+        return m_nCmdUid;
+      }
+
+      /*!
        * \brief Get forms's index.
        *
-       * \return Zero based index..
+       * \return Zero based index.
        */
       int getIndex() const
       {
@@ -490,6 +595,11 @@ namespace rnr
       {
         return m_nArgcOpt;
       }
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Output Methods and Operators
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
        * \brief Insert object into output stream.
@@ -502,15 +612,26 @@ namespace rnr
       friend std::ostream &operator<<(std::ostream     &os,
                                       const CmdFormDef &formdef);
 
+      //
+      // Friends
+      //
       friend class CmdDef;
       friend class CommandLine;
 
     protected:
+      int         m_nCmdUid;    ///< parent command's unique id
       int         m_nIndex;     ///< forms index
       std::string m_strSyntax;  ///< command extened usage syntax
       ArgDefVec   m_argdefs;    ///< command argument definitions
       int         m_nArgcReq;   ///< number of required arguments
       int         m_nArgcOpt;   ///< number of optional arguments
+
+      /*!
+       * \brief Set parent's command id.
+       *
+       * \param nCmdUid     Command unique id.
+       */
+      void setParent(const int nCmdUid);
 
       /*!
        * \brief Set forms's index.
@@ -589,6 +710,11 @@ namespace rnr
        * \return *this
        */
       CmdDef &operator=(const CmdDef &rhs);
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Attribute Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*
        * \brief Test if command definition is sufficiently defined.
@@ -646,6 +772,9 @@ namespace rnr
        */
       friend std::ostream &operator<<(std::ostream &os, const CmdDef &cmddef);
 
+      //
+      // Friends
+      //
       friend class CommandLine;
 
     protected:
@@ -710,14 +839,6 @@ namespace rnr
       static const int NoUid = -1;  ///< no unique id
 
       /*!
-       * Useful types.
-       */
-      typedef std::map<unsigned, CmdDef>  CmdDefMap;    ///< command map type
-      typedef CmdDefMap::iterator         CmdIter;      ///< cmd iterator type
-      typedef CmdDefMap::const_iterator   CmdConstIter; ///< cmd const iter type
-      typedef StringVec                   PromptStack;  ///< prompt stack type
-
-      /*!
        * \brief Default initialization constructor.
        *
        * \param strName     Name of command set and entry into readline's
@@ -745,6 +866,11 @@ namespace rnr
        * \return Returns true or false.
        */
       bool isDefined() const;
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Command Addition and Compile Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
        * \brief Add command to command line interface.
@@ -766,15 +892,12 @@ namespace rnr
        * \brief Compile all added commands.
        *
        * Compiling essentially parses the command extended usage syntax and
-       * set internal data for:
+       * sets the internal data for:
        *  - readline tab completion
        *  - input to command pattern matching
        *  - first-level command validation
        *
-       *  \return
-       *  On success, OK(0) is returned.
-       *  On error, RC_ERROR(-1) is returned and the error string is set
-       *  appropriately.
+       *  \copydoc doc_return_cl
        */
       virtual int compile();
   
@@ -785,50 +908,124 @@ namespace rnr
        *
        * \param cmddef  Command definition.
        *
-       *  \return
-       *  On success, OK(0) is returned.
-       *  On error, RC_ERROR(-1) is returned and the error string is set
-       *  appropriately.
+       *  \copydoc doc_return_cl
        */
       virtual int compile(CmdDef &cmddef);
   
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Command Line Interface Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  
       /*!
-       * best match
+       * \brief Read an input line stdin and match to best compiled command.
+       *
+       * \param [out] uid   Matched command unique id.
+       * \param [out] argv  Vector of arguments, with argv[0] being the
+       *                    command name.
+       *
+       *  \copydoc doc_return_cl
        */
-      virtual int readCommand(int &uid, StringVec &argv);
+      virtual int readCommand(int &uid, StringVec &argv)
+      {
+        return readCommand(stdin, uid, argv);
+      }
 
-
+      /*!
+       * \brief Read an input line file fp and match to best compiled command.
+       *
+       * \param fp          Input file pointer.
+       * \param [out] uid   Matched command unique id.
+       * \param [out] argv  Vector of arguments, with argv[0] being the
+       *                    command name.
+       *
+       *  \copydoc doc_return_cl
+       */
       virtual int readCommand(FILE *fp, int &uid, StringVec &argv);
   
-      virtual void addToHistory(const StringVec &argv);
-
       /*!
-       * \brief Lexically analyze string to generate a series of tokens.
+       * \brief Add command to history.
        *
-       * Tokens are separated by white space. A double quoted "c..." sequence
-       * of characters generate one token.
+       * \note Only available if readline is available and enabled, and
+       * input is interactive.
        *
-       * \param [in] str      Input string to analyze.
-       * \param [out] tokens  Generated string tokens.
-       *
-       *  \return
-       *  On success, the number of generated tokens is returned.
-       *  On error, RC_ERROR(-1) is returned and the error string is set
-       *  appropriately.
+       * \param argv  Command in argv vector.
        */
-      virtual ssize_t tokenize(const std::string &str, StringVec &tokens);
-
+      virtual void addToHistory(const StringVec &argv);
+  
       /*!
+       * \brief Push prompt string onto stack of prompts. 
+       *
        * If in interactive mode, the user will be prompted with the prompt
        * string found at the top of the prompt stack. If the stack or prompt
        * string is empty, no prompt will be displayed. Any prompt is written
        * to standard output (stdout).
+       *
+       * \param strPrompt   Prompt string.
        */
       void pushPrompt(const std::string &strPrompt);
 
+      /*!
+       * \brief Pop prompt string from stack of prompts. 
+       *
+       * The new top prompt string will be used for user prompting.
+       */
       void popPrompt();
 
+      /*!
+       * \brief Get the current prompt string.
+       *
+       * \return String.
+       */
       const std::string &getPrompt() const;
+
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Input Processing Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Lexically analyze string to generate a series of tokens.
+       *
+       * Tokens are separated by whitespace.
+       *
+       * Each tokens is either:
+       * * A contiguous sequence of non-whitespace characters.
+       * * An escapable sequence of characters delineated by double quotes '"'.
+       *
+       * \verbatim
+       * <token-list>    ::= <token>
+       *                   | <token-list> <token>
+       *
+       * <token>         ::= <word>
+       *                   | <quoted-string>
+       *
+       * <word>          ::= {NONWHITE_CHAR}+
+       *
+       * <qouted-string> ::= '"' {ESCAPABLE_CHAR}* '"'
+       * \endverbatim
+       *
+       * \param [in] strInput Input string to analyze.
+       * \param [out] tokens  Generated string tokens.
+       *
+       *  \copydoc doc_return_ssize
+       */
+      virtual ssize_t tokenize(const std::string &strInput, StringVec &tokens);
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Attribute and Data Access Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Get command's name.
+       *
+       * \return Name string.
+       */
+      const std::string &getName() const
+      {
+        return m_strName;
+      }
 
       /*!
        * \brief Get command with unique id.
@@ -859,21 +1056,27 @@ namespace rnr
       }
 
       /*!
-       * \brief Get command's name.
-       *
-       * \return Name string.
-       */
-      const std::string &getName() const
-      {
-        return m_strName;
-      }
-
-      /*!
-       * \brief Get the most recently set error string.
+       * \brief Get the most recent error.
        *
        * \return Error string.
        */
       const std::string &getErrorStr() const;
+
+      /*!
+       * \brief Insert trace and error log backtrace into output stream.
+       *
+       * \param os    Output stream.
+       * \param bAll  If true, backtrace all of log. Otherwise backtrace to
+       *              last major execution mark.
+       *
+       * \return Reference to output stream.
+       */
+      std::ostream &backtrace(std::ostream &os, bool bAll = false) const;
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Output Methods and Operators
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
        * \brief Insert object into output stream.
@@ -887,7 +1090,7 @@ namespace rnr
   
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-      // Static convenience member functions
+      // Static Convenience Methods
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
@@ -902,6 +1105,17 @@ namespace rnr
        */
       static std::string prettify(const std::string &str);
 
+      /*!
+       * \brief Canonicalization of a string.
+       *
+       * \note The name c14n is an cute abbreviation where 14 represents the
+       * number of letters between the 'c' and 'n' in the word
+       * "canonicalization".
+       *
+       * \param tokens  String tokens to canonicalize.
+       *
+       * \return Return string holding canonical form.
+       */
       static std::string c14n(const StringVec &tokens);
 
       /*!
@@ -925,18 +1139,25 @@ namespace rnr
        static int strToDouble(const std::string &str, double &val);
 
     protected:
+      /*!
+       * Useful types.
+       */
+      typedef std::map<unsigned, CmdDef>  CmdDefMap;    ///< command map type
+      typedef CmdDefMap::iterator         CmdIter;      ///< cmd iterator type
+      typedef CmdDefMap::const_iterator   CmdConstIter; ///< cmd const iter type
+      typedef StringVec                   PromptStack;  ///< prompt stack type
+
       std::string m_strName;      ///< name of this command line
       bool        m_bIgnoreCase;  ///< do [not] ignore case on commands
-      PromptStack m_prompts;      ///< stack of prompt strings
       int         m_nUidCnt;      ///< unique id counter
-      CmdDefMap   m_cmddefs;      ///< map of added command definitions
       bool        m_bIsCompiled;  ///< has [not] been successfully compiled
+      CmdDefMap   m_cmddefs;      ///< map of added command definitions
+      PromptStack m_prompts;      ///< stack of prompt strings
       ReadLine    m_readline;     ///< readline interface
-      LogBook     m_errlog;       ///< error log
-      std::string m_strError;     ///< error string
+      LogBook     m_log;          ///< trace and error log
 
       /*!
-       * \brief Get command with unique id.
+       * \brief Get command with the given unique id.
        *
        * \param uid   Command unique id.
        *
@@ -945,14 +1166,26 @@ namespace rnr
       CmdDef &cmdAt(const int uid);
 
       /*!
-       * \brief Get command with name.
+       * \brief Get command with the given name.
        *
        * \param strName Command name.
        *
        * \return Command definition reference.
        */
       CmdDef &cmdAt(const std::string &strName);
+  
 
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Lexical Analyzer Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Extract command name from extended usage syntax 
+       *
+       * \param strSyntax   Syntax string.
+       *
+       * \return Comamnd name (argv0).
+       */
       std::string extractArgv0(const std::string &strSyntax);
 
       /*!
@@ -961,15 +1194,13 @@ namespace rnr
        *
        * Tokens are separated by either whitespace or syntax special characters.
        *
-       * \param [in] str      Input string to analyze.
-       * \param [out] tokens  Generated tokens.
+       * \param [in] strSyntax  Input string to analyze.
+       * \param [out] tokens    Generated tokens.
        *
-       *  \return
-       *  On success, the number of generated tokens is returned.
-       *  On error, RC_ERROR(-1) is returned and the error string is set
-       *  appropriately.
+       *  \copydoc doc_return_ssize
        */
-      virtual ssize_t tokenizeSyntax(const std::string &str, StringVec &tokens);
+      virtual ssize_t tokenizeSyntax(const std::string &strSyntax,
+                                     StringVec         &tokens);
 
       /*!
        * \brief Syntax word lexical analyzer.
@@ -1026,6 +1257,11 @@ namespace rnr
        * \param [in,out] tokens Vector of lexical tokens.
        */
       void pushToken(std::string &tok, StringVec &tokens);
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Extended Usage Syntax Parsing Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       
       /*!
        * \brief Parse command syntax.
@@ -1035,7 +1271,7 @@ namespace rnr
        * validation.
        *
        * The parseSyntax() function [in]directly calls the CommandLine::parse
-       * family of member functions. Each function takes, at a minimum, three
+       * family of member functions. Each function takes, at a minimum, four
        * parameters:
        *  Parameter | Description
        *  --------- | -----------
@@ -1050,15 +1286,14 @@ namespace rnr
        *
        * \par Syntax:
        * \verbatim
-       * <command> ::= <literal-arg> [<required-arg-list>] [<optional-arg-list>]
+       * <command> ::= <argv0> [<required-arg-list>] [<optional-arg-list>]
        * \endverbatim
        *
        * \param [in,out] cmddef An added command object.
        * \param [in,out] form   Command form definition. 
        * \param [in] tokens     Lexical tokens generated from the syntax usage.
        *
-       * \return Returns OK(0) if the parse succeeded. Returns RC_ERROR(-1) on
-       * failure.
+       *  \copydoc doc_return_cl
        */
       virtual int parseSyntax(CmdDef          &cmddef,
                               CmdFormDef      &form,
@@ -1348,46 +1583,123 @@ namespace rnr
                   const StringVec   &tokens,
                   const size_t      pos);
       
+      /*!
+       * \brief Test if string has valid identifier syntax.
+       *
+       * \param [in] str    String to test.
+       *
+       * \return Returns true or false.
+       */
       bool tokIdentifier(const std::string &str);
+  
 
-      int processCommand(std::string &strLine, int &uid, StringVec &argv);
-
-      int matchCommand(int &uid, StringVec &argv);
-
-      int validateCommand(const CmdDef &cmddef, StringVec &argv);
-
-      int validateCommand(const CmdDef          &cmddef,
-                          const CmdFormDef      &form,
-                          StringVec             &argv,
-                          double                &fFitness);
-
-      int validateArgLiteral(const CmdDef      &cmddef,
-                             const CmdArgDef   &argdef,
-                             const std::string &strValue);
-
-      int validateArgInteger(const CmdDef      &cmddef,
-                             const CmdArgDef   &argdef,
-                             const std::string &strValue);
-
-      int validateArgFloat(const CmdDef      &cmddef,
-                           const CmdArgDef   &argdef,
-                           const std::string &strValue);
-
-      int checkReadResult();
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Command Line Interface Support Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
-       * \brief
+       * \brief Process a line of input.
+       *
+       * The line is tokenized and matched to the command with the best fit.
+       *
+       * \param [in] strLine  Line of input.
+       * \param [out] uid     Best matched command unique id.
+       * \param [out] argv    Vector of arguments.
+       *
+       *  \copydoc doc_return_cl
        */
-      virtual int buildReadLineGenerator();
+      int processInput(const std::string &strLine, int &uid, StringVec &argv);
 
-      static char *rlGeneratorWrapper(std::string &strText,
-                                      int         nState,
-                                      std::string &strContext,
-                                      void        *pAppArg);
+      /*!
+       * \brief Match best command against input line argument list.
+       *
+       * \param [out] uid     Best matched command unique id.
+       * \param [in] argv     Vector of arguments.
+       *
+       *  \copydoc doc_return_cl
+       */
+      int matchCommand(int &uid, const StringVec &argv);
 
-      virtual char *rlGenerator(std::string &strText,
-                                int         nState,
-                                std::string &strContext);
+      /*!
+       * \brief Match best command form against input line argument list.
+       *
+       * \param [in] cmddef   Compiled command definition.
+       * \param [in] argv     Vector of arguments.
+       *
+       *  \copydoc doc_return_cl
+       */
+      int matchCommand(const CmdDef &cmddef, const StringVec &argv);
+
+      /*!
+       * \brief Match command form against input line argument list.
+       *
+       * \param [in] cmddef     Compiled command definition.
+       * \param [in] form       Compiled command form definition.
+       * \param [in] argv       Vector of arguments.
+       * \param [out] fFitness  Fitness of match [0.0 - 1.0].
+       *
+       *  \copydoc doc_return_cl
+       */
+      int matchCommandForm(const CmdDef     &cmddef,
+                           const CmdFormDef &form,
+                           const StringVec  &argv,
+                           double           &fFitness);
+
+      /*!
+       * \brief Check read input result.
+       *
+       *  \copydoc doc_return_cl
+       */
+      int checkReadResult();
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // ReadLine Generator Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Perform any necessary pre-processing to prepare for command line
+       * TAB completion.
+       *
+       * \note Nothing is needed for the CommandLine base class.
+       *
+       *  \copydoc doc_return_cl
+       */
+      virtual int rlBuildReadLineGenerator();
+
+      /*!
+       *
+       * See \ref ReadLine::AltAppGenFunc for description of a ReadLine
+       * generator.
+       *
+       * \param [out] uFlags  TAB completion modifier flags.
+       */
+      static const std::string rlGeneratorWrapper(const std::string &strText,
+                                                  int               nIndex,
+                                                  const std::string &strContext,
+                                                  int               nStart,
+                                                  int               nEnd,
+                                                  unsigned          &uFlags,
+                                                  void              *pAppArg);
+
+      virtual const std::string rlGenerator(const std::string &strText,
+                                            int               nIndex,
+                                            const std::string &strContext,
+                                            int               nStart,
+                                            int               nEnd,
+                                            unsigned          &uFlags);
+
+      void rlArgDefs(const std::string       &strSubtext,
+                     std::vector<CmdArgDef*> &argdefs);
+
+      void rlTabList(const std:: string      &strText,
+                     std::vector<CmdArgDef*> &argdefs,
+                     StringVec               &tabList,
+                     unsigned                &uFlags);
+
+
+      bool rlEq(const std::string &strCandidate,
+                        const std::string &strText);
 
     }; // class CommandLine
   

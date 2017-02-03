@@ -148,8 +148,6 @@ namespace rnr
  */
 ReadLine *ReadLine::ThisObj = NULL;
 
-
-
 ReadLine::ReadLine(const string strName,
                    const string strPrompt,
                    bool         bUseRlLib) :
@@ -167,10 +165,11 @@ ReadLine::ReadLine(const string strName,
   // limitation of readline library which does not provide context feedback
   ThisObj = this;
 
-  m_bEoF      = false;
-  m_bFError   = false;
-  m_fnAppGen  = NULL;
-  m_pAppArg   = NULL;
+  m_bEoF        = false;
+  m_bFError     = false;
+  m_fnAppGen    = NULL;
+  m_fnAltAppGen = NULL;
+  m_pAppArg     = NULL;
 
 #ifdef HAVE_READLINE
 
@@ -185,20 +184,29 @@ ReadLine::ReadLine(const string strName,
 
 ReadLine::~ReadLine()
 {
-  //fprintf(stderr, "rdk: %s %s\n", __func__, m_strName.c_str());
 }
 
-void ReadLine::registerGenerator(ReadLineGenFunc   fnAppGen,
-                                 void              *pAppArg)
+void ReadLine::registerGenerator(AppGenFunc fnAppGen, void *pAppArg)
 {
-  m_fnAppGen  = fnAppGen;
-  m_pAppArg   = pAppArg;
+  m_fnAppGen    = fnAppGen;
+  m_fnAltAppGen = NULL;
+  m_pAppArg     = pAppArg;
+}
+
+void ReadLine::registerAltGenerator(AltAppGenFunc fnAltAppGen, void *pAppArg)
+{
+  m_fnAppGen    = NULL;
+  m_fnAltAppGen = fnAltAppGen;
+  m_pAppArg     = pAppArg;
 }
 
 void ReadLine::unregisterGenerator()
 {
-  m_fnAppGen  = NULL;
-  m_pAppArg   = NULL;
+  m_fnAppGen    = NULL;
+  m_fnAltAppGen = NULL;
+  m_pAppArg     = NULL;
+
+  rl_attempted_completion_over = 0;
 }
 
 string &ReadLine::rlreadLine()
@@ -215,7 +223,7 @@ string &ReadLine::rlreadLine()
     if( sLine != NULL )
     {
       m_strLine = sLine;
-      trim(m_strLine);
+      //trim(m_strLine);
       free(sLine);
     }
 
@@ -341,7 +349,8 @@ void ReadLine::setStreamStatus(FILE *fp)
 
 char *ReadLine::dupstr(const char *s)
 {
-  char *t = new char[strlen(s)+1];
+  size_t  size = sizeof(char) * (strlen(s) + 1);
+  char *t = (char *)malloc(size);
   strcpy(t, s);
   return t;
 }
@@ -364,23 +373,57 @@ string ReadLine::c14n(const string &str, size_t uLen)
   trim(strc14n);
 
   // convert multiple whitespace sequences to a single blank
-  // TODO need double quote processing
-#if 0 // RDK
   if( strc14n.length() != 0 )
   {
     while( (pos = strc14n.find("  ")) != strc14n.npos )
     {
-      str = strc14n.replace(pos, 2, " ");
+      strc14n = strc14n.replace(pos, 2, " ");
     }
   }
 
   //cout << "  (" << str << ")" << endl;
-#endif // RDK
 
   return strc14n;
 }
 
-int ReadLine::tokenize(char *s, char *tokv[], size_t tokmax)
+size_t ReadLine::tokenize(const string &str, vector<string> &tokens)
+{
+  size_t    i, len;
+  string    tok;
+
+  tokens.clear();
+
+  len = str.length();
+
+  for(i = 0; i < len; )
+  {
+    // find start of the next token
+    while( (i < len) && isspace((int)str[i]) )
+    {
+      ++i;
+    }
+
+    // no more tokens
+    if( i >= len ) 
+    {
+      break;
+    }
+
+    tok.clear();
+
+    // find end of word
+    while( (i < len) && !isspace((int)str[i]) )
+    {
+      tok.push_back(str[i++]);
+    }
+
+    tokens.push_back(tok);
+  }
+
+  return tokens.size();
+}
+
+size_t ReadLine::tokenize(char *s, char *tokv[], size_t tokmax)
 {
   int       tokc = 0;
 
@@ -417,7 +460,7 @@ int ReadLine::tokenize(char *s, char *tokv[], size_t tokmax)
     *s++ = 0;
   }
 
-  return tokc;
+  return (size_t)tokc;
 }
 
 int ReadLine::wc(const char *s)
@@ -458,11 +501,88 @@ char **ReadLine::completionWrapper(const char *sText, int nStart, int nEnd)
 char **ReadLine::completion(const char *sText, int nStart, int nEnd)
 {
 #ifdef HAVE_READLINE
-  return rl_completion_matches(sText, generatorWrapper);
+  if( m_fnAltAppGen != NULL )
+  {
+    return altCompletion(sText, nStart, nEnd);
+  }
+  else
+  {
+    return rl_completion_matches(sText, generatorWrapper);
+  }
 
 #else
   return NULL;
 #endif // HAVE_READLINE
+}
+
+char **ReadLine::altCompletion(const string strText, int nStart, int nEnd)
+{
+  string          strContext(rl_line_buffer);
+  int             nIndex;
+  unsigned        uFlags;
+  string          strMatch;
+  vector<string>  matchList;
+  size_t          i;
+  char            **tabList;
+
+  // default is filename TAB completion
+  rl_attempted_completion_over = 0;
+
+  // no flags
+  uFlags = 0;
+
+  for(nIndex = 0; ; ++nIndex)
+  {
+    strMatch = m_fnAltAppGen(strText, nIndex, strContext, nStart, nEnd, uFlags,
+                             m_pAppArg);
+
+    // end of completion generation
+    if( strMatch.empty() )
+    {
+      if( uFlags & FlagTabNoFilename )
+      {
+        rl_attempted_completion_over = 1;
+      }
+
+      break;
+    }
+
+    // regular completion
+    else
+    {
+      // Empty string disables default. Undocumented.
+      if( (nIndex == 0) && (uFlags & FlagTabNoDefault) )
+      {
+        matchList.push_back("");
+      }
+      matchList.push_back(strMatch);
+    }
+  }
+
+  // no matches
+  if( matchList.size() == 0 )
+  {
+    return NULL;
+  }
+
+  //
+  // Malloc a tap-completion array.
+  //
+  // Note:  The readlline library frees all entries in this array along with
+  //        the array itself. Undocumented.
+  //
+  i = sizeof(char*) * (matchList.size() + 1);
+
+  tabList = (char**)malloc(i);
+
+  // copy allocated char *'s
+  for(i = 0; i < matchList.size(); ++i)
+  {
+    tabList[i] = dupstr(matchList[i]);
+  }
+  tabList[i] = NULL;
+
+  return tabList;
 }
 
 char *ReadLine::generatorWrapper(const char *sText, int nState)
@@ -476,6 +596,7 @@ char *ReadLine::generatorWrapper(const char *sText, int nState)
   string strText(sText);
   string strContext(rl_line_buffer);
 
+  // trim left and right whitespace
   trim(strContext);
 
   // first time through
@@ -487,5 +608,5 @@ char *ReadLine::generatorWrapper(const char *sText, int nState)
   return ThisObj->m_fnAppGen(strText,
                              nState,
                              strContext,
-                             ThisObj->m_pAppArg );
+                             ThisObj->m_pAppArg);
 }

@@ -576,6 +576,19 @@ const LogBook::Entry &LogBook::operator[](const string &strMark) const
   return entryAt(strMark);
 }
 
+const LogBook::Entry &LogBook::lastEntry() const
+{
+  if( size() > 0 )
+  {
+    return m_book[size()-1];
+  }
+  else
+  {
+    return noentry;
+  }
+}
+
+
 size_t LogBook::getBookMarks(BookMarkList &list, int whence) const
 {
   switch( whence )

@@ -461,6 +461,15 @@ namespace rnr
     const Entry &operator[](const std::string &strMark) const;
 
     /*!
+     * \brief Get the last (latest) log entry.
+     *
+     * \return
+     * If the entry exists, reference to the last log entry is returned. 
+     * Otherwise, a "no entry" entry is returned (test with Entry::empty()).
+     */
+    const Entry &lastEntry() const;
+
+    /*!
      * \brief Get the entry text at the bookmark.
      *
      * \param strMark   Bookmark label.
@@ -504,6 +513,18 @@ namespace rnr
     }
 
     /*!
+     * \brief Get the last (latest) log entry text.
+     *
+     * \return
+     * If the entry exists, reference to the last log entry is returned. 
+     * Otherwise, a "no entry" entry is returned (test with Entry::empty()).
+     */
+    const std::string &lastText() const
+    {
+      return lastEntry().m_strText;
+    }
+
+    /*!
      * \brief Get a sorted list of bookmark labels.
      *
      * If whence is OLDEST, then sort from oldest to newest.
@@ -515,6 +536,18 @@ namespace rnr
      * \return Number of bookmarks in list.
      */
     size_t getBookMarks(BookMarkList &list, int whence) const;
+
+    /*!
+     * \brief Test if bookmark exists in log book.
+     *
+     * \param strMark   Bookmark label.
+     *
+     * \return Returns true or false.
+     */
+    bool hasBookMark(const std::string &strMark) const
+    {
+      return findMark(strMark) != m_book.end();
+    }
 
     /*!
      * \brief Get the name of the log book.
@@ -600,7 +633,7 @@ namespace rnr
     }
 
     /*!
-     * \brief Or-in new flags with the current formatting flags.
+     * \brief Or new flags into the current formatting flags.
      *
      * \param uFlags   Flags to or into bit list of flags.
      *
@@ -609,6 +642,19 @@ namespace rnr
     unsigned orFlags(const unsigned uFlags)
     {
       m_uFlags |= uFlags;
+      return m_uFlags;
+    }
+
+    /*!
+     * \brief Apply one's Complement and And into the current formatting flags.
+     *
+     * \param uFlags   Flags to unset.
+     *
+     * \return New bit list of or'ed flags.
+     */
+    unsigned compAndFlags(const unsigned uFlags)
+    {
+      m_uFlags &= ~uFlags;
       return m_uFlags;
     }
 

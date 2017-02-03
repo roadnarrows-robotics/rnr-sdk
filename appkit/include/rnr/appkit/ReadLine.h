@@ -14,7 +14,7 @@
  *
  * ReadLine provides a wrapper around the readline command-line library.
  *
- * \note Define HAVE_READLINE to enable interface with libreadline.
+ * \note Define HAVE_READLINE to compile interface with libreadline.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
@@ -78,28 +78,15 @@
 #endif // HAVE_READLINE
 
 
+/*!
+ * \brief RoadNarrows Robotics Command
+ */
 namespace rnr
 {
   namespace cmd
   {
-    /*!
-     * \brief Application-specific tab completion generator function type.
-     *
-     * \param strText     Partial text string to complete.
-     * \param nState      Generator state. If FIRST,then initialize any statics.
-     * \param strContext  Generator context (i.e. canonical path).
-     * \param pAppArg     Generator function optional argument.
-     *
-     * \return
-     * If a first/next match is made, return allocated completed match.\n
-     * Otherwise return NULL.
-     */
-    typedef char *(*ReadLineGenFunc)(std::string &strText,
-                                     int         nState,
-                                     std::string &strContext,
-                                     void       *pAppArg);
-    
-    
+    static const char *RlTabEnd = ""; ///< no more matches value (empty string)
+
     // -------------------------------------------------------------------------
     // Class ReadLine
     // -------------------------------------------------------------------------
@@ -119,8 +106,109 @@ namespace rnr
     class ReadLine
     {
     public:
-      static const int  FIRST   =  0;   ///< first state
-      static const int  NOT_REG = -1;   ///< not registered return value
+      static const int  FIRST = 0;  ///< first state
+    
+      /*!
+       * \brief ReadLine flag modifiers.
+       */
+      enum RlFlags
+      {
+        FlagTabNoDefault  = 0x0001, ///< no default TAB completion
+        FlagTabNoFilename = 0x0002  ///< no filename TAB completion
+      };
+
+      /*!
+       * \brief Application-specific TAB completion generator function type.
+       *
+       * The generator is called multiple times on a TAB completion event.
+       * The call is made through the readline library rl_completion_matches()
+       * C function. On the first call, nState equals ReadLine::FIRST. This
+       * allows for any necessary initaliazation of (static) application
+       * specific state variables. On subsequent calls, nState \h_gt 0. 
+       *
+       * For each matched candidate, a malloc'd string must be returned. The
+       * readline library automatically frees the memory allocation after use.
+       *
+       * When all candidates are exhausted, return NULL to signal no more
+       * matches to the readline library calling function.
+       *
+       * ReadLine Support Methods:
+       *  - ReadLine::dupstr() - string allocation.
+       *  - ReadLine::strip() - strips leading and trailing whitespace.
+       *  - ReadLine::tokenize() - simple, whitespace token generator.
+       *  - ReadLine::wc() count whitespace separated words.
+       *  - ReadLine::c14n() - simple cannicalization.
+       *
+       * \param strText     Partial text string to complete.
+       * \param nState      Generator state. If FIRST(0), initialize any
+       *                    state statics.
+       * \param strContext  Generator context (i.e. stripped input buffer).
+       * \param pAppArg     Generator function optional argument.
+       *
+       * \return
+       * If a first/next match is made, return allocated completed match.\n
+       * Otherwise return NULL.
+       */
+      typedef char *(*AppGenFunc)(const std::string  &strText,
+                                  int                 nState,
+                                  const std::string  &strContext,
+                                  void               *pAppArg);
+    
+      /*!
+       * \brief Alternative application-specific TAB completion generator
+       * function type.
+       *
+       * This is a somewhat more powerful TAB completion function that remains
+       * entirely in C++. The calling function is ReadLine::completion()
+       * which, in turn, is called by the readline library through the 
+       * set rl_attempted_completion_function variable.
+       *
+       * The generator is called multiple times on a TAB completion event.
+       * On the first call, nIndex is equal to 0. Subsequent calls, nIndex is
+       * incremented by one. The function may safely use this index to sequence
+       * through any application-specific data.
+       *
+       * Return Values:
+       * -# match: Any non-empty, non-whitespace string.
+       * -# empty: An empty string "" terminates TAB completion generation.
+       *           RlTabEnd is equivalent to the empty string.
+       *
+       * Tab Modifier Flags:
+       *  - FlagTabNoDefault:
+       *    If this flag is set at index 0 and a match is returned, then
+       *    a "no default" readline library value will be set. Otherwise the
+       *    this first match  is the default.
+       *  - FlagTabNoFilename:
+       *    If this flag is set at the end of TAB completion (an empty string
+       *    is returned), then readline library default filename completion
+       *    action is disabled. (See rl_attempted_completion_over.)
+       *    The readline library default action is only invoked if no strings
+       *    are generated.
+       *
+       * Flags only apply to the current TAB completion event and are reset
+       * to defaults there after.
+       *
+       * ReadLine Support Methods: \ref See AppGenFunc.
+       *
+       * \param strText       Partial text string to complete.
+       * \param nIndex        Match candidate index starting from 0.
+       * \param strContext    Generator context (i.e. input buffer).
+       * \param nStart        Starting index in context of text.
+       * \param nEnd          Ending index in context of the position
+       *                      immediately after the end of text. If nStart
+       *                      equals nEnd, then empty text.
+       * \param [out] uFlags  TAB completion modifier flags.
+       * \param pAppArg       Generator function optional argument.
+       *
+       * \return String.
+       */
+      typedef const std::string (*AltAppGenFunc)(const std::string &strText,
+                                                 int                nIndex,
+                                                 const std::string &strContext,
+                                                 int                nStart,
+                                                 int                nEnd,
+                                                 unsigned          &uFlags,
+                                                 void              *pAppArg);
     
       /*!
        * \brief Default initialization constructor.
@@ -130,8 +218,8 @@ namespace rnr
        * \param strPrompt Command line primary prompt string. Prompting occurs
        *                  only in interactive mode.
        * \param bUseRlLib Use the readline library. Note that readline must
-       *                  be available and in interactive mode. Otherwise a
-       *                  simple command-line interface will be used.
+       *                  be available and the input is interactive. Otherwise
+       *                  a simple command-line interface will be used.
        */
       ReadLine(const std::string strName    = "",
                const std::string strPrompt  = "> ",
@@ -145,18 +233,26 @@ namespace rnr
       /*!
        * \brief Register application-specific tab-completion generator.
        *
-       * \param strRegEx  Regular expression applied to current readline buffer
-       *                  state.
+       * The registered function will be called through the readline library
+       * rl_completion_matches() C function.
+       *
        * \param fnAppGen  Application-specific generator function.
        * \param pAppArg   Optional application argument generator function.
-       *
-       * \return
-       * On successful registration, a unique id \h_ge 0 is returned.\n
-       * On regular expression evalution failure, the generator is not registered
-       * and ReadLine::NOT_REG is returned.
        */
-      void registerGenerator(ReadLineGenFunc fnAppGen, void *pAppArg);
+      void registerGenerator(AppGenFunc fnAppGen, void *pAppArg);
     
+      /*!
+       * \brief Register alternate application-specific tab-completion
+       * generator.
+       *
+       * The registered function will be called through the
+       * ReadLine::completion C++ method.
+       *
+       * \param fnAltAppGen Alt application-specific generator function.
+       * \param pAppArg     Optional application argument generator function.
+       */
+      void registerAltGenerator(AltAppGenFunc fnAltAppGen, void *pAppArg);
+
       /*!
        * \brief Unregister application-specific generator associated with path.
        */
@@ -165,19 +261,19 @@ namespace rnr
       /*!
        * \brief Interactively read a line of input from standard input (stdin).
        *
-       * The readline library call readline() will be used iff:
+       * The readline library function readline() will be called iff:
        *  - The readline library is available (HAVE_READLINE).
        *  - The application enabled the ReadLine instance to use the readline.
        *  - library (bUseRlLib).
-       *  - stdin is interactive (i.e. bound to a terminal or tty).
+       *  - The input stdin is interactive (i.e. bound to a terminal or tty).
        *
        * Otherwise, ireadLine() is used.
        *
-       * The readline() library call enables tab completion, line editing, and
+       * The readline() library call enables TAB completion, line editing, and
        * history recording/recall.
        *
-       * If in interactive mode, the user will be prompted with the currently
-       * set prompt string. Any prompt is written to standard output (stdout).
+       * If in interactive mode, the user will be prompted with the current
+       * prompt string. Any prompt is written to standard output (stdout).
        *
        * \return
        * Returns the string of the line read, stripped of leading and trailing
@@ -261,11 +357,19 @@ namespace rnr
        */
       void addToHistory(const std::string &strLine);
     
+      /*!
+       * \brief Get this instance of readline name.
+       */
       const std::string &getName() const
       {
         return m_strName;
       }
 
+      /*!
+       * \brief Test if have readline library.
+       *
+       * \return Returns true or false.
+       */
       bool haveRlLib() const
       {
 #ifdef HAVE_READLINE
@@ -275,28 +379,63 @@ namespace rnr
 #endif // HAVE_READLINE
       }
 
+      /*!
+       * \brief Test if the readline library is enabled.
+       *
+       * \return Returns true or false.
+       */
       bool useRlLib() const
       {
         return m_bUseRlLib;
       }
 
+      /*!
+       * \brief Test if input file pointer is interactive.
+       *
+       * A file input stream is interactive if it is bound to a terminal or
+       * tty.
+       *
+       * \return Returns true or false.
+       */
       bool isInteractive(FILE *fp);
     
+      /*!
+       * \brief Set the prompt string.
+       *
+       * \param strPrompt   New prompt string.
+       */
       void setPrompt(const std::string &strPrompt)
       {
         m_strPrompt = strPrompt;
       }
 
+      /*!
+       * \brief Get the current prompt string.
+       *
+       * \return String.
+       */
       const std::string &getPrompt() const
       {
         return m_strPrompt;
       }
 
+      /*!
+       * \brief Test if the last read operation resulted in an end-of-file 
+       * condition.
+       *
+       * \return Returns true or false.
+       */
       bool isEoF() const
       {
         return m_bEoF;
       }
 
+      /*!
+       * \brief Test if the last read operation resulted in an I/O error
+       * condition.
+       *
+       * \return Returns true or false.
+       */
       bool isFError() const
       {
         return m_bFError;
@@ -310,12 +449,14 @@ namespace rnr
       const std::string &getErrorStr() const;
 
     
-      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // Built-In Tab Completion Generators
-      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       
       /*!
-       * \brief File name tab completion generator.
+       * \brief Filename TAB completion generator.
+       *
+       * A completion generator for filenames.
        *
        * \param sText     Partial text string to complete.
        * \param nState    Generator state. If FIRST,then initialize any statics.
@@ -324,7 +465,7 @@ namespace rnr
        * If a first/next match is made, return allocated completed match.\n
        * Otherwise return NULL.
        */
-      static char *FileCompletionGenerator(const char *sText, int nState)
+      static char *filenameCompletionGenerator(const char *sText, int nState)
       {
     #ifdef HAVE_READLINE
         return rl_filename_completion_function(sText, nState);
@@ -334,7 +475,9 @@ namespace rnr
       }
     
       /*!
-       * \brief User name tab completion generator.
+       * \brief Username TAB completion generator.
+       *
+       * A completion generator for usernames.
        *
        * \param sText     Partial text string to complete.
        * \param nState    Generator state. If FIRST,then initialize any statics.
@@ -343,7 +486,7 @@ namespace rnr
        * If a first/next match is made, return allocated completed match.\n
        * Otherwise return NULL.
        */
-      static char *UserCompletionGenerator(const char *sText, int nState)
+      static char *usernameCompletionGenerator(const char *sText, int nState)
       {
     #ifdef HAVE_READLINE
         return rl_username_completion_function(sText, nState);
@@ -352,17 +495,17 @@ namespace rnr
     #endif // HAVE_READLINE
       }
     
-    
-      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // Utilities
-      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
     
       /*!
        * \brief Duplicate string.
        *
        * \param str   String to dup.
        *
-       * \return Duplicated, allocated char *.
+       * \return Duplicated, allocated char*.
        */
       static char *dupstr(const std::string &str)
       {
@@ -379,7 +522,7 @@ namespace rnr
       static char *dupstr(const char *s);
     
       /*!
-       * \brief Strip copy of string of leading and trailing white space.
+       * \brief Strip a copy of the string of leading and trailing white space.
        *
        * \param [in] str    Input string to strip.
        *
@@ -388,7 +531,11 @@ namespace rnr
       static std::string strip(const std::string &str);
     
       /*!
-       * \brief Canonicalization of a string.
+       * \brief Simple canonicalization of a string.
+       *
+       * The string is canonical when:
+       *   - leading and trailing whitespace is stripped
+       *   - only single space between words
        *
        * \note c14n is an cute abbreviation where 14 represents the number of
        * letters between the 'c' and 'n' in the word "canonicalization".
@@ -401,16 +548,36 @@ namespace rnr
       static std::string c14n(const std::string &str, size_t uLen);
     
       /*!
-       * \brief Tokenize input.
+       * \brief Tokenize the given string.
        *
-       * \param [in,out] s  Input string to tokenize.
-       * \param [out] tokv  Array of tokens (pointer to locations in s).
-       * \param tokmax      Maximum number of tokens.
+       * Tokens are contiguous non-whitespace character sequences, separated by
+       * either the start-of-string, whitespace, or the end-of-string.
+       *
+       * \param [in] str      Input string to generate tokens.
+       * \param [out] tokens  Vector of tokens.
        *
        * \return Number of tokens.
        */
-      static int tokenize(char *s, char *tokv[], size_t tokmax);
+      static size_t tokenize(const std::string        &str,
+                             std::vector<std::string> &tokens);
     
+      /*!
+       * \brief In-place string tokenizer.
+       *
+       * Tokens are contiguous non-whitespace character sequences, separated by
+       * either the start-of-string, whitespace, or the end-of-string.
+       *
+       * The '\0' character is inserted at the end of each detected word in s.
+       * No memory allocation is used.
+       *
+       * \param [in,out] s  Input/output null-terminated string to tokenize.
+       * \param [out] tokv  Array of tokens (pointer to locations in s).
+       * \param [in] tokmax Maximum number of tokens.
+       *
+       * \return Number of tokens.
+       */
+      size_t tokenize(char *s, char *tokv[], size_t tokmax);
+
       /*!
        * \brief Count the words in the string.
        *
@@ -426,32 +593,30 @@ namespace rnr
       /*!
        * \brief Count the words in the string.
        *
-       * \param s   Null terminate string to count.
+       * \param s   Null-terminated string to count.
        *
        * \return Number of words.
        */
       static int wc(const char *s);
     
     protected:
-      static ReadLine  *ThisObj;   ///< static pointer to this single instance
+      static ReadLine *ThisObj;     ///< static pointer to this single instance
     
-      std::string       m_strName;    ///< readline name
-      std::string       m_strPrompt;  ///< prompt string
-      bool              m_bUseRlLib;  ///< [do not] use readline library
-      std::string       m_strLine;    ///< last read line
-      bool              m_bEoF;       ///< last file op end of file condition
-      bool              m_bFError;    ///< last file op file error condition
-      std::string       m_strError;   ///< error string
-      ReadLineGenFunc   m_fnAppGen;   ///< application-specific generator
-      void             *m_pAppArg;    ///< application-specific argument
+      std::string     m_strName;    ///< readline name
+      std::string     m_strPrompt;  ///< prompt string
+      bool            m_bUseRlLib;  ///< [do not] use readline library
+      std::string     m_strLine;    ///< last read line
+      bool            m_bEoF;       ///< last file op end of file condition
+      bool            m_bFError;    ///< last file op file error condition
+      std::string     m_strError;   ///< error string
+      AppGenFunc      m_fnAppGen;   ///< application-specific generator
+      AltAppGenFunc   m_fnAltAppGen;///< alternate app-specific generator
+      void           *m_pAppArg;    ///< application-specific argument
 
       /*! 
        * \brief Command completion callback function wrapper.
-       *
-       * Attempt to complete on the contents of text. The start and end bound the
-       * region of rl_line_buffer that contains the word to complete.  Text is
-       * the word to complete.  We can use the entire contents of rl_line_buffer
-       * in case we want to do some simple parsing.
+       * 
+       * Wraps method ReadLine::completion().
        *
        * \param sText   Text string to complete as a command.
        * \param nStart  Start index of text string in line.
@@ -464,6 +629,11 @@ namespace rnr
       /*! 
        * \brief Command completion callback function.
        *
+       * Attempt to complete on the contents of text. The start and end bound
+       * the region of rl_line_buffer that contains the word to complete. Text
+       * is the word to complete.  We can use the entire contents of
+       * rl_line_buffer to provide context.
+       *
        * \param sText   Text string to complete as a command.
        * \param nStart  Start index of text string in line.
        * \param nEnd    End index of text string in line.
@@ -472,19 +642,46 @@ namespace rnr
        */
       char **completion(const char *sText, int nStart, int nEnd);
     
+      /*! 
+       * \brief Command completion callback function.
+       *
+       * If an alternative application-specific generator is registered, this
+       * method is used to provide the requisite C++ interface.
+       *
+       * Attempt to complete on the contents of text. The start and end bound
+       * the region of rl_line_buffer that contains the word to complete. Text
+       * is the word to complete.  We can use the entire contents of
+       * rl_line_buffer to provide context.
+       *
+       * This method also provides the indexing for the registered generator.
+       *
+       * \param sText   Text string to complete as a command.
+       * \param nStart  Start index of text string in line.
+       * \param nEnd    End index of text string in line.
+       *  
+       * \return Array of matches, NULL if none.
+       */
+      char **altCompletion(const std::string strText, int nStart, int nEnd);
+
       /*!
        * \brief Generator wrapper.
        *
-       * Calls the matched, registered application-specific generator.
+       * Calls the registered application-specific generator.
        *
        * \param sText     Partial text string to complete.
        * \param nState    Generator state. If FIRST,then initialize any statics.
        *
-       * \return If a first/next match is made, return allocated completed match.\n
+       * \return
+       * If a first/next match is made, return allocated completed match.\n
        * Otherwise return NULL.
        */
       static char *generatorWrapper(const char *sText, int nState);
 
+      /*!
+       * \brief Set stream status for the last read operation.
+       *
+       * \param fp  Input file pointer.
+       */
       void setStreamStatus(FILE *fp);
     };
 

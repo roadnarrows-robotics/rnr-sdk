@@ -292,7 +292,7 @@ static void showAsciiArt(const char *art[])
 {
   for(int i = 0; art[i] != NULL; ++i)
   {
-    printf("%s\n", art[i]);
+    cout << art[i] << endl;
   }
 }
 
@@ -347,6 +347,11 @@ static void showAsciiArt(const char *art0[],
     }
   }
 
+  char    ofill  = cout.fill();
+  size_t  owidth = cout.width();
+
+  cout.fill(' ');
+
   // show
   for(int line = 0; line < maxlinecnt; ++line)
   {
@@ -355,17 +360,20 @@ static void showAsciiArt(const char *art0[],
       if( linecnt[i] >= maxlinecnt-line )
       {
         j = linecnt[i] - (maxlinecnt - line);
-        //printf("line %d, art %d j %d\n", line, i, j);
+        // cout << "line " << line << ", art " << i << " j " << j << endl;
         len = strlen(pieces[i][j]);
-        printf("%s%*s", pieces[i][j], maxlen[i]-len+1, "");
+        cout << pieces[i][j] << setw(maxlen[i]-len+1) << "";
       }
       else
       {
-        printf("%*s", maxlen[i], "");
+        cout << setw(maxlen[i]) << "";
       }
     }
-    printf("\n");
+    cout << endl;
   }
+
+  cout.fill(ofill);
+  cout.width(owidth);
 }
 
 enum Activity
@@ -482,7 +490,7 @@ CmdExec Commands[] =
   { "feed",
     "feed {aardvark | mandrill | numbat} {ants | grubs}\n"
     "feed {mandrill | zebra} carrots\n"
-    "feed <animal> vitamins",
+    "feed <animal:re> vitamins",
     "Feed your pet some nutritious food.",
     NULL,
     execFeedAnimal
@@ -558,7 +566,7 @@ static int execHelp(const StringVec &argv)
 
   if( cnt == 0 )
   {
-    printf("Error: No help for command \"%s\"\n", strCmdName.c_str());
+    cout << "Error: No help for command \"" << strCmdName << "\"." << endl;
   }
 
   return OK;
@@ -579,7 +587,8 @@ static int loadCommands(CommandLine &cl)
 
     if( nId == CommandLine::NoUid )
     {
-      fprintf(stderr, "Error: Failed to add command %s\n", Commands[i].m_sName);
+      cerr << "Error: Failed to add command " << Commands[i].m_sName
+        << "." << endl;
       return RC_ERROR;
     }
 
@@ -588,8 +597,10 @@ static int loadCommands(CommandLine &cl)
 
   if( (rc = cl.compile()) != OK )
   {
-    fprintf(stderr, "Error: Compile failed.");
+    cerr << "Error: Compile failed." << endl;
   }
+
+  //cl.backtrace(cerr, true);
 
   return rc;
 }
@@ -606,6 +617,7 @@ static int run(CommandLine &cl)
 
     if( rc == OK )
     {
+      cl.backtrace(cerr);
       if( uid != CommandLine::NoUid )
       {
         rc = Commands[IdToIndexMap[uid]].m_fnExec(argv);
@@ -618,7 +630,8 @@ static int run(CommandLine &cl)
     }
     else
     {
-      printf("Error: %s\n", cl.getErrorStr().c_str());
+      cout << "Error: Bad command. (backtrace):" << endl;
+      cl.backtrace(cout);
     }
   }
 
@@ -645,19 +658,19 @@ int main(int argc, char* argv[])
 
   if( loadCommands(cl) != OK )
   {
-    fprintf(stderr, "Error: Failed to load commands.\n");
+    cerr << "Error: Failed to load commands." << endl;;
     return APP_EC_EXEC;
   }
 
-  //cout << cl << endl;
+  //cerr << cl << endl;
 
   showAsciiArt(AsciiAardvark);
-  printf("%s CommandLine/ReadLine/LogBook Example\n", strClName.c_str());
-  printf("  (enter 'help' for list of commands)\n\n");
+  cout << strClName << " CommandLine/ReadLine/LogBook Example" << endl;
+  cout << "  (enter 'help' for list of commands)" << endl << endl;
 
   if( run(cl) != OK )
   {
-    fprintf(stderr, "Error: Failed to run commands.\n");
+    cerr << "Error: Failed to run commands." << endl;
     return APP_EC_EXEC;
   }
 
