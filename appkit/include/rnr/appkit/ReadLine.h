@@ -113,8 +113,10 @@ namespace rnr
        */
       enum RlFlags
       {
-        FlagTabNoDefault  = 0x0001, ///< no default TAB completion
-        FlagTabNoFilename = 0x0002  ///< no filename TAB completion
+        FlagTabNoMods     = 0x0000, ///< no TAB modifiers
+        FlagTabNoDefault  = 0x0001, ///< no default TAB completion match
+        FlagTabNoFilename = 0x0002, ///< no filename TAB completion attempt
+        FlagTabNoSpace    = 0x0004  ///< no space(' ') after TAB completion
       };
 
       /*!
@@ -139,20 +141,20 @@ namespace rnr
        *  - ReadLine::wc() count whitespace separated words.
        *  - ReadLine::c14n() - simple cannicalization.
        *
+       * \param pAppArg     Generator function argument.
        * \param strText     Partial text string to complete.
        * \param nState      Generator state. If FIRST(0), initialize any
        *                    state statics.
        * \param strContext  Generator context (i.e. stripped input buffer).
-       * \param pAppArg     Generator function optional argument.
        *
        * \return
        * If a first/next match is made, return allocated completed match.\n
        * Otherwise return NULL.
        */
-      typedef char *(*AppGenFunc)(const std::string  &strText,
+      typedef char *(*AppGenFunc)(void               *pAppArg,
+                                  const std::string  &strText,
                                   int                 nState,
-                                  const std::string  &strContext,
-                                  void               *pAppArg);
+                                  const std::string  &strContext);
     
       /*!
        * \brief Alternative application-specific TAB completion generator
@@ -190,6 +192,7 @@ namespace rnr
        *
        * ReadLine Support Methods: \ref See AppGenFunc.
        *
+       * \param pAppArg       Generator function argument.
        * \param strText       Partial text string to complete.
        * \param nIndex        Match candidate index starting from 0.
        * \param strContext    Generator context (i.e. input buffer).
@@ -198,17 +201,16 @@ namespace rnr
        *                      immediately after the end of text. If nStart
        *                      equals nEnd, then empty text.
        * \param [out] uFlags  TAB completion modifier flags.
-       * \param pAppArg       Generator function optional argument.
        *
-       * \return String.
+       * \return Match or empty string.
        */
-      typedef const std::string (*AltAppGenFunc)(const std::string &strText,
+      typedef const std::string (*AltAppGenFunc)(void              *pAppArg,
+                                                 const std::string &strText,
                                                  int                nIndex,
                                                  const std::string &strContext,
                                                  int                nStart,
                                                  int                nEnd,
-                                                 unsigned          &uFlags,
-                                                 void              *pAppArg);
+                                                 unsigned          &uFlags);
     
       /*!
        * \brief Default initialization constructor.
@@ -374,7 +376,7 @@ namespace rnr
       {
 #ifdef HAVE_READLINE
         return true;
-#else
+#else // !HAVE_READLINE
         return false;
 #endif // HAVE_READLINE
       }
@@ -417,6 +419,44 @@ namespace rnr
       const std::string &getPrompt() const
       {
         return m_strPrompt;
+      }
+
+      /*!
+       * \brief Get last read line.
+       *
+       * \return String.
+       */
+      const std::string &getLastRead() const
+      {
+        return m_strLine;
+      }
+
+      /*!
+       * \brief Get the line number of the last read line.
+       *
+       * \return Line number.
+       */
+      size_t getLineNum() const
+      {
+        return m_uLineNum;
+      }
+
+      /*!
+       * \brief Set the current line number.
+       *
+       * \param Line number.
+       */
+      void setLineNum(const size_t uLineNum)
+      {
+        m_uLineNum = uLineNum;
+      }
+
+      /*!
+       * \brief Reset the line number to zero.
+       */
+      void resetLineNum()
+      {
+        m_uLineNum = 0;
       }
 
       /*!
@@ -469,7 +509,7 @@ namespace rnr
       {
     #ifdef HAVE_READLINE
         return rl_filename_completion_function(sText, nState);
-    #else
+    #else // !HAVE_READLINE
         return NULL;
     #endif // HAVE_READLINE
       }
@@ -490,7 +530,7 @@ namespace rnr
       {
     #ifdef HAVE_READLINE
         return rl_username_completion_function(sText, nState);
-    #else
+    #else // !HAVE_READLINE
         return NULL;
     #endif // HAVE_READLINE
       }
@@ -606,6 +646,7 @@ namespace rnr
       std::string     m_strPrompt;  ///< prompt string
       bool            m_bUseRlLib;  ///< [do not] use readline library
       std::string     m_strLine;    ///< last read line
+      size_t          m_uLineNum;   ///< line number
       bool            m_bEoF;       ///< last file op end of file condition
       bool            m_bFError;    ///< last file op file error condition
       std::string     m_strError;   ///< error string
@@ -683,6 +724,11 @@ namespace rnr
        * \param fp  Input file pointer.
        */
       void setStreamStatus(FILE *fp);
+
+      /*!
+       * \brief Clear stream status prior to next read operation.
+       */
+      void clearStreamStatus();
     };
 
   } // namespace cmd

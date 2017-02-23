@@ -102,51 +102,91 @@ namespace rnr
 {
   namespace cmd
   {
+    //--------------------------------------------------------------------------
+    // Convenience 
+    //--------------------------------------------------------------------------
+
     /*!
      * \brief Useful types.
      */
     typedef std::vector<std::string>  StringVec;  ///< vector of strings type
-    typedef int (*CmdExecFunc)(const StringVec&); ///< cmd exec function type
+
+    /*!
+     * \brief Command execution function type, variant 1.
+     *
+     * With this variant, only the command input arguments are provided to the
+     * function.
+     *
+     * The arguments have been validated against the associated extended syntax.
+     *
+     * This function type is provided as a convenience for application
+     * development. It is external to the core CommandLine functionality.
+     *
+     * \param [in] argv Vector of string arguments produced from a successful
+     *                  return from the readCommand() call.
+     *
+     * \return User defined return code.
+     */
+    typedef int (*CmdExec1Func)(const StringVec &argv);
   
     /*!
-     * \brief User available command execution structure.
+     * \brief Command execution function type, variant 2.
+     *
+     * With this variant, the matched command unique id and form index are also
+     * provide, in addition to the input arguments.
+     *
+     * With the uid,iform pair, the CommandLine attribute and conversion
+     * methods are accessable. 
+     *
+     * The arguments have been validated against the associated extended syntax.
+     *
+     * This function type is provided as a convenience for application
+     * development. It is external to the core CommandLine functionality.
+     *
+     * \param [in] uid    Command unique id.
+     * \param [in] iform  Command form index.
+     * \param [in] argv   Vector of string arguments produced from a successful
+     *                    return from the readCommand() call.
+     *
+     * \return User defined return code.
+     */
+    typedef int (*CmdExec2Func)(int uid, int iform, const StringVec &argv);
+
+    /*!
+     * \brief User available command description structure.
      * 
      * This structure is provided as a convenience type for application
      * development. It is external to the core CommandLine functionality.
      */
-    struct CmdExec
+    struct CmdDesc
     {
       const char  *m_sName;       ///< command name
       const char  *m_sSyntax;     ///< parsable command extended usage syntax
       const char  *m_sSynopsis;   ///< short command synopsis
-      const char  *m_sDesc;       ///< long command description
-      CmdExecFunc  m_fnExec;      ///< command execution function
+      const char  *m_sLongDesc;   ///< long command description
     };
   
     /*!
-     * \brief Print help for commands.
+     * \brief Print help for a command.
      *
-     * \param cmds        Array of commands.
-     * \param uNumOfCmds  Number of commands.
-     * \param strCmdName  If not an empty string, the command to print help.
-     *                    Otherwise all commands help is printed.
+     * \param os          Output stream.
+     * \param desc        Command description.
      * \param bLongHelp   Print long or short help.
      */
-    int help(const CmdExec      cmds[],
-             size_t             uNumOfCmds,
-             const std::string  &strCmdName,
-             bool               bLongHelp = true);
+    void help(std::ostream &os, const CmdDesc &desc, bool bLongHelp = true);
 
     /*!
-     * \brief Variable argument types.
+     * \brief Variable argument symbol names.
      */
-    static const char *ArgLiteral       = "literal";  ///< literal constant
-    static const char *ArgWord          = "word";     ///< contiguous [^\s] seq
-    static const char *ArgInteger       = "int";      ///< integer (long)
-    static const char *ArgFloat         = "float";    ///< float (double)
-    static const char *ArgQuotedString  = "quoted-string"; ///< "c..."
-    static const char *ArgFile          = "file";     ///< file path
-    static const char *ArgRegEx         = "re";       ///< regular expression
+    static const char *ArgSymLiteral    = "literal";    ///< literal constant
+    static const char *ArgSymWord       = "word";       ///< non-whitespace seq
+    static const char *ArgSymMultiWord  = "multiword";  ///< any sequence
+    static const char *ArgSymIdentifier = "identifier"; ///< identifier
+    static const char *ArgSymBoolean    = "bool";       ///< boolean (bool)
+    static const char *ArgSymInteger    = "int";        ///< integer (long)
+    static const char *ArgSymFpn        = "fpn";        ///< fpn (double)
+    static const char *ArgSymFile       = "file";       ///< file path
+    static const char *ArgSymRegEx      = "re";         ///< regular expression
   
 
     //--------------------------------------------------------------------------
@@ -159,18 +199,26 @@ namespace rnr
     class Token
     {
     public:
-      std::string m_strValue; ///< token string value
-      // TODO replace m_uLineNum,Pos with m_uStartPos, m_uEndPos
-      size_t      m_uLineNum; ///< line number (always 0 if interactive mode)
-      size_t      m_uLinePos; ///< start to token value in line position
+      std::string m_strValue;   ///< token string value
+      size_t      m_posStart;   ///< line start position of token
+      size_t      m_posEnd;     ///< line end position of token
 
       /*!
-       * \brief Default construtor.
+       * \brief Default constructor.
        */
       Token();
       
       /*!
-       * \brief Copy construtor.
+       * \brief Initialization constructor.
+       *
+       * \param strValue  Token value.
+       * \param posStart  Token start position in line.
+       * \param posEnd    Token end position in line.
+       */
+      Token(const std::string &strValue, size_t posStart, size_t posEnd);
+
+      /*!
+       * \brief Copy constructor.
        *
        * \param src Source object.
        */
@@ -190,6 +238,22 @@ namespace rnr
        */
       Token &operator=(const Token &rhs);
   
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Attribute Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  
+      const std::string &value() const
+      {
+        return m_strValue;
+      }
+
+      void position(size_t &posStart, size_t &posEnd) const
+      {
+        posStart = m_posStart;
+        posEnd   = m_posEnd;
+      }
+
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // Output Methods and Operators
@@ -220,12 +284,195 @@ namespace rnr
        * \return Reference to output stream.
        */
       friend std::ostream &operator<<(std::ostream &os, const Token &tok);
+
+      /*!
+       * \brief Insert object into LogBook pending entry.
+       *
+       * \param log LogBook stream.
+       * \param tok Object to insert.
+       *
+       * \return Reference to LogBook.
+       */
+      friend LogBook &operator<<(LogBook &log, const Token &tok);
     };
 
     //
     // Types
     //
     typedef std::vector<Token> TokenVec;  ///< vector of tokens type
+
+
+    //--------------------------------------------------------------------------
+    // ConvertedArg Class
+    //--------------------------------------------------------------------------
+
+    /*!
+     * \brief Container class holding converted argmument value.
+     */
+    class ConvertedArg
+    {
+    public:
+      /*!
+       * \brief Converted types.
+       */
+      enum CvtType
+      {
+        CvtTypeUndef,       ///< unknown or uninitialized type
+        CvtTypeString,      ///< string type
+        CvtTypeEnum,        ///< index into literal enumeration list
+        CvtTypeBoolean,     ///< boolean type
+        CvtTypeInteger,     ///< integer type
+        CvtTypeFpn          ///< floating-point number type
+      };
+
+      /*!
+       * \brief Default constructor.
+       */
+      ConvertedArg();
+
+      /*!
+       * \brief Initialization constructor.
+       *
+       * \param strArg  Source argument string.
+       */
+      ConvertedArg(const std::string &strArg);
+
+      /*!
+       * \brief Copy constructor.
+       *
+       * \param src Source object.
+       */
+      ConvertedArg(const ConvertedArg &src);
+
+      /*!
+       * \brief Destructor.
+       */
+      virtual ~ConvertedArg();
+
+      /*!
+       * \brief Assignment operator.
+       *
+       * \param rhs   Right-hand side object.
+       *
+       * \return *this
+       */
+      ConvertedArg &operator=(const ConvertedArg &rhs);
+
+      /*!
+       * \brief Get source argument string (or a pirate grunting).
+       *
+       * \return String.
+       */
+      const std::string &arg() const { return m_strArg; }
+
+      /*!
+       * \brief Check if converted value is valid.
+       *
+       * \return Returns true or false.
+       */
+      bool isValid() const { return m_bIsValid; }
+
+      /*!
+       * \brief Get the type of conversion.
+       *
+       * \return ConvertedArg::CvtType value.
+       */
+      CvtType type() const { return m_eType; }
+
+      /*!
+       * \brief Get the converted string value.
+       *
+       * \return Returns string.
+       */
+      const std::string &s() const { return m_strVal; }
+
+      /*!
+       * \brief Get the converted enumeration index value.
+       *
+       * \return Returns index.
+       */
+      long e() const { return m_lVal; }
+
+      /*!
+       * \brief Get the converted boolean value.
+       *
+       * \return Returns bool.
+       */
+      bool b() const { return m_bVal; }
+
+      /*!
+       * \brief Get the converted integer value.
+       *
+       * \return Returns long.
+       */
+      long i() const { return m_lVal; }
+
+      /*!
+       * \brief Get the converted floating-point number value.
+       *
+       * \return Returns double.
+       */
+      double f() const { return m_fVal; }
+
+      //
+      // Friends
+      //
+      friend class CmdArgDef;
+
+    protected:
+      std::string m_strArg;   ///< argument source
+      bool        m_bIsValid; ///< conversion is [not] valid
+      CvtType     m_eType;    ///< converted type
+      std::string m_strVal;   ///< converted string value
+      bool        m_bVal;     ///< converted boolean value
+      long        m_lVal;     ///< converted integer/index value
+      double      m_fVal;     ///< converted float-point number value
+
+      /*!
+       * \brief Set the argument string value.
+       *
+       * \param strArg  Source argument string.
+       */
+      void arg(const std::string &strArg)
+      {
+        m_strArg = strArg;
+      }
+
+      /*!
+       * \brief Set the converted string value.
+       *
+       * \param strVal    Value to set.
+       */
+      void s(const std::string &strVal);
+
+      /*!
+       * \brief Set the converted index into literal enum list value.
+       *
+       * \param eVal    Value to set.
+       */
+      void e(const long eVal);
+
+      /*!
+       * \brief Set the converted boolean value.
+       *
+       * \param bVal    Value to set.
+       */
+      void b(const bool bVal);
+
+      /*!
+       * \brief Set the converted integer value.
+       *
+       * \param lVal    Value to set.
+       */
+      void i(const long lVal);
+
+      /*!
+       * \brief Set the converted floating-point number value.
+       *
+       * \param fVal    Value to set.
+       */
+      void f(const double fVal);
+    };
 
 
     //--------------------------------------------------------------------------
@@ -243,14 +490,16 @@ namespace rnr
        */
       enum ArgType
       {
-        TypeUndef   = 0,  ///< undefined argument type
-        TypeLiteral,      ///< literal constant
-        TypeWord,         ///< any non-whitespace contiguous character sequence
-        TypeInteger,      ///< integer (long)
-        TypeFloat,        ///< floating point number (double)
-        TypeQuotedString, ///< escape sequence supported "c..." dqouted string
-        TypeFile,         ///< file path
-        TypeRegEx         ///< regular expression
+        ArgTypeUndef   = 0, ///< undefined argument type
+        ArgTypeLiteral,     ///< literal constant
+        ArgTypeWord,        ///< any non-whitespace contiguous char sequence
+        ArgTypeMultiWord,   ///< any (quoted) character sequence
+        ArgTypeIdentifier,  ///< identifier (C conforming)
+        ArgTypeBoolean,     ///< boolean (bool)
+        ArgTypeInteger,     ///< integer (long)
+        ArgTypeFpn,         ///< floating point number (double)
+        ArgTypeFile,        ///< file path
+        ArgTypeRegEx        ///< regular expression
       };
   
       /*!
@@ -264,12 +513,12 @@ namespace rnr
       };
 
       /*!
-       * \brief Default construtor.
+       * \brief Default constructor.
        */
       CmdArgDef();
   
       /*!
-       * \brief Copy construtor.
+       * \brief Copy constructor.
        *
        * \param src Source object.
        */
@@ -378,6 +627,42 @@ namespace rnr
         return m_uFlags;
       }
 
+      /*!
+       * \brief Test if argument is the command argument (argv0).
+       *
+       * \return Returns true or false.
+       */
+      bool isCommand() const
+      {
+        return (m_uFlags & FlagCommand) != 0;
+      }
+
+      /*!
+       * \brief Test if argument is an optional argument.
+       *
+       * \return Returns true or false.
+       */
+      bool isOptional() const
+      {
+        return (m_uFlags & FlagOptional) != 0;
+      }
+
+      /*!
+       * \brief Construct literal list string.
+       *
+       * \param sep Seperator string between literals.
+       *
+       * \return Literal list string.
+       */
+      std::string constructLiteralList(const std::string sep = " ") const;
+
+      /*!
+       * \brief Construct syntax equivalent string from argument data.
+       *
+       * \return Syntax string.
+       */
+      std::string constructSyntax() const;
+
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // Pattern Matching Methods
@@ -386,12 +671,56 @@ namespace rnr
       /*!
        * \brief Match argument string against argument definition pattern.
        *
+       * The match weight returned is a heuristic measure of match strength.
+       * A value of 0.0 is no match, while anything \> 0.0 is a match, with 1.0
+       * being the best possible fit. With a matched weight assigned to
+       * each command argument, the best matched command applied to the input
+       * can be heuristically determined.
+       *
+       * \par For Example:
+       * Given two arguments whose syntax are specified as:
+       * \verbatim
+       * girl
+       * <teen:word>
+       * \endverbatim
+       *
+       * Then the weights returned from the following match calls are:
+       * \verbatim
+       * arg girl: match("girl") --> 1.00
+       * arg teen: match("girl") --> 0.91
+       * arg girl: match("boy")  --> 0.00
+       * arg teen: match("boy")  --> 0.91
+       * \endverbatim
+       *
        * \param strArg      Argument value.
        * \param bIgnoreCase Do [not] ignore case when applying pattern matching.
        *
-       * \return Returns true or false.
+       * \return Returns match weight [0.0 - 1.0].
        */
-      bool match(const std::string &strArg, bool bIgnoreCase = false) const;
+      double match(const std::string &strArg, bool bIgnoreCase = false) const;
+
+      /*!
+       * \brief Match argument agains literal enumeration list.
+       *
+       * \param strArg      Argument value.
+       * \param bIgnoreCase Do [not] ignore case when applying pattern matching.
+       *
+       * \return
+       * On success, returns literal list index \>= 0. Otherwise -1 is returned.
+       */
+      int matchLiteral(const std::string &strArg,
+                       bool              bIgnoreCase = false) const;
+
+      /*!
+       * \brief Convert argument string to type.
+       *
+       * \param strArg      Argument source string.
+       * \param bIgnoreCase Do [not] ignore case when applying pattern matching.
+       *
+       * \return Converted argument object.
+       */
+      ConvertedArg convert(const std::string &strArg,
+                           bool              bIgnoreCase = false) const;
 
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -483,17 +812,17 @@ namespace rnr
     {
     public:
       /*!
-       * \brief Default construtor.
+       * \brief Default constructor.
        */
       CmdFormDef();
   
       /*!
-       * \brief Initialization construtor.
+       * \brief Initialization constructor.
        */
       CmdFormDef(const std::string &strSyntax);
   
       /*!
-       * \brief Copy construtor.
+       * \brief Copy constructor.
        *
        * \param src Source object.
        */
@@ -575,7 +904,9 @@ namespace rnr
       /*!
        * \brief Get the total number of required arguments.
        *
-       * Required arguments start at argument index 1.
+       * The required number includes the command argv0.
+       *
+       * Required arguments start at argument index 0.
        *
        * \return Number of arguments.
        */
@@ -587,7 +918,7 @@ namespace rnr
       /*!
        * \brief Get the total number of optional arguments.
        *
-       * Optional arguments start at argument index 1+numOfRequiredArgs(().
+       * Optional arguments start at argument index numOfRequiredArgs().
        *
        * \return Number of arguments.
        */
@@ -686,12 +1017,12 @@ namespace rnr
     {
     public:
       /*!
-       * \brief Default construtor.
+       * \brief Default constructor.
        */
       CmdDef();
   
       /*!
-       * \brief Copy construtor.
+       * \brief Copy constructor.
        *
        * \param src Source object.
        */
@@ -833,10 +1164,12 @@ namespace rnr
       static const int EAmbigCmd    = -4;  ///< ambiguous command
       static const int EUnknownCmd  = -5;  ///< unknown, unmatched command
       static const int EBadSyntax   = -6;  ///< bad syntax
+      static const int ENoOp        = -7;  ///< bad operation
   
       static const int Ok           =  OK; ///< (0) no error, success, good
 
-      static const int NoUid = -1;  ///< no unique id
+      static const int NoUid        = -1;  ///< no unique id
+      static const int NoFormIndex  = -1;  ///< no form index
 
       /*!
        * \brief Default initialization constructor.
@@ -921,14 +1254,15 @@ namespace rnr
        * \brief Read an input line stdin and match to best compiled command.
        *
        * \param [out] uid   Matched command unique id.
+       * \param [out] iform Matched command form index.
        * \param [out] argv  Vector of arguments, with argv[0] being the
        *                    command name.
        *
        *  \copydoc doc_return_cl
        */
-      virtual int readCommand(int &uid, StringVec &argv)
+      virtual int readCommand(int &uid, int &iform, StringVec &argv)
       {
-        return readCommand(stdin, uid, argv);
+        return readCommand(stdin, uid, iform, argv);
       }
 
       /*!
@@ -936,12 +1270,13 @@ namespace rnr
        *
        * \param fp          Input file pointer.
        * \param [out] uid   Matched command unique id.
+       * \param [out] iform Matched command form index.
        * \param [out] argv  Vector of arguments, with argv[0] being the
        *                    command name.
        *
        *  \copydoc doc_return_cl
        */
-      virtual int readCommand(FILE *fp, int &uid, StringVec &argv);
+      virtual int readCommand(FILE *fp, int &uid, int &iform, StringVec &argv);
   
       /*!
        * \brief Add command to history.
@@ -979,6 +1314,109 @@ namespace rnr
        */
       const std::string &getPrompt() const;
 
+      /*!
+       * \brief Get the line number of the last read line.
+       *
+       * \return Line number.
+       */
+      size_t getLineNum() const
+      {
+        return m_readline.getLineNum();
+      }
+
+      /*!
+       * \brief Set the current line number.
+       *
+       * \param Line number.
+       */
+      void setLineNum(const size_t uLineNum)
+      {
+        m_readline.setLineNum(uLineNum);
+      }
+
+      /*!
+       * \brief Reset the line number to zero.
+       */
+      void resetLineNum()
+      {
+        m_readline.resetLineNum();
+      }
+
+      /*!
+       * \brief Get the total number of arguments.
+       *
+       * The first argument (argv0) is the command.
+       *
+       * \param uid   Matched command unique id.
+       * \param iform Matched command form index.
+       *
+       * \return Number of arguments.
+       */
+      int numOfArgs(int uid, int iform) const;
+
+      /*!
+       * \brief Get the total number of required arguments.
+       *
+       * The required number includes the command argv0.
+       *
+       * Required arguments start at argument index 0.
+       *
+       * \param uid   Matched command unique id.
+       * \param iform Matched command form index.
+       *
+       * \return Number of arguments.
+       */
+      int numOfRequiredArgs(int uid, int iform) const;
+
+      /*!
+       * \brief Get the total number of optional arguments.
+       *
+       * Optional arguments start at argument index numOfRequiredArgs().
+       *
+       * \param uid   Matched command unique id.
+       * \param iform Matched command form index.
+       *
+       * \return Number of arguments.
+       */
+      int numOfOptionalArgs(int uid, int iform) const;
+
+      /*!
+       * \brief Get the argument name.
+       *
+       * \param uid   Command unique id.
+       * \param iform Command form index.
+       * \param iarg  Command form argument index.
+       *
+       * \return Returns argument name on success, empty string on failure.
+       */
+      const std::string &getArgName(int uid, int iform, int iarg) const;
+
+      /*!
+       * \brief Get the argument type.
+       *
+       * \param uid   Command unique id.
+       * \param iform Command form index.
+       * \param iarg  Command form argument index.
+       *
+       * \return Returns argument type.
+       */
+      CmdArgDef::ArgType getArgType(int uid, int iform, int iarg) const;
+
+      /*!
+       * \brief Convert argument string to type.
+       *
+       * \param uid     Command unique id.
+       * \param iform   Command form index.
+       * \param iarg    Command form argument index.
+       * \param strArg  Argument source string.
+       *
+       * \return Converted argument object.
+       */
+      ConvertedArg convert(int               uid,
+                           int               iform,
+                           int               iarg,
+                           const std::string &strArg) const;
+
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // Public Input Processing Methods
@@ -1004,6 +1442,18 @@ namespace rnr
        *
        * <qouted-string> ::= '"' {ESCAPABLE_CHAR}* '"'
        * \endverbatim
+       *
+       * \param [in] strInput Input string to analyze.
+       * \param [out] tokens  Generated tokens.
+       *
+       *  \copydoc doc_return_ssize
+       */
+      virtual ssize_t tokenize(const std::string &strInput, TokenVec &tokens);
+
+      /*!
+       * \brief Lexically analyze string to generate a series of string tokens.
+       *
+       * See \ref tokenize()
        *
        * \param [in] strInput Input string to analyze.
        * \param [out] tokens  Generated string tokens.
@@ -1119,6 +1569,43 @@ namespace rnr
       static std::string c14n(const StringVec &tokens);
 
       /*!
+       * \brief Canonicalization of a string.
+       *
+       * \note The name c14n is an cute abbreviation where 14 represents the
+       * number of letters between the 'c' and 'n' in the word
+       * "canonicalization".
+       *
+       * \param tokens  Tokens to canonicalize.
+       *
+       * \return Return string holding canonical form.
+       */
+      static std::string c14n(const TokenVec &tokens);
+
+      /*!
+       * \brief Test if string is a valid identifier.
+       *
+       * Identifiers adhere to the C syntax.
+       *
+       * \param [in] str    String to test.
+       *
+       * \return Returns true or false.
+       */
+      static bool isIdentifier(const std::string &str);
+
+      /*!
+       * \brief Convert string to boolean.
+       *
+       *  false: 0 false f off low   disable  open
+       *  true:  1 true  t on  high  enable   close
+       *
+       * \param [in] str    String in hex, decimal, or octal format.
+       * \param [out] val   Converted boolean value.
+       *
+       * \return Returns Ok if a valid boolean, EBadSyntax otherwise.
+       */
+       static int strToBool(const std::string &str, bool &val);
+
+      /*!
        * \brief Convert string to a long integer.
        *
        * \param [in] str    String in hex, decimal, or octal format.
@@ -1180,7 +1667,7 @@ namespace rnr
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
-       * \brief Extract command name from extended usage syntax 
+       * \brief Extract command name from extended usage syntax.
        *
        * \param strSyntax   Syntax string.
        *
@@ -1194,13 +1681,13 @@ namespace rnr
        *
        * Tokens are separated by either whitespace or syntax special characters.
        *
-       * \param [in] strSyntax  Input string to analyze.
+       * \param [in] strSyntax  Syntax string to analyze.
        * \param [out] tokens    Generated tokens.
        *
        *  \copydoc doc_return_ssize
        */
       virtual ssize_t tokenizeSyntax(const std::string &strSyntax,
-                                     StringVec         &tokens);
+                                     TokenVec          &tokens);
 
       /*!
        * \brief Syntax word lexical analyzer.
@@ -1210,12 +1697,17 @@ namespace rnr
        *
        * Any generated token is place at the end of the vector.
        *
-       * \param [in] str        Input string to analyze.
-       * \param [in,out] tokens Vector of generated tokens. 
+       * \param [in]     strSyntax  Syntax string to analyze.
+       * \param [in]     cursor     Character position along syntax string.
+       * \param [in,out] tokens     Vector of generated tokens. 
        *
-       * \return Returns the length of the token. Zero (0) indicates no token.
+       * \return
+       * On success, returns new cursor position.
+       * Otherwise a negative error code is returned.
        */
-      virtual size_t lexSyntaxWord(const std::string &str, StringVec &tokens);
+      virtual ssize_t lexSyntaxWord(const std::string &strSyntax,
+                                    ssize_t            cursor,
+                                    TokenVec          &tokens);
 
       /*!
        * \brief Word lexical analyzer.
@@ -1225,12 +1717,17 @@ namespace rnr
        *
        * Any generated token is place at the end of the vector.
        *
-       * \param [in] str        Input string to analyze.
-       * \param [in,out] tokens Vector of generated tokens. 
+       * \param [in]     strInput   Input string to analyze.
+       * \param [in]     cursor     Character position along input string.
+       * \param [in,out] tokens     Vector of generated tokens. 
        *
-       * \return Returns the length of the token. Zero (0) indicates no token.
+       * \return
+       * On success, returns new cursor position.
+       * Otherwise a negative error code is returned.
        */
-      virtual size_t lexWord(const std::string &str, StringVec &tokens);
+      virtual ssize_t lexWord(const std::string &strInput,
+                              ssize_t            cursor,
+                              TokenVec          &tokens);
 
       /*!
        * \brief Quoted string lexical analyzer.
@@ -1242,22 +1739,31 @@ namespace rnr
        *
        * Any generated token is place at the end of the vector.
        *
-       * \param [in] str        Input string to analyze.
-       * \param [in,out] tokens Vector of generated tokens. 
+       * \param [in]     strInput   Input string to analyze.
+       * \param [in]     cursor     Character position along input string.
+       * \param [in,out] tokens     Vector of generated tokens. 
        *
-       * \return Returns the length of the token. Zero (0) indicates either
-       * no token or an empty string ("").
+       * \return
+       * On success, returns new cursor position.
+       * Otherwise a negative error code is returned.
        */
-      virtual size_t lexQuotedString(const std::string &str, StringVec &tokens);
+      virtual ssize_t lexQuotedString(const std::string &strInput,
+                                      ssize_t            cursor,
+                                      TokenVec          &tokens);
 
       /*!
        * \brief Push token to the end of the generated tokens.
        *
-       * \param tok             Token to push.
+       * \param strSource       Source string of tokens.
+       * \param start           Start token character position in source.
+       * \param cursor          Cursor position in source.
        * \param [in,out] tokens Vector of lexical tokens.
        */
-      void pushToken(std::string &tok, StringVec &tokens);
-  
+      void pushToken(const std::string &strSource,
+                     size_t             start,
+                     ssize_t            cursor,
+                     TokenVec          &tokens);
+
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // Extended Usage Syntax Parsing Methods
@@ -1295,9 +1801,9 @@ namespace rnr
        *
        *  \copydoc doc_return_cl
        */
-      virtual int parseSyntax(CmdDef          &cmddef,
-                              CmdFormDef      &form,
-                              const StringVec &tokens);
+      virtual int parseSyntax(CmdDef         &cmddef,
+                              CmdFormDef     &form,
+                              const TokenVec &tokens);
 
       /*!
        * \brief Parse argument 0 (command) syntax.
@@ -1318,10 +1824,10 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseArgv0(CmdDef          &cmddef,
-                      CmdFormDef      &form,
-                      const StringVec &tokens,
-                      size_t          &pos);
+      bool parseArgv0(CmdDef         &cmddef,
+                      CmdFormDef     &form,
+                      const TokenVec &tokens,
+                      size_t         &pos);
       
       /*!
        * \brief Parse required argument list syntax.
@@ -1339,10 +1845,10 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseRequiredArgList(CmdDef          &cmddef,
-                                CmdFormDef      &form,
-                                const StringVec &tokens,
-                                size_t          &pos);
+      bool parseRequiredArgList(CmdDef         &cmddef,
+                                CmdFormDef     &form,
+                                const TokenVec &tokens,
+                                size_t         &pos);
   
       /*!
        * \brief Parse optional argument list syntax.
@@ -1360,10 +1866,10 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseOptionalArgList(CmdDef          &cmddef,
-                                CmdFormDef      &form,
-                                const StringVec &tokens,
-                                size_t          &pos);
+      bool parseOptionalArgList(CmdDef         &cmddef,
+                                CmdFormDef     &form,
+                                const TokenVec &tokens,
+                                size_t         &pos);
 
       /*!
        * \brief Parse argument syntax.
@@ -1382,10 +1888,10 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseArg(CmdDef          &cmddef,
-                    CmdFormDef      &form,
-                    const StringVec &tokens,
-                    size_t          &pos);
+      bool parseArg(CmdDef         &cmddef,
+                    CmdFormDef     &form,
+                    const TokenVec &tokens,
+                    size_t         &pos);
       
       /*!
        * \brief Parse mutually exclusive argument values syntax.
@@ -1404,10 +1910,10 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseXorListArg(CmdDef          &cmddef,
-                           CmdFormDef      &form,
-                           const StringVec &tokens,
-                           size_t          &pos);
+      bool parseXorListArg(CmdDef         &cmddef,
+                           CmdFormDef     &form,
+                           const TokenVec &tokens,
+                           size_t         &pos);
       
       /*!
        * \brief Parse variable argument syntax.
@@ -1427,10 +1933,10 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseVariableArg(CmdDef          &cmddef,
-                            CmdFormDef      &form,
-                            const StringVec &tokens,
-                            size_t          &pos);
+      bool parseVariableArg(CmdDef         &cmddef,
+                            CmdFormDef     &form,
+                            const TokenVec &tokens,
+                            size_t         &pos);
 
       /*!
        * \brief Parse literal, fixed-valued argument syntax.
@@ -1449,10 +1955,10 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseLiteralArg(CmdDef          &cmddef,
-                           CmdFormDef      &form,
-                           const StringVec &tokens,
-                           size_t          &pos);
+      bool parseLiteralArg(CmdDef         &cmddef,
+                           CmdFormDef     &form,
+                           const TokenVec &tokens,
+                           size_t         &pos);
 
       /*!
        * \brief Parse mutually exclusive list.
@@ -1471,11 +1977,11 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseXorList(CmdDef          &cmddef,
-                        CmdFormDef      &form,
-                        const StringVec &tokens,
-                        size_t          &pos,
-                        StringVec       &literals);
+      bool parseXorList(CmdDef         &cmddef,
+                        CmdFormDef     &form,
+                        const TokenVec &tokens,
+                        size_t         &pos,
+                        StringVec      &literals);
 
       /*!
        * \brief Parse identifier.
@@ -1494,11 +2000,11 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseIdentifier(CmdDef          &cmddef,
-                           CmdFormDef      &form,
-                           const StringVec &tokens,
-                           size_t          &pos,
-                           std::string     &strIdent);
+      bool parseIdentifier(CmdDef         &cmddef,
+                           CmdFormDef     &form,
+                           const TokenVec &tokens,
+                           size_t         &pos,
+                           std::string    &strIdent);
       
       /*!
        * \brief Parse variable type.
@@ -1523,7 +2029,7 @@ namespace rnr
        */
       bool parseType(CmdDef             &cmddef,
                      CmdFormDef         &form,
-                     const StringVec    &tokens,
+                     const TokenVec     &tokens,
                      size_t             &pos,
                      CmdArgDef::ArgType &eType);
 
@@ -1543,11 +2049,11 @@ namespace rnr
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseLiteralValue(CmdDef          &cmddef,
-                             CmdFormDef      &form,
-                             const StringVec &tokens,
-                             size_t          &pos,
-                             std::string     &strValue);
+      bool parseLiteralValue(CmdDef         &cmddef,
+                             CmdFormDef     &form,
+                             const TokenVec &tokens,
+                             size_t         &pos,
+                             std::string    &strValue);
 
       /*!
        * \brief Test if token at position is equal to string.
@@ -1555,7 +2061,6 @@ namespace rnr
        * If equal, the position cursor is advanced on position. If not equal,
        * an error message will be logged.
        *
-       * \param [in] strInput String origin of tokens.
        * \param [in] strCmp   String to compare token against.
        * \param [in] tokens   Lexical tokens generated from the syntax usage.
        * \param [in,out] pos  The position in the token vector.
@@ -1563,34 +2068,33 @@ namespace rnr
        *
        * \return Returns true on equal, false otherwise.
        */
-      bool tokEq(const std::string &strInput,
-                 const std::string strCmp,
-                 const StringVec   &tokens,
-                 size_t            &pos);
+      bool tokEq(const std::string strCmp, const TokenVec &tokens, size_t &pos);
 
       /*!
-       * \brief Peek if token at position is equal to string.
+       * \brief Peek if token is equal to string.
        *
        * The position cursor is not advance nor any error message logged.
        *
        * \param [in] strCmp String to compare token against.
-       * \param [in] tokens Lexical tokens generated from the syntax usage.
-       * \param [in] pos    The position in the token vector.
+       * \param [in] token  Lexical token.
        *
        * \return Returns true on equal, false otherwise.
        */
-      bool peekEq(const std::string strCmp,
-                  const StringVec   &tokens,
-                  const size_t      pos);
+      bool peekEq(const std::string strCmp, const Token &token) const
+      {
+        return token.value() == strCmp;
+      }
       
       /*!
        * \brief Test if string has valid identifier syntax.
        *
-       * \param [in] str    String to test.
+       * \param [in] tokens   Lexical tokens generated from the syntax usage.
+       * \param [in,out] pos  The position in the token vector.
+       *                      Advanced 1 position if valid identifier.
        *
        * \return Returns true or false.
        */
-      bool tokIdentifier(const std::string &str);
+      bool tokIdentifier(const TokenVec &tokens, size_t &pos);
   
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1602,47 +2106,56 @@ namespace rnr
        *
        * The line is tokenized and matched to the command with the best fit.
        *
-       * \param [in] strLine  Line of input.
+       * \param [in]  strLine Line of input.
        * \param [out] uid     Best matched command unique id.
+       * \param [out] iform   Best matched form index of the best command.
        * \param [out] argv    Vector of arguments.
        *
        *  \copydoc doc_return_cl
        */
-      int processInput(const std::string &strLine, int &uid, StringVec &argv);
+      int processInput(const std::string &strLine,
+                       int               &uid,
+                       int               &iform,
+                       StringVec         &argv);
 
       /*!
-       * \brief Match best command against input line argument list.
+       * \brief Match the input tokens to the compiled commands to find the
+       * best fit.
        *
+       * \param [in]  tokens  Vector of input tokens.
        * \param [out] uid     Best matched command unique id.
-       * \param [in] argv     Vector of arguments.
+       * \param [out] iform   Best matched form index of the best command.
        *
        *  \copydoc doc_return_cl
        */
-      int matchCommand(int &uid, const StringVec &argv);
+      int match(const TokenVec &tokens, int &uid, int &iform);
 
       /*!
        * \brief Match best command form against input line argument list.
        *
-       * \param [in] cmddef   Compiled command definition.
-       * \param [in] argv     Vector of arguments.
-       *
-       *  \copydoc doc_return_cl
-       */
-      int matchCommand(const CmdDef &cmddef, const StringVec &argv);
-
-      /*!
-       * \brief Match command form against input line argument list.
-       *
-       * \param [in] cmddef     Compiled command definition.
-       * \param [in] form       Compiled command form definition.
-       * \param [in] argv       Vector of arguments.
+       * \param [in]  cmddef    Compiled command definition.
+       * \param [in]  tokens    Vector of arguments.
+       * \param [out] iform     Best matched form index of the best command.
        * \param [out] fFitness  Fitness of match [0.0 - 1.0].
        *
        *  \copydoc doc_return_cl
        */
-      int matchCommandForm(const CmdDef     &cmddef,
-                           const CmdFormDef &form,
-                           const StringVec  &argv,
+      int matchCommand(const CmdDef   &cmddef,
+                       const TokenVec &tokens,
+                       int            &iform,
+                       double         &fFitness);
+
+      /*!
+       * \brief Match command form against input line argument list.
+       *
+       * \param [in]  form      Compiled command form definition.
+       * \param [in]  tokens    Vector of arguments.
+       * \param [out] fFitness  Fitness of match [0.0 - 1.0].
+       *
+       *  \copydoc doc_return_cl
+       */
+      int matchCommandForm(const CmdFormDef &form,
+                           const TokenVec   &argv,
                            double           &fFitness);
 
       /*!
@@ -1668,20 +2181,48 @@ namespace rnr
       virtual int rlBuildReadLineGenerator();
 
       /*!
+       * \brief Static TAB completion generator wrapper.
        *
        * See \ref ReadLine::AltAppGenFunc for description of a ReadLine
        * generator.
        *
+       * \param pAppArg       Pointer to this CommandLine object.
+       * \param strText       Partial text string to complete.
+       * \param nIndex        Match candidate index starting from 0.
+       * \param strContext    Generator context (i.e. input buffer).
+       * \param nStart        Starting index in context of text.
+       * \param nEnd          Ending index in context of the position
+       *                      immediately after the end of text. If nStart
+       *                      equals nEnd, then empty text.
        * \param [out] uFlags  TAB completion modifier flags.
+       *
+       * \return Match or empty string.
        */
-      static const std::string rlGeneratorWrapper(const std::string &strText,
+      static const std::string rlGeneratorWrapper(void              *pAppArg,
+                                                  const std::string &strText,
                                                   int               nIndex,
                                                   const std::string &strContext,
                                                   int               nStart,
                                                   int               nEnd,
-                                                  unsigned          &uFlags,
-                                                  void              *pAppArg);
+                                                  unsigned          &uFlags);
 
+      /*!
+       * \brief TAB completion generator.
+       *
+       * See \ref ReadLine::AltAppGenFunc for description of a ReadLine
+       * generator.
+       *
+       * \param strText       Partial text string to complete.
+       * \param nIndex        Match candidate index starting from 0.
+       * \param strContext    Generator context (i.e. input buffer).
+       * \param nStart        Starting index in context of text.
+       * \param nEnd          Ending index in context of the position
+       *                      immediately after the end of text. If nStart
+       *                      equals nEnd, then empty text.
+       * \param [out] uFlags  TAB completion modifier flags.
+       *
+       * \return Match or empty string.
+       */
       virtual const std::string rlGenerator(const std::string &strText,
                                             int               nIndex,
                                             const std::string &strContext,
@@ -1689,17 +2230,44 @@ namespace rnr
                                             int               nEnd,
                                             unsigned          &uFlags);
 
+      /*!
+       * \brief Build list of all command argument definitions that match
+       * completed subtext.
+       *
+       * \param [in] strSubtext Complete subtext string.
+       * \param [out] argdefs   List of matched argument definitions.
+       */
       void rlArgDefs(const std::string       &strSubtext,
                      std::vector<CmdArgDef*> &argdefs);
 
-      void rlTabList(const std:: string      &strText,
+      /*!
+       * \brief Build TAB completion list and set appropriate readline
+       * modifiers.
+       *
+       * \param [in] strText  Partial text string to complete.
+       * \param [in] argdefs  List of matched argument definitions.
+       * \param [out] tabList List of TAB completion matches.
+       * \param [out] uFlags  TAB completion modifier flags.
+       */
+      void rlTabList(const std::string       &strText,
                      std::vector<CmdArgDef*> &argdefs,
                      StringVec               &tabList,
                      unsigned                &uFlags);
 
-
-      bool rlEq(const std::string &strCandidate,
-                        const std::string &strText);
+      /*!
+       * \brief Match partial text agains literal string.
+       *
+       * Ignore case is taken into account when strings are compared.
+       *
+       * \param [in] strText    Partial text string to complete.
+       * \param [in] strLiteral Literal text string to compare.
+       * \param [in] uLen       Number of characters to match.
+       *
+       * \return Returns true on partial match, false otherwise.
+       */
+      bool rlPartialMatch(const std::string &strText,
+                          const std::string strLiteral,
+                          const size_t      uLen);
 
     }; // class CommandLine
   

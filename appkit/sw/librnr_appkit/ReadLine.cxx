@@ -165,6 +165,7 @@ ReadLine::ReadLine(const string strName,
   // limitation of readline library which does not provide context feedback
   ThisObj = this;
 
+  m_uLineNum    = 0;
   m_bEoF        = false;
   m_bFError     = false;
   m_fnAppGen    = NULL;
@@ -206,54 +207,69 @@ void ReadLine::unregisterGenerator()
   m_fnAltAppGen = NULL;
   m_pAppArg     = NULL;
 
-  rl_attempted_completion_over = 0;
+#ifdef HAVE_READLINE
+  rl_attempted_completion_over  = 0;
+  rl_completion_suppress_append = 0;
+#endif // HAVE_READLINE
 }
 
 string &ReadLine::rlreadLine()
 {
+#ifdef HAVE_READLINE
   bool  bInteractive = isInteractive(stdin);
 
-  m_strLine.clear();
-
+  // 
+  // Use readline library.
+  //
   if( m_bUseRlLib  && bInteractive )
   {
-#ifdef HAVE_READLINE
+    clearStreamStatus();
+    m_strLine.clear();
+
     char *sLine = readline(getPrompt().c_str());   // fixed at stdin
 
     if( sLine != NULL )
     {
       m_strLine = sLine;
-      //trim(m_strLine);
       free(sLine);
+      ++m_uLineNum;
     }
 
     else
     {
       setStreamStatus(stdin);
     }
-#else
-    ireadLine(stdin);
-#endif // HAVE_READLINE
+
+    return m_strLine;
   }
 
+  //
+  // Interactive, but don't use the readline library.
+  //
   else if( bInteractive )
   {
-    ireadLine(stdin);
+    return ireadLine(stdin);
   }
 
+  //
+  // Non-interactive.
+  //
   else
   {
-    freadLine(stdin);
+    return freadLine(stdin);
   }
 
-  return m_strLine;
+#else // !HAVE_READLINE
+
+  return ireadLine(stdin);
+
+#endif // HAVE_READLINE
 }
 
 string &ReadLine::ireadLine(FILE *fp)
 {
-  bool    bInteractive  = isInteractive(stdin);
-
-  if( !getPrompt().empty() )
+  // prompt
+  if( isInteractive(fp) && !getPrompt().empty() )
   {
     fprintf(stdout, "%s", getPrompt().c_str());
     fflush(stdout);
@@ -269,19 +285,45 @@ string &ReadLine::freadLine(FILE *fp)
   char    bufLine[BufSize];
   size_t  n;
 
+  clearStreamStatus();
+  m_strLine.clear();
+
   if( fgets(bufLine, BufSize, fp) != NULL )
   {
     bufLine[BufSize-1] = 0;
     n = strlen(bufLine);
-    if( (n > 0) && (bufLine[n-1] == '\n') )
+
+    // some characters were read
+    if( n > 0 )
     {
-      bufLine[n-1] = 0;
+      // got end of line
+      if( bufLine[n-1] == '\n' )
+      {
+        bufLine[n-1] = 0;
+        ++m_uLineNum;
+      }
+
+      // oops, input line trunctated - too long
+      else
+      {
+        bufLine[n-1] = 0;
+        ++m_uLineNum;
+        LOGWARN("Input line too long. Exceeds %zu characters.", BufSize);
+      }
+    }
+
+    // no i/o errors but also no characters read - odd
+    else
+    {
+      setStreamStatus(fp);
+
+      bufLine[0] = 0;
     }
   }
 
+  // read failure
   else
   {
-    // set state
     setStreamStatus(fp);
 
     bufLine[0] = 0;
@@ -345,6 +387,13 @@ void ReadLine::setStreamStatus(FILE *fp)
 
     m_strError = ss.str();
   }
+}
+
+void ReadLine::clearStreamStatus()
+{
+  m_bEoF    = false;
+  m_bFError = false;
+  m_strError.clear();
 }
 
 char *ReadLine::dupstr(const char *s)
@@ -517,6 +566,7 @@ char **ReadLine::completion(const char *sText, int nStart, int nEnd)
 
 char **ReadLine::altCompletion(const string strText, int nStart, int nEnd)
 {
+#ifdef HAVE_READLINE
   string          strContext(rl_line_buffer);
   int             nIndex;
   unsigned        uFlags;
@@ -525,16 +575,16 @@ char **ReadLine::altCompletion(const string strText, int nStart, int nEnd)
   size_t          i;
   char            **tabList;
 
-  // default is filename TAB completion
-  rl_attempted_completion_over = 0;
+  rl_attempted_completion_over  = 0;  // disable default filename TAB completion
+  rl_completion_suppress_append = 0;  // enable default space (' ') after match
 
   // no flags
   uFlags = 0;
 
   for(nIndex = 0; ; ++nIndex)
   {
-    strMatch = m_fnAltAppGen(strText, nIndex, strContext, nStart, nEnd, uFlags,
-                             m_pAppArg);
+    strMatch = m_fnAltAppGen(m_pAppArg, strText, nIndex,
+                             strContext, nStart, nEnd, uFlags);
 
     // end of completion generation
     if( strMatch.empty() )
@@ -544,6 +594,10 @@ char **ReadLine::altCompletion(const string strText, int nStart, int nEnd)
         rl_attempted_completion_over = 1;
       }
 
+      if( uFlags & FlagTabNoSpace )
+      {
+        rl_completion_suppress_append = 1;
+      }
       break;
     }
 
@@ -583,10 +637,17 @@ char **ReadLine::altCompletion(const string strText, int nStart, int nEnd)
   tabList[i] = NULL;
 
   return tabList;
+
+#else // !HAVE_READLINE
+
+  return NULL;
+
+#endif // HAVE_READLINE
 }
 
 char *ReadLine::generatorWrapper(const char *sText, int nState)
 {
+#ifdef HAVE_READLINE
   // no registered generator match current path
   if( ThisObj->m_fnAppGen == NULL )
   {
@@ -605,8 +666,11 @@ char *ReadLine::generatorWrapper(const char *sText, int nState)
   }
 
   // call application-specific generator
-  return ThisObj->m_fnAppGen(strText,
-                             nState,
-                             strContext,
-                             ThisObj->m_pAppArg);
+  return ThisObj->m_fnAppGen(ThisObj->m_pAppArg, strText, nState, strContext);
+
+#else // !HAVE_READLINE
+
+  return NULL;
+
+#endif // HAVE_READLINE
 }
