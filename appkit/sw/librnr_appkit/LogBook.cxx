@@ -525,7 +525,7 @@ void LogBook::clear()
   erasePending();
 }
 
-const LogBook::Entry &LogBook::entryAt(const string &strMark) const
+const LogBook::Entry &LogBook::at(const string &strMark) const
 {
   BookCIter pos;
 
@@ -539,7 +539,7 @@ const LogBook::Entry &LogBook::entryAt(const string &strMark) const
   }
 }
 
-const LogBook::Entry &LogBook::entryAt(const size_t index) const
+const LogBook::Entry &LogBook::at(const size_t index) const
 {
   if( index < size() )
   {
@@ -551,7 +551,7 @@ const LogBook::Entry &LogBook::entryAt(const size_t index) const
   }
 }
 
-const LogBook::Entry &LogBook::entryAt(const size_t index, int whence) const
+const LogBook::Entry &LogBook::at(const size_t index, int whence) const
 {
   size_t  i;
 
@@ -568,12 +568,12 @@ const LogBook::Entry &LogBook::entryAt(const size_t index, int whence) const
 
 const LogBook::Entry &LogBook::operator[](const size_t index) const
 {
-  return entryAt(index);
+  return at(index);
 }
 
 const LogBook::Entry &LogBook::operator[](const string &strMark) const
 {
-  return entryAt(strMark);
+  return at(strMark);
 }
 
 const LogBook::Entry &LogBook::lastEntry() const
