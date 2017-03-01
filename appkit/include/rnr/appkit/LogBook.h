@@ -411,7 +411,7 @@ namespace rnr
      * If the entry exists, reference to log entry is returned. 
      * Otherwise, a "no entry" entry is returned (test with Entry::empty()).
      */
-    const Entry &entryAt(const std::string &strMark) const;
+    const Entry &at(const std::string &strMark) const;
 
     /*!
      * \brief Get the entry at the index.
@@ -422,7 +422,7 @@ namespace rnr
      * If the entry exists, reference to log entry is returned. 
      * Otherwise, a "no entry" entry is returned (test with Entry::empty()).
      */
-    const Entry &entryAt(const size_t index) const;
+    const Entry &at(const size_t index) const;
 
     /*!
      * \brief Get the entry at relative index from whence.
@@ -434,7 +434,7 @@ namespace rnr
      * If the entry exists, reference to log entry is returned. 
      * Otherwise, a "no entry" entry is returned (test with Entry::empty()).
      */
-    const Entry &entryAt(const size_t index, int whence) const;
+    const Entry &at(const size_t index, int whence) const;
 
     /*!
      * \brief Log book array index operator.
@@ -480,7 +480,7 @@ namespace rnr
      */
     const std::string &textAt(const std::string &strMark) const
     {
-      return entryAt(strMark).m_strText;
+      return at(strMark).m_strText;
     }
 
     /*!
@@ -494,7 +494,7 @@ namespace rnr
      */
     const std::string &textAt(const size_t index) const
     {
-      return entryAt(index).m_strText;
+      return at(index).m_strText;
     }
 
     /*!
@@ -509,7 +509,7 @@ namespace rnr
      */
     const std::string &textAt(const size_t index, int whence) const
     {
-      return entryAt(index, whence).m_strText;
+      return at(index, whence).m_strText;
     }
 
     /*!

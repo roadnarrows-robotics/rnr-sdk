@@ -370,7 +370,7 @@ namespace rnr
        *
        * \return Returns true or false.
        */
-      bool isValid() const { return m_bIsValid; }
+      bool isValid() const { return m_eType != CvtTypeUndef; }
 
       /*!
        * \brief Get the type of conversion.
@@ -421,7 +421,6 @@ namespace rnr
 
     protected:
       std::string m_strArg;   ///< argument source
-      bool        m_bIsValid; ///< conversion is [not] valid
       CvtType     m_eType;    ///< converted type
       std::string m_strVal;   ///< converted string value
       bool        m_bVal;     ///< converted boolean value
@@ -885,9 +884,25 @@ namespace rnr
       /*!
        * \brief Get form's argument at index.
        *
+       * \param nIndex    Argument index.
+       *
        * \return Command argument definition reference.
        */
-      const CmdArgDef &argAt(const int nIndex) const;
+      const CmdArgDef &at(const int nIndex) const;
+
+      /*!
+       * \brief Index operator.
+       *
+       * Get form's argument at index.
+       *
+       * \param nIndex    Argument index.
+       *
+       * \return Command argument definition reference.
+       */
+      const CmdArgDef &operator[](const int nIndex) const
+      {
+        return at(nIndex);
+      }
 
       /*!
        * \brief Get the total number of arguments.
@@ -986,7 +1001,11 @@ namespace rnr
       void pushArg(CmdArgDef &argdef);
 
       /*!
-       * \brief Get form's argument at index.
+       * \brief Get form's modifiable argument at index.
+       *
+       * Protected version of at().
+       *
+       * \param nIndex    Argument index.
        *
        * \return Command argument definition reference.
        */
@@ -1091,7 +1110,21 @@ namespace rnr
        *
        * \return Command form definition reference.
        */
-      const CmdFormDef &formAt(const int nIndex) const;
+      const CmdFormDef &at(const int nIndex) const;
+
+      /*!
+       * \brief Index operator.
+       *
+       * Get command form at index.
+       *
+       * \param nIndex    Argument index.
+       *
+       * \return Command form definition reference.
+       */
+      const CmdFormDef &operator[](const int nIndex) const
+      {
+        return at(nIndex);
+      }
 
       /*!
        * \brief Insert object into output stream.
@@ -1135,7 +1168,9 @@ namespace rnr
       void pushForm(CmdFormDef &formdef);
 
       /*!
-       * \brief Get command form at index.
+       * \brief Get command modifiable form at index.
+       *
+       * Protected version of at().
        *
        * \param nIndex  Form's index.
        *
@@ -1164,7 +1199,8 @@ namespace rnr
       static const int EAmbigCmd    = -4;  ///< ambiguous command
       static const int EUnknownCmd  = -5;  ///< unknown, unmatched command
       static const int EBadSyntax   = -6;  ///< bad syntax
-      static const int ENoOp        = -7;  ///< bad operation
+      static const int ENoOp        = -7;  ///< no operation
+      static const int ENoExec      = -8;  ///< cannot execute
   
       static const int Ok           =  OK; ///< (0) no error, success, good
 
@@ -1233,17 +1269,6 @@ namespace rnr
        *  \copydoc doc_return_cl
        */
       virtual int compile();
-  
-      /*!
-       * \brief Compile a command.
-       *
-       * \sa CommandLine::compile()
-       *
-       * \param cmddef  Command definition.
-       *
-       *  \copydoc doc_return_cl
-       */
-      virtual int compile(CmdDef &cmddef);
   
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1478,22 +1503,44 @@ namespace rnr
       }
 
       /*!
-       * \brief Get command with unique id.
+       * \brief Get the command definition with the unique id.
        *
        * \param uid   Command unique id.
        *
        * \return Command definition reference.
        */
-      const CmdDef &cmdAt(const int uid) const;
+      const CmdDef &at(const int uid) const;
 
       /*!
-       * \brief Get command with name.
+       * \brief Get command definition with the argv0 name.
        *
        * \param strName Command name.
        *
        * \return Command definition reference.
        */
-      const CmdDef &cmdAt(const std::string &strName) const;
+      const CmdDef &at(const std::string &strName) const;
+
+      /*!
+       * \brief Index operator.
+       *
+       * Get the command definition with the unique id.
+       *
+       * \param uid   Command unique id.
+       *
+       * \return Command definition reference.
+       */
+      const CmdDef &operator[](const int uid) const;
+
+      /*!
+       * \brief Index operator.
+       *
+       * Get the command definition with the unique id.
+       *
+       * \param strName Command name.
+       *
+       * \return Command definition reference.
+       */
+      const CmdDef &operator[](const std::string &strName) const;
 
       /*!
        * \brief Get the total number of added commands.
@@ -1644,7 +1691,9 @@ namespace rnr
       LogBook     m_log;          ///< trace and error log
 
       /*!
-       * \brief Get command with the given unique id.
+       * \brief Get modifiable command definition with the given unique id.
+       *
+       * Protected version of at().
        *
        * \param uid   Command unique id.
        *
@@ -1653,7 +1702,9 @@ namespace rnr
       CmdDef &cmdAt(const int uid);
 
       /*!
-       * \brief Get command with the given name.
+       * \brief Get modifiable command definition with the given argv0 name.
+       *
+       * Protected version of at().
        *
        * \param strName Command name.
        *
@@ -1763,7 +1814,30 @@ namespace rnr
                      size_t             start,
                      ssize_t            cursor,
                      TokenVec          &tokens);
+  
 
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Command Addition and Compile Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Compile a command.
+       *
+       * \sa CommandLine::compile()
+       *
+       * \param cmddef  Command definition.
+       *
+       *  \copydoc doc_return_cl
+       */
+      virtual int compile(CmdDef &cmddef);
+
+      /*!
+       * \brief Finalize command compilation.
+       *
+       *  \copydoc doc_return_cl
+       */
+      int finalize();
+  
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // Extended Usage Syntax Parsing Methods

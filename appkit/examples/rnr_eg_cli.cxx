@@ -586,17 +586,33 @@ static int execQuit(int uid, int iform, const StringVec &argv)
  */
 static int execAdopt(int uid, int iform, const StringVec &argv)
 {
-  AnimalInfo *p = findAnimal(argv[1]);
+  size_t  argc = argv.size();
+  size_t  n;  
+
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
+  {
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
+    return RC_ERROR;
+  }
+
+  n = 1;  // skip argv0
+
+  //
+  // Required arguments.
+  //
+
+  AnimalInfo *p = findAnimal(argv[n]);
 
   if( p == NULL )
   {
-    cout << "Error: Unknown animal '" << argv[1] << "'" << endl;
+    cout << "Error: Unknown animal '" << argv[n] << "'." << endl;
     return RC_ERROR;
   }
 
   else if( p->m_bIsAdopted )
   {
-    cout << "Error: The " << argv[1] << " is already adopted" << endl;
+    cout << "Error: The " << argv[n] << " is already adopted." << endl;
     return RC_ERROR;
   }
 
@@ -616,17 +632,15 @@ static int execAdopt(int uid, int iform, const StringVec &argv)
  */
 static int execSleep(int uid, int iform, const StringVec &argv)
 {
-  size_t        argc    = argv.size();
-  size_t        n;
-  ConvertedArg  cvt;
+  size_t  argc = argv.size();
+  size_t  n;  
 
   // optional defaults
   long    secs = 10;
 
-  const CmdDef &cmddef = ((const CommandLine)Cli).cmdAt(uid);
   if( argc < Cli.numOfRequiredArgs(uid, iform) )
   {
-    cout << "Error: Command '" << cmddef.getName()
+    cout << "Error: Command '" << Cli.at(uid).getName()
       << "' has missing arguments." << endl;
     return RC_ERROR;
   }
@@ -636,6 +650,7 @@ static int execSleep(int uid, int iform, const StringVec &argv)
   //
   // Required arguments.
   //
+
   AnimalInfo *p = findAnimal(argv[n]);
 
   if( p == NULL )
@@ -644,16 +659,23 @@ static int execSleep(int uid, int iform, const StringVec &argv)
     return RC_ERROR;
   }
 
+  else if( !p->m_bIsAdopted )
+  {
+    cout << "The " << p->m_sCommonName << " is not yours to rock to sleep."
+      << endl;
+    return OK;
+  }
+
   ++n;
 
   //
   // Optional arguments
   //
+
   if( n < argc )
   {
-    cvt = Cli.convert(uid, iform, n, argv[n]);
-
-    secs = cvt.i();
+    // convert to integer
+    secs = Cli.convert(uid, iform, n, argv[n]).i();
   }
 
   p->m_eActivity    = ActSleeping;
@@ -675,25 +697,41 @@ static int execSleep(int uid, int iform, const StringVec &argv)
  */
 static int execNameAnimal(int uid, int iform, const StringVec &argv)
 {
-  AnimalInfo *p = findAnimal(argv[1]);
+  size_t  argc = argv.size();
+  size_t  n;  
+
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
+  {
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
+    return RC_ERROR;
+  }
+
+  n = 1;  // skip argv0
+
+  //
+  // Required arguments.
+  //
+
+  AnimalInfo *p = findAnimal(argv[n]);
 
   if( p == NULL )
   {
-    cout << "Error: Unknown animal '" << argv[1] << "'" << endl;
+    cout << "Error: Unknown animal '" << argv[n] << "'" << endl;
     return RC_ERROR;
   }
 
   else if( !p->m_bIsAdopted )
   {
-    cout << "You have not adopted the " << argv[1] << endl;
+    cout << "You have not adopted the " << argv[n] << endl;
     return OK;
   }
 
-  else
-  {
-    p->m_strGivenName = argv[2];
-    return OK;
-  }
+  ++n;  // next argument
+
+  p->m_strGivenName = argv[n];
+
+  return OK;
 }
 
 /*!
@@ -719,46 +757,64 @@ static int execNamaste(int uid, int iform, const StringVec &argv)
  */
 static int execFeedAnimal(int uid, int iform, const StringVec &argv)
 {
-  AnimalInfo *p = findAnimal(argv[1]);
+  size_t  argc = argv.size();
+  size_t  n;  
+
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
+  {
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
+    return RC_ERROR;
+  }
+
+  n = 1;  // skip argv0
+
+  //
+  // Required arguments.
+  //
+
+  AnimalInfo *p = findAnimal(argv[n]);
 
   if( p == NULL )
   {
-    cout << "Error: Unknown animal '" << argv[1] << "'" << endl;
+    cout << "Error: Unknown animal '" << argv[n] << "'." << endl;
     return RC_ERROR;
   }
 
   else if( !p->m_bIsAdopted )
   {
-    cout << "The " << p->m_sCommonName << " is not yours to feed" << endl;
+    cout << "The " << p->m_sCommonName << " is not yours to feed." << endl;
     return OK;
   }
+
+  ++n;  // next argument
 
   const char **food = NULL;
   double      fSecs;
 
-  if( argv[2] == "ants" )
+  if( argv[n] == "ants" )
   {
     food  = AsciiAnt;
     fSecs = 30.0;
   }
-  else if( argv[2] == "carrots" )
+  else if( argv[n] == "carrots" )
   {
     food  = AsciiCarrot;
     fSecs = 10.0;
   }
-  else if( argv[2] == "grubs" )
+  else if( argv[n] == "grubs" )
   {
     food  = AsciiGrub;
     fSecs = 20.0;
   }
-  else if( argv[2] == "vitamins" )
+  else if( argv[n] == "vitamins" )
   {
     food  = AsciiVitamins;
     fSecs = 5.0;
   }
   else
   {
-    cout << "Error: Unknown food '" << argv[2] << "'" << endl;
+    cout << "Error: Unknown food '" << argv[n] << "'" << endl;
     return RC_ERROR;
   }
 
@@ -788,32 +844,53 @@ static int execFeedAnimal(int uid, int iform, const StringVec &argv)
  */
 static int execWalkAnimal(int uid, int iform, const StringVec &argv)
 {
-  AnimalInfo *p = findAnimal(argv[1]);
+  size_t  argc = argv.size();
+  size_t  n;  
+
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
+  {
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
+    return RC_ERROR;
+  }
+
+  n = 1;  // skip argv0
+
+  //
+  // Required arguments.
+  //
+
+  AnimalInfo *p = findAnimal(argv[n]);
 
   if( p == NULL )
   {
-    cout << "Error: Unknown animal '" << argv[1] << "'" << endl;
+    cout << "Error: Unknown animal '" << argv[n] << "'." << endl;
     return RC_ERROR;
   }
 
   else if( !p->m_bIsAdopted )
   {
-    cout << "The " << p->m_sCommonName << " is not yours to walk" << endl;
+    cout << "The " << p->m_sCommonName << " is not yours to walk." << endl;
     return OK;
   }
 
+  ++n;  // next argument
+
   double  minutes;
 
-  if( CommandLine::strToDouble(argv[2], minutes) < 0 )
-  {
-    cout << "Error: Cannot convert '" << argv[2] << "' to an integer" << endl;
-    return RC_ERROR;
-  }
+  // convert to double
+  minutes = Cli.convert(uid, iform, n, argv[n]).f();
 
   p->m_eActivity    = ActWalking;
   p->m_fActStart    = ActivityTime.now();
   p->m_fActDuration = (double)minutes * 60.0;
 
+  cout << "You are walking the " << p->m_sCommonName << " for " << minutes
+    << " minutes." << endl;
+
+  //
+  // Fun stuff
+  //
   const char *gait;
 
   //
@@ -826,9 +903,11 @@ static int execWalkAnimal(int uid, int iform, const StringVec &argv)
     printf("%*s%s\r", i, " ", gait);
     fflush(stdout);
     usleep(50000);
-    //printf("%*s\r", 80, " ");
-    //fflush(stdout);
   }
+
+  usleep(250000);
+  printf("%*s\r", 80, " ");
+  fflush(stdout);
 
   printf("\n");
 
@@ -863,86 +942,104 @@ static int execListAnimals(int uid, int iform, const StringVec &argv)
  */
 static int execGetPetsState(int uid, int iform, const StringVec &argv)
 {
-  AnimalInfo *p = findAnimal(argv[1]);
+  size_t  argc = argv.size();
+  size_t  n;  
+
+  // optional arguments defaults
+  long eState = 0;
+
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
+  {
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
+    return RC_ERROR;
+  }
+
+  n = 1;  // skip argv0
+
+  //
+  // Required arguments.
+  //
+
+  AnimalInfo *p = findAnimal(argv[n]);
 
   if( p == NULL )
   {
-    cout << "Error: Unknown animal '" << argv[1] << "'" << endl;
+    cout << "Error: Unknown animal '" << argv[n] << "'." << endl;
     return RC_ERROR;
   }
 
-  bool bAll   = false;
-  bool bGood  = false;
+  string  strAdoptState;
+  string  strActivity;
 
-  if( argv[2] == "all" )
-  {
-    bAll  = true;
-    bGood = true;
-  }
+  strAdoptState = p->m_bIsAdopted? "Adopted": "Not adopted";
 
-  if( bAll || argv[2] == "selfie" )
+  switch( p->m_eActivity )
   {
-    cout << p->m_sSelfie;
-    bGood = true;
-  }
-
-  if( bAll || argv[2] == "species" )
-  {
-    cout << p->m_sCommonName << " (" << p->m_sScientificName << ")" << endl;
-    bGood = true;
-  }
-
-  if( bAll || argv[2] == "adoption" )
-  {
-    if( p->m_bIsAdopted )
-    {
-      cout << "Adopted" << endl;
-    }
-    else
-    {
-      cout << "Not adopted" << endl;
-    }
-    bGood = true;
+    case ActIdle:
+      strActivity = "Just chill'n dude.";
+      break;
+    case ActSleeping:
+      strActivity = "Sleeping, don't wake me.";
+      break;
+    case ActEating:
+      strActivity = "Num, num, num.";
+      break;
+    case ActWalking:
+      strActivity = "And I'm walking, and walking, walking...";
+      break;
+    default:
+      strActivity = "I dunno what I'm doing.";
+      break;
   }
 
-  if( bAll || argv[2] == "name" )
+  ++n;  // next argument
+
+  //
+  // Optional arguments.
+  //
+
+  // 
+  // Argument 2
+  //
+  // State: all | adoption | given | activity | species | selfie
+  //
+  if( n < argc )
   {
-    cout << p->m_strGivenName << endl;
-    bGood = true;
+    // convert to enum index
+    eState = Cli.convert(uid, iform, n, argv[n]).e();
   }
 
-  if( bAll || argv[2] == "activity" )
+  switch( eState )
   {
-    switch( p->m_eActivity )
-    {
-      case ActIdle:
-        cout << "Just chill'n dude" << endl;
-        break;
-      case ActSleeping:
-        cout << "Sleeping, don't wake me" << endl;
-        break;
-      case ActEating:
-        cout << "Num, num, num" << endl;
-        break;
-      case ActWalking:
-        cout << "And I'm walking, and walking, walking..." << endl;
-        break;
-      default:
-        cout << "I dunno what I'm doing" << endl;
-        break;
-    }
-    bGood = true;
+    case 1: // adoption
+      cout << strAdoptState << endl;
+      break;
+    case 2: // given
+      cout << p->m_strGivenName << endl;
+      break;
+    case 3: // activity
+      cout << strActivity << endl;
+      break;
+    case 4: // species
+      cout << p->m_sCommonName << " (" << p->m_sScientificName << ")" << endl;
+      break;
+    case 5: // selfie
+      cout << p->m_sSelfie;
+      break;
+    case 0: // all
+      cout << p->m_sSelfie;
+      cout << p->m_sCommonName << " (" << p->m_sScientificName << ")" << endl;
+      cout << strAdoptState << endl;
+      cout << p->m_strGivenName << endl;
+      cout << strActivity << endl;
+      break;
+    default:
+      cout << "oops" << endl;
+      break;
   }
 
-  if( bGood )
-  {
-    return OK;
-  }
-  else
-  {
-    cout << "Error: " << "Unknown pet attribute '" << argv[2] << "'" << endl;
-    return RC_ERROR;
-  }
+  return OK;
 }
 
 /*!
@@ -954,27 +1051,48 @@ static int execGetPetsState(int uid, int iform, const StringVec &argv)
  */
 static int execReward(int uid, int iform, const StringVec &argv)
 {
-  AnimalInfo *p = findAnimal(argv[1]);
+  size_t  argc = argv.size();
+  size_t  n;  
+
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
+  {
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
+    return RC_ERROR;
+  }
+
+  n = 1;  // skip argv0
+
+  //
+  // Required Arguments
+  //
+
+  AnimalInfo *p = findAnimal(argv[n]);
 
   if( p == NULL )
   {
-    cout << "Error: Unknown animal '" << argv[1] << "'" << endl;
+    cout << "Error: Unknown animal '" << argv[n] << "'." << endl;
     return RC_ERROR;
   }
 
-  bool isgood;
-
-  if( CommandLine::strToBool(argv[2], isgood) < 0 )
+  else if( !p->m_bIsAdopted )
   {
-    cout << "Error: Cannot convert '" << argv[2] << "' to an boolean" << endl;
-    return RC_ERROR;
+    cout << "The " << p->m_sCommonName << " is not yours to reward." << endl;
+    return OK;
   }
+
+  ++n;  // next argument
+
+  bool isGood;
+
+  // convert to boolean
+  isGood = Cli.convert(uid, iform, n, argv[n]).b();
 
   cout << "Your " << p->m_sCommonName << " ";
 
   if( p->m_sCommonName == "aardvark" )
   {
-    if( isgood )
+    if( isGood )
     {
       cout << "is a good girl." << endl;
       cout << "She ate all of those pesky ants pilfering food in the kitchen."
@@ -989,7 +1107,7 @@ static int execReward(int uid, int iform, const StringVec &argv)
 
   else if( p->m_sCommonName == "mandrill" )
   {
-    if( isgood )
+    if( isGood )
     {
       cout << "is a good boy." << endl;
       cout << "You are now well groomed and free of fleas." << endl;
@@ -1003,7 +1121,7 @@ static int execReward(int uid, int iform, const StringVec &argv)
 
   else if( p->m_sCommonName == "numbat" )
   {
-    if( isgood )
+    if( isGood )
     {
       cout << "is a good lad." << endl;
       cout << "Those termites won't be invading any time soon." << endl;
@@ -1018,10 +1136,10 @@ static int execReward(int uid, int iform, const StringVec &argv)
 
   else if( p->m_sCommonName == "zebra" )
   {
-    if( isgood )
+    if( isGood )
     {
       cout << "is a good lass." << endl;
-      cout << "You rode her all the way into town this time without being "
+      cout << "You rode her all the way to town this time without being "
         << "thrown." << endl;
     }
     else
@@ -1033,7 +1151,7 @@ static int execReward(int uid, int iform, const StringVec &argv)
 
   else
   {
-    cout << " is " << (isgood? "good": "not good") << "." << endl;
+    cout << " is " << (isGood? "good": "not good") << "." << endl;
   }
 
   return OK;
@@ -1048,22 +1166,40 @@ static int execReward(int uid, int iform, const StringVec &argv)
  */
 static int execSave(int uid, int iform, const StringVec &argv)
 {
-  AnimalInfo *p = findAnimal(argv[1]);
+  size_t  argc = argv.size();
+  size_t  n;  
 
-  if( p == NULL )
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
   {
-    cout << "Error: Unknown animal '" << argv[1] << "'" << endl;
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
     return RC_ERROR;
   }
 
+  n = 1;  // skip argv0
+
+  //
+  // Required arguments.
+  //
+
+  AnimalInfo *p = findAnimal(argv[n]);
+
+  if( p == NULL )
+  {
+    cout << "Error: Unknown animal '" << argv[n] << "'." << endl;
+    return RC_ERROR;
+  }
+
+  ++n;  // next argument
+
   bool bSave = false;
 
-  if( access(argv[2].c_str(), F_OK) == 0 )
+  if( access(argv[n].c_str(), F_OK) == 0 )
   {
     string line;
     string ans;
 
-    cout << "Overwrite file '" << argv[2] << "'? [ny] ";
+    cout << "Overwrite file '" << argv[n] << "'? [ny] ";
 
     if( std::getline(cin, line) )
     {
@@ -1083,17 +1219,18 @@ static int execSave(int uid, int iform, const StringVec &argv)
   {
     ofstream selfie;
 
-    selfie.open(argv[2].c_str());
+    selfie.open(argv[n].c_str());
 
     if( selfie.is_open() )
     {
       selfie << p->m_sSelfie;
       selfie.close();
-      cout << argv[1] << " selfie writen to file '" << argv[2] << "'" << endl;
+      cout << "A " << p->m_sCommonName << " selfie writen to file '"
+        << argv[n] << "'." << endl;
     }
     else
     {
-      cout << "Error: Failed to open file '" << argv[2] << "'" << endl;
+      cout << "Error: Failed to open file '" << argv[n] << "'." << endl;
     }
   }
 
@@ -1101,15 +1238,89 @@ static int execSave(int uid, int iform, const StringVec &argv)
 }
 
 /*!
- * \brief Execute 'dump' command.
+ * \brief Execute command-line interface debug command.
  *
  * \param argv  Command line arguments.
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execDump(int uid, int iform, const StringVec &argv)
+static int execCliTest(int uid, int iform, const StringVec &argv)
 {
-  cout << Cli << endl;
+  size_t  argc = argv.size();
+  size_t  n;  
+
+  if( argc < Cli.numOfRequiredArgs(uid, iform) )
+  {
+    cout << "Error: Command '" << Cli.at(uid).getName()
+      << "' has missing arguments." << endl;
+    return RC_ERROR;
+  }
+
+  n = 0;  // argv0 is the test function
+
+  if( argv[n] == "dump" )
+  {
+    cout << Cli << endl;
+  }
+  else if( argv[n] == "bt" )
+  {
+    Cli.backtrace(cout, true);
+  }
+  else if( argv[n] == "print" )
+  {
+    ++n;  // next argument
+    if( n < argc )
+    {
+      if( argv[n] == "name" )
+      {
+        cout << Cli.getName() << endl;
+      }
+      else if( argv[n] == "prompt" )
+      {
+        cout << Cli.getPrompt() << endl;
+      }
+      else if( argv[n] == "numcmds" )
+      {
+        cout << Cli.numOfCmds() << endl;
+      }
+      else if( argv[n] == "errstr" )
+      {
+        cout << Cli.getErrorStr() << endl;
+      }
+      else
+      {
+        cout << "Error: Unknown <attr> '" << argv[n] << "'." << endl;
+        return RC_ERROR;
+      }
+    }
+    else
+    {
+      cout << "Error: Nothing to get." << endl;
+      return RC_ERROR;
+    }
+  }
+  else if( argv[n] == "push" )
+  {
+    ++n;  // next argument
+    if( n < argc )
+    {
+      Cli.pushPrompt(argv[n]);
+    }
+    else
+    {
+      cout << "Error: Nothing to push." << endl;
+      return RC_ERROR;
+    }
+  }
+  else if( argv[n] == "pop" )
+  {
+    Cli.popPrompt();
+  }
+  else
+  {
+    cout << "Error: Do not know how to execute '" << argv[n] << "'." << endl;
+    return RC_ERROR;
+  }
 
   return OK;
 }
@@ -1131,15 +1342,17 @@ CmdExec Commands[] =
   { { "help",
       "help [{--usage | -u}] [<cmd:word>]",
       "Print this help.",
-      NULL
+      "Print command help. If the --usage option is specified, then only the "
+      "command(s) usages are printed. If the <cmd> is specified, then only "
+      "help for that command is printed. Otherwise all command help is printed."
     },
     execHelp
   },
 
   { { "quit",
       "quit",
-      "Quit test.",
-      NULL,
+      "Quit example application.",
+      NULL
     },
     execQuit
   },
@@ -1147,7 +1360,11 @@ CmdExec Commands[] =
   { { "adopt",
       "adopt <animal>",
       "Adopt an available animal",
-      NULL,
+      "Adopt a cuddly animal. In order to name, feed, walk, sleep, or reward "
+      "an animal, "
+      "you must adopt first. See the 'list' command for list of animals and "
+      "the 'get' command for an animal's current state of being.\n\n"
+      "Demonstrates a variable with default 'word' type."
     },
     execAdopt
   },
@@ -1155,7 +1372,10 @@ CmdExec Commands[] =
   { { "sleep",
       "sleep <animal> [<seconds:int>]",
       "Sleep for some <seconds> because, why not?",
-      NULL,
+      "Put your adopted animal to sleep (no, not kill you brute). "
+      "The <animal> goes to sleep for the given seconds.\n"
+      "  Default: 10 seconds\n\n"
+      "Demonstrates an optional integer variable."
     },
     execSleep
   }, 
@@ -1163,7 +1383,9 @@ CmdExec Commands[] =
   { { "name",
       "name <animal> <name:multiword>",
       "Name your cute adopted pet.",
-      NULL,
+      "Name your adopted animal. Double qoute '\"' the name if it contains "
+      "any whitespace.\n\n"
+      "Demonstrates a multword variable type."
     },
     execNameAnimal
   },
@@ -1171,7 +1393,8 @@ CmdExec Commands[] =
   { { "namaste",
       "namaste",
       "Bow to the divine ewe.",
-      NULL,
+      "Say namaste.\n\n"
+      "Demonstrates commands with similar names such as 'name' and 'namaste'."
     },
     execNamaste
   },
@@ -1182,7 +1405,10 @@ CmdExec Commands[] =
       "feed {mandrill | zebra} carrots\n"
       "feed <animal:re> vitamins",
       "Feed your pet some nutritious food.",
-      NULL,
+      "Feed your adopted animal. Of course, the food has to match the "
+      "animal's diet.\n\n"
+      "Demonstrates multi-form commands and enumerated literal arguments. "
+      "Also demonstrate a regular expresson variable type (future)."
     },
     execFeedAnimal
   },
@@ -1190,7 +1416,8 @@ CmdExec Commands[] =
   { { "walk",
       "walk <animal> <minutes:fpn>",
       "Walk your adopted pet for some fun-filled <minutes>",
-      NULL,
+      "Walk your adopted animal for the specified minutes.\n\n"
+      "Demonstrates a floating-point number variable."
     },
     execWalkAnimal
   },
@@ -1198,15 +1425,17 @@ CmdExec Commands[] =
   { { "list",
       "list",
       "Get list of animals.",
-      NULL,
+      NULL
     },
     execListAnimals
   },
 
   { { "get",
-      "get <animal> {adoption | given | activity | species | selfie | all}",
+      "get <animal> [{all | adoption | given | activity | species | selfie}]",
       "Get an animal's current (partial) state.",
-      NULL,
+      "Get the animal's state of being.\n"
+      "  Default: all\n\n"
+      "Demonstrates optional enumerated literal arguments."
     },
     execGetPetsState
   },
@@ -1214,7 +1443,8 @@ CmdExec Commands[] =
   { { "reward",
       "reward <animal> <good:bool>",
       "Do [not] reward your pet for its behaviour.",
-      NULL,
+      "Reward your adopted animal or not.\n\n"
+      "Demonstrates a boolean variable."
     },
     execReward
   },
@@ -1222,17 +1452,28 @@ CmdExec Commands[] =
   { { "save",
       "save <animal:word> <fname:file>",
       "Save ascii animal to file.",
-      NULL,
+      "Save an animal's ASCII redention to a file. The art is fantastic btw."
+      "If the file exist, you will be prompted if you wish to overwrite.\n\n"
+      "Demonstrates a file variable type."
     },
     execSave
   },
 
-  { { "dump",
-      "dump",
-      "Dump CommandLine data",
-      NULL,
+  { { "clitest",
+      "<clitest:word> [<modifier:multiword>]",
+      "Test CommandLine features.",
+      "The 'clitest' command validates command wild carding and provides test "
+      "functions to validate the CommandLine and underlining classes.\n\n"
+      "Supported Test Functions:\n"
+      "dump           - Dump definitions.\n"
+      "bt             - Backtrace log.\n"
+      "print <attr>   - Print attribute, where <attr> is one of:\n"
+      "                   name prompt numcmds errstr.\n"
+      "push <prompt>  - Push new <prompt> string.\n"
+      "pop            - Pop current prompt string.\n\n"
+      "Demonstrates command name wild carding."
     },
-    execDump
+    execCliTest
   }
 };
 
