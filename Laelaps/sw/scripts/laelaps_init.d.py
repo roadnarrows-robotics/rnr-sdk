@@ -19,7 +19,7 @@
 ## \author Robin Knight (robin.knight@roadnarrows.com)
 ##  
 ## \par Copyright:
-##   (C) 2016.  RoadNarrows LLC.\n
+##   (C) 2016-2017.  RoadNarrows LLC.\n
 ##   (http://www.roadnarrows.com)\n
 ##   All Rights Reserved
 ##
@@ -30,6 +30,7 @@
 
 import sys
 import os
+import platform
 import time
 import math
 import subprocess
@@ -86,6 +87,42 @@ reDoneDone    = re.compile(r"done.*done", re.DOTALL | re.IGNORECASE)
 reFailDone    = re.compile(r"fail.*done", re.DOTALL | re.IGNORECASE)
 reRunning     = re.compile(r"\s*is\s*running", re.IGNORECASE)
 reNotRunning  = re.compile(r"\s*is\s*not\s*running", re.IGNORECASE)
+reActive      = re.compile(r"\s*active:\s*active.*", re.IGNORECASE)
+reInactive    = re.compile(r"\s*active:\s*inactive.*", re.IGNORECASE)
+
+#
+## \brief Determine the OS specifics.
+##
+## \return Return a 3-tuple (osname, version, id)
+#
+def os_distribution():
+  try:
+    return platform.linux_distribution()
+  except:
+    return ('n/a', 'n/a', 'n/a')
+
+#
+## \brief Determine if OS version 1 is greater or equal to version 2.
+##
+## The version is expected to be in major[.minor] format.
+##
+## \param v1  Version 1 as a string, float, or int.
+## \param v2  Version 2 as a string, float, or int.
+##
+## \return Returns True or False.
+#
+def os_ver_ge(v1, v2):
+  if type(v1) is 'str':
+    try:
+      v1 = float(v1)
+    except:
+      v1 = 0;
+  if type(v2) is 'str':
+    try:
+      v2 = float(v2)
+    except:
+      v2 = 0;
+  return v1 >= v2
 
 
 # ------------------------------------------------------------------------------
@@ -137,6 +174,7 @@ class window(Frame):
   ## \return Modified keywords sans this specific class.
   #
   def initData(self, kw):
+    self.m_osdist         = os_distribution()
     self.m_debug          = False # default debug level
     self.m_icons          = {}    # must keep loaded icons referenced
     self.m_wBttn          = {}    # button widgets
@@ -574,7 +612,7 @@ class window(Frame):
   #
   ## \brief Set service status field.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## \param status  Service status. One of: 'running' 'stopped' 'unknown'
   #
   def setStatus(self, service, status):
@@ -596,93 +634,117 @@ class window(Frame):
   #
   ## \brief Execute 'service <service> start' subprocess.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## 
   ## \return Returns True on success, False on failure.
   #
   def execStart(self, service):
-    s = ''
+    rsp = ''
     hasLock = self.m_lock.acquire()
     try:
-      s = subprocess.check_output(["service", service, "start"],
+      rsp = subprocess.check_output(["service", service, "start"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
       self.m_lock.release()
       return False
     self.m_lock.release()
-    if reFail.search(s):
-      return False
+    if os_ver_ge(self.m_osdist[1], 15.04):
+      return True  # no output 
     else:
-      return True
+      if reFail.search(rsp):
+        return False
+      else:
+        return True
 
   #
   ## \brief Execute 'service <service> stop' subprocess.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## 
   ## \return Returns True on success, False on failure.
   #
   def execStop(self, service):
-    s = ''
+    rsp = ''
     hasLock = self.m_lock.acquire()
     try:
-      s = subprocess.check_output(["service", service, "stop"],
+      rsp = subprocess.check_output(["service", service, "stop"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
       self.m_lock.release()
       return False
     self.m_lock.release()
-    if reFail.search(s):
-      return False
+    if os_ver_ge(self.m_osdist[1], 15.04):
+      return True  # no output 
     else:
-      return True
+      if reFail.search(rsp):
+        return False
+      else:
+        return True
 
   #
   ## \brief Execute 'service <service> restart' subprocess.
   ##
-  ## \param servcie Service (key).
+  ## \param service Service (key).
   ## 
   ## \return Returns True on success, False on failure.
   #
   def execRestart(self, service):
-    s = ''
+    rsp = ''
     hasLock = self.m_lock.acquire()
     try:
-      s = subprocess.check_output(["service", service, "restart"],
+      rsp = subprocess.check_output(["service", service, "restart"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
       self.m_lock.release()
       return False
     self.m_lock.release()
-    if reDoneDone.search(s):
-      return True
-    elif reFailDone.search(s):
-      return True
+    if os_ver_ge(self.m_osdist[1], 15.04):
+      return True  # no output 
     else:
-      return False
+      if reDoneDone.search(rsp):
+        return True
+      elif reFailDone.search(rsp):
+        return True
+      else:
+        return False
 
   #
   ## \brief Execute 'service <service> status' subprocess.
   ##
-  ## \param servcie Service (key).
+  ## On Ubuntu 16.04+ the output to 'service <service> status' changed. It does
+  ## call the init.d script, but rather uses the systemd calls. These output
+  ## muliple lines of info. So this script now supports the new interace but
+  ## is also backwards capatible with Ubuntu 14.04- releases (hopefully).
+  ##
+  ## \param service Service (key).
   ##
   ## \return Service status. One of: 'running' 'stopped' 'unknown'
   #
   def execStatus(self, service):
-    s = ''
+    rsp = ''
     hasLock = self.m_lock.acquire()
     try:
-      s = subprocess.check_output(["service", service, "status"],
+      rsp = subprocess.check_output(["service", service, "status"],
                                   stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError, inst:
-      s = inst.output
+      rsp = inst.output
     self.m_lock.release()
-    if reRunning.search(s):
-      return ('running', s)
-    elif reNotRunning.search(s):
-      return ('stopped', s)
+
+    if os_ver_ge(self.m_osdist[1], 15.04):
+      rsp = rsp.split("\n")
+      for line in rsp:
+        if reActive.search(line):
+          return ('running', line)
+        elif reInactive.search(line):
+          return ('stopped', line)
+      return ('unknown', "")
     else:
-      return ('unknown', s)
+      if reRunning.search(rsp):
+        return ('running', rsp)
+      elif reNotRunning.search(rsp):
+        return ('stopped', rsp)
+      else:
+        return ('unknown', rsp)
 
 
 # ------------------------------------------------------------------------------

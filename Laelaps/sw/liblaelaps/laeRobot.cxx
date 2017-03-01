@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015-2016  RoadNarrows
+ * (C) 2015-2017  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */
@@ -350,13 +350,17 @@ int LaeRobot::disconnect()
   m_threadWatchDog.terminateThread();
   m_threadKin.terminateThread();
   m_threadImu.terminateThread();
+#if 0 // RDK
   m_threadRange.terminateThread();
+#endif // RDK
 
   m_kin.close();              // close motors
   m_imu.close();              // on usb device
   m_i2cBus.close();           // sensors/watchdog on i2c device
 
+#if 0 // RDK
   m_range.clear();
+#endif // RDK
 
   // reset robot state
   m_bIsConnected      = false;
@@ -884,6 +888,7 @@ int LaeRobot::connSensors()
     LOGDIAG2("Connected to IMU %s.", strIdent.c_str());
   }
 
+#if 0 // RDK
   if( (rc = m_range.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer)) < 0 )
   {
     LOGERROR("Failed to read range sensor group interface version.");
@@ -894,6 +899,7 @@ int LaeRobot::connSensors()
     LOGDIAG2("Connected to Range Sensor Group %u.%u, fwver=%u.",
         uVerMajor, uVerMinor, uFwVer);
   }
+#endif // RDK
 
   return rc;
 }
@@ -989,6 +995,7 @@ int LaeRobot::configForOperation()
     LOGERROR("Failed to tune IMU.");
   }
 
+#if 0 // RDK
   //
   // Configure range sensors from product description.
   //
@@ -1004,6 +1011,7 @@ int LaeRobot::configForOperation()
   {
     LOGERROR("Failed to configure range sensor group.");
   }
+#endif // RDK
 
   //
   // Good
@@ -1044,6 +1052,7 @@ int LaeRobot::startCoreThreads()
   //
   // Time-of-Flight range sensors thread.
   //
+#if 0 // RDK
   nPriority = LaeThreadRange::ThreadRangePrioDft;
   fHz       = m_tunes.getRangeHz();
 
@@ -1051,6 +1060,7 @@ int LaeRobot::startCoreThreads()
   {
     return rc;
   }
+#endif // RDK
 
   //
   // Inertia Measurement Unit thread.
