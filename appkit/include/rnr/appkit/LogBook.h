@@ -53,8 +53,8 @@
  */
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _LOG_BOOK_H
-#define _LOG_BOOK_H
+#ifndef _RNR_LOG_BOOK_H
+#define _RNR_LOG_BOOK_H
 
 #include <sys/types.h>
 #include <sys/time.h>
@@ -73,6 +73,9 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
+/*!
+ * \brief RoadNarrows Robotics Namespace
+ */
 namespace rnr
 {
   class LogBook
@@ -1004,4 +1007,4 @@ namespace rnr
 
 } // namespace rnr
 
-#endif // _LOG_BOOK_H
+#endif // _RNR_LOG_BOOK_H

@@ -12,7 +12,7 @@
  *
  * \brief The ReadLine wrapper class implementaion.
  *
- * ReadLine provides a wrapper around the readline command-line library.
+ * ReadLine provides a wrapper around the readline command-line C library.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *

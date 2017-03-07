@@ -1,20 +1,21 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Package:     RoadNarrows Robotics ROS Chess Engine Package
+// Package:   RoadNarrows Robotics Application Tool Kit
 //
-// Link:        https://github.com/roadnarrows-robotics/rnr-sdk
+// Link:      https://github.com/roadnarrows-robotics/rnr-sdk
 //
-// Library:     librnr_appkit
+// Library:   librnr_appkit
 //
-// File:        ReadLine.h
+// File:      ReadLine.h
 //
 /*! \file
  *
  * \brief The thin ReadLine wrapper class interface.
  *
- * ReadLine provides a wrapper around the readline command-line library.
+ * ReadLine provides a wrapper around the readline command-line C library.
  *
- * \note Define HAVE_READLINE to compile interface with libreadline.
+ * \note Define HAVE_READLINE to compile interface with the libreadline
+ * library.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
@@ -57,8 +58,8 @@
  */
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _READ_LINE_H
-#define _READ_LINE_H
+#ifndef _RNR_READ_LINE_H
+#define _RNR_READ_LINE_H
 
 #include <sys/types.h>
 #include <unistd.h>
@@ -79,7 +80,7 @@
 
 
 /*!
- * \brief RoadNarrows Robotics Command
+ * \brief RoadNarrows Robotics Command Namespace
  */
 namespace rnr
 {
@@ -735,4 +736,4 @@ namespace rnr
 } // namespace rnr
 
 
-#endif // _READ_LINE_H
+#endif // _RNR_READ_LINE_H

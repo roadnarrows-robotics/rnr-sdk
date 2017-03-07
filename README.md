@@ -6,7 +6,7 @@ RoadNarrows robotic products, sensors, and intelligent systems.
 Private
 
 ## Copyright
-&#169; 2002-2016 RoadNarrows LLC
+&#169; 2002-2017 RoadNarrows LLC
 
 ## License
 RoadNarrows Restricted (unless otherwise stated)

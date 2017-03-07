@@ -61,7 +61,7 @@ pkgroot		= ../../..
 # Programs
 
 # Distribution Static Libraries
-TEST_PGMS = ut-librnr_appkit utThread utLogBook
+TEST_PGMS = ut-librnr_appkit utThread utRegEx 
 
 # Linked Libraries 
 ut-librnr_appkit.LIBS = \
@@ -69,11 +69,11 @@ ut-librnr_appkit.LIBS = \
 	pthread stdc++
 
 utThread.LIBS = rnr_appkit rnr pthread stdc++
-utLogBook.LIBS = rnr_appkit rnr stdc++
+utRegEx.LIBS = rnr_appkit rnr stdc++
 
 ut-librnr_appkit.LIBDEPS	= gtest rnr_appkit
 utThread.LIBDEPS = rnr_appkit
-utLogBook.LIBDEPS = rnr_appkit rnr stdc++
+utRegEx.LIBDEPS = rnr_appkit rnr stdc++
 
 #------------------------------------------------------------------------------
 # Sources
@@ -85,7 +85,7 @@ ut-librnr_appkit.SRC.CXX = \
 
 utThread.SRC.CXX = utThread.cxx
 
-utLogBook.SRC.CXX = utLogBook.cxx
+utRegEx.SRC.CXX = utRegEx.cxx
 
 #------------------------------------------------------------------------------
 # Optional Variables 

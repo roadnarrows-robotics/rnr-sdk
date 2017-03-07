@@ -2,6 +2,8 @@
 //
 // Package:   RoadNarrows Robotics Application Tool Kit
 //
+// Link:      https://github.com/roadnarrows-robotics/rnr-sdk
+//
 // Library:   librnr_cam
 //
 // File:      StateWinCamera.h
@@ -20,7 +22,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2012-2016.  RoadNarrows LLC
+ * (C) 2012-2017.  RoadNarrows LLC
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */

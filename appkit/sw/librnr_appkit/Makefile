@@ -81,6 +81,7 @@ rnr_appkit.SRC.CXX = \
 	LogBook.cxx \
 	Random.cxx \
 	ReadLine.cxx \
+	RegEx.cxx \
 	Session.cxx \
 	State.cxx \
 	StateKb.cxx \

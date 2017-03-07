@@ -22,5 +22,11 @@ RoadNarrows Restricted. See the EULA for more details.
 * c
 * stdc++
 
+## ToDo
+* Add RegEx class based on libc regex.
+* Add re type to CommandLine class.
+* Add int and fpn range to CommandLine class.
+* Add static now double method to Time class
+
 ## See Also
 See documentation for more details.

@@ -53,8 +53,8 @@
  */
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _COMMAND_LINE_H
-#define _COMMAND_LINE_H
+#ifndef _RNR_COMMAND_LINE_H
+#define _RNR_COMMAND_LINE_H
 
 #include <unistd.h>
 #include <stdlib.h>
@@ -2348,4 +2348,4 @@ namespace rnr
   } // namespace cmd
 } // namespace rnr
 
-#endif // _COMMAND_LINE_H
+#endif // _RNR_COMMAND_LINE_H

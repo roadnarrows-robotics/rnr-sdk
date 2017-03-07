@@ -2,6 +2,8 @@
 //
 // Package:   RoadNarrows Robotics Application Tool Kit
 //
+// Link:      https://github.com/roadnarrows-robotics/rnr-sdk
+//
 // Library:   librnr_appkit
 //
 // File:      State.h

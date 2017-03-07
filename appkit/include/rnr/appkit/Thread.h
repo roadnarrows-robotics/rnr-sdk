@@ -2,6 +2,8 @@
 //
 // Package:   RoadNarrows Robotics Application Tool Kit
 //
+// Link:      https://github.com/roadnarrows-robotics/rnr-sdk
+//
 // Library:   librnr_appkit
 //
 // File:      Thread.h
@@ -16,7 +18,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2015-2016  RoadNarrows
+ * (C) 2015-2017  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */

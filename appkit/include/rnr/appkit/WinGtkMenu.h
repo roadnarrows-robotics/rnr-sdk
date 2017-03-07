@@ -2,6 +2,8 @@
 //
 // Package:   RoadNarrows Robotics Application Tool Kit
 //
+// Link:      https://github.com/roadnarrows-robotics/rnr-sdk
+//
 // Library:   librnr_wingtk
 //
 // File:      WinGtkMenu.h
@@ -17,7 +19,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2011-2016  RoadNarrows
+ * (C) 2011-2017  RoadNarrows
  * (http://www.roadnarrows.com)
  * \n All Rights Reserved
  */
