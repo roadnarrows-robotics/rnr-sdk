@@ -153,18 +153,6 @@ ReadLine::ReadLine(const string strName,
                    bool         bUseRlLib) :
     m_strName(strName), m_strPrompt(strPrompt), m_bUseRlLib(bUseRlLib)
 {
-  //
-  // Only one instance of this class can be instantiated since:
-  //  1. The readline library provides no user argument for callbacks to use.
-  //  2. Boost function/bind does work with non-static member functions AND
-  //     readline C callback function pointers.
-  //  3. And most importantly, readline library uses global variables.
-  //
-  assert(ThisObj == NULL);
-
-  // limitation of readline library which does not provide context feedback
-  ThisObj = this;
-
   m_uLineNum    = 0;
   m_bEoF        = false;
   m_bFError     = false;
@@ -173,6 +161,15 @@ ReadLine::ReadLine(const string strName,
   m_pAppArg     = NULL;
 
 #ifdef HAVE_READLINE
+  //
+  // Only one instance of this class can be instantiated since:
+  //  1. The readline library provides no user argument for callbacks to use.
+  //  2. And most importantly, readline library uses global variables.
+  //
+  assert(ThisObj == NULL);
+
+  // limitation of readline library which does not provide context feedback
+  ThisObj = this;
 
   // tell readline completer that we want a crack at it first before default
   rl_attempted_completion_function = ReadLine::completionWrapper;

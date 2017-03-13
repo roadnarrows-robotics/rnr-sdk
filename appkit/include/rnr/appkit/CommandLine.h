@@ -68,6 +68,7 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
+#include "rnr/appkit/RegEx.h"
 #include "rnr/appkit/LogBook.h"
 #include "rnr/appkit/ReadLine.h"
 
@@ -80,7 +81,7 @@
  * \defgroup doc_return_cl doc_return_cl
  * \{
 \return
-On success, Ok(0) is returned.
+On success, AOk(0) is returned.
 On error, a CommandLine error code (\< 0) is returned.
 See \ref getErroStr() and backtrace() to retrieve or print error(s).
  * \}
@@ -103,6 +104,321 @@ namespace rnr
   namespace cmd
   {
     //--------------------------------------------------------------------------
+    // ExtArg Class
+    //--------------------------------------------------------------------------
+
+    /*!
+     * \brief EXTended ARGument class holding parsed command context and
+     * the raw and converted argmument values.
+     *
+     * Extended arguments are an alternative command interface to the standard
+     * simple command string arguments.
+     */
+    class ExtArg
+    {
+    public:
+      /*!
+       * \brief Converted types.
+       */
+      enum CvtType
+      {
+        CvtTypeUndef,       ///< unknown or uninitialized type
+        CvtTypeString,      ///< string type
+        CvtTypeEnum,        ///< index into literal enumeration list
+        CvtTypeBoolean,     ///< boolean type
+        CvtTypeInteger,     ///< integer type
+        CvtTypeFpn          ///< floating-point number type
+      };
+
+      /*!
+       * \brief Default constructor.
+       */
+      ExtArg();
+
+      /*!
+       * \brief Initialization constructor.
+       *
+       * \param nCmdUid       Command definition unique id.
+       * \param nFormIndex    Form definition index.
+       * \param nArgIndex     Argument definition index.
+       * \param nArgInstance  Argument instance (FUTURE).
+       * \param strArg        Source argument string.
+       */
+      ExtArg(const int         &nCmdUid,
+             const int         &nFormIndex,
+             const int         &nArgIndex,
+             const int         &nArgInstance,
+             const std::string &strArg);
+
+      /*!
+       * \brief Copy constructor.
+       *
+       * \param src Source object.
+       */
+      ExtArg(const ExtArg &src);
+
+      /*!
+       * \brief Destructor.
+       */
+      virtual ~ExtArg();
+
+      /*!
+       * \brief Assignment operator.
+       *
+       * \param rhs   Right-hand side object.
+       *
+       * \return *this
+       */
+      ExtArg &operator=(const ExtArg &rhs);
+
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Parsed Command Context Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Get the argument's associated parsed command unique id.
+       *
+       * \return Unique id.
+       */
+      int uid() const { return m_nCmdUid; }
+
+      /*!
+       * \brief Get the argument's associated parsed form definition index.
+       *
+       * \return Form index.
+       */
+      int formIndex() const { return m_nFormIndex; }
+
+      /*!
+       * \brief Get the argument's associated parsed argument definition index.
+       *
+       * \return Argument index.
+       */
+      int argIndex() const { return m_nArgIndex; }
+
+      /*!
+       * \brief Get the argument's instance number of (uid, formindex, argindex)
+       * parsed argument definition index.
+       *
+       * FUTURE
+       *
+       * \return Argument index.
+       */
+      int argInstance() const { return m_nArgInstance; }
+
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Argument Access Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Get raw source argument string (or a pirate grunting).
+       *
+       * \return String.
+       */
+      const std::string &arg() const { return m_strArg; }
+
+      /*!
+       * \brief Check if converted value is valid.
+       *
+       * \return Returns true or false.
+       */
+      bool isValid() const { return m_eCvtType != CvtTypeUndef; }
+
+      /*!
+       * \brief Get the converted argument type.
+       *
+       * \return ExtArg::CvtType value.
+       */
+      CvtType type() const { return m_eCvtType; }
+
+      /*!
+       * \brief Get the converted string value.
+       *
+       * \return Returns string.
+       */
+      const std::string &s() const { return m_strCvtVal; }
+
+      /*!
+       * \brief Get the converted enumeration index value.
+       *
+       * \return Returns index.
+       */
+      long e() const { return m_lCvtVal; }
+
+      /*!
+       * \brief Get the converted boolean value.
+       *
+       * \return Returns bool.
+       */
+      bool b() const { return m_bCvtVal; }
+
+      /*!
+       * \brief Get the converted integer value.
+       *
+       * \return Returns long.
+       */
+      long i() const { return m_lCvtVal; }
+
+      /*!
+       * \brief Get the converted floating-point number value.
+       *
+       * \return Returns double.
+       */
+      double f() const { return m_fCvtVal; }
+
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Comparison Operators
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \{
+       *
+       * \brief Comparison operator this == rval.
+       *
+       * \param rval   Rvalue object.
+       *
+       * \return Returns true if equal, false otherwise.
+       */
+      bool operator==(const ExtArg &rval) const;
+
+      bool operator==(const std::string &rval) const;
+
+      bool operator==(const char* const &rval) const;
+
+      bool operator==(const bool &rval) const;
+
+      bool operator==(const long &rval) const;
+
+      bool operator==(const double &rval) const;
+      /*!
+       * \}
+       */
+
+      /*!
+       * \{
+       *
+       * \brief Comparison operator this != rval.
+       *
+       * \param rval   Rvalue object.
+       *
+       * \return Returns true if not equal, false otherwise.
+       */
+      bool operator!=(const ExtArg &rval) const { return !(*this == rval); }
+
+      bool operator!=(const std::string &rval) const {return !(*this == rval);}
+
+      bool operator!=(const char* const &rval) const {return !(*this == rval);}
+
+      bool operator!=(const bool &rval) const { return !(*this == rval); }
+
+      bool operator!=(const long &rval) const { return !(*this == rval); }
+
+      bool operator!=(const double &rval) const { return !(*this == rval); }
+      /*!
+       * \}
+       */
+
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Output Methods and Operators
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+      /*!
+       * \brief Insert object into output stream.
+       *
+       * \param os  Output stream.
+       * \param arg Object to insert.
+       *
+       * \return Reference to output stream.
+       */
+      friend std::ostream &operator<<(std::ostream &os, const ExtArg &arg);
+
+      /*!
+       * \brief Insert object into LogBook pending entry.
+       *
+       * \param log LogBook stream.
+       * \param arg Object to insert.
+       *
+       * \return Reference to LogBook.
+       */
+      friend LogBook &operator<<(LogBook &log, const ExtArg &arg);
+
+      //
+      // Friends
+      //
+      friend class CmdArgDef;
+
+    protected:
+      // command context 
+      int         m_nCmdUid;      ///< command definition unique id
+      int         m_nFormIndex;   ///< form definition index
+      int         m_nArgIndex;    ///< argument definition index
+      int         m_nArgInstance; ///< argument instance (FUTURE)
+
+      // raw value
+      std::string m_strArg;       ///< argument unconverted raw value string
+
+      // converted type and value
+      CvtType     m_eCvtType;     ///< converted type
+      std::string m_strCvtVal;    ///< converted string value
+      bool        m_bCvtVal;      ///< converted boolean value
+      long        m_lCvtVal;      ///< converted integer/index value
+      double      m_fCvtVal;      ///< converted float-point number value
+
+      /*!
+       * \brief Set the argument string value.
+       *
+       * \param strArg  Source argument string.
+       */
+      void arg(const std::string &strArg)
+      {
+        m_strArg = strArg;
+      }
+
+      /*!
+       * \brief Set the converted string value.
+       *
+       * \param strVal    Value to set.
+       */
+      void s(const std::string &strVal);
+
+      /*!
+       * \brief Set the converted index into literal enum list value.
+       *
+       * \note A literal has both a string and integer enumeration. So any
+       * relevant operators and methods supports both interface.
+       *
+       * \param eVal    Value to set.
+       */
+      void e(const long eVal);
+
+      /*!
+       * \brief Set the converted boolean value.
+       *
+       * \param bVal    Value to set.
+       */
+      void b(const bool bVal);
+
+      /*!
+       * \brief Set the converted integer value.
+       *
+       * \param lVal    Value to set.
+       */
+      void i(const long lVal);
+
+      /*!
+       * \brief Set the converted floating-point number value.
+       *
+       * \param fVal    Value to set.
+       */
+      void f(const double fVal);
+    };
+
+
+    //--------------------------------------------------------------------------
     // Convenience 
     //--------------------------------------------------------------------------
 
@@ -110,12 +426,13 @@ namespace rnr
      * \brief Useful types.
      */
     typedef std::vector<std::string>  StringVec;  ///< vector of strings type
+    typedef std::vector<ExtArg>       ExtArgVec;  ///< vector of ext. args type
 
     /*!
      * \brief Command execution function type, variant 1.
      *
-     * With this variant, only the command input arguments are provided to the
-     * function.
+     * With this variant, a vector of command line strings argument are
+     * provided to the function.
      *
      * The arguments have been validated against the associated extended syntax.
      *
@@ -123,7 +440,8 @@ namespace rnr
      * development. It is external to the core CommandLine functionality.
      *
      * \param [in] argv Vector of string arguments produced from a successful
-     *                  return from the readCommand() call.
+     *                  return from the relevant readCommand() call. The argv[0]
+     *                  argument is the command name.
      *
      * \return User defined return code.
      */
@@ -132,25 +450,22 @@ namespace rnr
     /*!
      * \brief Command execution function type, variant 2.
      *
-     * With this variant, the matched command unique id and form index are also
-     * provide, in addition to the input arguments.
-     *
-     * With the uid,iform pair, the CommandLine attribute and conversion
-     * methods are accessable. 
+     * With this variant, a vector of command line extended arguments are
+     * provided to the function. Each extended argument provide matched command
+     * context. Moreover, each argument has been converted to its basic type.
      *
      * The arguments have been validated against the associated extended syntax.
      *
      * This function type is provided as a convenience for application
      * development. It is external to the core CommandLine functionality.
      *
-     * \param [in] uid    Command unique id.
-     * \param [in] iform  Command form index.
-     * \param [in] argv   Vector of string arguments produced from a successful
-     *                    return from the readCommand() call.
+     * \param [in] argv Vector of extended arguments produced from a successful
+     *                  return from the relevant readCommand() call. The argv[0]
+     *                  argument is the command name.
      *
      * \return User defined return code.
      */
-    typedef int (*CmdExec2Func)(int uid, int iform, const StringVec &argv);
+    typedef int (*CmdExec2Func)(const ExtArgVec &argv);
 
     /*!
      * \brief User available command description structure.
@@ -303,178 +618,6 @@ namespace rnr
 
 
     //--------------------------------------------------------------------------
-    // ConvertedArg Class
-    //--------------------------------------------------------------------------
-
-    /*!
-     * \brief Container class holding converted argmument value.
-     */
-    class ConvertedArg
-    {
-    public:
-      /*!
-       * \brief Converted types.
-       */
-      enum CvtType
-      {
-        CvtTypeUndef,       ///< unknown or uninitialized type
-        CvtTypeString,      ///< string type
-        CvtTypeEnum,        ///< index into literal enumeration list
-        CvtTypeBoolean,     ///< boolean type
-        CvtTypeInteger,     ///< integer type
-        CvtTypeFpn          ///< floating-point number type
-      };
-
-      /*!
-       * \brief Default constructor.
-       */
-      ConvertedArg();
-
-      /*!
-       * \brief Initialization constructor.
-       *
-       * \param strArg  Source argument string.
-       */
-      ConvertedArg(const std::string &strArg);
-
-      /*!
-       * \brief Copy constructor.
-       *
-       * \param src Source object.
-       */
-      ConvertedArg(const ConvertedArg &src);
-
-      /*!
-       * \brief Destructor.
-       */
-      virtual ~ConvertedArg();
-
-      /*!
-       * \brief Assignment operator.
-       *
-       * \param rhs   Right-hand side object.
-       *
-       * \return *this
-       */
-      ConvertedArg &operator=(const ConvertedArg &rhs);
-
-      /*!
-       * \brief Get source argument string (or a pirate grunting).
-       *
-       * \return String.
-       */
-      const std::string &arg() const { return m_strArg; }
-
-      /*!
-       * \brief Check if converted value is valid.
-       *
-       * \return Returns true or false.
-       */
-      bool isValid() const { return m_eType != CvtTypeUndef; }
-
-      /*!
-       * \brief Get the type of conversion.
-       *
-       * \return ConvertedArg::CvtType value.
-       */
-      CvtType type() const { return m_eType; }
-
-      /*!
-       * \brief Get the converted string value.
-       *
-       * \return Returns string.
-       */
-      const std::string &s() const { return m_strVal; }
-
-      /*!
-       * \brief Get the converted enumeration index value.
-       *
-       * \return Returns index.
-       */
-      long e() const { return m_lVal; }
-
-      /*!
-       * \brief Get the converted boolean value.
-       *
-       * \return Returns bool.
-       */
-      bool b() const { return m_bVal; }
-
-      /*!
-       * \brief Get the converted integer value.
-       *
-       * \return Returns long.
-       */
-      long i() const { return m_lVal; }
-
-      /*!
-       * \brief Get the converted floating-point number value.
-       *
-       * \return Returns double.
-       */
-      double f() const { return m_fVal; }
-
-      //
-      // Friends
-      //
-      friend class CmdArgDef;
-
-    protected:
-      std::string m_strArg;   ///< argument source
-      CvtType     m_eType;    ///< converted type
-      std::string m_strVal;   ///< converted string value
-      bool        m_bVal;     ///< converted boolean value
-      long        m_lVal;     ///< converted integer/index value
-      double      m_fVal;     ///< converted float-point number value
-
-      /*!
-       * \brief Set the argument string value.
-       *
-       * \param strArg  Source argument string.
-       */
-      void arg(const std::string &strArg)
-      {
-        m_strArg = strArg;
-      }
-
-      /*!
-       * \brief Set the converted string value.
-       *
-       * \param strVal    Value to set.
-       */
-      void s(const std::string &strVal);
-
-      /*!
-       * \brief Set the converted index into literal enum list value.
-       *
-       * \param eVal    Value to set.
-       */
-      void e(const long eVal);
-
-      /*!
-       * \brief Set the converted boolean value.
-       *
-       * \param bVal    Value to set.
-       */
-      void b(const bool bVal);
-
-      /*!
-       * \brief Set the converted integer value.
-       *
-       * \param lVal    Value to set.
-       */
-      void i(const long lVal);
-
-      /*!
-       * \brief Set the converted floating-point number value.
-       *
-       * \param fVal    Value to set.
-       */
-      void f(const double fVal);
-    };
-
-
-    //--------------------------------------------------------------------------
     // CmdArgDef Class
     //--------------------------------------------------------------------------
   
@@ -506,10 +649,22 @@ namespace rnr
        */
       enum ArgFlags
       {
-        FlagCommand   = 0x0001,   ///< argument is the command
-        FlagOptional  = 0x0002,   ///< argument is optional
-        FlagXorList   = 0x0004    ///< argument has a mutually exclusive list
+        FlagCommand   = 0x0001, ///< argument is the command
+        FlagOptional  = 0x0002, ///< argument is optional
+        FlagXorList   = 0x0004, ///< argument has a mutually exclusive list
+        FlagRepeat    = 0x0008  ///< argument supports repetition
       };
+
+      /*!
+       * \brief Number minimum and maximum (sub)range.
+       */
+      struct range
+      {
+        double min;   ///< minimum value
+        double max;   ///< maximum value
+      };
+
+      typedef std::vector<range>  RangeVec; ///< vector of subranges
 
       /*!
        * \brief Default constructor.
@@ -606,15 +761,53 @@ namespace rnr
        */
       int numOfLiterals() const
       {
-        return (int)m_values.size();
+        return (int)m_literals.size();
       }
 
       /*!
        * \brief Get literal value at index.
        *
+       * \param nIndex  Index of literal in list.
+       *
        * \return String value.
        */
       const std::string &literalAt(const int nIndex) const;
+
+      /*!
+       * \brief Get numeric range values.
+       *
+       * \return Vector of ranges.
+       */
+      const RangeVec &getRanges() const
+      {
+        return m_ranges;
+      }
+
+      /*!
+       * \brief Get regular expression value.
+       *
+       * \return String value.
+       */
+      const std::string &getRegEx() const
+      {
+        return m_re.getRegEx();
+      }
+
+      /*!
+       * \{
+       *
+       * \brief Check if value is in the specified range.
+       *
+       * \param value   Value to check.
+       *
+       * \return Returns true or false.
+       */
+      bool inRange(const long value) const;
+
+      bool inRange(const double value) const;
+      /*!
+       * \}
+       */
 
       /*!
        * \brief Get argument's modifier flags.
@@ -654,6 +847,15 @@ namespace rnr
        * \return Literal list string.
        */
       std::string constructLiteralList(const std::string sep = " ") const;
+
+      /*!
+       * \brief Construct ranges string.
+       *
+       * \param sep Seperator string between ranges.
+       *
+       * \return Literal list string.
+       */
+      std::string constructRangeList(const std::string sep = ",") const;
 
       /*!
        * \brief Construct syntax equivalent string from argument data.
@@ -718,8 +920,7 @@ namespace rnr
        *
        * \return Converted argument object.
        */
-      ConvertedArg convert(const std::string &strArg,
-                           bool              bIgnoreCase = false) const;
+      ExtArg convert(const std::string &strArg, bool bIgnoreCase = false) const;
 
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -750,7 +951,9 @@ namespace rnr
       int         m_nIndex;     ///< argument index
       std::string m_strName;    ///< argument name
       ArgType     m_eType;      ///< argument type
-      StringVec   m_values;     ///< argument values
+      StringVec   m_literals;   ///< literal argument valid values
+      RangeVec    m_ranges;     ///< numeric argument valid ranges
+      RegEx       m_re;         ///< regular expression argument valid pattern
       unsigned    m_uFlags;     ///< argument modifiers
 
       /*!
@@ -788,6 +991,20 @@ namespace rnr
        * \param strValue    Value to add.
        */
       void addLiteralValue(const std::string &strValue);
+
+      /*!
+       * \brief Set numeric range values.
+       *
+       * \param ranges  Vector of ranges.
+       */
+      void setRanges(const RangeVec &ranges);
+
+      /*!
+       * \brief Set regular expression value.
+       *
+       * \param re  Regular expression.
+       */
+      void setRegEx(const RegEx &re);
 
       /*!
        * \brief Or flags into argment modifier flags.
@@ -973,6 +1190,11 @@ namespace rnr
       int         m_nArgcOpt;   ///< number of optional arguments
 
       /*!
+       * \brief Reset form definition to pre-compiled state.
+       */
+      void reset();
+
+      /*!
        * \brief Set parent's command id.
        *
        * \param nCmdUid     Command unique id.
@@ -1147,6 +1369,11 @@ namespace rnr
       CmdFormDefVec m_formdefs;   ///< vector of command forms
  
       /*!
+       * \brief Reset command definition to pre-compiled state.
+       */
+      void reset();
+
+      /*!
        * \brief Set command's unique id.
        *
        * \param uid     Unique id.
@@ -1199,13 +1426,15 @@ namespace rnr
       static const int EAmbigCmd    = -4;  ///< ambiguous command
       static const int EUnknownCmd  = -5;  ///< unknown, unmatched command
       static const int EBadSyntax   = -6;  ///< bad syntax
-      static const int ENoOp        = -7;  ///< no operation
-      static const int ENoExec      = -8;  ///< cannot execute
+      static const int ENoExec      = -7;  ///< cannot execute
+      static const int EArgv0       = -8;  ///< not this command argv0
+      static const int ENoOp        = -9;  ///< no operation
+      static const int EBadVal      = -10; ///< bad value
   
-      static const int Ok           =  OK; ///< (0) no error, success, good
+      static const int AOk          =  OK; ///< (0) A-Ok, no error,success,good
 
       static const int NoUid        = -1;  ///< no unique id
-      static const int NoFormIndex  = -1;  ///< no form index
+      static const int NoIndex      = -1;  ///< no index
 
       /*!
        * \brief Default initialization constructor.
@@ -1248,14 +1477,46 @@ namespace rnr
        * by a newline '\n' character. The command named in each form must be
        * the identical.
        *
-       * This is a (somewhat) light-weight function. A call to compile() is
-       * necessary to finalized command syntax processing.
+       * This is a light-weight function. A call to compile() is necessary to
+       * finalized command syntax processing.
+       *
+       * \param strMultiFormSyntax  One or more extended usage syntax
+       *                            separated by newline characters.
        *
        * \return
        * On success, returns command's assigned unique id.
        * Otherwise NoUid is returned.
        */
       virtual int addCommand(const std::string strMultiFormSyntax);
+  
+      /*!
+       * \brief Remove command from command line interface.
+       *
+       * No re-comiple is necessary.
+       *
+       * \param uid   Command unique id.
+       *
+       *  \copydoc doc_return_cl
+       */
+      virtual int removeCommand(const int uid);
+  
+      /*!
+       * \brief Remove command from command line interface.
+       *
+       * No re-comiple is necessary.
+       *
+       * \param strName Command name.
+       *
+       *  \copydoc doc_return_cl
+       */
+      virtual int removeCommand(const std::string &strName);
+  
+      /*!
+       * \brief Remove all commands from command line interface.
+       *
+       *  \copydoc doc_return_cl
+       */
+      virtual int removeAllCommands();
   
       /*!
        * \brief Compile all added commands.
@@ -1276,7 +1537,13 @@ namespace rnr
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
   
       /*!
-       * \brief Read an input line stdin and match to best compiled command.
+       * \brief Read an input line from stdin and match to the best compiled
+       * command.
+       *
+       * Simple string argument version.
+       *
+       * On success, no arguments indicate an empty input line. Otherwise,
+       * the command name argv[0] is guaranteed to be present in the vector. 
        *
        * \param [out] uid   Matched command unique id.
        * \param [out] iform Matched command form index.
@@ -1291,7 +1558,43 @@ namespace rnr
       }
 
       /*!
-       * \brief Read an input line file fp and match to best compiled command.
+       * \brief Read an input line from stdin and match to the best compiled
+       * command.
+       *
+       * Extended argument version.
+       *
+       * Each extended argument contains matched command context of:
+       *  - the command's unique id and definition
+       *  - form definition index
+       *  - argument definition index
+       *  - argument instance number for (future) argument repetition
+       *
+       * On success, no arguments indicate an empty input line. Otherwise,
+       * the command name argv[0] is guaranteed to be present in the vector. 
+       *
+       * Extended arguments gives access to the compiled, matched command
+       * definition data such as number of required, optional, and total
+       * arguments, plus argument specific info such as name, type, etc. 
+       *
+       * \param [out] uid   Matched command unique id.
+       * \param [out] argv  Vector of extended arguments, with argv[0] being the
+       *                    command name argument.
+       *
+       *  \copydoc doc_return_cl
+       */
+      virtual int readCommand(ExtArgVec &argv)
+      {
+        return readCommand(stdin, argv);
+      }
+
+      /*!
+       * \brief Read an input line from file fp and match to the best compiled
+       * command.
+       *
+       * Simple string argument version.
+       *
+       * On success, no arguments indicate an empty input line. Otherwise,
+       * the command name argv[0] is guaranteed to be present in the vector. 
        *
        * \param fp          Input file pointer.
        * \param [out] uid   Matched command unique id.
@@ -1304,7 +1607,36 @@ namespace rnr
       virtual int readCommand(FILE *fp, int &uid, int &iform, StringVec &argv);
   
       /*!
+       * \brief Read an input line from file fp and match to the best compiled
+       * command.
+       *
+       * Extended argument version.
+       *
+       * Each extended argument contains matched command context of:
+       *  - the command's unique id and definition
+       *  - form definition index
+       *  - argument definition index
+       *  - argument instance number for (future) argument repetition
+       *
+       * On success, no arguments indicate an empty input line. Otherwise,
+       * the command name argv[0] is guaranteed to be present in the vector. 
+       *
+       * Extended arguments gives access to the compiled, matched command
+       * definition data such as number of required, optional, and total
+       * arguments, plus argument specific info such as name, type, etc. 
+       *
+       * \param [out] uid   Matched command unique id.
+       * \param [out] argv  Vector of extended arguments, with argv[0] being the
+       *                    command name argument.
+       *
+       *  \copydoc doc_return_cl
+       */
+      virtual int readCommand(FILE *fp, ExtArgVec &argv);
+  
+      /*!
        * \brief Add command to history.
+       *
+       * Simple string argument version.
        *
        * \note Only available if readline is available and enabled, and
        * input is interactive.
@@ -1312,6 +1644,18 @@ namespace rnr
        * \param argv  Command in argv vector.
        */
       virtual void addToHistory(const StringVec &argv);
+  
+      /*!
+       * \brief Add command to history.
+       *
+       * Extended argument version.
+       *
+       * \note Only available if readline is available and enabled, and
+       * input is interactive.
+       *
+       * \param argv  Command in argv vector.
+       */
+      virtual void addToHistory(const ExtArgVec &argv);
   
       /*!
        * \brief Push prompt string onto stack of prompts. 
@@ -1366,6 +1710,11 @@ namespace rnr
       {
         m_readline.resetLineNum();
       }
+  
+
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+      // Public Command Form Info and Argument Access Methods
+      // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
        * \brief Get the total number of arguments.
@@ -1380,6 +1729,17 @@ namespace rnr
       int numOfArgs(int uid, int iform) const;
 
       /*!
+       * \brief Get the total number of arguments of matched command.
+       *
+       * The extended argument contains matched command context.
+       *
+       * \param arg   Extended argument.
+       *
+       * \return Number of arguments.
+       */
+      int numOfArgs(const ExtArg &arg) const;
+
+      /*!
        * \brief Get the total number of required arguments.
        *
        * The required number includes the command argv0.
@@ -1389,9 +1749,24 @@ namespace rnr
        * \param uid   Matched command unique id.
        * \param iform Matched command form index.
        *
-       * \return Number of arguments.
+       * \return Number of required arguments.
        */
       int numOfRequiredArgs(int uid, int iform) const;
+
+      /*!
+       * \brief Get the total number of required arguments of matched command.
+       *
+       * The extended argument contains matched command context.
+       *
+       * The required number includes the command argv0.
+       *
+       * Required arguments start at argument index 0.
+       *
+       * \param arg   Extended argument.
+       *
+       * \return Number of required arguments.
+       */
+      int numOfRequiredArgs(const ExtArg &arg) const;
 
       /*!
        * \brief Get the total number of optional arguments.
@@ -1401,46 +1776,46 @@ namespace rnr
        * \param uid   Matched command unique id.
        * \param iform Matched command form index.
        *
-       * \return Number of arguments.
+       * \return Number of optional arguments.
        */
       int numOfOptionalArgs(int uid, int iform) const;
 
       /*!
+       * \brief Get the total number of arguments of matched command.
+       *
+       * The extended argument contains matched command context.
+       *
+       * \param arg   Extended argument.
+       *
+       * \return Number of optional arguments.
+       */
+      int numOfOptionalArgs(const ExtArg &arg) const;
+
+      /*!
        * \brief Get the argument name.
        *
-       * \param uid   Command unique id.
-       * \param iform Command form index.
-       * \param iarg  Command form argument index.
+       * The extended argument contains matched command context.
+       *
+       * \param arg   Extended argument.
        *
        * \return Returns argument name on success, empty string on failure.
        */
-      const std::string &getArgName(int uid, int iform, int iarg) const;
+      const std::string &getArgName(const ExtArg &arg) const;
 
       /*!
        * \brief Get the argument type.
        *
-       * \param uid   Command unique id.
-       * \param iform Command form index.
-       * \param iarg  Command form argument index.
+       * The extended argument contains matched command context.
+       *
+       * \note Argument type differs from argument converted type. The former
+       * specifies the argument syntax, while the later specifies converted
+       * basic type such as string, int, etc.
+       *
+       * \param arg   Extended argument.
        *
        * \return Returns argument type.
        */
-      CmdArgDef::ArgType getArgType(int uid, int iform, int iarg) const;
-
-      /*!
-       * \brief Convert argument string to type.
-       *
-       * \param uid     Command unique id.
-       * \param iform   Command form index.
-       * \param iarg    Command form argument index.
-       * \param strArg  Argument source string.
-       *
-       * \return Converted argument object.
-       */
-      ConvertedArg convert(int               uid,
-                           int               iform,
-                           int               iarg,
-                           const std::string &strArg) const;
+      CmdArgDef::ArgType getArgDefType(const ExtArg &arg) const;
 
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1456,7 +1831,7 @@ namespace rnr
        * * A contiguous sequence of non-whitespace characters.
        * * An escapable sequence of characters delineated by double quotes '"'.
        *
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <token-list>    ::= <token>
        *                   | <token-list> <token>
        *
@@ -1466,7 +1841,7 @@ namespace rnr
        * <word>          ::= {NONWHITE_CHAR}+
        *
        * <qouted-string> ::= '"' {ESCAPABLE_CHAR}* '"'
-       * \endverbatim
+       * ~~~~~~~~
        *
        * \param [in] strInput Input string to analyze.
        * \param [out] tokens  Generated tokens.
@@ -1493,7 +1868,7 @@ namespace rnr
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
       /*!
-       * \brief Get command's name.
+       * \brief Get command line interface's name.
        *
        * \return Name string.
        */
@@ -1501,6 +1876,24 @@ namespace rnr
       {
         return m_strName;
       }
+
+      /*!
+       * \brief Test if command exists.
+       *
+       * \param uid   Command unique id.
+       *
+       * \return Returns true or false.
+       */
+      bool hasCmd(const int uid) const;
+
+      /*!
+       * \brief Test if command exists.
+       *
+       * \param strName Command name.
+       *
+       * \return Returns true or false.
+       */
+      bool hasCmd(const std::string &strName) const;
 
       /*!
        * \brief Get the command definition with the unique id.
@@ -1648,7 +2041,7 @@ namespace rnr
        * \param [in] str    String in hex, decimal, or octal format.
        * \param [out] val   Converted boolean value.
        *
-       * \return Returns Ok if a valid boolean, EBadSyntax otherwise.
+       * \return Returns AOk if a valid boolean, EBadSyntax otherwise.
        */
        static int strToBool(const std::string &str, bool &val);
 
@@ -1658,7 +2051,7 @@ namespace rnr
        * \param [in] str    String in hex, decimal, or octal format.
        * \param [out] val   Converted long value.
        *
-       * \return Returns Ok if a valid long, EBadSyntax otherwise.
+       * \return Returns AOk if a valid long, EBadSyntax otherwise.
        */
        static int strToLong(const std::string &str, long &val);
 
@@ -1668,7 +2061,7 @@ namespace rnr
        * \param [in] str    String in hex, decimal, or octal format.
        * \param [out] val   Converted double value.
        *
-       * \return Returns Ok if a valid double, EBadSyntax otherwise.
+       * \return Returns AOk if a valid double, EBadSyntax otherwise.
        */
        static int strToDouble(const std::string &str, double &val);
 
@@ -1730,9 +2123,10 @@ namespace rnr
        * \brief Lexically analyze extened usage syntax string to generate a
        * series of tokens.
        *
-       * Tokens are separated by either whitespace or syntax special characters.
+       * Tokens are separated by either whitespace, parenthetical blocks,
+       * or syntax special characters.
        *
-       * \param [in] strSyntax  Syntax string to analyze.
+       * \param [in]  strSyntax Syntax string to analyze.
        * \param [out] tokens    Generated tokens.
        *
        *  \copydoc doc_return_ssize
@@ -1743,10 +2137,11 @@ namespace rnr
       /*!
        * \brief Syntax word lexical analyzer.
        *
-       * A syntax word is define as any contiguous sequence of non-whitespace,
-       * non syntax special symbol characters.
+       * A syntax word is defined as any contiguous sequence of non-whitespace,
+       * non-syntax-special symbol characters.
        *
-       * Any generated token is place at the end of the vector.
+       * On success, the generated <word> token is placed at the end of the
+       * vector.
        *
        * \param [in]     strSyntax  Syntax string to analyze.
        * \param [in]     cursor     Character position along syntax string.
@@ -1761,12 +2156,41 @@ namespace rnr
                                     TokenVec          &tokens);
 
       /*!
+       * \brief Syntax parenthetical expression lexical analyzer.
+       *
+       * A syntax parenthetical expression isdefined as any contiguous sequence
+       * block of character delineated by a balanced pair of parentheses. A
+       * backslash escaped parenthesis does to factor into the paentheses
+       * countiog.
+       *
+       * On success,the generated tokens '(', <paren-tok>, and ')' are placed
+       * at the end of the vector.
+       *
+       * \par Syntax:
+       * ~~~~~~~~(.abnf)
+       * <paren-expr-def> ::= '(' <paren-tok> ')'
+       * ~~~~~~~~
+       *
+       * \param [in]     strSyntax  Syntax string to analyze.
+       * \param [in]     cursor     Character position along syntax string.
+       * \param [in,out] tokens     Vector of generated tokens. 
+       *
+       * \return
+       * On success, returns new cursor position.
+       * Otherwise a negative error code is returned.
+       */
+      virtual ssize_t lexSyntaxParenExpr(const std::string &strSyntax,
+                                         ssize_t            cursor,
+                                         TokenVec          &tokens);
+
+      /*!
        * \brief Word lexical analyzer.
        *
-       * A word is define as any contiguous sequence of non-whitespace
+       * A word is defined as any contiguous sequence of non-whitespace
        * characters.
        *
-       * Any generated token is place at the end of the vector.
+       * On success, the generated <word> token is placed at the end of the
+       * vector.
        *
        * \param [in]     strInput   Input string to analyze.
        * \param [in]     cursor     Character position along input string.
@@ -1783,12 +2207,26 @@ namespace rnr
       /*!
        * \brief Quoted string lexical analyzer.
        *
-       * Syntax: "..."
-       *
        * The unescaped double quotes are not included in the token. Escape
-       * sequences "\<c>" and "\<h><h>" are recognized and processed.
+       * sequences interpreted.
        *
-       * Any generated token is place at the end of the vector.
+       * On success, the generated <interp-char-seq> token is placed at the end
+       * of the vector.
+       *
+       * \par Syntax:
+       * ~~~~~~~~(.abnf)
+       * <quoted-string> ::= '"' <interp-char-seq> '"'
+       *
+       * <interp-char-seq> ::= <interp-char>
+       *                     | <interp-char-seq> <interp-char>
+       *
+       * <interp-char> ::= NON_BACKSLASH_CHAR
+       *                |  <interp-esc-char>
+       *
+       * <interp-esc-char> ::= '\' CHAR
+       *                     | '\' 'x' HEXDIGIT
+       *                     | '\' 'x' HEXDIGIT HEXDIGIT
+       * ~~~~~~~~
        *
        * \param [in]     strInput   Input string to analyze.
        * \param [in]     cursor     Character position along input string.
@@ -1853,6 +2291,7 @@ namespace rnr
        * The parseSyntax() function [in]directly calls the CommandLine::parse
        * family of member functions. Each function takes, at a minimum, four
        * parameters:
+       *
        *  Parameter | Description
        *  --------- | -----------
        *  cmddef    | Definition of an added command. It may be modified.
@@ -1865,13 +2304,13 @@ namespace rnr
        *
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <command> ::= <argv0> [<required-arg-list>] [<optional-arg-list>]
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        *
        *  \copydoc doc_return_cl
        */
@@ -1880,20 +2319,20 @@ namespace rnr
                               const TokenVec &tokens);
 
       /*!
-       * \brief Parse argument 0 (command) syntax.
+       * \brief Parse argument 0 (command name) syntax.
        *
-       * Argv0 is a special argument that defines the command. Currently, only
-       * literal arguments are valid. If expanded to include variables, then
-       * tab completion and command matching would be interesting.
+       * Argv0 is a special argument that defines the command name. Only
+       * literal and variable arguments types are valid.
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <argv0> ::= <literal-arg>
-       * \endverbatim
+       *           | <variable-arg>
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
        *
        * \return Returns true on a successful parse, false otherwise.
@@ -1907,14 +2346,14 @@ namespace rnr
        * \brief Parse required argument list syntax.
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <required-arg-list> ::= <arg>
        *                       | <required-arg-list> <arg>
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
        *
        * \return Returns true on a successful parse, false otherwise.
@@ -1928,14 +2367,14 @@ namespace rnr
        * \brief Parse optional argument list syntax.
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <optional-arg-list> ::= '[' <arg> ']'
        *                       | <optional-arg-list> '[' <arg> ']'
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
        *
        * \return Returns true on a successful parse, false otherwise.
@@ -1949,15 +2388,15 @@ namespace rnr
        * \brief Parse argument syntax.
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <arg> ::= <xor-list-arg>
        *         | <variable-arg>
        *         | <literal-arg>
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
        *
        * \return Returns true on a successful parse, false otherwise.
@@ -1973,13 +2412,13 @@ namespace rnr
        * A CmdArgDef object is added to the CmdDef
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <xor-list-arg> ::= '{' <xor-list> '}'
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
        *
        * \return Returns true on a successful parse, false otherwise.
@@ -1995,14 +2434,14 @@ namespace rnr
        * A CmdArgDef object is added to the CmdDef
        *
        * \par Syntax:
-       * \verbatim
-       * <variable-arg> ::= '<' <identity> '>'              (* word default *)
-       *                  | '<' <identity> ':' <type> '>'
-       * \endverbatim
+       * ~~~~~~~~(.abnf)
+       * <variable-arg> ::= '<' <identifier> '>'
+       *                  | '<' <identifier> ':' <var-modifier> '>'
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
        *
        * \return Returns true on a successful parse, false otherwise.
@@ -2018,13 +2457,13 @@ namespace rnr
        * A CmdArgDef object is added to the CmdDef
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <literal-arg> ::= <literal>
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
        *
        * \return Returns true on a successful parse, false otherwise.
@@ -2038,16 +2477,16 @@ namespace rnr
        * \brief Parse mutually exclusive list.
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <xor-list> ::= <literal>
        *              | <xor-list> '|' <literal>
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
-       * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
-       * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
-       * \param [out] literals  Vector of literals.
+       * \param [in,out] cmddef   Command definition.
+       * \param [in,out] form     Command form definition. 
+       * \param [in]     tokens   Lexical tokens generated from syntax usage.
+       * \param [in,out] pos      The parse cursor position. \sa parseSyntax().
+       * \param [out]    literals Vector of literals.
        *
        * \return Returns true on a successful parse, false otherwise.
        */
@@ -2061,16 +2500,16 @@ namespace rnr
        * \brief Parse identifier.
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <identifier> ::= ALPHA {ALPHANUMERIC}*
        *                | '_' {ALPHANUMERIC}*
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
-       * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
-       * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
-       * \param [out] strIdent  Identity string.
+       * \param [in,out] cmddef   Command definition.
+       * \param [in,out] form     Command form definition. 
+       * \param [in]     tokens   Lexical tokens generated from syntax usage.
+       * \param [in,out] pos      The parse cursor position. \sa parseSyntax().
+       * \param [out]    strIdent Identity string.
        *
        * \return Returns true on a successful parse, false otherwise.
        */
@@ -2081,45 +2520,119 @@ namespace rnr
                            std::string    &strIdent);
       
       /*!
-       * \brief Parse variable type.
+       * \brief Parse variable modifier.
        *
        * \par Syntax:
-       * \verbatim
-       * <type> ::= literal
-       *          | word
-       *          | int
-       *          | float
-       *          | quoted-string
-       *          | file
-       * \endverbatim
+       * ~~~~~~~~(.abnf)
+       * <var-modifier> ::= <var-type>
+       *                  | <var-type> <var-paren-expr>
        *
-       * \param [in,out] cmddef An added command object.
+       * <var-paren-expr> ::= '(' <range-expr> ')'
+       *                    | '(' <regex> ')'
+       * ~~~~~~~~
+       *
+       * \param [in,out] cmddef Command definition.
        * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
        * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
-       * \param [out] eType     Type enum.
+       * \param [out]    eType  Type enum.
+       * \param [out]    ranges Vector of ranges.
+       * \param [out]    re     Regular expression.
        *
        * \return Returns true on a successful parse, false otherwise.
        */
-      bool parseType(CmdDef             &cmddef,
-                     CmdFormDef         &form,
-                     const TokenVec     &tokens,
-                     size_t             &pos,
-                     CmdArgDef::ArgType &eType);
+      bool parseVarMod(CmdDef              &cmddef,
+                       CmdFormDef          &form,
+                       const TokenVec      &tokens,
+                       size_t              &pos,
+                       CmdArgDef::ArgType  &eType,
+                       CmdArgDef::RangeVec &ranges,
+                       RegEx               &re);
+
+      /*!
+       * \brief Parse variable type.
+       *
+       * \par Syntax:
+       * ~~~~~~~~(.abnf)
+       * <var-type> ::= word | multiword | identifier | bool |
+       *                int | fpn | re | file
+       * ~~~~~~~~
+       *
+       * \param [in,out] cmddef Command definition.
+       * \param [in,out] form   Command form definition. 
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
+       * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
+       * \param [out]    eType  Type enum.
+       *
+       * \return Returns true on a successful parse, false otherwise.
+       */
+      bool parseVarType(CmdDef             &cmddef,
+                        CmdFormDef         &form,
+                        const TokenVec     &tokens,
+                        size_t             &pos,
+                        CmdArgDef::ArgType &eType);
+
+      /*!
+       * \brief Parse variable range expression.
+       *
+       * \par Syntax:
+       * ~~~~~~~~(.abnf)
+       * <range-expr> ::= <range>
+       *                | <range-expr> ',' <range>
+       *
+       * <range> ::= NUMBER
+       *           | NUMBER ':' NUMBER
+       * ~~~~~~~~
+       *
+       * \param [in,out] cmddef Command definition.
+       * \param [in,out] form   Command form definition. 
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
+       * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
+       * \param [out]    ranges Vector of ranges.
+       *
+       * \return Returns true on a successful parse, false otherwise.
+       */
+      bool parseVarRangeExpr(CmdDef              &cmddef,
+                             CmdFormDef          &form,
+                             const TokenVec      &tokens,
+                             size_t              &pos,
+                             CmdArgDef::RangeVec &ranges);
+
+      /*!
+       * \brief Parse variable regular expression.
+       *
+       * \par Syntax:
+       * ~~~~~~~~(.abnf)
+       * <regex> ::= REGEX
+       * ~~~~~~~~
+       *
+       * \param [in,out] cmddef Command definition.
+       * \param [in,out] form   Command form definition. 
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
+       * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
+       * \param [out]    re     Regular expression.
+       *
+       * \return Returns true on a successful parse, false otherwise.
+       */
+      bool parseVarRegExpr(CmdDef         &cmddef,
+                           CmdFormDef     &form,
+                           const TokenVec &tokens,
+                           size_t         &pos,
+                           RegEx          &re);
 
       /*!
        * \brief Parse literal value.
        *
        * \par Syntax:
-       * \verbatim
+       * ~~~~~~~~(.abnf)
        * <literal> ::= {NON_SPECIAL_CHAR}+
-       * \endverbatim
+       * ~~~~~~~~
        *
-       * \param [in,out] cmddef An added command object.
-       * \param [in,out] form   Command form definition. 
-       * \param [in] tokens     Lexical tokens generated from the syntax usage.
-       * \param [in,out] pos    The parse cursor position. \sa parseSyntax().
-       * \param [out] strValue  Value string.
+       * \param [in,out] cmddef   Command definition.
+       * \param [in,out] form     Command form definition. 
+       * \param [in]     tokens   Lexical tokens generated from syntax usage.
+       * \param [in,out] pos      The parse cursor position. \sa parseSyntax().
+       * \param [out]    strValue Value string.
        *
        * \return Returns true on a successful parse, false otherwise.
        */
@@ -2135,10 +2648,10 @@ namespace rnr
        * If equal, the position cursor is advanced on position. If not equal,
        * an error message will be logged.
        *
-       * \param [in] strCmp   String to compare token against.
-       * \param [in] tokens   Lexical tokens generated from the syntax usage.
-       * \param [in,out] pos  The position in the token vector.
-       *                      Advanced 1 position if equal.
+       * \param [in]     strCmp String to compare token against.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
+       * \param [in,out] pos    The position in the token vector.
+       *                        Advanced 1 position if equal.
        *
        * \return Returns true on equal, false otherwise.
        */
@@ -2162,9 +2675,9 @@ namespace rnr
       /*!
        * \brief Test if string has valid identifier syntax.
        *
-       * \param [in] tokens   Lexical tokens generated from the syntax usage.
-       * \param [in,out] pos  The position in the token vector.
-       *                      Advanced 1 position if valid identifier.
+       * \param [in]     tokens Lexical tokens generated from the syntax usage.
+       * \param [in,out] pos    The position in the token vector.
+       *                        Advanced 1 position if valid identifier.
        *
        * \return Returns true or false.
        */
@@ -2181,42 +2694,39 @@ namespace rnr
        * The line is tokenized and matched to the command with the best fit.
        *
        * \param [in]  strLine Line of input.
-       * \param [out] uid     Best matched command unique id.
-       * \param [out] iform   Best matched form index of the best command.
-       * \param [out] argv    Vector of arguments.
+       * \param [out] argv    Vector of extended arguments, with argv[0] being
+       *                      the command name argument.
        *
        *  \copydoc doc_return_cl
        */
-      int processInput(const std::string &strLine,
-                       int               &uid,
-                       int               &iform,
-                       StringVec         &argv);
+      int processInput(const std::string &strLine, ExtArgVec &argv);
 
       /*!
        * \brief Match the input tokens to the compiled commands to find the
        * best fit.
        *
        * \param [in]  tokens  Vector of input tokens.
-       * \param [out] uid     Best matched command unique id.
-       * \param [out] iform   Best matched form index of the best command.
+       * \param [out] argv    Vector of extended arguments, with argv[0] being
+       *                      the command name argument.
        *
        *  \copydoc doc_return_cl
        */
-      int match(const TokenVec &tokens, int &uid, int &iform);
+      int match(const TokenVec &tokens, ExtArgVec &argv);
 
       /*!
        * \brief Match best command form against input line argument list.
        *
        * \param [in]  cmddef    Compiled command definition.
        * \param [in]  tokens    Vector of arguments.
-       * \param [out] iform     Best matched form index of the best command.
+       * \param [out] argv      Vector of extended arguments, with argv[0] being
+       *                        the command name argument.
        * \param [out] fFitness  Fitness of match [0.0 - 1.0].
        *
        *  \copydoc doc_return_cl
        */
       int matchCommand(const CmdDef   &cmddef,
                        const TokenVec &tokens,
-                       int            &iform,
+                       ExtArgVec      &argv,
                        double         &fFitness);
 
       /*!
@@ -2224,12 +2734,15 @@ namespace rnr
        *
        * \param [in]  form      Compiled command form definition.
        * \param [in]  tokens    Vector of arguments.
+       * \param [out] argv      Vector of extended arguments, with argv[0] being
+       *                        the command name argument.
        * \param [out] fFitness  Fitness of match [0.0 - 1.0].
        *
        *  \copydoc doc_return_cl
        */
       int matchCommandForm(const CmdFormDef &form,
-                           const TokenVec   &argv,
+                           const TokenVec   &tokens,
+                           ExtArgVec        &argv,
                            double           &fFitness);
 
       /*!
@@ -2239,6 +2752,14 @@ namespace rnr
        */
       int checkReadResult();
   
+      /*!
+       * \brief Convert extended argument vector to string argument vector.
+       *
+       * \param [in]  v1  Extended argument vector.
+       * \param [out] v2  String argument vector.
+       */
+      void toVec(const ExtArgVec &v1, StringVec &v2);
+
 
       // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
       // ReadLine Generator Methods

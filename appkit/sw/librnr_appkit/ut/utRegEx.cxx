@@ -92,6 +92,7 @@ const RegEx re0;
 const RegEx re1("^[a-z]*$", RegEx::ReFlagICase);
 RegEx re2 = re1;
 const RegEx re3("['\"]{1,2}([0-9]+)(hello)(^)");
+const RegEx re4("^[a-z]*$");
 RegEx reGo = "([cC]at)|([dD]og)";
 
 static string getline(istream &is)
@@ -113,7 +114,7 @@ static string getline(istream &is)
  */ 
 static void utPr(ostream &os, const string name, const RegEx &re)
 {
-  cout << " ... RE " << name << endl;
+  os << " ... RE " << name << endl;
 
   os << "getRegEx()      " << re.getRegEx() << endl;
   os << "isValid()       " << re.isValid() << endl;
@@ -124,20 +125,59 @@ static void utPr(ostream &os, const string name, const RegEx &re)
 }
 
 /*!
+ * \brief Print RegEx data.
+ *
+ * \param re    RegEx object.
+ */ 
+static void utConstRe(ostream &os, const RegEx &re)
+{
+  const char *testinputs[] =
+  {
+    "abcd",
+    "ABCD",
+    "wXyZ",
+    "12",
+    "jkl mno",
+    NULL
+  };
+
+  os << "  Test Constant RegEx:" << endl;
+
+  utPr(os, "sut", re);
+
+  for(size_t i = 0; testinputs[i] != NULL; ++i)
+  {
+    string input(testinputs[i]);
+
+    os << input << " --> ";
+
+    if( re.match(input) )
+    {
+      os << "match";
+    }
+    else
+    {
+      os << "no match";
+    }
+    os << endl;
+  }
+}
+
+/*!
  * \brief Test RegEx operations.
  */
-static void utRun()
+static void utRun(ostream &os)
 {
   string            cmd, arg;
   RegEx::ReMatchVec matches;
 
-  cout << "  Test Run-Time Operations:" << endl;
-  cout << "q         - Quit." << endl;
-  cout << "n <re>    - Specify new re." << endl;
-  cout << "m <input> - Match input to re." << endl;
-  cout << "a <input> - Match all input substrings to re." << endl;
-  cout << "p         - Print re." << endl;
-  cout << endl;
+  os << "  Test Run-Time Operations:" << endl;
+  os << "q         - Quit." << endl;
+  os << "n <re>    - Specify new re." << endl;
+  os << "m <input> - Match input to re." << endl;
+  os << "a <input> - Match all input substrings to re." << endl;
+  os << "p         - Print re." << endl;
+  os << endl;
 
   while( true )
   {
@@ -147,7 +187,7 @@ static void utRun()
       cin.ignore(INT_MAX, '\n');    // awkward flush
     }
 
-    cout << "cmd> ";
+    os << "cmd> ";
     cin >> cmd;
 
 
@@ -160,52 +200,53 @@ static void utRun()
       cin >> reGo;
       if( cin.fail() )
       {
-        cout << "bad input" << endl;
+        os << "bad input" << endl;
       }
       else if( !reGo.isValid() )
       {
-        cout << "bad re: " << reGo.getErrorStr() << endl;
+        os << "bad re: " << reGo.getErrorStr() << endl;
       }
       else
       {
-        cout << "valid new re" << endl;
+        os << "new valid re" << endl;
       }
     }
     else if( cmd == "m" )
     {
       arg = getline(cin);
 
-      cout << "match on '" << arg << "'" << endl;
+      os << "try match on '" << arg << "' --> ";
       if( reGo.match(arg) )
       {
-        cout << "match" << endl;
+        os << "match" << endl;
       }
       else
       {
-        cout << "no match" << endl;
+        os << "no match" << endl;
       }
     }
     else if( cmd == "a" )
     {
       arg = getline(cin);
 
-      cout << "match all on '" << arg << "'" << endl;
+      os << "try match all on '" << arg << "'" << endl;
 
       reGo.match(arg, matches);
+
       for(size_t i = 0; i < matches.size(); ++i)
       {
-        cout << i << ". (" << matches[i].m_uStart << ","
+        os << i << ". (" << matches[i].m_uStart << ","
           << matches[i].m_uEnd << ") '"
           << matches[i].m_strMatch << "'" << endl;
       }
     }
     else if( cmd == "p" )
     {
-      utPr(cout, "Go", reGo);
+      utPr(os, "Go", reGo);
     }
     else
     {
-      cout << "'" << cmd << "': Bad command. One of: a m n p q" << endl;
+      os << "'" << cmd << "': Bad command. One of: a m n p q" << endl;
     }
   }
 }
@@ -248,12 +289,19 @@ int main(int argc, char* argv[])
   utPr(cout, "1", re1);
   utPr(cout, "copy of 1", re2);
   utPr(cout, "3", re3);
+  utPr(cout, "4", re4);
   utPr(cout, "Go", reGo);
+  cout << endl;
+
+  // Constant regex match
+  utConstRe(cout, re1);
+  utConstRe(cout, re4);
+  cout << endl;
 
   //
   // Test run-time
   //
-  utRun();
+  utRun(cout);
 
   return APP_EC_OK;
 }

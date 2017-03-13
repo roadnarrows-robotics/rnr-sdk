@@ -207,6 +207,8 @@ namespace rnr
     RegEx &operator=(const char *rhs);
   
     /*!
+     * \{
+     *
      * \brief Match the input string against the regular expression.
      *
      * The entire input must match the regular expression.
@@ -214,9 +216,16 @@ namespace rnr
      * \param [in] strInput Input string to match.
      *
      * \return
-     * Returns true if a match, false otherwise. Error is set if no match.
+     * Returns true if a match, false otherwise.
+     * For the non-constant version, an error is set if no match.
      */
     bool match(const std::string &strInput, const int nFlags = ReFlagDefaults);
+
+    bool match(const std::string &strInput,
+               const int nFlags = ReFlagDefaults) const;
+    /*!
+     * \}
+     */
   
     /*!
      * \brief Match the input char* against the regular expression.
@@ -226,9 +235,15 @@ namespace rnr
      * \param [in] sInput   Null-terminated input char* to match.
      *
      * \return
-     * Returns true if a match, false otherwise. Error is set if no match.
+     * Returns true if a match, false otherwise.
+     * For the non-constant version, an error is set if no match.
      */
     bool match(const char *sInput, const int nFlags = ReFlagDefaults);
+
+    bool match(const char *sInput, const int nFlags = ReFlagDefaults) const;
+    /*!
+     * \}
+     */
   
     /*!
      * \brief Find all substrings in the input that match the regular
@@ -275,12 +290,21 @@ namespace rnr
      * \param uMaxSubMatches  Maximum number of submatches per match.
      * \param nFlags          Bitwise-or of matching behavior flags.
      *
-     * \return Returns number of matches. Error is set if no matches.
+     * \return Returns number of matches.
+     * For the non-constant version, an error is set if no match.
      */
     size_t match(const std::string &strInput,
                  ReMatchVec        &matches,
                  const size_t      uMaxSubMatches = ReMaxSubMatchesDft,
                  const int         nFlags = ReFlagDefaults);
+
+    size_t match(const std::string &strInput,
+                 ReMatchVec        &matches,
+                 const size_t      uMaxSubMatches = ReMaxSubMatchesDft,
+                 const int         nFlags = ReFlagDefaults) const;
+    /*!
+     * \}
+     */
 
     /*!
      * \brief Find all substrings in input that match the regular expression.
@@ -292,12 +316,21 @@ namespace rnr
      * \param uMaxSubMatches  Maximum number of submatches per match.
      * \param nFlags          Bitwise-or of matching behavior flags.
      *
-     * \return Returns number of matches. Error is set if no matches.
+     * \return Returns number of matches.
+     * For the non-constant version, an error is set if no match.
      */
     size_t match(const char   *sInput,
                  ReMatchVec   &matches,
                  const size_t uMaxSubMatches = ReMaxSubMatchesDft,
                  const int    nFlags = ReFlagDefaults);
+
+    size_t match(const char   *sInput,
+                 ReMatchVec   &matches,
+                 const size_t uMaxSubMatches = ReMaxSubMatchesDft,
+                 const int    nFlags = ReFlagDefaults) const;
+    /*!
+     * \}
+     */
 
     /*!
      * \brief Get the pre-compiled regular expression.
@@ -332,6 +365,15 @@ namespace rnr
       return m_nFlags;
     }
   
+    /*!
+     * \brief Set new compile behavior flags.
+     *
+     * \note May result in a new regular expression re-compile.
+     *
+     * \param nFlags  Bitwise-or of compile behavior flags.
+     */
+    void setFlags(int nFlags);
+
     /*!
      * \brief Get the extened return code from the last RegEx operation.
      *
@@ -383,11 +425,11 @@ namespace rnr
     bool compile();
 
     /*!
-     * \brief Set compile behavior flags, disabling any unsupported flags.
+     * \brief Groom compile behavior flags, disabling any unsupported flags.
      *
      * \param nFlags  Bitwise-or of compile behavior flags.
      */
-    void setFlags(const int nFlags);
+    void groomFlags(const int nFlags);
 
     /*!
      * \brief Set the error code and associated error string.

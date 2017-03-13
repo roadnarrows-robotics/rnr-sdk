@@ -69,6 +69,7 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
+#include "rnr/appkit/RegEx.h"
 #include "rnr/appkit/LogBook.h"
 #include "rnr/appkit/ReadLine.h"
 #include "rnr/appkit/CommandLine.h"
@@ -90,41 +91,75 @@ using namespace rnr::cmd;
 static int dbg_calldepth_ = -1;
 
 #define CL_CALL_DEPTH        dbg_calldepth_
-#define CL_SET_CALL_DEPTH(n) dbg_calldepth_ = n
+#define CL_SET_CALL_DEPTH(_n) dbg_calldepth_ = _n
 #define CL_PUSH_CALL_DEPTH() ++dbg_calldepth_
 #define CL_POP_CALL_DEPTH()  --dbg_calldepth_
 
-#define CL_DBG_CALL_IN(args, post) \
+/*!
+ * \brief Enter function debug macro.
+ * \param _args Stream of function arguments.
+ * \param _post Stream of post call data.
+ */
+#define CL_DBG_CALL_IN(_args, _post) \
 do \
 { \
   CL_PUSH_CALL_DEPTH(); \
-  cerr << space(dbg_calldepth_*2) << __func__ << "(" << args << ")" << post; \
+  cerr << space(dbg_calldepth_*2) << __func__ << "(" << _args << ")" <<_post; \
 } while(0)
 
-#define CL_DBG_CALL_OUT1(res) \
+/*!
+ * \brief Enter parse function debug macro.
+ * \param _cmddef   Command definition.
+ * \param _formdef  Form definition.
+ * \param _toks     Input tokens.
+ * \param _pos      Parse position in tokens.
+ * \param _post     Stream of post call data.
+ */
+#define CL_DBG_PARSE_CALL_IN(_cmddef, _formdef, _toks, _pos, _post) \
+  CL_DBG_CALL_IN("cmddef(uid=" << (_cmddef).getUid() \
+      << ", name=" << (_cmddef).getName() << ")"     \
+      << ", form(index=" << (_formdef).getIndex()    \
+      << ", argc=" << (_formdef).numOfArgs() << ")"  \
+      << ", tokens=" << (_toks).size()               \
+      << ", pos=" << (_pos), _post)
+
+/*!
+ * \brief Exit function debug macro with results on New Line.
+ * \param _res    Results.
+ */
+#define CL_DBG_CALL_OUT_NL(_res) \
 do \
 { \
-  cerr << space(dbg_calldepth_*2) << "--> (" << res << ")" << endl; \
+  cerr << space(dbg_calldepth_*2) << "--> (" << _res << ")" << endl; \
   CL_POP_CALL_DEPTH(); \
 } while(0)
 
-#define CL_DBG_CALL_OUT2(res) \
+/*!
+ * \brief Exit function debug macro with results In Line.
+ * \param _res    Results.
+ */
+#define CL_DBG_CALL_OUT_IL(_res) \
 do \
 { \
-  cerr << "--> (" << res << ")" << endl; \
+  cerr << "--> (" << _res << ")" << endl; \
   CL_POP_CALL_DEPTH(); \
 } while(0)
 
-#define CL_DBG(os) cerr << os
+/*!
+ * \brief Debug macro with no indentation.
+ * \param _data   Any data stream.
+ */
+#define CL_DBG(_data) cerr << _data
 
 #else
 #define CL_CALL_DEPTH
-#define CL_SET_CALL_DEPTH(n)
+#define CL_SET_CALL_DEPTH(_n)
 #define CL_PUSH_CALL_DEPTH()
 #define CL_POP_CALL_DEPTH()
-#define CL_DBG_CALL_IN(args, post)
-#define CL_DBG_CALL_OUT1(res)
-#define CL_DBG_CALL_OUT2(res)
+#define CL_DBG_CALL_IN(_args, _post)
+#define CL_DBG_PARSE_CALL_IN(_cmddef, _formdef, _toks, _pos, _post)
+#define CL_DBG_CALL_OUT_NL(_res)
+#define CL_DBG_CALL_OUT_IL(_res)
 #define CL_DBG(os)
 #endif // CL_ENABLE_DEBUG
 
@@ -251,7 +286,8 @@ namespace rnr
     {
       return( (c == '<') || (c == ':') || (c == '>') ||
               (c == '{') || (c == '|') || (c == '}') ||
-              (c == '[') || (c == ']') );
+              (c == '[') || (c == ']') ||
+              (c == '(') || (c == ')') );
     }
 
     /*!
@@ -260,6 +296,22 @@ namespace rnr
     static inline bool isdquote(int c)
     {
       return(c == '"');
+    }
+
+    /*!
+     * \brief Test if c is a open parenthesis character.
+     */
+    static inline bool isoparen(int c)
+    {
+      return(c == '(');
+    }
+
+    /*!
+     * \brief Test if c is a close parenthesis character.
+     */
+    static inline bool iscparen(int c)
+    {
+      return(c == ')');
     }
 
     /*!
@@ -371,7 +423,7 @@ namespace rnr
      *
      * \return Indent manipulation object.
      */
-    osManipIndent setdeltaindent(const long nDelta)
+    osManipIndent deltaindent(const long nDelta)
     {
       osManipIndent obj;
 
@@ -678,6 +730,176 @@ namespace rnr
 
 
 // -----------------------------------------------------------------------------
+// ExtArg Class
+// -----------------------------------------------------------------------------
+
+ExtArg::ExtArg()
+{
+  m_nCmdUid       = CommandLine::NoUid;
+  m_nFormIndex    = CommandLine::NoIndex;
+  m_nArgIndex     = CommandLine::NoIndex;
+  m_nArgInstance  = 0;
+  m_eCvtType      = CvtTypeUndef;
+  m_bCvtVal       = false;
+  m_lCvtVal       = 0;
+  m_fCvtVal       = 0.0;
+}
+
+ExtArg::ExtArg(const int         &nCmdUid,
+               const int         &nFormIndex,
+               const int         &nArgIndex,
+               const int         &nArgInstance,
+               const std::string &strArg) :
+    m_nCmdUid(nCmdUid), m_nFormIndex(nFormIndex), m_nArgIndex(nArgIndex),
+    m_nArgInstance(nArgInstance), m_strArg(strArg)
+{
+  m_eCvtType      = CvtTypeUndef;
+  m_bCvtVal       = false;
+  m_lCvtVal       = 0;
+  m_fCvtVal       = 0.0;
+}
+
+ExtArg::ExtArg(const ExtArg &src)
+{
+  m_nCmdUid       = src.m_nCmdUid;
+  m_nFormIndex    = src.m_nFormIndex;
+  m_nArgIndex     = src.m_nArgIndex;
+  m_nArgInstance  = src.m_nArgInstance;
+  m_strArg        = src.m_strArg;
+  m_eCvtType      = src.m_eCvtType;
+  m_strCvtVal     = src.m_strCvtVal;
+  m_bCvtVal       = src.m_bCvtVal;
+  m_lCvtVal       = src.m_lCvtVal;
+  m_fCvtVal       = src.m_fCvtVal;
+}
+
+ExtArg::~ExtArg()
+{
+}
+
+ExtArg &ExtArg::operator=(const ExtArg &rhs)
+{
+  m_nCmdUid       = rhs.m_nCmdUid;
+  m_nFormIndex    = rhs.m_nFormIndex;
+  m_nArgIndex     = rhs.m_nArgIndex;
+  m_nArgInstance  = rhs.m_nArgInstance;
+  m_strArg        = rhs.m_strArg;
+  m_eCvtType      = rhs.m_eCvtType;
+  m_strCvtVal     = rhs.m_strCvtVal;
+  m_bCvtVal       = rhs.m_bCvtVal;
+  m_lCvtVal       = rhs.m_lCvtVal;
+  m_fCvtVal       = rhs.m_fCvtVal;
+}
+
+void ExtArg::s(const string &strVal)
+{
+  m_strCvtVal = strVal;
+  m_eCvtType  = CvtTypeString;
+}
+
+void ExtArg::e(const long eVal)
+{
+  m_strCvtVal = m_strArg;
+  m_lCvtVal   = eVal;
+  m_eCvtType  = CvtTypeEnum;
+}
+
+void ExtArg::b(const bool bVal)
+{
+  m_bCvtVal   = bVal;
+  m_eCvtType  = CvtTypeBoolean;
+}
+
+void ExtArg::i(const long lVal)
+{
+  m_lCvtVal   = lVal;
+  m_eCvtType  = CvtTypeInteger;
+}
+
+void ExtArg::f(const double fVal)
+{
+  m_fCvtVal   = fVal;
+  m_eCvtType  = CvtTypeFpn;
+}
+
+bool ExtArg::operator==(const ExtArg &rval) const
+{
+  return (type() == rval.type()) && (arg() == rval.arg());
+}
+
+bool ExtArg::operator==(const std::string &rval) const
+{
+  return ((type() == CvtTypeString) || (type() == CvtTypeEnum)) &&
+          (s() == rval);
+}
+
+bool ExtArg::operator==(const char* const &rval) const
+{
+  if( rval == NULL )
+  {
+    return false;
+  }
+
+  return ((type() == CvtTypeString) || (type() == CvtTypeEnum)) &&
+          (strcmp(s().c_str(), rval) == 0);
+}
+
+bool ExtArg::operator==(const bool &rval) const
+{
+  return (type() == CvtTypeBoolean) && (b() == rval);
+}
+
+bool ExtArg::operator==(const long &rval) const
+{
+  return ((type() == CvtTypeEnum) || (type() == CvtTypeInteger)) &&
+          (i() == rval);
+}
+
+bool ExtArg::operator==(const double &rval) const
+{
+  return (type() == CvtTypeFpn) && (f() == rval);
+}
+
+ostream &rnr::cmd::operator<<(ostream &os, const ExtArg &arg)
+{
+  switch( arg.type() )
+  {
+    case ExtArg::CvtTypeString:
+      os << arg.s();
+      break;
+    case ExtArg::CvtTypeEnum:
+      os << arg.s();  // string has priority over enum
+      break;
+    case ExtArg::CvtTypeBoolean:
+      os << arg.b();
+      break;
+    case ExtArg::CvtTypeInteger:
+      os << arg.i();
+      break;
+    case ExtArg::CvtTypeFpn:
+      os << arg.f();
+      break;
+    case ExtArg::CvtTypeUndef:
+    default:
+      os << "undef";
+      break;
+  }
+
+  return os;
+}
+
+LogBook &rnr::cmd::operator<<(LogBook &log, const ExtArg &arg)
+{
+  stringstream ss;
+
+  ss  << arg;
+  log << ss.str();
+
+  return log;
+}
+
+
+// -----------------------------------------------------------------------------
 // Token Class
 // -----------------------------------------------------------------------------
 
@@ -732,7 +954,7 @@ ostream &Token::oloc(ostream &os, const string &strLine)
 ostream &rnr::cmd::operator<<(ostream &os, const Token &tok)
 {
   os << "'" << CommandLine::prettify(tok.value()) << "'";
-  os << " at " << tok.m_posStart << "," << tok.m_posEnd;
+  //os << " @" << tok.m_posStart << ":" << tok.m_posEnd;
 
   return os;
 }
@@ -745,81 +967,6 @@ LogBook &rnr::cmd::operator<<(LogBook &log, const Token &tok)
   log << ss.str();
 
   return log;
-}
-
-
-// -----------------------------------------------------------------------------
-// ConvertedArg Class
-// -----------------------------------------------------------------------------
-
-ConvertedArg::ConvertedArg()
-{
-  m_eType     = CvtTypeUndef;
-  m_bVal      = false;
-  m_lVal      = 0;
-  m_fVal      = 0.0;
-}
-
-ConvertedArg::ConvertedArg(const string &strArg) : m_strArg(strArg)
-{
-  m_eType     = CvtTypeUndef;
-  m_bVal      = false;
-  m_lVal      = 0;
-  m_fVal      = 0.0;
-}
-
-ConvertedArg::ConvertedArg(const ConvertedArg &src)
-{
-  m_strArg    = src.m_strArg;
-  m_eType     = src.m_eType;
-  m_strVal    = src.m_strVal;
-  m_bVal      = src.m_bVal;
-  m_lVal      = src.m_lVal;
-  m_fVal      = src.m_fVal;
-}
-
-ConvertedArg::~ConvertedArg()
-{
-}
-
-ConvertedArg &ConvertedArg::operator=(const ConvertedArg &rhs)
-{
-  m_strArg    = rhs.m_strArg;
-  m_eType     = rhs.m_eType;
-  m_strVal    = rhs.m_strVal;
-  m_bVal      = rhs.m_bVal;
-  m_lVal      = rhs.m_lVal;
-  m_fVal      = rhs.m_fVal;
-}
-
-void ConvertedArg::s(const string &strVal)
-{
-  m_strVal    = strVal;
-  m_eType     = CvtTypeString;
-}
-
-void ConvertedArg::e(const long eVal)
-{
-  m_lVal      = eVal;
-  m_eType     = CvtTypeEnum;
-}
-
-void ConvertedArg::b(const bool bVal)
-{
-  m_bVal      = bVal;
-  m_eType     = CvtTypeBoolean;
-}
-
-void ConvertedArg::i(const long lVal)
-{
-  m_lVal      = lVal;
-  m_eType     = CvtTypeInteger;
-}
-
-void ConvertedArg::f(const double fVal)
-{
-  m_fVal      = fVal;
-  m_eType     = CvtTypeFpn;
 }
 
 
@@ -843,7 +990,9 @@ CmdArgDef::CmdArgDef(const CmdArgDef &src)
   m_nIndex      = src.m_nIndex;
   m_strName     = src.m_strName;
   m_eType       = src.m_eType;
-  m_values      = src.m_values;
+  m_literals    = src.m_literals;
+  m_ranges      = src.m_ranges;
+  m_re          = src.m_re;
   m_uFlags      = src.m_uFlags;
 }
 
@@ -858,7 +1007,9 @@ CmdArgDef &CmdArgDef::operator=(const CmdArgDef &rhs)
   m_nIndex      = rhs.m_nIndex;
   m_strName     = rhs.m_strName;
   m_eType       = rhs.m_eType;
-  m_values      = rhs.m_values;
+  m_literals    = rhs.m_literals;
+  m_ranges      = rhs.m_ranges;
+  m_re          = rhs.m_re;
   m_uFlags      = rhs.m_uFlags;
 
   return *this;
@@ -892,19 +1043,53 @@ void CmdArgDef::setType(const ArgType eType)
 
 void CmdArgDef::addLiteralValue(const string &strValue)
 {
-  m_values.push_back(strValue);
+  m_literals.push_back(strValue);
 }
 
 const string &CmdArgDef::literalAt(const int nIndex) const
 {
-  if( (nIndex >= 0) && (nIndex < m_values.size()) )
+  if( (nIndex >= 0) && (nIndex < m_literals.size()) )
   {
-    return m_values[nIndex];
+    return m_literals[nIndex];
   }
   else
   {
     return noliteral;
   }
+}
+
+void CmdArgDef::setRanges(const RangeVec &ranges)
+{
+  m_ranges = ranges;
+}
+
+bool CmdArgDef::inRange(const long value) const
+{
+  return inRange((double)value);
+}
+
+bool CmdArgDef::inRange(const double value) const
+{
+  // no minimum or maximum
+  if( m_ranges.size() == 0 )
+  {
+    return true;
+  }
+
+  for(size_t i = 0; i < m_ranges.size(); ++i)
+  {
+    if( (value >= m_ranges[i].min) && (value <= m_ranges[i].max) )
+    {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void CmdArgDef::setRegEx(const RegEx &re)
+{
+  m_re = re;
 }
 
 void CmdArgDef::orFlags(const unsigned uFlags)
@@ -920,6 +1105,20 @@ string CmdArgDef::constructLiteralList(const string sep) const
   for(size_t i = 0; i < numOfLiterals(); ++i)
   {
     ss << pre << literalAt(i);
+    pre = sep;
+  }
+
+  return ss.str();
+}
+
+string CmdArgDef::constructRangeList(const string sep) const
+{
+  stringstream  ss;
+  string        pre;
+
+  for(size_t i = 0; i < m_ranges.size(); ++i)
+  {
+    ss << pre << m_ranges[i].min << ":" << m_ranges[i].max;
     pre = sep;
   }
 
@@ -945,12 +1144,20 @@ string CmdArgDef::constructSyntax() const
       break;
     case ArgTypeInteger:
     case ArgTypeFpn:
-      ss << "<" << m_strName << ":" << lookupArgSymbol(m_eType) << ">";
-      // TODO add range
+      ss << "<" << m_strName << ":" << lookupArgSymbol(m_eType);
+      if( m_ranges.size() > 0 )
+      {
+        ss << "(" << constructRangeList() << ")";
+      }
+      ss << ">";
       break;
     case ArgTypeRegEx:
-      ss << "<" << m_strName << ":" << lookupArgSymbol(m_eType) << ">";
-      // TODO add re
+      ss << "<" << m_strName << ":" << lookupArgSymbol(m_eType);
+      if( m_re.isValid() )
+      {
+        ss << "(" << m_re.getRegEx() << ")";
+      }
+      ss << ">";
       break;
     default:
       ss << "<" << m_strName << ">";
@@ -1019,7 +1226,7 @@ double CmdArgDef::match(const string &strArg, bool bIgnoreCase) const
           rc = CommandLine::strToBool(strArg, val);
         }
 
-        if( rc == CommandLine::Ok )
+        if( rc == CommandLine::AOk )
         {
           fWeight = 0.95;
         }
@@ -1032,7 +1239,8 @@ double CmdArgDef::match(const string &strArg, bool bIgnoreCase) const
     case ArgTypeInteger:
       {
         long  val;
-        if( CommandLine::strToLong(strArg, val) == CommandLine::Ok )
+        if( (CommandLine::strToLong(strArg, val) == CommandLine::AOk) &&
+            inRange(val) )
         {
           fWeight = 0.95;
         }
@@ -1045,7 +1253,8 @@ double CmdArgDef::match(const string &strArg, bool bIgnoreCase) const
     case ArgTypeFpn:
       {
         double val;
-        if( CommandLine::strToDouble(strArg, val) == CommandLine::Ok )
+        if( (CommandLine::strToDouble(strArg, val) == CommandLine::AOk) &&
+            inRange(val) )
         {
           fWeight = 0.95;
         }
@@ -1053,10 +1262,13 @@ double CmdArgDef::match(const string &strArg, bool bIgnoreCase) const
       break;
 
     //
-    // Regular expression (TBD).
+    // Regular expression.
     //
     case ArgTypeRegEx:
-      fWeight = 0.93;
+      if( m_re.isValid() && m_re.match(strArg) )
+      {
+        fWeight = 0.93;
+      }
       break;
 
     //
@@ -1113,9 +1325,9 @@ int CmdArgDef::matchLiteral(const string &strArg, bool bIgnoreCase) const
   return -1;
 }
 
-ConvertedArg CmdArgDef::convert(const string &strArg, bool bIgnoreCase) const
+ExtArg CmdArgDef::convert(const string &strArg, bool bIgnoreCase) const
 {
-  ConvertedArg cvt(strArg);
+  ExtArg cvt(m_nCmdUid, m_nFormIndex, m_nIndex, 0, strArg);
 
   switch( m_eType )
   {
@@ -1160,7 +1372,7 @@ ConvertedArg CmdArgDef::convert(const string &strArg, bool bIgnoreCase) const
         {
           rc = CommandLine::strToBool(strArg, val);
         }
-        if( rc == CommandLine::Ok )
+        if( rc == CommandLine::AOk )
         {
           cvt.b(val);
         }
@@ -1174,7 +1386,7 @@ ConvertedArg CmdArgDef::convert(const string &strArg, bool bIgnoreCase) const
       {
         long val;
 
-        if( CommandLine::strToLong(strArg, val) == CommandLine::Ok )
+        if( CommandLine::strToLong(strArg, val) == CommandLine::AOk )
         {
           cvt.i(val);
         }
@@ -1188,7 +1400,7 @@ ConvertedArg CmdArgDef::convert(const string &strArg, bool bIgnoreCase) const
       {
         double val;
 
-        if( CommandLine::strToDouble(strArg, val) == CommandLine::Ok )
+        if( CommandLine::strToDouble(strArg, val) == CommandLine::AOk )
         {
           cvt.f(val);
         }
@@ -1206,31 +1418,30 @@ ConvertedArg CmdArgDef::convert(const string &strArg, bool bIgnoreCase) const
   return cvt;
 }
 
-
 ostream &rnr::cmd::operator<<(ostream &os, const CmdArgDef &argdef)
 {
-  os << setdeltaindent(2);
-
   os << indent() << "{" << endl;
 
-  os << setdeltaindent(2);
+  os << deltaindent(2);
 
-  os << indent() << "cmduid    = " << argdef.m_nCmdUid << endl;
-  os << indent() << "formindex = " << argdef.m_nFormIndex << endl;
-  os << indent() << "index     = " << argdef.m_nIndex << endl;
-  os << indent() << "name      = " << argdef.m_strName << endl;
-  os << indent() << "type      = "
+  os << indent() << "cmduid      = " << argdef.m_nCmdUid << endl;
+  os << indent() << "formindex   = " << argdef.m_nFormIndex << endl;
+  os << indent() << "index       = " << argdef.m_nIndex << endl;
+  os << indent() << "name        = " << argdef.m_strName << endl;
+  os << indent() << "type        = "
     << argdef.m_eType << "(" << lookupArgSymbol(argdef.m_eType) << ")" << endl;
-  os << indent() << "flags     = 0x" << std::hex << argdef.m_uFlags << std::dec
+  os << indent() << "flags       = 0x"
+    << std::hex << argdef.m_uFlags << std::dec
     << "(" << lookupFlagNames(argdef.m_uFlags) << ")" << endl;
-  os << indent() << "values[" << argdef.m_values.size() << "] = {"
+  os << indent() << "literals[" << argdef.m_literals.size() << "] = {"
     << argdef.constructLiteralList(", ")  << "}" << endl;
+  os << indent() << "ranges[" << argdef.m_ranges.size() << "]   = ("
+    << argdef.constructRangeList(", ")  << ")" << endl;
+  os << indent() << "regex       = " << argdef.m_re << endl;
 
-  os << setdeltaindent(-2);
+  os << deltaindent(-2);
 
   os << indent() << "}";
-
-  os << setdeltaindent(-2);
 
   return os;
 }
@@ -1243,7 +1454,7 @@ ostream &rnr::cmd::operator<<(ostream &os, const CmdArgDef &argdef)
 CmdFormDef::CmdFormDef()
 {
   m_nCmdUid   = CommandLine::NoUid;
-  m_nIndex    = CommandLine::NoFormIndex;
+  m_nIndex    = CommandLine::NoIndex;
   m_nArgcReq  = 0;
   m_nArgcOpt  = 0;
 }
@@ -1252,7 +1463,7 @@ CmdFormDef::CmdFormDef(const string &strSyntax) :
     m_strSyntax(strSyntax)
 {
   m_nCmdUid   = CommandLine::NoUid;
-  m_nIndex    = CommandLine::NoFormIndex;
+  m_nIndex    = CommandLine::NoIndex;
   m_nArgcReq  = 0;
   m_nArgcOpt  = 0;
 }
@@ -1287,6 +1498,13 @@ bool CmdFormDef::isDefined() const
           !m_strSyntax.empty()      &&
           (m_argdefs.size() > 0)    &&
           m_argdefs[0].isDefined();
+}
+
+void CmdFormDef::reset()
+{
+  m_argdefs.clear();
+  m_nArgcReq  = 0;
+  m_nArgcOpt  = 0;
 }
 
 void CmdFormDef::setParent(const int nCmdUid)
@@ -1346,11 +1564,9 @@ ostream &rnr::cmd::operator<<(ostream &os, const CmdFormDef &formdef)
 {
   string  sep;
 
-  os << setdeltaindent(2);
-
   os << indent() << "{" << endl;
 
-  os << setdeltaindent(2);
+  os << deltaindent(2);
 
   os << indent() << "cmduid  = " << formdef.m_nCmdUid << endl;
   os << indent() << "index   = " << formdef.m_nIndex << endl;
@@ -1363,6 +1579,8 @@ ostream &rnr::cmd::operator<<(ostream &os, const CmdFormDef &formdef)
   os << indent() << "args[" << formdef.numOfArgs() << "] =" << endl;
   os << indent() << "{" << endl;
 
+  os << deltaindent(2);
+
   for(size_t i = 0; i < formdef.m_argdefs.size(); ++i)
   {
     os << sep << formdef.m_argdefs[i];
@@ -1373,13 +1591,13 @@ ostream &rnr::cmd::operator<<(ostream &os, const CmdFormDef &formdef)
   }
   os << endl;
 
+  os << deltaindent(-2);
+
   os << indent() << "}" << endl;
 
-  os << setdeltaindent(-2);
+  os << deltaindent(-2);
 
   os << indent() << "}";
-
-  os << setdeltaindent(-2);
 
   return os;
 }
@@ -1417,6 +1635,14 @@ bool CmdDef::isDefined() const
           !m_strName.empty()        &&
           (numOfForms() > 0)        &&
           m_formdefs[0].isDefined();
+}
+
+void CmdDef::reset()
+{
+  for(size_t i = 0; i < m_formdefs.size(); ++i)
+  {
+    m_formdefs[i].reset();
+  }
 }
 
 void CmdDef::setUid(const int uid)
@@ -1466,16 +1692,16 @@ ostream &rnr::cmd::operator<<(ostream &os, const CmdDef &cmddef)
 {
   string  sep;
 
-  os << setdeltaindent(2);
-
   os << indent() << "{" << endl;
 
-  os << setdeltaindent(2);
+  os << deltaindent(2);
 
   os << indent() << "uid      = " << cmddef.m_nUid << endl;
   os << indent() << "name     = " << cmddef.m_strName << endl;
   os << indent() << "forms[" << cmddef.numOfForms() << "] = " << endl;
   os << indent() << "{" << endl;
+
+  os << deltaindent(2);
 
   for(size_t i = 0; i < cmddef.m_formdefs.size(); ++i)
   {
@@ -1488,13 +1714,13 @@ ostream &rnr::cmd::operator<<(ostream &os, const CmdDef &cmddef)
   }
   os << endl;
 
+  os << deltaindent(-2);
+
   os << indent() << "}" << endl;
 
-  os << setdeltaindent(-2);
+  os << deltaindent(-2);
 
   os << indent() << "}";
-
-  os << setdeltaindent(-2);
 
   return os;
 }
@@ -1533,7 +1759,7 @@ CommandLine::CommandLine(const string strName,
     m_strName(strName),
     m_bIgnoreCase(bIgnoreCase),
     m_readline(strName, strPrompt, bUseRlLib),
-    m_log("Command Line Log", 25)
+    m_log("Command Line Log", 50)
 {
   m_nUidCnt     = 0;
   m_bIsCompiled = false;
@@ -1602,13 +1828,63 @@ int CommandLine::addCommand(const string strMultiFormSyntax)
     cmddef.pushForm(formdef);
   }
 
+  m_bIsCompiled = false;
+
   return uid;
+}
+
+int CommandLine::removeCommand(const int uid)
+{
+  CmdIter pos;
+  int     rc;
+
+  if( uid == NoUid )
+  {
+    rc = EBadVal;
+  }
+  else if( (pos = m_cmddefs.find(uid)) == m_cmddefs.end() )
+  {
+    rc = EBadVal;
+  }
+  else
+  {
+    m_cmddefs.erase(pos);
+    if( m_cmddefs.size() == 0 )
+    {
+      m_bIsCompiled = false;
+    }
+    m_log << "Command " << uid << " removed." << eoe;
+    rc = AOk;
+  }
+
+  if( rc != AOk )
+  {
+    m_log << "No command with uid " << uid << " found." << eoe;
+    LOGERROR("%s", getErrorStr().c_str());
+  }
+
+  return rc;
+}
+
+int CommandLine::removeCommand(const string &strCmd)
+{
+  CmdDef &cmddef = cmdAt(strCmd);
+
+  return removeCommand(cmddef.getUid());
+}
+
+int CommandLine::removeAllCommands()
+{
+  m_cmddefs.clear();
+  m_bIsCompiled = false;
+  m_log << "All commands removed." << eoe;
+  return AOk;
 }
 
 int CommandLine::compile()
 {
   CmdIter   iter;
-  int       rc = Ok;
+  int       rc = AOk;
 
   CL_DBG_CALL_IN("", endl);
 
@@ -1630,17 +1906,22 @@ int CommandLine::compile()
   //
   // Compile each command.
   //
-  for(iter = m_cmddefs.begin(); (rc == Ok) && (iter != m_cmddefs.end()); ++iter)
+  for(iter = m_cmddefs.begin();
+      (rc == AOk) && (iter != m_cmddefs.end());
+      ++iter)
   {
     CmdDef &cmddef = iter->second;
 
-    rc = compile(cmddef);
+    if( !cmddef.isDefined() )
+    {
+      rc = compile(cmddef);
+    }
   }
 
   //
   // Finalize compilation.
   //
-  if( rc == Ok )
+  if( rc == AOk )
   {
     rc = finalize();
   }
@@ -1648,7 +1929,7 @@ int CommandLine::compile()
   //
   // Build readline generator.
   //
-  if( rc == Ok )
+  if( rc == AOk )
   {
     rc = rlBuildReadLineGenerator();
   }
@@ -1656,7 +1937,7 @@ int CommandLine::compile()
   //
   // All good.
   //
-  if( rc == Ok )
+  if( rc == AOk )
   {
     // register readline generator callback
     m_readline.registerAltGenerator(rlGeneratorWrapper, this);
@@ -1669,7 +1950,7 @@ int CommandLine::compile()
     m_log << labelExec << "Ok" << eoe;
   }
 
-  CL_DBG_CALL_OUT1("rc=" << rc);
+  CL_DBG_CALL_OUT_NL("rc=" << rc);
 
   return rc;
 }
@@ -1681,14 +1962,17 @@ int CommandLine::compile(CmdDef &cmddef)
   int         i;
   int         rc;
 
-  CL_DBG_CALL_IN("cmddef.uid=" << cmddef.getUid(), endl);
+  CL_DBG_CALL_IN("cmddef.uid=" << cmddef.getUid(), " ***" << endl);
 
   m_log.clear();
   m_log << bookmark(markExec) << labelExec << __func__ << eoe;
   m_log << labelCompile << "cmddef " << cmddef.getUid()
         << ": " << cmddef.getName() << eoe;
 
-  for(i = 0, rc = Ok; (i < cmddef.numOfForms()) && (rc == Ok); ++i)
+  // reset command definition to pre-compiled state
+  cmddef.reset();
+
+  for(i = 0, rc = AOk; (i < cmddef.numOfForms()) && (rc == AOk); ++i)
   {
     CmdFormDef &form = cmddef.formAt(i);
 
@@ -1712,7 +1996,7 @@ int CommandLine::compile(CmdDef &cmddef)
     }
   }
 
-  if( rc == Ok )
+  if( rc == AOk )
   {
     m_log << labelExec << "Ok" << eoe;
   }
@@ -1721,7 +2005,7 @@ int CommandLine::compile(CmdDef &cmddef)
     m_log << labelFail << "Could not compile." << eoe;
   }
 
-  CL_DBG_CALL_OUT1("rc=" << rc);
+  CL_DBG_CALL_OUT_NL("rc=" << rc);
   CL_DBG(endl);
 
   return rc;
@@ -1752,7 +2036,7 @@ int CommandLine::finalize()
     }
   }
 
-  return Ok;
+  return AOk;
 }
 
 
@@ -1762,11 +2046,34 @@ int CommandLine::finalize()
 
 int CommandLine::readCommand(FILE *fp, int &uid, int &iform, StringVec &argv)
 {
+  ExtArgVec extargv;
+  int       rc;
+
+  argv.clear();
+
+  uid   = NoUid;
+  iform = NoIndex;
+
+  if( ((rc = readCommand(fp, extargv)) == AOk) && (extargv.size() > 0) )
+  {
+    uid   = extargv[0].uid();
+    iform = extargv[0].formIndex();
+
+    toVec(extargv, argv);
+  }
+
+  return rc;
+}
+
+int CommandLine::readCommand(FILE *fp, ExtArgVec &argv)
+{
   string  strLine;
   int     rc;
 
   m_log.clear();
   m_log << bookmark(markExec) << labelExec << __func__ << eoe;
+
+  argv.clear();
 
   //
   // Preliminary checks.
@@ -1779,7 +2086,7 @@ int CommandLine::readCommand(FILE *fp, int &uid, int &iform, StringVec &argv)
   }
   else if( !isDefined() )
   {
-    m_log << labelNoExec << "Commands not compiled." << eoe;
+    m_log << labelNoExec << "Commands not fully compiled." << eoe;
     LOGERROR("%s", getErrorStr().c_str());
     return ENoExec;
   }
@@ -1801,14 +2108,15 @@ int CommandLine::readCommand(FILE *fp, int &uid, int &iform, StringVec &argv)
   //
   // Process input, match to best command.
   //
-  rc = processInput(strLine, uid, iform, argv);
-
-  if( rc == Ok )
+  if( (rc = processInput(strLine, argv)) == AOk )
   {
     m_log << labelExec << "Ok" << eoe;
 
-    LOGDIAG3("Command %s(%d), form %d matched.",
-        m_cmddefs[uid].getName(), uid, iform);
+    if( argv.size() > 0 )
+    {
+      LOGDIAG3("Command %s(%d), form %d matched.",
+        m_cmddefs[argv[0].uid()].getName(), argv[0].uid(), argv[0].formIndex());
+    }
   }
   else
   {
@@ -1823,6 +2131,14 @@ int CommandLine::readCommand(FILE *fp, int &uid, int &iform, StringVec &argv)
 void CommandLine::addToHistory(const StringVec &argv)
 {
   m_readline.addToHistory(c14n(argv));
+}
+
+void CommandLine::addToHistory(const ExtArgVec &argv)
+{
+  StringVec v;
+
+  toVec(argv, v);
+  m_readline.addToHistory(c14n(v));
 }
 
 void CommandLine::pushPrompt(const string &strPrompt)
@@ -1856,57 +2172,12 @@ const string &CommandLine::getPrompt() const
   }
 }
 
-int CommandLine::numOfArgs(int uid, int iform) const
-{
-  return at(uid).at(iform).numOfArgs();
-}
-
-int CommandLine::numOfRequiredArgs(int uid, int iform) const
-{
-  return at(uid).at(iform).numOfRequiredArgs();
-}
-
-int CommandLine::numOfOptionalArgs(int uid, int iform) const
-{
-  return at(uid).at(iform).numOfOptionalArgs();
-}
-
-const string &CommandLine::getArgName(int uid, int iform, int iarg) const
-{
-  // all terrain armored transport, of course
-  const CmdArgDef &argdef = at(uid).at(iform).at(iarg);
-
-  return argdef.getName();
-}
-
-CmdArgDef::ArgType CommandLine::getArgType(int uid, int iform, int iarg) const
-{
-  const CmdArgDef &argdef = at(uid).at(iform).at(iarg);
-
-  return argdef.getType();
-}
-
-ConvertedArg CommandLine::convert(int          uid,
-                                  int          iform,
-                                  int          iarg,
-                                  const string &strArg) const
-{
-  const CmdArgDef &argdef = at(uid).at(iform).at(iarg);
-
-  return argdef.convert(strArg, m_bIgnoreCase);
-}
-
 int CommandLine::processInput(const string &strLine,
-                              int          &uid,
-                              int          &iform,
-                              StringVec    &argv)
+                              ExtArgVec    &argv)
 {
   TokenVec  tokens; // tokenized input arguments
   int       argc;   // argument count
   int       rc;     // return code
-
-  uid   = NoUid;
-  iform = NoFormIndex;
 
   argv.clear();
 
@@ -1939,31 +2210,30 @@ int CommandLine::processInput(const string &strLine,
   // Otherwise match the input arguments to the best form of the best fit 
   // command definition.
   //
-  else if( (rc = match(tokens, uid, iform)) == Ok )
+  else
   {
-    // convert token vec to string vec
-    for(size_t i = 0; i < tokens.size(); ++i)
-    {
-      argv.push_back(tokens[i].value());
-    }
+    rc = match(tokens, argv);
   }
 
   return rc;
 }
 
-int CommandLine::match(const TokenVec &tokens, int &uid, int &iform)
+int CommandLine::match(const TokenVec &tokens, ExtArgVec &argv)
 {
-  CmdIter iter;                         // command definition iterator
-  double  fPenultFitness, fUltFitness;  // second and best fitness value
-  int     uidUlt, iformUlt;             // best cmd uid, form index
-  int     uid2nd, iform2nd;             // second best cmd uid, form index
-  double  fFitness;                     // working fitness
-  int     jform;                        // working form index
-  int     cnt;                          // count of commands matching tokens[0]
-  int     rc;                           // return code
+  CmdIter   iter;             // command definition iterator
 
-  uid   = NoUid;
-  iform = NoFormIndex;
+  double    fUltFitness;      // best fitness value
+  int       uidUlt;           // best command unique id
+  int       iformUlt;         // best form index
+
+  double    fPenultFitness;   // second best fitness value
+  int       uid2nd;           // seconds best command unique id
+  int       iform2nd;         // second best form index
+
+  ExtArgVec argvCmd;          // working command extended arguments
+  double    fFitness;         // working fitness
+  int       cnt;              // count of commands matching argv0
+  int       rc;               // return code
 
   // This is considered a bug. 
   if( tokens.size() == 0 )
@@ -1972,9 +2242,11 @@ int CommandLine::match(const TokenVec &tokens, int &uid, int &iform)
     return EError;
   }
 
+  argvCmd.clear();
+
   fPenultFitness  = fUltFitness = 0.0;
   uid2nd          = uidUlt      = NoUid;
-  iform2nd        = iformUlt    = NoFormIndex;
+  iform2nd        = iformUlt    = NoIndex;
 
   cnt = 0;
 
@@ -1983,16 +2255,16 @@ int CommandLine::match(const TokenVec &tokens, int &uid, int &iform)
   //
   for(iter = m_cmddefs.begin(); iter != m_cmddefs.end(); ++iter)
   {
-    rc = matchCommand(iter->second, tokens, jform, fFitness);
+    rc = matchCommand(iter->second, tokens, argvCmd, fFitness);
 
     switch( rc )
     {
-      case Ok:      // match
+      case AOk:      // complete match
         ++cnt;
         break;
-      case ENoOp:   // argv0 not matched
+      case EArgv0:  // argv0 not matched
         break;
-      default:      // argv0 match, but no match
+      default:      // argv0 matched, but args failed to match 
         ++cnt;
         continue;
     }
@@ -2004,9 +2276,10 @@ int CommandLine::match(const TokenVec &tokens, int &uid, int &iform)
       uid2nd          = uidUlt;
       iform2nd        = iformUlt;
 
+      argv        = argvCmd;
       fUltFitness = fFitness;
       uidUlt      = iter->second.getUid();
-      iformUlt    = jform;
+      iformUlt    = argv[0].formIndex();
     }
 
     // Found a new second best, but not a new best.
@@ -2014,7 +2287,7 @@ int CommandLine::match(const TokenVec &tokens, int &uid, int &iform)
     {
       fPenultFitness  = fFitness;
       uid2nd          = iter->second.getUid();
-      iform2nd        = jform;
+      iform2nd        = argvCmd[0].formIndex();
     }
   }
 
@@ -2052,11 +2325,8 @@ int CommandLine::match(const TokenVec &tokens, int &uid, int &iform)
   //
   else
   {
-    uid   = uidUlt;
-    iform = iformUlt;
-    rc    = Ok;
-
-    m_log << labelSelect << cmdAt(uid).formAt(iform).getSyntax() << eoe;
+    m_log << labelSelect << cmdAt(uidUlt).formAt(iformUlt).getSyntax() << eoe;
+    rc = AOk;
   }
 
   return rc;
@@ -2064,13 +2334,14 @@ int CommandLine::match(const TokenVec &tokens, int &uid, int &iform)
 
 int CommandLine::matchCommand(const CmdDef   &cmddef,
                               const TokenVec &tokens,
-                              int            &iform,
+                              ExtArgVec      &argv,
                               double         &fFitness)
 {
-  double  fMaxFitness;  // working and best form fitness
-  int     iBest;        // best form index
-  int     i;            // working index
-  int     rc;           // return code
+  ExtArgVec argvForm;     // working form extended arguments
+  double    fMaxFitness;  // working and best form fitness
+  int       iBest;        // best form index
+  int       i;            // working index
+  int       rc;           // return code
 
   // This is considered a bug. 
   if( tokens.size() == 0 )
@@ -2079,10 +2350,11 @@ int CommandLine::matchCommand(const CmdDef   &cmddef,
     return EError;
   }
 
-  iform       = NoFormIndex;
+  argv.clear();
+
   fFitness    = 0.0;
   fMaxFitness = 0.0;
-  iBest       = NoFormIndex;
+  iBest       = NoIndex;
 
   //
   // If argv0 doesn't match, don't try to apply matching algorithm to this
@@ -2092,7 +2364,7 @@ int CommandLine::matchCommand(const CmdDef   &cmddef,
   //
   if( cmddef.at(0).at(0).match(tokens[0].value()) == 0.0 )
   {
-    return ENoOp;
+    return EArgv0;
   }
 
   for(i = 0; i < cmddef.numOfForms(); ++i)
@@ -2101,10 +2373,11 @@ int CommandLine::matchCommand(const CmdDef   &cmddef,
 
     m_log << labelTry << form.getSyntax() << eoe;
 
-    if( (rc = matchCommandForm(form, tokens, fFitness)) == Ok )
+    if( (rc = matchCommandForm(form, tokens, argvForm, fFitness)) == AOk )
     {
       if( fFitness > fMaxFitness )
       {
+        argv        = argvForm;
         fMaxFitness = fFitness;
         iBest       = i;
       }
@@ -2123,13 +2396,11 @@ int CommandLine::matchCommand(const CmdDef   &cmddef,
   //
   if( iBest >= 0 )
   {
-    iform = iBest;
-
     m_log << labelMatch
           << "Command '" << cmddef.getName()
           << "', form " << iBest << ": Fitness " << fMaxFitness
           << eoe;
-    rc = Ok;
+    rc = AOk;
   }
 
   //
@@ -2148,6 +2419,7 @@ int CommandLine::matchCommand(const CmdDef   &cmddef,
 
 int CommandLine::matchCommandForm(const CmdFormDef &form,
                                   const TokenVec   &tokens,
+                                  ExtArgVec        &argv,
                                   double           &fFitness)
 {
   int     argcToks = (int)tokens.size();  // number of input tokens
@@ -2156,6 +2428,8 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
   int     iArg;                           // working form argument index
   int     iTok;                           // working input tokens index
   int     rc;                             // return code
+
+  argv.clear();
 
   fFitness = 0.0;
   fDecay   = 1.0;
@@ -2196,8 +2470,8 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
   //
   // Match input arguments to form syntax.
   //
-  for(iArg = 0, iTok = 0, rc = Ok;
-      (iArg < argcForm) && (iTok < argcToks) && (rc == Ok);
+  for(iArg = 0, iTok = 0, rc = AOk;
+      (iArg < argcForm) && (iTok < argcToks) && (rc == AOk);
       ++iArg)
   {
     const CmdArgDef &argdef = form.at(iArg);
@@ -2212,32 +2486,50 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
 
       // start log entry
       m_log << labelNoMatch
-            << "Token " << tokens[iTok] << " for "
+            << "Input argument " << tokens[iTok] << " doesn't match "
             << "command '" << strCmdName << "', "
             << "form " << form.getIndex() << ", "
-            << "arg " << argdef.getName() << ": ";
+            << (argdef.isOptional()? "(opt)": "")
+            << "arg " << argdef.getIndex()
+            << " definition."
+            << eoe;
     
-      // log reason of match failure
+      //
+      // Log reason of match failure.
+      //
       switch( argdef.getType() )
       {
         case CmdArgDef::ArgTypeLiteral:
-          m_log << "Not one of: " << argdef.constructLiteralList();
+          m_log << labelBlank << " - Not one of: "
+                << argdef.constructLiteralList() << "."
+                << eoe;
         break;
 
         case CmdArgDef::ArgTypeWord:
         case CmdArgDef::ArgTypeMultiWord:
         case CmdArgDef::ArgTypeIdentifier:
         case CmdArgDef::ArgTypeBoolean:
+        case CmdArgDef::ArgTypeFile:
+          m_log << labelBlank << " - Not a "
+                << "'" << lookupArgSymbol(argdef.getType()) << "' type."
+                << eoe;
+          break;
+
         case CmdArgDef::ArgTypeInteger:
         case CmdArgDef::ArgTypeFpn:
-        case CmdArgDef::ArgTypeFile:
-          m_log << "Not a " << lookupArgSymbol(argdef.getType());
+          m_log << labelBlank << " - Not a "
+                << "'" << lookupArgSymbol(argdef.getType()) << "' type";
+          if( argdef.getRanges().size() > 0 )
+          {
+            m_log << " or out of range " << argdef.constructRangeList();
+          }
+          m_log << "." << eoe;
           break;
 
         case CmdArgDef::ArgTypeRegEx:
-          m_log << "Failed to match regular expression pattern: "
-                << "TBD"; //<< argdef.getRegEx()
-                
+          m_log << labelBlank << " - Failed to match re: "
+                << "'" << argdef.getRegEx() << "'."
+                << eoe;
           break;
 
         case CmdArgDef::ArgTypeUndef:
@@ -2246,15 +2538,23 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
           rc = EError;
           break;
       }
-
-      m_log << "." << eoe; // record pending log entry
     }
 
     //
     // Good argument match.
     //
-    if( rc == Ok )
+    if( rc == AOk )
     {
+      m_log << labelMatch
+            << "Input argument " << tokens[iTok] << " matches "
+            << "cmd '" << strCmdName << "', "
+            << "form " << form.getIndex() << ", "
+            << "arg " << argdef.getIndex() << " "
+            << "definition."
+            << eoe;
+
+      argv.push_back(argdef.convert(tokens[iTok].value(), m_bIgnoreCase));
+
       // don't decay perfection
       if( fWeight == 1.0 )
       {
@@ -2275,7 +2575,7 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
     //
     else if( argdef.isOptional() && (iArg < argcForm-1) )
     {
-      rc = Ok;
+      rc = AOk;
     }
 
     //
@@ -2312,8 +2612,66 @@ int CommandLine::checkReadResult()
   // read successful
   else
   {
-    return Ok;
+    return AOk;
   }
+}
+
+void CommandLine::toVec(const ExtArgVec &v1, StringVec &v2)
+{
+  for(size_t i = 0; i < v1.size(); ++i)
+  {
+    v2.push_back(v1[i].arg());
+  }
+}
+
+
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Command Info and Argument Access Methods
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+int CommandLine::numOfArgs(int uid, int iform) const
+{
+  return at(uid).at(iform).numOfArgs();
+}
+
+int CommandLine::numOfArgs(const ExtArg &arg) const
+{
+  return at(arg.uid()).at(arg.formIndex()).numOfArgs();
+}
+
+int CommandLine::numOfRequiredArgs(int uid, int iform) const
+{
+  return at(uid).at(iform).numOfRequiredArgs();
+}
+
+int CommandLine::numOfRequiredArgs(const ExtArg &arg) const
+{
+  return at(arg.uid()).at(arg.formIndex()).numOfRequiredArgs();
+}
+
+int CommandLine::numOfOptionalArgs(int uid, int iform) const
+{
+  return at(uid).at(iform).numOfOptionalArgs();
+}
+
+int CommandLine::numOfOptionalArgs(const ExtArg &arg) const
+{
+  return at(arg.uid()).at(arg.formIndex()).numOfOptionalArgs();
+}
+
+const string &CommandLine::getArgName(const ExtArg &arg) const
+{
+  // all terrain armored transport, of course
+  const CmdArgDef &argdef= at(arg.uid()).at(arg.formIndex()).at(arg.argIndex());
+
+  return argdef.getName();
+}
+
+CmdArgDef::ArgType CommandLine::getArgDefType(const ExtArg &arg) const
+{
+  const CmdArgDef &argdef= at(arg.uid()).at(arg.formIndex()).at(arg.argIndex());
+
+  return argdef.getType();
 }
 
 
@@ -2323,7 +2681,7 @@ int CommandLine::checkReadResult()
 
 int CommandLine::rlBuildReadLineGenerator()
 {
-  return Ok;
+  return AOk;
 }
 
 const string CommandLine::rlGeneratorWrapper(void         *pAppArg,
@@ -2601,6 +2959,16 @@ bool CommandLine::rlPartialMatch(const string &strText,
 // Attribute and Data Access Methods
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
+bool CommandLine::hasCmd(const int uid) const
+{
+  return m_cmddefs.find(uid) != m_cmddefs.end();
+}
+
+bool CommandLine::hasCmd(const string &strName) const
+{
+  return at(strName).isDefined();
+}
+
 const CmdDef &CommandLine::at(const int uid) const
 {
   CmdConstIter  pos;
@@ -2747,7 +3115,7 @@ ssize_t CommandLine::tokenize(const string &strInput, TokenVec &tokens)
       ss << sep << tokens[i];
       sep = ", ";
     }
-    CL_DBG_CALL_OUT1(ss.str());
+    CL_DBG_CALL_OUT_NL(ss.str());
   }
 #endif // CL_ENABLE_DEBUG
 
@@ -2798,8 +3166,14 @@ ssize_t CommandLine::tokenizeSyntax(const string &strSyntax, TokenVec &tokens)
       break;
     }
 
+    // new parenthetical expression
+    if( isoparen(strSyntax[cursor]) )
+    {
+      cursor = lexSyntaxParenExpr(strSyntax, cursor, tokens);
+    }
+
     //  special character token
-    if( isspecial(strSyntax[cursor]) )
+    else if( isspecial(strSyntax[cursor]) )
     {
       start = cursor++;
       pushToken(strSyntax, start, cursor, tokens);
@@ -2821,7 +3195,7 @@ ssize_t CommandLine::tokenizeSyntax(const string &strSyntax, TokenVec &tokens)
       ss << sep << tokens[i];
       sep = ", ";
     }
-    CL_DBG_CALL_OUT1(ss.str());
+    CL_DBG_CALL_OUT_NL(ss.str());
   }
 #endif // CL_ENABLE_DEBUG
 
@@ -2858,6 +3232,94 @@ ssize_t CommandLine::lexSyntaxWord(const string &strSyntax,
   }
 
   return cursor;
+}
+
+ssize_t CommandLine::lexSyntaxParenExpr(const string &strSyntax,
+                                        ssize_t       cursor,
+                                        TokenVec     &tokens)
+{
+  size_t    len;      // length of input string;
+  size_t    start;    // start character position of token in input string
+  int       pdepth;   // parenthesis depth
+  bool      escseq;   // is [not] in an escape sequence
+  bool      eop;      // is [not] at end of parenthetical
+  char      c;        // working character
+  string    value;    // working token value
+
+  len     = strSyntax.length();
+  start   = cursor;
+  pdepth  = 0;
+  escseq  = false;
+  eop     = false;
+
+  if( isoparen(strSyntax[cursor]) )
+  {
+    // '(' token
+    start = cursor++;
+    pushToken(strSyntax, start, cursor, tokens);
+
+    start = cursor;
+    ++pdepth;
+  }
+  else
+  {
+    m_log << labelSyntax << "No starting '(' found." << eoe;
+    LOGERROR("%s", getErrorStr().c_str());
+    return EBadSyntax;
+  }
+
+  while( (cursor >= 0) && (cursor < len) && !eop )
+  {
+    switch( strSyntax[cursor] )
+    {
+      case '\\':
+        escseq = true;
+        break;
+      case '(':
+        if( !escseq )
+        {
+          ++pdepth;
+        }
+        escseq = false;
+        break;
+      case ')':
+        if( !escseq )
+        {
+          if( --pdepth == 0 )
+          {
+            eop = true;
+          }
+        }
+        escseq = false;
+        break;
+      default:
+        escseq = false;
+        break;
+    }
+
+    if( !eop )
+    {
+      value.push_back(strSyntax[cursor++]);
+    }
+  }
+
+  if( iscparen(strSyntax[cursor]) )
+  {
+    // expression token
+    pushToken(strSyntax, start, cursor, tokens);
+
+    // ')' token
+    start = cursor++;
+    pushToken(strSyntax, start, cursor, tokens);
+
+    return cursor;
+  }
+  else
+  {
+    m_log << labelSyntax << "No ending '(' found." << eoe;
+    LOGERROR("%s", getErrorStr().c_str());
+    return EBadSyntax;
+  }
 }
 
 ssize_t CommandLine::lexWord(const string &strInput,
@@ -2900,11 +3362,11 @@ ssize_t CommandLine::lexQuotedString(const string &strInput,
   string    value;    // working token value
 
   len   = strInput.length();
-  start = cursor;
 
   if( isdquote(strInput[cursor]) )
   {
     ++cursor;
+    start = cursor;
   }
   else
   {
@@ -2987,9 +3449,10 @@ ssize_t CommandLine::lexQuotedString(const string &strInput,
 
   if( isdquote(strInput[cursor]) )
   {
-    Token tok(value, start, cursor);
-    tokens.push_back(tok);
+    pushToken(strInput, start, cursor, tokens);
+
     ++cursor;   // get past quote
+
     return cursor;
   }
   else
@@ -3019,12 +3482,10 @@ int CommandLine::parseSyntax(CmdDef         &cmddef,
 {
   size_t  tokcnt  = tokens.size();
   size_t  pos     = 0;
-  bool    bOk;
+  bool    bOk     = true;
   int     rc;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex() << ")"
-      << ", tokens", endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, 0, endl);
 
   m_log << labelParse
         << "cmddef " << cmddef.getUid() << ", "
@@ -3036,7 +3497,6 @@ int CommandLine::parseSyntax(CmdDef         &cmddef,
   if( !parseArgv0(cmddef, form, tokens, pos) )
   {
     m_log << labelFail << "Parssing special argv0." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
     bOk = false;
   }
 
@@ -3044,7 +3504,6 @@ int CommandLine::parseSyntax(CmdDef         &cmddef,
   else if( !parseRequiredArgList(cmddef, form, tokens, pos) )
   {
     m_log << labelFail << "Parsing required argument list." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
     bOk = false;
   }
 
@@ -3052,7 +3511,6 @@ int CommandLine::parseSyntax(CmdDef         &cmddef,
   else if( !parseOptionalArgList(cmddef, form, tokens, pos) )
   {
     m_log << labelFail << "Parsing optional argument list." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
     bOk = false;
   }
 
@@ -3060,24 +3518,29 @@ int CommandLine::parseSyntax(CmdDef         &cmddef,
   else if( pos < tokcnt )
   {
     m_log << labelFail
-          << "Extraneous tokens found after optional arguments." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+          << "Extraneous tokens found after optional arguments."
+          << eoe;
     bOk = false;
   }
 
-  // good
-  else
+  // all good
+  if( bOk )
   {
     m_log << labelParse << "Ok" << eoe;
     LOGDIAG2("Command(uid=%d, name=%s, form=%d, argc=%d) successfully parsed.",
         cmddef.getUid(), cmddef.getName().c_str(),
         form.getIndex(), form.numOfArgs());
-    bOk = true;
+    rc = AOk;
   }
 
-  rc = bOk? Ok: EBadSyntax;
+  // not so good - log error
+  else
+  {
+    LOGERROR("%s", getErrorStr().c_str());
+    rc = EBadSyntax;
+  }
 
-  CL_DBG_CALL_OUT1("rc=" << rc << ", " << okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL("rc=" << rc << ", " << okstr(bOk) << ", pos=" << pos);
 
   return rc;
 }
@@ -3090,10 +3553,7 @@ bool CommandLine::parseArgv0(CmdDef         &cmddef,
   bool    bOk;
   string  strName;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   if( pos < tokens.size() )
   {
@@ -3108,7 +3568,7 @@ bool CommandLine::parseArgv0(CmdDef         &cmddef,
   }
   else
   {
-    m_log << labelSyntax << "Command argument not found in form"
+    m_log << labelSyntax << "Command argument not found in form "
           << form.getIndex() << "."
           << eoe;
     LOGERROR("%s", getErrorStr().c_str());
@@ -3150,7 +3610,7 @@ bool CommandLine::parseArgv0(CmdDef         &cmddef,
     }
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3162,11 +3622,7 @@ bool CommandLine::parseRequiredArgList(CmdDef         &cmddef,
 {
   bool  bOk = true;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
-
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   while( bOk && (pos < tokens.size()) )
   {
@@ -3183,7 +3639,7 @@ bool CommandLine::parseRequiredArgList(CmdDef         &cmddef,
     }
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3195,10 +3651,7 @@ bool CommandLine::parseOptionalArgList(CmdDef         &cmddef,
 {
   bool  bOk = true;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   while( bOk && (pos < tokens.size()) )
   {
@@ -3222,7 +3675,7 @@ bool CommandLine::parseOptionalArgList(CmdDef         &cmddef,
     }
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3234,10 +3687,7 @@ bool CommandLine::parseArg(CmdDef         &cmddef,
 {
   bool  bOk;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   if( pos < tokens.size() )
   {
@@ -3261,7 +3711,7 @@ bool CommandLine::parseArg(CmdDef         &cmddef,
     bOk = false;
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3275,16 +3725,15 @@ bool CommandLine::parseXorListArg(CmdDef         &cmddef,
   CmdArgDef argdef;
   StringVec literals;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   form.pushArg(argdef);
 
-  if( tokEq("{", tokens, pos) &&
-      parseXorList(cmddef, form, tokens, pos, literals) &&
-      tokEq("}", tokens, pos) )
+  bOk = tokEq("{", tokens, pos) &&
+        parseXorList(cmddef, form, tokens, pos, literals) &&
+        tokEq("}", tokens, pos);
+
+  if( bOk )
   {
     stringstream  ss;
     int           n = form.numOfArgs() - 1;
@@ -3299,15 +3748,9 @@ bool CommandLine::parseXorListArg(CmdDef         &cmddef,
     {
       form.lastArg().addLiteralValue(literals[i]);
     }
-
-    bOk = true;
-  }
-  else
-  {
-    bOk = false;
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3321,42 +3764,42 @@ bool CommandLine::parseVariableArg(CmdDef         &cmddef,
   CmdArgDef           argdef;
   string              strName;
   CmdArgDef::ArgType  eType;
+  CmdArgDef::RangeVec ranges;
+  RegEx               re;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   form.pushArg(argdef);
 
   bOk = tokEq("<", tokens, pos) &&
-           parseIdentifier(cmddef, form, tokens, pos, strName);
+        parseIdentifier(cmddef, form, tokens, pos, strName);
 
   if( bOk )
   {
+    // variable modifier
     if( peekEq(":", tokens[pos]) )
     {
       bOk = tokEq(":", tokens, pos) &&
-                parseType(cmddef, form, tokens, pos, eType);
+            parseVarMod(cmddef, form, tokens, pos, eType, ranges, re);
     }
+    // default
     else
     {
       eType = CmdArgDef::ArgTypeWord;
     }
   }
 
-  if( bOk )
-  {
-    bOk = tokEq(">", tokens, pos);
-  }
+  bOk = bOk && tokEq(">", tokens, pos);
 
   if( bOk )
   {
     form.lastArg().setName(strName);
     form.lastArg().setType(eType);
+    form.lastArg().setRanges(ranges);
+    form.lastArg().setRegEx(re);
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3370,14 +3813,13 @@ bool CommandLine::parseLiteralArg(CmdDef         &cmddef,
   CmdArgDef argdef;
   string    strValue;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   form.pushArg(argdef);
 
-  if( (bOk = parseLiteralValue(cmddef, form, tokens, pos, strValue)) )
+  bOk = parseLiteralValue(cmddef, form, tokens, pos, strValue);
+
+  if( bOk )
   {
     stringstream  ss;
     int           n = form.numOfArgs() - 1;
@@ -3389,7 +3831,7 @@ bool CommandLine::parseLiteralArg(CmdDef         &cmddef,
     form.lastArg().addLiteralValue(strValue);
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3404,10 +3846,7 @@ bool CommandLine::parseXorList(CmdDef         &cmddef,
   bool    more = true;
   string  strValue;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   while( more && bOk && (pos < tokens.size()) )
   {
@@ -3441,7 +3880,7 @@ bool CommandLine::parseXorList(CmdDef         &cmddef,
     bOk = false;
   }
 
-  CL_DBG_CALL_OUT1(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3454,10 +3893,7 @@ bool CommandLine::parseIdentifier(CmdDef         &cmddef,
 {
   bool    bOk;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
 
   strIdent.clear();
 
@@ -3473,24 +3909,68 @@ bool CommandLine::parseIdentifier(CmdDef         &cmddef,
     bOk = false;
   }
 
-  CL_DBG_CALL_OUT2(okstr(bOk) << ", identifier=\"" << strIdent
-      << "\", pos=" << pos);
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", identifier='" << strIdent
+      << "', pos=" << pos);
 
   return bOk;
 }
 
-bool CommandLine::parseType(CmdDef             &cmddef,
-                            CmdFormDef         &form,
-                            const TokenVec     &tokens,
-                            size_t             &pos,
-                            CmdArgDef::ArgType &eType)
+bool CommandLine::parseVarMod(CmdDef              &cmddef,
+                              CmdFormDef          &form,
+                              const TokenVec      &tokens,
+                              size_t              &pos,
+                              CmdArgDef::ArgType  &eType,
+                              CmdArgDef::RangeVec &ranges,
+                              RegEx               &re)
 {
   bool  bOk;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, endl);
+
+  bOk = parseVarType(cmddef, form, tokens, pos, eType);
+
+  if( bOk )
+  {
+    if( peekEq("(", tokens[pos]) )
+    {
+      switch( eType )
+      {
+        case CmdArgDef::ArgTypeInteger:
+        case CmdArgDef::ArgTypeFpn:
+          bOk = tokEq("(", tokens, pos) &&
+                parseVarRangeExpr(cmddef, form, tokens, pos, ranges) &&
+                tokEq(")", tokens, pos);
+          break;
+        case CmdArgDef::ArgTypeRegEx:
+          bOk = tokEq("(", tokens, pos) &&
+                parseVarRegExpr(cmddef, form, tokens, pos, re) &&
+                tokEq(")", tokens, pos);
+          break;
+        default:
+          m_log << labelSyntax
+                << "Unexpected '(' token found for argument type "
+                << "'" << lookupArgSymbol(eType) << "'."
+                << eoe;
+          LOGERROR("%s", getErrorStr().c_str());
+          bOk = false;
+      }
+    }
+  }
+
+  CL_DBG_CALL_OUT_NL(okstr(bOk) << ", type=" << eType << ", pos=" << pos);
+
+  return bOk;
+}
+
+bool CommandLine::parseVarType(CmdDef             &cmddef,
+                               CmdFormDef         &form,
+                               const TokenVec     &tokens,
+                               size_t             &pos,
+                               CmdArgDef::ArgType &eType)
+{
+  bool  bOk;
+
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, " ");
 
   eType = CmdArgDef::ArgTypeUndef;
 
@@ -3517,7 +3997,157 @@ bool CommandLine::parseType(CmdDef             &cmddef,
     bOk = false;
   }
 
-  CL_DBG_CALL_OUT2(okstr(bOk) << ", type=" << eType << ", pos=" << pos);
+  CL_DBG_CALL_OUT_IL(okstr(bOk) << ", type=" << eType << ", pos=" << pos);
+
+  return bOk;
+}
+
+bool CommandLine::parseVarRangeExpr(CmdDef              &cmddef,
+                                    CmdFormDef          &form,
+                                    const TokenVec      &tokens,
+                                    size_t              &pos,
+                                    CmdArgDef::RangeVec &ranges)
+{
+  bool              bOk = true;
+  StringVec         subranges;
+  StringVec         minmax;
+  CmdArgDef::range  r;
+
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, " ");
+
+  ranges.clear();
+
+  if( pos < tokens.size() )
+  {
+    split(tokens[pos].value(), ',', subranges);
+
+    for(size_t i = 0; bOk && (i < subranges.size()); ++i)
+    {
+      minmax.clear();
+
+      split(subranges[i], ':', minmax);
+
+      if( minmax.size() == 0 )
+      {
+        m_log << labelSyntax << "No 'min[:max]' subrange found in "
+              << "'" << tokens[pos].value() << "'.'"
+              << eoe;
+        bOk = false;
+        break;
+      }
+      else if( minmax.size() > 2 )
+      {
+        m_log << labelSyntax << "Too many 'min:max:?' subrange values found in "
+              << "'" << tokens[pos].value() << "'.'"
+              << eoe;
+        bOk = false;
+        break;
+      }
+
+      if( strToDouble(minmax[0], r.min) != AOk )
+      {
+        m_log << labelSyntax << "Subrange min '" << minmax[0] << "' NaN in "
+              << "'" << tokens[pos].value() << "'.'"
+              << eoe;
+        bOk = false;
+        break;
+      }
+
+      if( minmax.size() == 2 )
+      {
+        if( strToDouble(minmax[1], r.max) != AOk )
+        {
+          m_log << labelSyntax << "Subrange max '" << minmax[1] << "' NaN in "
+                << "'" << tokens[pos].value() << "'.'"
+                << eoe;
+          bOk = false;
+          break;
+        }
+      }
+      else
+      {
+        r.max = r.min;
+      }
+
+      // reverse ranges are ok, just swap order
+      if( r.max < r.min )
+      {
+        double tmp;
+
+        r.min = tmp;
+        r.min = r.max;
+        r.max = r.min;
+      }
+
+      ranges.push_back(r);
+    }
+  }
+
+  // everything is cool, but no ranges specified
+  if( bOk && (ranges.size() == 0) )
+  {
+    m_log << labelSyntax << "Range expression not found." << eoe;
+    bOk = false;
+  }
+
+  if( bOk )
+  {
+    ++pos; // advance token parse position
+  }
+  else
+  {
+    LOGERROR("%s", getErrorStr().c_str());
+  }
+
+  CL_DBG_CALL_OUT_IL(okstr(bOk) << ", numranges=" << ranges.size()
+      << ", pos=" << pos);
+
+  return bOk;
+}
+
+bool CommandLine::parseVarRegExpr(CmdDef         &cmddef,
+                                  CmdFormDef     &form,
+                                  const TokenVec &tokens,
+                                  size_t         &pos,
+                                  RegEx          &re)
+{
+  bool  bOk;
+
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, " ");
+
+  if( pos < tokens.size() )
+  {
+    if( m_bIgnoreCase )
+    {
+      re.setFlags(RegEx::ReFlagICase);
+    }
+
+    re = tokens[pos++].value();
+
+    if( re.isValid() )
+    {
+      bOk = true;
+    }
+    else
+    {
+      m_log << labelSyntax << "Regular expression '"
+            << "'" << re.getRegEx() << "': "
+            << re.getErrorStr() << "."
+            << eoe;
+      LOGERROR("%s", getErrorStr().c_str());
+      bOk = false;
+    }
+  }
+
+  else
+  {
+    m_log << labelSyntax << "Regular expression not found." << eoe;
+    LOGERROR("%s", getErrorStr().c_str());
+    bOk = false;
+  }
+
+  CL_DBG_CALL_OUT_IL(okstr(bOk) << ", re='" << re.getRegEx() << "', pos="
+      << pos);
 
   return bOk;
 }
@@ -3530,10 +4160,7 @@ bool CommandLine::parseLiteralValue(CmdDef         &cmddef,
 {
   bool  bOk;
 
-  CL_DBG_CALL_IN("cmddef(uid=" << cmddef.getUid() << ")"
-      << ", form(index=" << form.getIndex()
-      << ", argc=" << form.numOfArgs() << ")"
-      << ", tokens, pos=" << pos, endl);
+  CL_DBG_PARSE_CALL_IN(cmddef, form, tokens, pos, " ");
 
   strValue.clear();
 
@@ -3549,7 +4176,7 @@ bool CommandLine::parseLiteralValue(CmdDef         &cmddef,
     bOk = false;
   }
 
-  CL_DBG_CALL_OUT2(okstr(bOk) << ", value=\"" << strValue << "\", "
+  CL_DBG_CALL_OUT_IL(okstr(bOk) << ", value='" << strValue << "', "
       << "pos=" << pos);
 
   return bOk;
@@ -3586,7 +4213,7 @@ bool CommandLine::tokEq(const string   strCmp,
     bOk = true;
   }
 
-  CL_DBG_CALL_OUT2(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_IL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3595,7 +4222,7 @@ bool CommandLine::tokIdentifier(const TokenVec &tokens, size_t &pos)
 {
   bool    bOk;
 
-  CL_DBG_CALL_IN("tokens, pos=" << pos, " ");
+  CL_DBG_CALL_IN("tokens=" << tokens.size() << ", pos=" << pos, " ");
 
   bOk = isIdentifier(tokens[pos].value());
 
@@ -3609,7 +4236,7 @@ bool CommandLine::tokIdentifier(const TokenVec &tokens, size_t &pos)
     LOGERROR("%s", getErrorStr().c_str());
   }
 
-  CL_DBG_CALL_OUT2(okstr(bOk) << ", pos=" << pos);
+  CL_DBG_CALL_OUT_IL(okstr(bOk) << ", pos=" << pos);
 
   return bOk;
 }
@@ -3757,7 +4384,7 @@ int CommandLine::strToBool(const string &str, bool &val)
     if( str == FalseHood[i] )
     {
       val = false;
-      return Ok;
+      return AOk;
     }
   }
 
@@ -3766,7 +4393,7 @@ int CommandLine::strToBool(const string &str, bool &val)
     if( str == TruthHood[i] )
     {
       val = true;
-      return Ok;
+      return AOk;
     }
   }
 
@@ -3777,14 +4404,14 @@ int CommandLine::strToLong(const string &str, long &val)
 {
   char  sniff;
 
-  return sscanf(str.c_str(), "%li%c", &val, &sniff) == 1? Ok: EBadSyntax;
+  return sscanf(str.c_str(), "%li%c", &val, &sniff) == 1? AOk: EBadSyntax;
 }
 
 int CommandLine::strToDouble(const string &str, double &val)
 {
   char  sniff;
 
-  return sscanf(str.c_str(), "%lf%c", &val, &sniff) == 1? Ok: EBadSyntax;
+  return sscanf(str.c_str(), "%lf%c", &val, &sniff) == 1? AOk: EBadSyntax;
 }
 
 
@@ -3803,7 +4430,7 @@ ostream &rnr::cmd::operator<<(ostream &os, const CommandLine &cl)
   os << "CommandLine " << cl.m_strName << endl;
   os << "{" << endl;
 
-  os << setdeltaindent(2);
+  os << deltaindent(2);
 
   os << indent() << "name          = " << cl.m_strName << endl;
   os << indent() << "have_readline = " << cl.m_readline.haveRlLib() << endl;
@@ -3812,6 +4439,8 @@ ostream &rnr::cmd::operator<<(ostream &os, const CommandLine &cl)
   os << indent() << "ignorecase    = " << cl.m_bIgnoreCase << endl;
   os << indent() << "cmddefs[" << cl.numOfCmds() << "] =" << endl;
   os << indent() << "{" << endl;
+
+  os << deltaindent(2);
 
   for(iter = cl.m_cmddefs.begin(); iter != cl.m_cmddefs.end(); ++iter)
   {
@@ -3823,9 +4452,11 @@ ostream &rnr::cmd::operator<<(ostream &os, const CommandLine &cl)
   }
   os << endl;
 
+  os << deltaindent(-2);
+
   os << indent() << "}" << endl;
 
-  os << setdeltaindent(-2);
+  os << deltaindent(-2);
 
   os << indent() << "}";
 

@@ -81,7 +81,7 @@ RegEx::RegEx(int nFlags)
 {
   m_bIsValid = false;
 
-  setFlags(nFlags);
+  groomFlags(nFlags);
   setError(ReENoExpr);
 }
 
@@ -90,7 +90,7 @@ RegEx::RegEx(const string &strRegEx, int nFlags)
   m_strRegEx  = strRegEx;
   m_bIsValid  = false;
 
-  setFlags(nFlags);
+  groomFlags(nFlags);
 
   compile();
 }
@@ -99,7 +99,7 @@ RegEx::RegEx(const char *sRegEx, int nFlags)
 {
   m_bIsValid = false;
 
-  setFlags(nFlags);
+  groomFlags(nFlags);
 
   if( (sRegEx != NULL) && (*sRegEx != 0) )
   {
@@ -117,7 +117,7 @@ RegEx::RegEx(const RegEx &src)
   m_strRegEx  = src.m_strRegEx;
   m_bIsValid  = false;
 
-  setFlags(src.m_nFlags);
+  groomFlags(src.m_nFlags);
 
   compile();
 }
@@ -133,7 +133,7 @@ RegEx &RegEx::operator=(const RegEx &rhs)
 
   m_strRegEx = rhs.m_strRegEx;
  
-  setFlags(rhs.m_nFlags);
+  groomFlags(rhs.m_nFlags);
 
   compile();
 
@@ -169,6 +169,22 @@ RegEx &RegEx::operator=(const char *rhs)
   return *this;
 }
 
+bool RegEx::match(const string &strInput, int nFlags) const
+{
+  if( !m_bIsValid )
+  {
+    return false;
+  }
+  else if( regexec(&m_regex, strInput.c_str(), 0, NULL, nFlags) == ReOk )
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 bool RegEx::match(const string &strInput, int nFlags)
 {
   int rc; // return code
@@ -190,6 +206,18 @@ bool RegEx::match(const string &strInput, int nFlags)
   }
 }
 
+bool RegEx::match(const char *sInput, int nFlags) const
+{
+  string strInput;
+
+  if( sInput != NULL )
+  {
+    strInput = sInput;
+  }
+
+  return match(strInput, nFlags);
+}
+
 bool RegEx::match(const char *sInput, int nFlags)
 {
   string strInput;
@@ -200,6 +228,57 @@ bool RegEx::match(const char *sInput, int nFlags)
   }
 
   return match(strInput, nFlags);
+}
+
+size_t RegEx::match(const string &strInput,
+                    ReMatchVec   &matches,
+                    const size_t uMaxSubMatches,
+                    const int    nFlags) const
+{
+  regmatch_t  pos[uMaxSubMatches];
+  const char *sIn;    // fixed input start pointer
+  const char *s;      // working pointer
+  int         flags;  // working matching behavior flags
+  
+  matches.clear();
+
+  if( !m_bIsValid )
+  {
+    return matches.size();
+  }
+
+  sIn = s = strInput.c_str();
+  flags = nFlags;
+
+  while( regexec(&m_regex, s, uMaxSubMatches, pos, flags) == ReOk )
+  {
+    for(size_t i = 0; i < uMaxSubMatches; ++i)
+    {
+      ReMatch m;
+
+      if( pos[i].rm_so == -1 )
+      {
+        break;
+      }
+
+      m.m_uStart   = pos[i].rm_so + (s - sIn);
+      m.m_uEnd     = pos[i].rm_eo + (s - sIn);
+      m.m_strMatch = strInput.substr(m.m_uStart, m.m_uEnd-m.m_uStart);
+      m.m_uEnd    -= 1;
+
+      //cerr << "DBG: " << i << ". "
+      //    << "(" << m.m_uStart << "," << m.m_uEnd << ") "
+      //    << "'" << m.m_strMatch << "'" << endl;
+
+      matches.push_back(m);
+    }
+
+    flags |= REG_NOTBOL;
+
+    s += pos[0].rm_eo;
+  }
+
+  return matches.size();
 }
 
 size_t RegEx::match(const string &strInput,
@@ -263,6 +342,21 @@ size_t RegEx::match(const string &strInput,
 size_t RegEx::match(const char   *sInput,
                     ReMatchVec   &matches,
                     const size_t uMaxSubMatches,
+                    const int    nFlags) const
+{
+  string strInput;
+
+  if( sInput != NULL )
+  {
+    strInput = sInput;
+  }
+
+  return match(strInput, matches, uMaxSubMatches, nFlags);
+}
+
+size_t RegEx::match(const char   *sInput,
+                    ReMatchVec   &matches,
+                    const size_t uMaxSubMatches,
                     const int    nFlags)
 {
   string strInput;
@@ -300,6 +394,18 @@ bool RegEx::compile()
 }
 
 void RegEx::setFlags(const int nFlags)
+{
+  int oldFlags = m_nFlags;
+
+  groomFlags(nFlags);
+
+  if( (m_nFlags != oldFlags) && !m_strRegEx.empty() )
+  {
+    compile();
+  }
+}
+
+void RegEx::groomFlags(const int nFlags)
 {
   m_nFlags  = nFlags & (ReFlagICase | ReFlagNewLine);
   m_nFlags |= REG_EXTENDED;
