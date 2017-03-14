@@ -1876,7 +1876,8 @@ static int loadCommands(CommandLine &cli)
     PERROR("Compile failed.");
   }
 
-  cli.backtrace(cerr, true);
+  // see the results of the compile
+  //cli.backtrace(cerr, true);
 
   return rc;
 }
@@ -1901,7 +1902,8 @@ static int run(CommandLine &cli)
 
     if( rc == OK )
     {
-      cli.backtrace(cerr);
+      // see the results of a good command match
+      //cli.backtrace(cerr);
 
       if( argv.size() > 0 ) 
       {
@@ -1941,6 +1943,7 @@ int main(int argc, char* argv[])
     return APP_EC_EXEC;
   }
 
+  // debug
   //cerr << Cli << endl;
 
   cout << AsciiAardvark;

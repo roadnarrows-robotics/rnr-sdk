@@ -1608,7 +1608,7 @@ ostream &rnr::cmd::operator<<(ostream &os, const CmdFormDef &formdef)
 
 CmdDef::CmdDef()
 {
-  m_nUid      = CommandLine::NoUid;
+  m_nUid = CommandLine::NoUid;
 }
 
 CmdDef::CmdDef(const CmdDef &src)
@@ -2500,7 +2500,7 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
       switch( argdef.getType() )
       {
         case CmdArgDef::ArgTypeLiteral:
-          m_log << labelBlank << " - Not one of: "
+          m_log << labelBlank << "  Not one of: "
                 << argdef.constructLiteralList() << "."
                 << eoe;
         break;
@@ -2510,14 +2510,14 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
         case CmdArgDef::ArgTypeIdentifier:
         case CmdArgDef::ArgTypeBoolean:
         case CmdArgDef::ArgTypeFile:
-          m_log << labelBlank << " - Not a "
+          m_log << labelBlank << "  Not a "
                 << "'" << lookupArgSymbol(argdef.getType()) << "' type."
                 << eoe;
           break;
 
         case CmdArgDef::ArgTypeInteger:
         case CmdArgDef::ArgTypeFpn:
-          m_log << labelBlank << " - Not a "
+          m_log << labelBlank << "  Not a "
                 << "'" << lookupArgSymbol(argdef.getType()) << "' type";
           if( argdef.getRanges().size() > 0 )
           {
@@ -2527,7 +2527,7 @@ int CommandLine::matchCommandForm(const CmdFormDef &form,
           break;
 
         case CmdArgDef::ArgTypeRegEx:
-          m_log << labelBlank << " - Failed to match re: "
+          m_log << labelBlank << "  Failed to match re: "
                 << "'" << argdef.getRegEx() << "'."
                 << eoe;
           break;
@@ -2710,9 +2710,10 @@ const string CommandLine::rlGenerator(const string &strText,
                                       int           nEnd,
                                       unsigned     &uFlags)
 {
-  vector<CmdArgDef*>  argdefs;
-  StringVec           tabList;
-  size_t              i;
+  static vector<CmdArgDef*> argdefs;
+
+  StringVec tabList;
+  size_t    i;
 
   //cerr  << "{text=" << strText
   //      << ", index=" << nIndex
@@ -2721,7 +2722,12 @@ const string CommandLine::rlGenerator(const string &strText,
   //      << ", end=" << nEnd
   //      << "}" << endl;
 
-  rlArgDefs(strContext.substr(0, nStart), argdefs);
+  if( nIndex == 0 )
+  {
+    //cerr << "rebuild args" << endl;
+    argdefs.clear();
+    rlArgDefs(strContext.substr(0, nStart), argdefs);
+  }
 
   rlTabList(strText, argdefs, tabList, uFlags);
 
@@ -2738,6 +2744,7 @@ const string CommandLine::rlGenerator(const string &strText,
 void CommandLine::rlArgDefs(const string       &strSubtext,
                             vector<CmdArgDef*> &argdefs)
 {
+  CmdIter             iter;         // command definition iterator
   vector<CmdArgDef*>  v[2];         // work swap vectors of argument definitions
   int                 tog0, tog1;   // vector toggle source/destination indices
   StringVec           tokens;       // input tokens
@@ -2753,11 +2760,11 @@ void CommandLine::rlArgDefs(const string       &strSubtext,
   //
   // Seed with argv0 (command).
   //
-  for(i = 0; i < numOfCmds(); ++i)
+  for(iter = m_cmddefs.begin(); iter != m_cmddefs.end(); ++iter)
   {
-    for(j = 0; j < m_cmddefs[i].numOfForms(); ++j)
+    for(j = 0; j < iter->second.numOfForms(); ++j)
     {
-      CmdFormDef &form = m_cmddefs[i].formAt(j);
+      CmdFormDef &form = iter->second.formAt(j);
       v[tog0].push_back(&form.argAt(0));
     }
   }
