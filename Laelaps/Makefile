@@ -16,7 +16,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2015-2016  RoadNarrows LLC
+  (C) 2015-2017  RoadNarrows LLC
   (http://roadnarrows.com)
   All Rights Reserved
 

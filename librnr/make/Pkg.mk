@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-  (C) 2005-2016.  RoadNarrows LLC.
+  (C) 2005-2017.  RoadNarrows LLC.
   (http://www.roadnarrows.com)
   All Rights Reserved
 
@@ -26,6 +26,9 @@ RN Make System Specific Makefile
  */
 endif
 
+#
+# @EulaBegin@
+#
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
 # software and its documentation for any purpose, provided that
@@ -50,6 +53,8 @@ endif
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #
+# @EulaEnd@
+#
 ################################################################################
 
 # Prevent mutliple inclusion
@@ -62,9 +67,9 @@ endif
 # The Package Definition
 PKG 								= librnr
 PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 13
+PKG_VERSION_MINOR   = 14
 PKG_VERSION_RELEASE = 2
-PKG_VERSION_DATE    = 2016
+PKG_VERSION_DATE    = 2017
 PKG_AUTHORS					= "Robin Knight, Kim Wheeler, Daniel Packard"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= \
