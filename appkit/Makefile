@@ -2,27 +2,23 @@
 #
 # ./Makefile
 
-ifdef RNMAKE_DOXY
-/*!
-\file
-
-$LastChangedDate: 2015-11-09 11:56:44 -0700 (Mon, 09 Nov 2015) $
-$Rev: 4194 $
-
-\brief Make the RoadNarrows Applicaiton Tool Kit package.
-
-RN Make System Specific Makefile
-
-\author: Robin Knight (robin.knight@roadnarrows.com)
-
-\par Copyright:
-  (C) 2013-2016  RoadNarrows LLC
-  (http://roadnarrows.com)
-  All Rights Reserved
-
-\cond RNMAKE_DOXY
- */
-endif
+##! \file
+##! 
+##! $LastChangedDate: 2015-11-09 11:56:44 -0700 (Mon, 09 Nov 2015) $
+##! $Rev: 4194 $
+##! 
+##! \brief Make the RoadNarrows Applicaiton Tool Kit package.
+##! 
+##! RN Make System Specific Makefile
+##! 
+##! \author: Robin Knight (robin.knight@roadnarrows.com)
+##! 
+##! \par Copyright:
+##!   (C) 2013-2016  RoadNarrows LLC
+##!   (http://roadnarrows.com)
+##!   All Rights Reserved
+##!
+##! \cond RNMAKE_DOXY
 
 #
 # @EulaBegin@
@@ -198,6 +194,4 @@ $(DISTDIR_SHARE_ICONS)/%.jpg : $(PKGDIR_SHARE_ICONS)/%.jpg
 	@$(CP) $(<) $(@)
 
 
-ifdef RNMAKE_DOXY
-/*! \endcond RNMAKE_DOXY */
-endif
+##! \endcond 

@@ -10,21 +10,19 @@
 //
 /*! \file
  *
- * \brief 
+ * \brief LogBook class interface.
  *
  * \author Robin Knight   (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- * (C) 2017.  RoadNarrows LLC.
- * (http://www.roadnarrows.com)
- * \n All Rights Reserved
+ * \h_copy 2017.  RoadNarrows LLC.\n
+ * http://www.roadnarrows.com\n
+ * All Rights Reserved
  *
- * \par License:
+ * \par License
  * MIT
- */
-/*
+ *
  * @EulaBegin@
- * 
  * Permission is hereby granted, without written agreement and without
  * license or royalty fees, to use, copy, modify, and distribute this
  * software and its documentation for any purpose, provided that
@@ -35,20 +33,19 @@
  * copyrighted by their authors and need not follow the licensing terms
  * described here, provided that the new terms are clearly indicated in
  * all files where they apply.
- * 
+ * \n\n
  * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
  * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
  * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
  * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
  * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
  * THE POSSIBILITY OF SUCH DAMAGE.
- * 
+ * \n\n
  * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
  * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
  * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
- * 
  * @EulaEnd@
  */
 ////////////////////////////////////////////////////////////////////////////////
