@@ -16,10 +16,10 @@
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright:
- * (C) 2011-2017  RoadNarrows
- * (http://www.roadnarrows.com)
- * \n All Rights Reserved
+ * \par Copyright
+ *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   http://www.roadnarrows.com\n
+ *   All Rights Reserved
  *
  * \par Licence:
  * MIT

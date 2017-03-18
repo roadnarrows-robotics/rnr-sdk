@@ -17,10 +17,10 @@ RN Make System Specific Makefile
 \author: Robin Knight 	(robin.knight@roadnarrows.com)
 \author: Daniel Packard	(daniel@roadnarrows.com)
 
-\par Copyright:
-  (C) 2013-2016. RoadNarrows LLC.
-  (http://roadnarrows.com)
-  All Rights Reserved
+##! \par Copyright
+##!   \h_copy 2013-2017. RoadNarrows LLC.\n
+##!   http://www.roadnarrows.com\n
+##!   All Rights Reserved
 
 \cond RNMAKE_DOXY
  */

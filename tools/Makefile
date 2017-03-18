@@ -12,7 +12,7 @@
 # Author: Robin Knight (robin.knight@roadnarrows.com)
 #
 # Copyright:
-# (C) 2008-2016.  RoadNarrows LLC
+# (C) 2008-2017.  RoadNarrows LLC
 # All Rights Reserved
 #
 # @EulaBegin@
@@ -46,6 +46,7 @@
 
 scripts = \
 	cppstrings \
+	rncopyright_update.py \
 	rncp_to_repostaging \
 	rneula_update.py \
 	rnmake_all \
