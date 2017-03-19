@@ -13,9 +13,9 @@ i2c python setup.py script.
 ##
 ## \author Robin Knight (robin.knight@roadnarrows.com)
 ##  
-## \par Copyright:
-##   (C) 2016.  RoadNarrows LLC.\n
-##   (http://www.roadnarrows.com)\n
+## \copyright
+##   \h_copy 2016-2017. RoadNarrows LLC.\n
+##   http://www.roadnarrows.com\n
 ##   All Rights Reserved
 ##
 # @EulaBegin@

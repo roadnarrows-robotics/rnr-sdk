@@ -26,10 +26,10 @@
  * \author Casey Kuhns (casey@roadnarrows.com)
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright
- * (C) 2006-2009.  RoadNarrows LLC.
- * (http://www.roadnarrows.com)
- * \n All Rights Reserved
+ * \copyright
+ *   \h_copy 2006-2017. RoadNarrows LLC.\n
+ *   http://www.roadnarrows.com\n
+ *   All Rights Reserved
  */
 ////////////////////////////////////////////////////////////////////////////////
 

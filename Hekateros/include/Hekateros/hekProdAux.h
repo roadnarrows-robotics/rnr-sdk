@@ -11,7 +11,7 @@
  * $LastChangedDate: 2014-09-18 16:53:49 -0600 (Thu, 18 Sep 2014) $
  * $Rev: 3748 $
  *
- * \brief Aggregate of supported \h_hek auxiliary effectors static
+ * \brief Aggregate of supported \h_hek auxiliary add-ons static
  * specifications.
  *
  * The auxiliary ports are situated at the non-rotating section of the arm's
@@ -19,10 +19,10 @@
  *
  * \author Robin Knight   (robin.knight@roadnarrows.com)
  *
- * \par Copyright:
- * (C) 2013.  RoadNarrows
- * (http://www.RoadNarrows.com)
- * \n All Rights Reserved
+ * \copyright
+ *   \h_copy 2013-2017. RoadNarrows LLC.\n
+ *   http://www.roadnarrows.com\n
+ *   All Rights Reserved
  */
 /*
  * @EulaBegin@

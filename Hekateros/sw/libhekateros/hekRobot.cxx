@@ -16,10 +16,10 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
- * \par Copyright:
- * (C) 2011-2015  RoadNarrows
- * (http://www.RoadNarrows.com)
- * \n All Rights Reserved
+ * \copyright
+ *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   http://www.roadnarrows.com\n
+ *   All Rights Reserved
  */
 /*
  * @EulaBegin@

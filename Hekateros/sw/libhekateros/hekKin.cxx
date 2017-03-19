@@ -13,10 +13,10 @@
  *
  * \brief The Hekateros kinematics and dynamics class implemenation.
  *
- * \par Copyright:
- * (C) 2014-2015.  RoadNarrows
- * (http://www.roadnarrows.com)
- * \n All Rights Reserved
+ * \copyright
+ *   \h_copy 2014-2017. RoadNarrows LLC.\n
+ *   http://www.roadnarrows.com\n
+ *   All Rights Reserved
  */
 /*
  * @EulaBegin@

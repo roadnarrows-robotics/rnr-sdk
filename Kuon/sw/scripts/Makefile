@@ -15,10 +15,10 @@ RN Make System Specific Makefile
 
 \author: Robin Knight (robin@rnisys.com)
 
-\par Copyright:
-  (C) 2014-2016  RoadNarrows Intelligent Systems.
-  (http://www.roadnarrows.com)
-  All Rights Reserved
+##! \copyright
+##!   \h_copy 2014-2017. RoadNarrows LLC.\n
+##!   http://www.roadnarrows.com\n
+##!   All Rights Reserved
 
 \cond RNMAKE_DOXY
  */

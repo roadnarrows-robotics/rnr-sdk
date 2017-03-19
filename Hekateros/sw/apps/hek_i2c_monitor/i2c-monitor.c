@@ -16,10 +16,10 @@
  * \author Robin Knight  (robin.knight@roadnarrows.com)
  * \author Brent Wilkins (brent@roadnarrows.com)
  *
- * \par Copyright:
- * (C) 2012.  RoadNarrows LLC
- * (http://www.roadnarrows.com)
- * \n All Rights Reserved
+ * \copyright
+ *   \h_copy 2012-2017. RoadNarrows LLC.\n
+ *   http://www.roadnarrows.com\n
+ *   All Rights Reserved
  */
 // Unless otherwise noted, all materials contained are copyrighted and may not
 // be used except as provided in these terms and conditions or in the copyright
