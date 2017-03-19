@@ -5,7 +5,7 @@
 #
 # File:     rncopyright_update.py
 #
-# Usage: rncopyright_update.py [OPTIONS] [<dir>]
+# Usage: rncopyright_update.py [OPTIONS] [<dir> | <file>]
 #
 # Description:
 #   RN package utility.
@@ -54,7 +54,7 @@ import getopt
 ## Excluded directories
 Pat_excludes  = [
     '.svn', 'obj', '.deps', 'dist', 'loc', 'hw', 'gtest', 'tinyxml',
-    'build'
+    'build', 'build.*', 'doxy'
 ]
 
 ## Source file patterns
@@ -157,7 +157,7 @@ class Application():
 
     self.m_copyright = {}
     self.m_copyright['template'] = [
-        "{0} \\par Copyright\n",
+        "{0} \\copyright\n",
         "{0}   \\h_copy {1}-{2}. RoadNarrows LLC.\\n\n",
         "{0}   http://www.roadnarrows.com\\n\n",
         "{0}   All Rights Reserved\n"
@@ -165,6 +165,8 @@ class Application():
 
     ## Current year
     self.m_yearNow = dt.date.today().year
+
+    self.m_nUpdateCnt = 0
 
   ##
   ## \brief Print usage error.
@@ -191,20 +193,29 @@ class Application():
 """
 
 Usage: {0} [OPTIONS] [<dir>]
+       {0} [OPTIONS] [<file>]
        {0} --help
 
 Update source file copyrights with this current year.
 
 Description:
-  Recursively update all source file copyrights with the current year,
-  starting from directory <dir>. Default for <dir> is '.' - the current working
-  directory. Only files that have copyrights that differ in the ending year from
-  current year will be updated. Source files are defined as:
+  If a directory <dir> is specified, then recursively update all source file
+  copyrights with the current year, starting from directory <dir>.
+  Only files that have copyrights that differ in the ending year from
+  current year will be updated, unless the --force option is specified.
+  Source files are defined as:
     C, C++, Java, Python, make files, doxygen, html, xml
+
+  If a regular <file> is specified, then update the file's copyright with the
+  current year.
+
+  If neither <dir> nor <file> is specified, the default is '.' - the current
+  working directory.
 
 Options and Arguments:
 -n, --noupdate            : List files that need updating, but don't update.
 -f, --force               : Force update, even if years match. Must be good.
+-e, --exclude <dir>       : Exclude directory. May be iterated.
 
 -h, --help                : Display this help and exit.
 """.format(self._Argv0)
@@ -237,19 +248,23 @@ Options and Arguments:
     kwargs['debug']   = 0
     kwargs['update']  = True
     kwargs['force']   = False
+    kwargs['topdir']  = '.'
+    kwargs['file']    = None
 
     # parse command-line options
     try:
       try:
-        opts, args = getopt.getopt(argv[1:], "?hnf",
-            ['help', 'noupdate', 'force', ''])
+        opts, args = getopt.getopt(argv[1:], "?hnfe:",
+            ['help', 'noupdate', 'force', 'exclude=', ''])
       except getopt.error, msg:
         raise usage(msg)
       for opt, optarg in opts:
         if opt in ('-n', '--noupdate'):
           kwargs['update'] = False
-        if opt in ('-f', '--force'):
+        elif opt in ('-f', '--force'):
           kwargs['force'] = True
+        elif opt in ('-e', '--exlude'):
+          Pat_excludes.append(optarg)
         elif opt in ('-h', '--help', '-?'):
           self.printUsage()
           sys.exit(0)
@@ -257,10 +272,12 @@ Options and Arguments:
       self.printUsageErr(err.msg)
       sys.exit(2)
 
+    # update directory or file
     if len(args) > 0:
-      kwargs['topdir'] = args[0]
-    else:
-      kwargs['topdir'] = '.'
+      if os.path.isdir(args[0]):
+        kwargs['topdir'] = args[0]
+      else:
+        kwargs['file'] = args[0]
 
     return kwargs
 
@@ -310,7 +327,7 @@ Options and Arguments:
   ##  copyright is the line text holding the copyright year.
   ##
   def findCopyright(self, f):
-    nCLineBegin = -1  # doxygen '\par Copyright:' line number
+    nCLineBegin = -1  # doxygen '\par Copyright' or '\copyright' line number
     nCLineYear  = -1  # actual '(C) YEARRANGE. RoadNarrows LLC.' line number
     nCLineEnd   = -1  # end of Copyright paragraph
 
@@ -325,7 +342,7 @@ Options and Arguments:
       n += 1
 
       # copyright begin pattern
-      if re.search(r"\\par\s+Copyright", line, re.IGNORECASE):
+      if re.search(r"\\par\s+Copyright|\\copyright", line, re.IGNORECASE):
         nCLineBegin = n
       # copyright year pattern
       elif re.search(r"(\(C\)|h_copy)\s+[0-9,-]+\.*\s+RoadNarrows",
@@ -500,17 +517,38 @@ Options and Arguments:
       self.m_nUpdateCnt += 1
   
   ##
-  ## \brief Run application.
+  ## \brief Run application on file.
   ##    
-  ## \param argv    Optional argument list to override command-line arguments.
   ## \param kwargs  Optional keyword argument list.
   ##
-  def run(self, argv=None, **kwargs):
-  
-    kwargs = self.getOptions(argv, **kwargs)
+  def runOnFile(self, **kwargs):
+    print "Copyright:  {0}".format(self.m_yearNow)
+    print "File:       {0}".format(kwargs['file'])
+    print "Scanning..."
 
-    print "Copyright:  %d" % (self.m_yearNow)
-    print "Directory:  %s" % (kwargs['topdir'])
+    fname = kwargs['file']
+    if not os.path.isfile(fname):
+      print "Error: {0}: Doet not exist.".format(fname)
+      return
+    style = self.classifyFileType(fname)
+    if style:
+      try:
+        f = open(fname, "r")
+      except:
+        print "Error: {0}: Cannot open.".format(fpath)
+        return
+      self.updateCopyright(f, style, kwargs['update'], kwargs['force'])
+      if not f.closed:
+        f.close()
+
+  ##
+  ## \brief Run application recursively on directory.
+  ##    
+  ## \param kwargs  Optional keyword argument list.
+  ##
+  def runOnDirectory(self, **kwargs):
+    print "Copyright:  {0}".format(self.m_yearNow)
+    print "Directory:  {0}".format(kwargs['topdir'])
     print "Scanning..."
 
     self.m_nUpdateCnt = 0
@@ -532,11 +570,26 @@ Options and Arguments:
           try:
             f = open(fpath, "r")
           except:
-            print "Warning: %s: Cannot open." % (fpath)
+            print "Warning: {0}: Cannot open.".format(fpath)
             continue
           self.updateCopyright(f, style, kwargs['update'], kwargs['force'])
           if not f.closed:
             f.close()
+
+  ##
+  ## \brief Run application.
+  ##    
+  ## \param argv    Optional argument list to override command-line arguments.
+  ## \param kwargs  Optional keyword argument list.
+  ##
+  def run(self, argv=None, **kwargs):
+  
+    kwargs = self.getOptions(argv, **kwargs)
+
+    if kwargs['file']:
+      self.runOnFile(**kwargs)
+    else:
+      self.runOnDirectory(**kwargs)
 
     print "Files:      %s" % (self.m_nUpdateCnt)
 

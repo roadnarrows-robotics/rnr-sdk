@@ -103,9 +103,3 @@ PKG_CXXFLAGS				=
 
 # Link flags
 PKG_LDFLAGS					=
-
-# Doxy Parameters
-HTML_HEADER     = $(rnmake)/doxy/rnr_doxy_header.html
-HTML_FOOTER     = $(rnmake)/doxy/rnr_doxy_footer.html
-HTML_STYLESHEET = $(rnmake)/doxy/rnr_doxy.css
-DOXY_IMAGES     = $(rnmake)/doxy/rnr_images

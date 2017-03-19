@@ -57,7 +57,6 @@ DOC_SUBDIR				=
 # Sub[Package] Doxygen Configuration File
 DOXY_CONF_FILE		= $(pkgroot)/make/doxy.conf
 
-
 #------------------------------------------------------------------------------
 # Optional Variables 
 #

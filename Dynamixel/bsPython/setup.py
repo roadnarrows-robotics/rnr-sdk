@@ -13,9 +13,9 @@ BotSense setup.py script.
 ##
 ## \author Robin Knight (robin.knight@roadnarrows.com)
 ##  
-## \par Copyright:
-##   (C) 2011.  RoadNarrows LLC.\n
-##   (http://www.roadnarrows.com)\n
+## \copyright
+##   \h_copy 2011-2017. RoadNarrows LLC.\n
+##   http://www.roadnarrows.com\n
 ##   All Rights Reserved
 ##
 

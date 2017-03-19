@@ -25,10 +25,10 @@
  * \todo Replace RNNAMEFILTER with the name of the plug-in and the suffix
  * 'filter' component by function: SRC DEMUX MUX FILTER SINK
  *    
- * \par Copyright:
- * (C) 2012-2015.  RoadNarrows
- * (http://www.roadnarrows.com)
- * \n All Rights Reserved
+ * \copyright
+ *   \h_copy 2012-2017. RoadNarrows LLC.\n
+ *   http://www.roadnarrows.com\n
+ *   All Rights Reserved
  */
 /*
  * @EulaBegin@
