@@ -1,5 +1,6 @@
 #!/usr/bin/python
-################################################################################
+
+# //////////////////////////////////////////////////////////////////////////////
 #
 # Package:  tools
 #
@@ -41,7 +42,7 @@
 # "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
 # PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #
-################################################################################
+# //////////////////////////////////////////////////////////////////////////////
 
 import os
 import sys
@@ -51,10 +52,13 @@ import fnmatch
 import re
 import getopt
 
+## Minimum copyright year
+YearRNCreated       = 2002
+
 ## Excluded directories
 Pat_excludes  = [
     '.svn', 'obj', '.deps', 'dist', 'loc', 'hw', 'gtest', 'tinyxml',
-    'build', 'build.*', 'doxy'
+    'build', 'build.*', 'doxy', 'deb-doc', 'deb-dev', 'deb-src'
 ]
 
 ## Source file patterns
@@ -68,11 +72,14 @@ Pat_js_src    = ['*.js']
 Pat_src       = Pat_c_src + Pat_mk_src + Pat_py_src + Pat_j_src + \
                 Pat_xml_src + Pat_doxy_src + Pat_js_src
 
-## File comment style patterns
-Pat_slashstar_style = Pat_c_src + Pat_j_src + Pat_doxy_src + Pat_js_src
-Pat_hashhash_style  = Pat_py_src
-Pat_hashbang_style  = Pat_mk_src
+## Doxygen file comment style patterns
+Pat_slashstar_style = Pat_c_src + Pat_j_src + Pat_doxy_src + Pat_js_src + \
+                      Pat_mk_src
+Pat_hash_style      = Pat_py_src
+Pat_hashhash_style  = []
+Pat_hashbang_style  = []
 Pat_xml_style       = Pat_xml_src
+Pat_nocom_style     = []
 
 ## Slash-star (c, java, doxygen, php, ...) comment style constructs
 ComSlashStarKey     = "/* */"
@@ -80,13 +87,19 @@ ComSlashStarStart   = "/*!"
 ComSlashStarMiddle  = " *"
 ComSlashStarEnd     = " */"
 
-## Hash-hash (python, perl, ...) doxygen comment style constructs
+## Hash (makefiles, python, perl, ...) comment style constructs
+ComHashKey          = "#"
+ComHashStart        = "##"
+ComHashMiddle       = "# "
+ComHashEnd          = "#"
+
+## Hash-hash doxygen comment style constructs
 ComHashHashKey      = "##"
 ComHashHashStart    = "##"
 ComHashHashMiddle   = "##"
 ComHashHashEnd      = "##"
 
-## Hash-bang (makefiles, ...) doxygen comment style constructs
+## Hash-bang doxygen filtered pattern comment style constructs
 ComHashBangKey      = "##!"
 ComHashBangStart    = "##!"
 ComHashBangMiddle   = "##!"
@@ -98,12 +111,21 @@ ComXmlStart         = "<!--"
 ComXmlMiddle        = " - "
 ComXmlEnd           = " -->"
 
+## No comment doxygen comment style constructs
+NoComKey        = "nocomment"
+NoCom           = ""
+
 ## Doxygen Supported Comments 
 CommentStyle = {
     ComSlashStarKey: {
       'start':  ComSlashStarStart,
       'middle': ComSlashStarMiddle,
       'end':    ComSlashStarEnd
+    },
+    ComHashKey: {
+      'start':  ComHashStart,
+      'middle': ComHashMiddle,
+      'end':    ComHashEnd
     },
     ComHashHashKey: {
       'start':  ComHashHashStart,
@@ -119,38 +141,36 @@ CommentStyle = {
       'start':  ComXmlStart,
       'middle': ComXmlMiddle,
       'end':    ComXmlEnd
+    },
+    NoComKey: {
+      'start':  NoCom,
+      'middle': NoCom,
+      'end':    NoCom
     }
 }
 
-## Minimum copyright year
-YearRNCreated       = 2002
 
-
-##
 ## \brief Command-line exception class.
-##
-## Raise usage excpetion.
-##
+#
+# Raise usage excpetion.
+#
 class usage(Exception):
 
-  ##
   ## \brief Constructor.
-  ##
-  ## \param msg   Error message string.
-  ##
+  #
+  # \param msg   Error message string.
+  #
   def __init__(self, msg):
     ## error message attribute
     self.msg = msg
 
 
-##
-## \brief Application utilitiy class.
-##
+## \brief Application class.
+#
 class Application():
 
-  ##
   ## \brief Constructor.
-  ##
+  #
   def __init__(self):
     ## command name
     self._Argv0 = __file__
@@ -166,19 +186,14 @@ class Application():
     ## Current year
     self.m_yearNow = dt.date.today().year
 
+    ## Number of files (required to be) updated.
     self.m_nUpdateCnt = 0
 
-  ##
   ## \brief Print usage error.
-  ##
-  ## \param emsg  Error message string.
-  ##
+  #
+  # \param emsg  Error message string.
+  #
   def printUsageErr(self, emsg):
-    """ Print Error Usage Message.
-          
-        Parameters:
-          msg   - Error message string.
-    """
     if emsg:
       print "{0}: {1}".format(self._Argv0, emsg)
     else:
@@ -187,7 +202,7 @@ class Application():
 
   ##
   ## \brief Print Command-Line Usage Message.
-  ##
+  #
   def printUsage(self):
     print \
 """
@@ -220,16 +235,31 @@ Options and Arguments:
 -h, --help                : Display this help and exit.
 """.format(self._Argv0)
  
-  ##
-  ## \brief Print file warning message.
-  ##
-  ## \param f       Opened file object.
-  ## \param warnmsg Warning messages with {n} markup starting at 0.
-  ## \param args    Argument list to warnmsg.
-  ##
-  def warning(self, f, warnmsg, *args):
-    print "Warning: {0}:".format(f.name),
+  ## \brief Print file i/o warning message.
+  #
+  # \param f        Opened file object or file name.
+  # \param warnmsg  Warning message with {n} markup starting at 0.
+  # \param args     Argument list to warnmsg.
+  #
+  def iowarning(self, f, warnmsg, *args):
+    if type(f) is file:
+      print "Warning: {0}:".format(f.name),
+    else:
+      print "Warning: {0}:".format(f),
     print warnmsg.format(*args)
+
+  ## \brief Print file i/o error message.
+  #
+  # \param f        Opened file object or file name.
+  # \param errmsg   Error message with {n} markup starting at 0.
+  # \param args     Argument list to errmsg.
+  #
+  def ioerror(self, f, errmsg, *args):
+    if type(f) is file:
+      print "Error: {0}:".format(f.name),
+    else:
+      print "Error: {0}:".format(f),
+    print errmsg.format(*args)
 
   ##  
   ## \brief Get command-line options
@@ -281,17 +311,19 @@ Options and Arguments:
 
     return kwargs
 
-  ##
   ## \brief Classify comment style from file name.
-  ##
-  ## \param fname   File name.
-  ##
-  ## \return Comment style.
-  ##
+  #
+  # \param fname   File name.
+  #
+  # \return Comment style.
+  #
   def classifyFileType(self, fname):
     for pat in Pat_slashstar_style:
       if fnmatch.fnmatch(fname, pat):
         return ComSlashStarKey
+    for pat in Pat_hash_style:
+      if fnmatch.fnmatch(fname, pat):
+        return ComHashKey
     for pat in Pat_hashhash_style:
       if fnmatch.fnmatch(fname, pat):
         return ComHashHashKey
@@ -301,6 +333,9 @@ Options and Arguments:
     for pat in Pat_xml_style:
       if fnmatch.fnmatch(fname, pat):
         return ComXmlKey
+    for pat in Pat_nocom_style:
+      if fnmatch.fnmatch(fname, pat):
+        return NoComKey
     return None
   
   ##
@@ -314,18 +349,19 @@ Options and Arguments:
       self.m_copyright[style].append(
           line.format(CommentStyle[style]['middle'], yearBegin, yearEnd))
   
-  ##
   ## \brief Find copyright block in open source file.
-  ##
-  ## \param f   Open source file object.
-  ##
-  ## \return
-  ## Returns a 4-tuple (found, nCLineBegin, nCLineEnd, copyright) where:\n
-  ##  found is True or False if copyright block is found.\n
-  ##  nCLineBegin is the line number of the beginning of copyright block.\n
-  ##  nCLineEnd is the line number of the end of copyright block.\n
-  ##  copyright is the line text holding the copyright year.
-  ##
+  #
+  # \param f  Open source file object.
+  #
+  # \return
+  # Returns a 4-tuple (found, nCLineBegin, nCLineEnd, copyright) where:\n
+  # value | description
+  # ----- | -----------
+  # found       | True or False if copyright block is found.
+  # nCLineBegin | The line number of the beginning of copyright block.
+  # nCLineEnd   | The line number of the end of copyright block.
+  # copyright   | The line text holding the copyright year.
+  #
   def findCopyright(self, f):
     nCLineBegin = -1  # doxygen '\par Copyright' or '\copyright' line number
     nCLineYear  = -1  # actual '(C) YEARRANGE. RoadNarrows LLC.' line number
@@ -354,8 +390,8 @@ Options and Arguments:
         nCLineEnd = n
         break
       # copyright block is too long
-      elif nCLineBegin >= 0 and nCLineEnd == -1 and n - nCLineBegin > 6:
-        self.warning(f, "Copyright block starting at line {0} is bogus.",
+      elif nCLineBegin > 0 and nCLineEnd == -1 and n - nCLineBegin > 6:
+        self.iowarning(f, "Copyright block starting at line {0} is bogus.",
             nCLineBegin)
         return fail
 
@@ -365,25 +401,25 @@ Options and Arguments:
 
     # no begin pattern
     if nCLineBegin < 0:
-      self.warning(f, "Copyright block is missing or non-standard.")
+      self.iowarning(f, "Copyright block is missing or non-standard.")
       return fail
     # no year pattern
     elif nCLineYear < 0:
-      self.warning(f, "Copyright year line is missing.")
+      self.iowarning(f, "Copyright year line is missing.")
       return fail
     # no year pattern
     elif nCLineEnd < 0:
-      self.warning(f, "Copyright end pattern missing or non-standard.")
+      self.iowarning(f, "Copyright end pattern missing or non-standard.")
       return fail
     # begin pattern found but end position preceeds it
     elif nCLineEnd <= nCLineBegin:
-      self.warning(f,
+      self.iowarning(f,
           "Copyright begin pattern at {0} follows end pattern at {1}.",
            nCLineBegin, nCLineEnd)
       return fail
     # year no between begin and end patterns
     elif nCLineYear < nCLineBegin or nCLineYear > nCLineEnd:
-      self.warning(f, "Copyright year at {0} not between " \
+      self.iowarning(f, "Copyright year at {0} not between " \
                  "begin and end patterns {1}-{2}.",
           nCLineYear, nCLineBegin, nCLineEnd)
       return fail
@@ -407,7 +443,7 @@ Options and Arguments:
     m = re.search(r"([12]\d+)[, -]*([12]\d\d\d)?", copyright)
     #print m.groups()
     if m is None:
-      self.warning(f,
+      self.iowarning(f,
           "Copyright line specifies no valid year(s)\nLine: {0}",
           copyright)
       return (False, -1, -1)
@@ -415,28 +451,28 @@ Options and Arguments:
     try:
       yearBegin = int(m.group(1))
     except:
-      self.warning(f, "Copyright year {0} syntax error.",  m.group(1))
+      self.iowarning(f, "Copyright year {0} syntax error.",  m.group(1))
       return (False, m_group(1), -1)
 
     if m.group(2) is not None:
       try:
         yearEnd = int(m.group(2))
       except:
-        self.warning(f, "Copyright year {0} syntax error.",  m.group(2))
+        self.iowarning(f, "Copyright year {0} syntax error.",  m.group(2))
         return (False, yearBegin, m_group(2))
     else:
       yearEnd = yearBegin
 
     if yearBegin < YearRNCreated or yearBegin > self.m_yearNow:
-      self.warning(f, "Copyright year {0} not in range [{1}, {2}].",
+      self.iowarning(f, "Copyright year {0} not in range [{1}, {2}].",
           yearBegin, YearRNCreated, self.m_yearNow)
       return (False, yearBegin, yearEnd)
     if yearEnd < YearRNCreated or yearEnd > self.m_yearNow:
-      self.warning(f, "Copyright year {0} not in range [{1}, {2}].",
+      self.iowarning(f, "Copyright year {0} not in range [{1}, {2}].",
           yearEnd, YearRNCreated, self.m_yearNow)
       return (False, yearBegin, yearEnd)
     if yearEnd < yearBegin:
-      self.warning(f, "Copyright ending year {0} < beginning year {1}.",
+      self.iowarning(f, "Copyright ending year {0} < beginning year {1}.",
           yearEnd, yearBegin)
       return (False, yearBegin, yearEnd)
 
@@ -445,47 +481,49 @@ Options and Arguments:
     else:
       return (False, yearBegin, yearEnd)
   
-  ##
   ## \brief Copy source file to temporary while updating the EULA.
-  ##
-  ## \param fsrc    Open source file object.
-  ## \param style   EULA comment style.
-  ## \param n0      EULA begin tag line number.
-  ## \param n1      EULA end tag line number.
-  ##
-  ## \return On success, returns temporary file name.
-  ##         On failure, an empty string.
-  ## returned.
-  ##
+  #
+  # \param fsrc   Open source file object.
+  # \param style  EULA comment style.
+  # \param n0     EULA begin tag line number.
+  # \param n1     EULA end tag line number.
+  #
+  # \return On success, returns temporary file name.
+  #         On failure, an empty string is returned.
+  #
   def copySourceToTmp(self, fsrc, style, nLineBegin, nLineEnd):
     tmpfile = fsrc.name + '.tmp'
     try:
       fdst = open(tmpfile, "w")
     except:
-      self.warning(fdst, "Cannot open temporary before updating - skipping.")
+      self.iowarning(fdst, "Cannot open temporary before updating.")
       return ""
     fsrc.seek(0)
     n = 1
+    # lines before copyright
     while n < nLineBegin:
       fdst.write(fsrc.readline())
       n += 1
+    # new copyright
     for line in self.m_copyright[style]:
       fdst.write(line)
+    # eat old copyright
     while n <= nLineEnd:
       fsrc.readline()
       n += 1
+    # lines after copyright
     for line in fsrc:
       fdst.write(line)
     fdst.close()
     return tmpfile
   
-  ##
   ## \brief Check and, if needed, update source file copyright.
-  ##
-  ## \param f         Open source file object.
-  ## \param style     Comment style.
-  ## \param doupdate  Do [not] update.
-  ##
+  #
+  # \param f          Open source file object.
+  # \param style      Comment style.
+  # \param doupdate   Do [not] update.
+  # \param doforce    Do [not] force update on good files.
+  #
   def updateCopyright(self, f, style, doupdate, doforce):
     found, nLineBeg, nLineEnd, copyright = self.findCopyright(f)
     #print "{0}[{1},{2}]: '{3}'".format(f.name, nLineBeg, nLineEnd, copyright)
@@ -508,7 +546,7 @@ Options and Arguments:
       try:
         shutil.move(tmpfile, f.name)
       except IOError:
-        self.warning(f, "Cannot move temporary {0} back to source.", tmpfile)
+        self.ioerror(f, "Cannot move temporary {0} back to source.", tmpfile)
         return
       print "Updated: {0}".format(f.name)
       self.m_nUpdateCnt += 1
@@ -516,36 +554,36 @@ Options and Arguments:
       print "Update required: {0}".format(f.name)
       self.m_nUpdateCnt += 1
   
-  ##
   ## \brief Run application on file.
-  ##    
-  ## \param kwargs  Optional keyword argument list.
-  ##
+  #    
+  # \param kwargs  Optional keyword argument list.
+  #
   def runOnFile(self, **kwargs):
     print "Copyright:  {0}".format(self.m_yearNow)
     print "File:       {0}".format(kwargs['file'])
     print "Scanning..."
 
+    self.m_nUpdateCnt = 0
+
     fname = kwargs['file']
     if not os.path.isfile(fname):
-      print "Error: {0}: Doet not exist.".format(fname)
+      self.ioerror(fname, "Does not exist.")
       return
     style = self.classifyFileType(fname)
     if style:
       try:
         f = open(fname, "r")
       except:
-        print "Error: {0}: Cannot open.".format(fpath)
+        self.ioerror(fname, "Cannot open.")
         return
       self.updateCopyright(f, style, kwargs['update'], kwargs['force'])
       if not f.closed:
         f.close()
 
-  ##
   ## \brief Run application recursively on directory.
-  ##    
-  ## \param kwargs  Optional keyword argument list.
-  ##
+  #    
+  # \param kwargs  Optional keyword argument list.
+  #
   def runOnDirectory(self, **kwargs):
     print "Copyright:  {0}".format(self.m_yearNow)
     print "Directory:  {0}".format(kwargs['topdir'])
@@ -576,12 +614,11 @@ Options and Arguments:
           if not f.closed:
             f.close()
 
-  ##
   ## \brief Run application.
-  ##    
-  ## \param argv    Optional argument list to override command-line arguments.
-  ## \param kwargs  Optional keyword argument list.
-  ##
+  #    
+  # \param argv    Optional argument list to override command-line arguments.
+  # \param kwargs  Optional keyword argument list.
+  #
   def run(self, argv=None, **kwargs):
   
     kwargs = self.getOptions(argv, **kwargs)

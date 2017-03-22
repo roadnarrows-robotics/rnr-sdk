@@ -1,15 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Package:   RoadNarrows Robotics Common Library 1
-//
-// Library:   librnr
-//
-// File:      log.h
-//
 /*! \file
- *
- * $LastChangedDate: 2014-12-06 13:48:30 -0700 (Sat, 06 Dec 2014) $
- * $Rev: 3823 $
  *
  * \brief Logger declarations.
  *
@@ -20,30 +10,33 @@
  * capabilities through namespaceing. Copy log.h and log.c to user application
  * source tree and compile with LOGNS uniquely defined.
  *
- * \par There are 7 defined loggging levels:
- * <dl>
- * <dt> \ref LOGGING_NA </dt>
- *  <dd>Logging is not compiled into the application.
- *      See \ref LOG_GET_THRESHOLD() to test level including this level.</dd>
- * <dt> \ref LOG_LEVEL_OFF (0) </dt>
- *  <dd>Logging is turned off.</dd>
- * <dt> \ref LOG_LEVEL_ERROR (1) </dt>
- *  <dd>Log errors only.</dd>
- * <dt> \ref LOG_LEVEL_DIAG1 (2) </dt>
- *  <dd>Log errors plus level 1 diagnostics.</dd>
- * <dt> \ref LOG_LEVEL_DIAG2 (3) </dt>
- *  <dd>Log errors plus levels 1-2 diagnostics.</dd>
- * <dt> \ref LOG_LEVEL_DIAG3 (4) </dt>
- *  <dd>Log errors plus levels 1-3 diagnostics.</dd>
- * <dt> \ref LOG_LEVEL_DIAG4 (5) </dt>
- *  <dd>Log errors plus levels 1-4 diagnostics.</dd>
- * <dt> \ref LOG_LEVEL_DIAG5 (6) </dt>
- *  <dd>Log errors plus levels 1-5 diagnostics.</dd>
- * <dt> \b &gt;7 </dt>
- * <dd>User defined loggging levels.</dd>
- * </dl>
+ * \par The Defined Loggging Thresholds
+ * Define | Threshold | Description
+ * ------ | ----- | -----------
+ * \ref LOGGING_NA | -1 | Logging is not compiled into the application.<br> See \ref LOG_GET_THRESHOLD() to test level including this level.
+ * \ref LOG_LEVEL_OFF   | 0 | Logging is turned off.
+ * \ref LOG_LEVEL_ERROR | 1 | Log only warnings and errors.
+ * \ref LOG_LEVEL_DIAG1 | 2 | Log errors plus level 1 diagnostics.
+ * \ref LOG_LEVEL_DIAG2 | 3 | Log errors plus level 1-2 diagnostics.
+ * \ref LOG_LEVEL_DIAG3 | 4 | Log errors plus level 1-3 diagnostics.
+ * \ref LOG_LEVEL_DIAG4 | 5 | Log errors plus level 1-4 diagnostics.
+ * \ref LOG_LEVEL_DIAG5 | 6 | Log errors plus level 1-5 diagnostics.
+ * \b User \b Defined   | \h_ge 7 | User defined loggging levels.
  *
- * \par Special make defines:
+ * \par Coding Common Logging Macros
+ * Macro | Threshold | Description
+ * ----- | ----- | -----------
+ * \ref LOGWARN()     | 1 | Log warning message.
+ * \ref LOGERROR()    | 1 | Log error message.
+ * \ref LOGSYSERROR() | 1 | Log system error message.<br>The _errno_ and associaed string will also be logged.
+ * \ref LOGDIAG1()    | 2 | Log level 1 diagnostic message.
+ *        ~           | ~ | ~
+ * \ref LOGDIAG5()    | 6 | Log level 5 diagnostic message.
+ * \ref LOG_GET_THRESHOLD() | - | Get current logging level.
+ * \ref LOG_SET_THRESHOLD() | - | Set current logging level.
+ * \ref LOGFUNCNAME         | - | Calling function or method name.
+ *
+ * \par Special Make Defines
  * <dl>
  * <dt> \b LOG </dt>
  *  <dd>If defined, complile logging into an application.\n
@@ -66,48 +59,60 @@
  * Page \ref example_log under "Related Pages" for an example usage of logging.
  *
  * \todo
- * Define log class concepts whereby logging can be filter by threshold and
- * class.
- *    LogClassSet(...), LogClassClear(), LogClassAdd(...), LogClassDel(...)
- * Class maps to bit in bitmap. All logging macros check loglevel and class bit.
+ * Define log class concepts whereby logging can be filtered by threshold and
+ * class.\n
+ * LogClassSet(...), LogClassClear(), LogClassAdd(...), LogClassDel(...)\n
+ * Class maps to a bit in a bitmap. All logging macros check loglevel and
+ * class bit.\n
  * Reserved names: '_all_', '_none_', '_common_' (default)
+ *
+ * \pkgsynopsis
+ * RoadNarrows Robotics Common Library 1
+ *
+ * \pkgcomponent{Library}
+ * librnr
+ *
+ * \pkgfile{rnr/log.h}
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright
+ * \copyright
  *   \h_copy 2005-2017. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
+ *
+ * \license{MIT}
+ *
+ * \EulaBegin
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that
+ * (1) The above copyright notice and the following two paragraphs
+ * appear in all copies of the source code and (2) redistributions
+ * including binaries reproduces these notices in the supporting
+ * documentation.   Substantial modifications to this software may be
+ * copyrighted by their authors and need not follow the licensing terms
+ * described here, provided that the new terms are clearly indicated in
+ * all files where they apply.
+ * \n\n
+ * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ * \n\n
+ * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * \EulaEnd
  */
-//
-// Permission is hereby granted, without written agreement and without
-// license or royalty fees, to use, copy, modify, and distribute this
-// software and its documentation for any purpose, provided that
-// (1) The above copyright notice and the following two paragraphs
-// appear in all copies of the source code and (2) redistributions
-// including binaries reproduces these notices in the supporting
-// documentation.   Substantial modifications to this software may be
-// copyrighted by their authors and need not follow the licensing terms
-// described here, provided that the new terms are clearly indicated in
-// all files where they apply.
-//
-// IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-// OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-// PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-// EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE.
-//
-// THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-// FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-// "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-// PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-//
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _LOG_H
-#define _LOG_H
+#ifndef _RNR_LOG_H
+#define _RNR_LOG_H
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -883,4 +888,4 @@ extern void LOGGER_CALL(const char *sPreface, int nLevel,
 C_DECLS_END
 
 
-#endif // _LOG_H
+#endif // _RNR_LOG_H

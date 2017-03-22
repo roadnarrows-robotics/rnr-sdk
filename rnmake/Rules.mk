@@ -877,21 +877,28 @@ endif
 .PHONY: documents
 documents: docs-clean docs-src-gen docs-pub-gen $(EXTRA_TGT_DOC)
 
+DOXY_VER=1.8.11
+
 # documentation generator from source files
 ifndef HTML_HEADER
-HTML_HEADER     = $(rnmake)/doxy/rn_doxy_header.html
+HTML_HEADER     = $(rnmake)/doxy/$(DOXY_VER)/rn_doxy_header.html
 endif
 
 ifndef HTML_FOOTER
-HTML_FOOTER     = $(rnmake)/doxy/rn_doxy_footer.html
+HTML_FOOTER     = $(rnmake)/doxy/$(DOXY_VER)/rn_doxy_footer.html
 endif
 
 ifndef HTML_STYLESHEET
-HTML_STYLESHEET = $(rnmake)/doxy/rn_doxy.css
+HTML_STYLESHEET = $(rnmake)/doxy/$(DOXY_VER)/rn_doxy.css
 endif
 
 ifndef DOXY_IMAGES
 DOXY_IMAGES = $(rnmake)/doxy/rn_images
+endif
+
+ifndef RN_DOXY_CONF_FILE
+RN_DOXY_CONF_PATH = $(rnmake)/doxy
+RN_DOXY_CONF_FILE = $(RN_DOXY_CONF_PATH)/rn_doxy.conf
 endif
 
 docs-clean:
@@ -913,6 +920,9 @@ docs-src-gen:
 		 echo "HTML_FOOTER=$(HTML_FOOTER)"; \
 		 echo "OUTPUT_DIRECTORY=$(DISTDIR_DOC)"; \
 		 echo "HTML_OUTPUT=$(DIST_SRCDOC)"; \
+		 echo "PROJECT_LOGO=$(DISTDIR_DOC_SRC_IMG)/RNLogo.png"; \
+		 echo "@INCLUDE_PATH=$(RN_DOXY_CONF_PATH)"; \
+		 echo "@INCLUDE=$(RN_DOXY_CONF_FILE)"; \
 		) | doxygen - >$(pkgroot)/doxy.out.log 2>$(pkgroot)/doxy.err.log; \
 	fi
 

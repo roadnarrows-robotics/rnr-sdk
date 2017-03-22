@@ -1,11 +1,4 @@
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Package:   RoadNarrows Robotics Common Library 1
-//
-// Library:   librnr
-//
-// File:      new.h
-//
 /*! \file
  *
  * \brief Memory allocation and deallocation declarations.
@@ -14,44 +7,53 @@
  * defines. None of the calls will fail, unless fatally for the entire 
  * program. Modeled on C++ new() and delete() operators.
  *
- * $LastChangedDate: 2010-03-24 10:19:36 -0600 (Wed, 24 Mar 2010) $
- * $Rev: 307 $
+ * \pkgsynopsis
+ * RoadNarrows Robotics Common Library 1
+ *
+ * \pkgcomponent{Library}
+ * librnr
+ *
+ * \pkgfile{rnr/new.h}
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright
+ * \copyright
  *   \h_copy 2005-2017. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
+ *
+ * \license{MIT}
+ *
+ * \EulaBegin
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that
+ * (1) The above copyright notice and the following two paragraphs
+ * appear in all copies of the source code and (2) redistributions
+ * including binaries reproduces these notices in the supporting
+ * documentation.   Substantial modifications to this software may be
+ * copyrighted by their authors and need not follow the licensing terms
+ * described here, provided that the new terms are clearly indicated in
+ * all files where they apply.
+ * \n\n
+ * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ * \n\n
+ * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * \EulaEnd
  */
-// Permission is hereby granted, without written agreement and without
-// license or royalty fees, to use, copy, modify, and distribute this
-// software and its documentation for any purpose, provided that
-// (1) The above copyright notice and the following two paragraphs
-// appear in all copies of the source code and (2) redistributions
-// including binaries reproduces these notices in the supporting
-// documentation.   Substantial modifications to this software may be
-// copyrighted by their authors and need not follow the licensing terms
-// described here, provided that the new terms are clearly indicated in
-// all files where they apply.
-//
-// IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-// OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-// PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-// EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE.
-//
-// THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-// FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-// "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-// PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-//
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _NEW_H
-#define _NEW_H
+#ifndef _RNR_NEW_H
+#define _RNR_NEW_H
 
 #include "rnr/rnrconfig.h"
 
@@ -168,4 +170,4 @@ C_DECLS_END
 #endif // ! __windows__ 
 
 
-#endif // _NEW_H
+#endif // _RNR_NEW_H

@@ -1,64 +1,74 @@
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Package:   RoadNarrows Robotics Common Library 1
-//
-// Library:   librnr
-//
-// File:      sock.h
-//
 /*! \file
- *
- * $LastChangedDate: 2010-05-12 06:59:00 -0600 (Wed, 12 May 2010) $
- * $Rev: 396 $
  *
  * \brief Socket services declarations.
  *
  * These socket functions were inspired by the camserv socket.c functions 
- * written by Jon Travis (see below).
+ * written by Jon Travis
+ * (\ref sock_h_original_src "see below").
+ *
+ * \pkgsynopsis
+ * RoadNarrows Robotics Common Library 1
+ *
+ * \pkgcomponent{Library}
+ * librnr
+ *
+ * \pkgfile{rnr/sock.h}
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright
+ * \copyright
  *   \h_copy 2005-2017. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  *
- * <hr>
- * \par Original Source and Copyright:
+ * \license{MIT}
  *
- * \par Original Author:
+ * \EulaBegin
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that
+ * (1) The above copyright notice and the following two paragraphs
+ * appear in all copies of the source code and (2) redistributions
+ * including binaries reproduces these notices in the supporting
+ * documentation.   Substantial modifications to this software may be
+ * copyrighted by their authors and need not follow the licensing terms
+ * described here, provided that the new terms are clearly indicated in
+ * all files where they apply.
+ * \n\n
+ * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ * \n\n
+ * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * \EulaEnd
+ *
+ * <hr>
+ * \anchor sock_h_original_src
+ * \par Original Source Comment Block
+ *
+ * \par Original Author
  *  Jon Travis (jtravis@p00p.org)
+ *
+ * \par Original Copyright
+ * N/A
+ *
+ * \par Original Header
+ * N/A
  *
  * <hr>
  */
-// Permission is hereby granted, without written agreement and without
-// license or royalty fees, to use, copy, modify, and distribute this
-// software and its documentation for any purpose, provided that
-// (1) The above copyright notice and the following two paragraphs
-// appear in all copies of the source code and (2) redistributions
-// including binaries reproduces these notices in the supporting
-// documentation.   Substantial modifications to this software may be
-// copyrighted by their authors and need not follow the licensing terms
-// described here, provided that the new terms are clearly indicated in
-// all files where they apply.
-//
-// IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-// OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-// PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-// EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE.
-//
-// THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-// FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-// "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-// PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-//
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _SOCK_H
-#define _SOCK_H
+#ifndef _RNR_SOCK_H
+#define _RNR_SOCK_H
 
 /*! Allow IPV6 */
 #define USE_IPV6
@@ -334,4 +344,4 @@ extern void SocketUTest();
 C_DECLS_END
 
 
-#endif // _SOCK_H
+#endif // _RNR_SOCK_H

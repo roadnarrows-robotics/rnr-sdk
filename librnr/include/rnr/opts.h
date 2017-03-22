@@ -1,68 +1,114 @@
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Package:   RoadNarrows Robotics Common Library 1
-//
-// Library:   librnr
-//
-// File:      opts.h
-//
 /*! \file
  *
- * $LastChangedDate: 2014-12-06 13:48:30 -0700 (Sat, 06 Dec 2014) $
- * $Rev: 3823 $
+ * \brief Standard command-line options options and parsing.
  *
- * \brief Standard command-line options built-in options and parsing.
- *
- * Every application that uses librnr options facilities are provides with
- * a set of built-in options (describe below) to standardize RoadNarrows
+ * Every application that uses librnr options facilities are provided with
+ * a set of built-in options (described below) to standardize RoadNarrows
  * application interfaces.
  *
- * \par Built-In Options:
+ * \par Built-In Options
  * <dl>
- * <dt> \b --log, \b -l </dt> <dd>Diagnostics logging level.</dd>
- * <dt> \b --logfile </dt> <dd>Diagnostics logging output file.</dd>
- * <dt> \b --help </dt> <dd>Print help (usage) for the command.</dd>
- * <dt> \b --version </dt> <dd>Print command version string(s).</dd>
- * </dl>
  *
+ * <dt> <b>-l, --log=<i>level</i></b></dt>
+ * <dd>
+ * Set logging threshold level. All logging events 
+ * with priority \h_le <b><i>level</i></b> will be logged. All 
+ * others will be ignored. The <b><i>level</i></b> argument is one of:
+ * <table style="border:0">
+ *  <tr><td>\c 'off' or \c 0</td><td>Disable all logging.</td></tr>
+ *  <tr><td>\c 'error' or \c 1</td>
+ *    <td>Enable error and warning logging.</td></tr>
+ *  <tr><td>\c 'diag1' or \c 2</td><td>Enable diagnostics 1 logging.</td></tr>
+ *  <tr><td>\c 'diag2' or \c 3</td><td>Enable diagnostics 2 logging.</td></tr>
+ *  <tr><td>\c 'diag3' or \c 4</td><td>Enable diagnostics 3 logging.</td></tr>
+ *  <tr><td>\c 'diag4' or \c 5</td><td>Enable diagnostics 4 logging.</td></tr>
+ *  <tr><td>\c 'diag5' or \c 6</td><td>Enable diagnostics 5 logging.</td></tr>
+ *  <tr><td>\h_gt \c 6     </td><td>Enable user-defined logging.</td></tr>
+ * </table>
+ * \b DEFAULT: \c off
+ * </dd>
+ *
+ * <dt> <b>--logfile=<i>file</i></b></dt>
+ * <dd>
+ * Set log file <b><i>file</i></b>. Special <b><i>file</i></b> names:
+ * <table style="border:0">
+ *  <tr><td>\c 'stderr'</td><td>log to standard error.</td></tr>
+ *  <tr><td>\c 'stdout'</td><td>log to standard output.</td></tr>
+ * </table>
+ * \b DEFAULT: \c stderr
+ * </dd>
+ *
+ * <dt> <b>--log-no-color</b></dt>
+ * <dd>
+ * Disable logging with compiled ANSI color strings.<br>
+ * \b DEFAULT: \c false
+ * </dd>
+ *
+ * <dt> <b>--log-no-timestamp</b></dt>
+ * <dd>
+ * Disable logging with timestamps.<br>
+ * \b DEFAULT: \c false
+ *
+ * </dd>
+ * <dt> <b>--help</b></dt>
+ * <dd>Display this help and exit.</dd>
+ *
+ * <dt> <b>--version</b></dt>
+ * <dd>Output version information and exit.</dd>
+ *
+ * </dl>
+ * 
  * \sa 
  * Page \ref example_log under "Related Pages" for an example usage of options.
  *
+ * \pkgsynopsis
+ * RoadNarrows Robotics Common Library 1
+ *
+ * \pkgcomponent{Library}
+ * librnr
+ *
+ * \pkgfile{rnr/opts.h}
+ *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright
+ * \copyright
  *   \h_copy 2005-2017. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
+ *
+ * \license{MIT}
+ *
+ * \EulaBegin
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that
+ * (1) The above copyright notice and the following two paragraphs
+ * appear in all copies of the source code and (2) redistributions
+ * including binaries reproduces these notices in the supporting
+ * documentation.   Substantial modifications to this software may be
+ * copyrighted by their authors and need not follow the licensing terms
+ * described here, provided that the new terms are clearly indicated in
+ * all files where they apply.
+ * \n\n
+ * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ * \n\n
+ * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * \EulaEnd
  */
-// Permission is hereby granted, without written agreement and without
-// license or royalty fees, to use, copy, modify, and distribute this
-// software and its documentation for any purpose, provided that
-// (1) The above copyright notice and the following two paragraphs
-// appear in all copies of the source code and (2) redistributions
-// including binaries reproduces these notices in the supporting
-// documentation.   Substantial modifications to this software may be
-// copyrighted by their authors and need not follow the licensing terms
-// described here, provided that the new terms are clearly indicated in
-// all files where they apply.
-//
-// IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-// OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-// PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-// EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE.
-//
-// THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-// FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-// "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-// PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-//
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _OPTS_H
-#define _OPTS_H
+#ifndef _RNR_OPTS_H
+#define _RNR_OPTS_H
 
 #include <limits.h>
 #include <getopt.h>
@@ -281,4 +327,4 @@ extern void OptsInvalid(const char *argv0, const char *sFmt, ...);
 C_DECLS_END
 
 
-#endif // _OPTS_H
+#endif // _RNR_OPTS_H

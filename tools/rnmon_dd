@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sudo watch -n 10 kill -USR1 $(pgrep '^dd$')

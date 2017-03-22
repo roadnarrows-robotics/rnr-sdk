@@ -1,15 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Package:   RoadNarrows Robotics Common Library 1
-//
-// Library:   librnr
-//
-// File:      dlistvoid.h
-//
 /*! \file
- *
- * $LastChangedDate: 2010-03-24 10:19:36 -0600 (Wed, 24 Mar 2010) $
- * $Rev: 307 $
  *
  * \brief Doubly linked list (dlist) of data pointers \#defines, types,
  * and declarations.
@@ -40,43 +30,55 @@
  * dliststr.h for librnr string example. \n
  * \ref example_dlist under "Related Pages" for another example.
  *
+ * \pkgsynopsis
+ * RoadNarrows Robotics Common Library 1
+ *
+ * \pkgcomponent{Library}
+ * librnr
+ *
+ * \pkgfile{rnr/dlistvoid.h}
+ *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright
+ * \copyright
  *   \h_copy 2005-2017. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
- *   All Rights Reserved
+ *   All Rights Reservedcolorcolor
+ *
+ * \license{MIT}
+ *
+ * \EulaBegin
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that
+ * (1) The above copyright notice and the following two paragraphs
+ * appear in all copies of the source code and (2) redistributions
+ * including binaries reproduces these notices in the supporting
+ * documentation.   Substantial modifications to this software may be
+ * copyrighted by their authors and need not follow the licensing terms
+ * described here, provided that the new terms are clearly indicated in
+ * all files where they apply.
+ * \n\n
+ * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ * \n\n
+ * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * \EulaEnd
  */
-// Permission is hereby granted, without written agreement and without
-// license or royalty fees, to use, copy, modify, and distribute this
-// software and its documentation for any purpose, provided that
-// (1) The above copyright notice and the following two paragraphs
-// appear in all copies of the source code and (2) redistributions
-// including binaries reproduces these notices in the supporting
-// documentation.   Substantial modifications to this software may be
-// copyrighted by their authors and need not follow the licensing terms
-// described here, provided that the new terms are clearly indicated in
-// all files where they apply.
-//
-// IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-// OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-// PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-// EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE.
-//
-// THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-// FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-// "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-// PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-//
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _DLISTVOID_H
+#ifndef _RNR_DLISTVOID_H
 #include <sys/types.h>
 #include <stdio.h>
-#endif // _DLISTVOID_H
+#endif // _RNR_DLISTVOID_H
 
 C_DECLS_BEGIN
 
@@ -147,7 +149,7 @@ C_DECLS_BEGIN
 // Base Data Types
 //-----------------------------------------------------------------------------
 
-#ifndef _DLISTVOID_H
+#ifndef _RNR_DLISTVOID_H
 
 /*!
  * \brief Special dlist index value to insert before end-of-list.
@@ -193,7 +195,7 @@ typedef struct
   void          *m_pNext; ///< pointer to next dnode
 } DListVoidIter_T;
 
-#endif // _DLISTVOID_H
+#endif // _RNR_DLISTVOID_H
 
 
 //-----------------------------------------------------------------------------
@@ -246,7 +248,7 @@ typedef DListVoidIter_T   _DLIST_ITER;    ///< dlist iterator
 // Base Prototypes
 //-----------------------------------------------------------------------------
 
-#ifndef _DLISTVOID_H
+#ifndef _RNR_DLISTVOID_H
 
 // Base
 extern DListVoid_T *DListVoidNew(DListVoidFuncDataCmp_T fnDataCmp,
@@ -430,7 +432,7 @@ static inline void *DListVoidIterDataNext(_DLIST_ITER *pIter)
   return( DListVoidGetData(DListVoidIterNodeNext(pIter)) );
 }
 
-#endif // _DLISTVOID_H
+#endif // _RNR_DLISTVOID_H
 
 
 //-----------------------------------------------------------------------------
@@ -970,4 +972,4 @@ C_DECLS_END
 #undef _DLIST_NODE
 #undef _DLIST_ITER
 
-#define _DLISTVOID_H    ///< include base declaration only once
+#define _RNR_DLISTVOID_H    ///< include base declaration only once

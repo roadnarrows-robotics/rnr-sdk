@@ -1,91 +1,90 @@
 ////////////////////////////////////////////////////////////////////////////////
-//
-// Package:   RoadNarrows Robotics Common Library 1
-//
-// Library:   librnr
-//
-// File:      hash.h
-//
 /*! \file
- *
- * $LastChangedDate: 2010-03-24 10:19:36 -0600 (Wed, 24 Mar 2010) $
- * $Rev: 307 $
  *
  * \brief General purpose hash data and function declarations.
  *
- * This file has been modified from the original source (see below).
+ * This file has been modified from the original source
+ * (\ref hash_h_original_src "see below").
  *
  * \sa 
  * \ref example_hash under "Related Pages" for an example usage of hashing.
  *
+ * \pkgsynopsis
+ * RoadNarrows Robotics Common Library 1
+ *
+ * \pkgcomponent{Library}
+ * librnr
+ *
+ * \pkgfile{rnr/hash.h}
+ *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \par Copyright
+ * \copyright
  *   \h_copy 2005-2017. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  *
- * <hr>
- * \par Original Source and Copyright:
+ * \license{MIT}
  *
- * \par Original Author:
+ * \EulaBegin
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that
+ * (1) The above copyright notice and the following two paragraphs
+ * appear in all copies of the source code and (2) redistributions
+ * including binaries reproduces these notices in the supporting
+ * documentation.   Substantial modifications to this software may be
+ * copyrighted by their authors and need not follow the licensing terms
+ * described here, provided that the new terms are clearly indicated in
+ * all files where they apply.
+ * \n\n
+ * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
+ * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
+ * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+ * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
+ * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
+ * THE POSSIBILITY OF SUCH DAMAGE.
+ * \n\n
+ * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+ * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
+ * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
+ * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ * \EulaEnd
+ *
+ * <hr>
+ * \anchor hash_h_original_src
+ * \par Original Source Comment Block
+ *
+ * \par Original Author
  * Kaz Kylheku (kaz@ashi.footprints.net)
  *
- * \par Original Copyright:
+ * \par Original Copyright
  * (C) 1997
  *
- * \par Original Header:
- * See "Original Source Header EULA" in source file.
+ * \par Original Header
+ * \verbatim
+ * Hash Table Data Type
+ * Copyright (C) 1997 Kaz Kylheku <kaz@ashi.footprints.net>
+ *
+ * Free Software License:
+ *
+ * All rights are reserved by the author, with the following exceptions:
+ * Permission is granted to freely reproduce and distribute this software,
+ * possibly in exchange for a fee, provided that this copyright notice appears
+ * intact. Permission is also granted to adapt this software to produce
+ * derivative works, as long as the modified versions carry this copyright
+ * notice and additional notices stating that the work has been modified.
+ * The copyright extends to translations of this work into other languages,
+ * including machine languages. 
+ * \endverbatim
  *
  * <hr>
  */
-// Permission is hereby granted, without written agreement and without
-// license or royalty fees, to use, copy, modify, and distribute this
-// software and its documentation for any purpose, provided that
-// (1) The above copyright notice and the following two paragraphs
-// appear in all copies of the source code and (2) redistributions
-// including binaries reproduces these notices in the supporting
-// documentation.   Substantial modifications to this software may be
-// copyrighted by their authors and need not follow the licensing terms
-// described here, provided that the new terms are clearly indicated in
-// all files where they apply.
-//
-// IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-// OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-// PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-// DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-// EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-// THE POSSIBILITY OF SUCH DAMAGE.
-//
-// THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-// INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-// FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-// "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-// PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-//
-// Original Source Header EULA:
-//
-// Hash Table Data Type
-// Copyright (C) 1997 Kaz Kylheku <kaz@ashi.footprints.net>
-//
-// Free Software License:
-//
-// All rights are reserved by the author, with the following exceptions:
-// Permission is granted to freely reproduce and distribute this software,
-// possibly in exchange for a fee, provided that this copyright notice appears
-// intact. Permission is also granted to adapt this software to produce
-// derivative works, as long as the modified versions carry this copyright
-// notice and additional notices stating that the work has been modified.
-// The copyright extends to translations of this work into other languages,
-// including machine languages. 
-//
-// $Id: hash.h,v 1.1 1999/11/05 00:22:34 jtravis Exp $
-// $Name:  $
-//
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef _HASH_H
-#define _HASH_H
+#ifndef _RNR_HASH_H
+#define _RNR_HASH_H
 
 #include <limits.h>
 
@@ -446,4 +445,4 @@ extern void hnode_delete(hnode_t *node);
 C_DECLS_END
 
 
-#endif // _HASH_H
+#endif // _RNR_HASH_H
