@@ -5,6 +5,9 @@
  *
  * \note Add entries as new architectures are supported.
  *
+ * \warning The install.h approach is obsolete. Need to replace with a better
+ * system.
+ *
  * \pkgsynopsis
  * RoadNarrows Robotics Common Library 1
  *
@@ -53,9 +56,13 @@
 #ifndef _RNR_INSTALL_WRAPPER_H
 #define _RNR_INSTALL_WRAPPER_H
 
+#warning "The rnr/install.h file is deprecated."
+
 #include "rnr/rnrconfig.h"
 
 C_DECLS_BEGIN
+
+#if 0 // deprecated
 
 #if defined(ARCH_i386)
 
@@ -101,6 +108,35 @@ C_DECLS_BEGIN
 
 # warning "Unknown architecture"
 
+#endif // deprecated
+
+//
+// Default installation
+//
+
+/*! \brief package install bin directory*/
+#define PKG_INSTALL_BINDIR      "/usr/local/bin"
+
+/*! \brief package install system bin directory */
+#define PKG_INSTALL_SBINDIR     "/usr/local/sbin"
+
+/*! \brief package install include directory */
+#define PKG_INSTALL_INCDIR      "/usr/local/include"
+
+/*! \brief package library directory */
+#define PKG_INSTALL_LIBDIR      "/usr/local/lib64"
+
+/*! \brief package install system configuration directory */
+#define PKG_INSTALL_SYSCONFDIR  "/usr/local/etc"
+
+/*! \brief package install documentation directory */
+#define PKG_INSTALL_DOCDIR      "/usr/local/share/doc"
+
+/*! \brief package install man pages directory */
+#define PKG_INSTALL_MANDIR      "/usr/local/man"
+
+/*! \brief package install information directory (s) */
+#define PKG_INSTALL_INFODIR     "/usr/local/info"
 #endif    // end supported architectures
 
 C_DECLS_END

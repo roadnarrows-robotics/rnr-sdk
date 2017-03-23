@@ -19,8 +19,7 @@
  *   \h_copy 2013-2017. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
- */
-//
+ *
  * \EulaBegin
  * Permission is hereby granted, without written agreement and without
  * license or royalty fees, to use, copy, modify, and distribute this
@@ -46,7 +45,7 @@
  * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
  * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  * \EulaEnd
-//
+ */
 ////////////////////////////////////////////////////////////////////////////////
 
 #include <stdio.h>

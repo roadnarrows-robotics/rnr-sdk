@@ -65,7 +65,7 @@ endif
 PKG 								= botsense
 PKG_VERSION_MAJOR   = 3
 PKG_VERSION_MINOR   = 1
-PKG_VERSION_RELEASE = 0
+PKG_VERSION_RELEASE = 1
 PKG_VERSION_DATE    = 2017
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"

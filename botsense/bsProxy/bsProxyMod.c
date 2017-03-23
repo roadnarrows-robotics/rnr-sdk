@@ -63,7 +63,6 @@
 #include "rnr/hash.h"
 #include "rnr/dliststr.h"
 #include "rnr/path.h"
-#include "rnr/install.h"
 
 #include "botsense/BotSense.h"
 #include "botsense/bsProxyModIF.h"
@@ -80,6 +79,10 @@
 # define DLL_EXT    ".so"       ///< standard dll library file name extension
 #else
 # define DLL_EXT    ".DLL"      ///< windows dll library file name extension
+#endif
+
+#ifndef BS_AUX_LIBDIR
+#define BS_AUX_LIBDIR "/prj/lib" ///< additional bsProxy library directory
 #endif
 
 #ifndef BS_PLUGIN_DIR
@@ -198,7 +201,7 @@ static void ModDllInit(DListStr_T *pDListLibPath)
   // RDK add user's home/botsense/libs path here
  
   // Add installed prefix/lib/botsense/ path.
-  if( (sPath = NewJoinedPath(PKG_INSTALL_LIBDIR, BS_PLUGIN_DIR)) != NULL )
+  if( (sPath = NewJoinedPath(BS_AUX_LIBDIR, BS_PLUGIN_DIR)) != NULL )
   {
     DListStrAppend(BsModDllPaths, sPath);
   }

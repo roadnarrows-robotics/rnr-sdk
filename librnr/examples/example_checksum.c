@@ -55,8 +55,6 @@
 #include "rnr/opts.h"
 #include "rnr/checksum.h"
 
-#include "rnr/install.h"
-
 #include "version.h"
 
 // 

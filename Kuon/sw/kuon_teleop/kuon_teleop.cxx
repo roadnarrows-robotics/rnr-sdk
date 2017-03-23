@@ -57,7 +57,6 @@
 #include "rnr/log.h"
 #include "rnr/opts.h"
 #include "rnr/uri.h"
-#include "rnr/install.h"
 
 #include "rnr/hid/HIDXbox360.h"
 

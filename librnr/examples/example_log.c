@@ -52,7 +52,6 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 #include "rnr/opts.h"
-#include "rnr/install.h"
 
 #include "version.h"
 
@@ -243,11 +242,6 @@ static int init(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
   printf("arch   : %s\n", ARCH);
-  printf("install: \n");
-  printf("  %s\n", PKG_INSTALL_BINDIR);
-  printf("  %s\n", PKG_INSTALL_LIBDIR);
-  printf("  %s\n", PKG_INSTALL_INCDIR);
-  printf("  %s\n", PKG_INSTALL_SYSCONFDIR);
 
   if( !init(argc, argv) )
   {

@@ -56,7 +56,6 @@
 #include "rnr/log.h"
 #include "rnr/opts.h"
 #include "rnr/shm.h"
-#include "rnr/install.h"
 
 #include "version.h"
 

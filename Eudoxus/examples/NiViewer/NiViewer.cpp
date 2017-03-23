@@ -90,7 +90,6 @@ using namespace glh;
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 #include "rnr/opts.h"
-#include "rnr/install.h"
 
 #include "Eudoxus/Eudoxus.h"
 #include "Eudoxus/euUtils.h"

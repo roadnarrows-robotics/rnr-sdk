@@ -547,8 +547,9 @@ FQ_PGMS					= $(call fq_pgm_names,$(LOCDIR_BIN),$(LOC_PGMS)) \
 FQ_REL_FILES 		= $(addprefix $(DISTDIR_DOC)/,$(REL_FILES))
 
 # Auto-Generated Header Files
-AUTOHDRS				= $(addprefix $(LOCDIR_INCLUDE)/,version.h) \
-								  $(addprefix $(ARCH_INCDIR)/,install.h)
+AUTOHDRS				= $(addprefix $(LOCDIR_INCLUDE)/,version.h)
+
+# deprecated		$(addprefix $(ARCH_INCDIR)/,install.h)
 
 #------------------------------------------------------------------------------
 # Target Specific Variables
@@ -765,6 +766,7 @@ $(LOCDIR_INCLUDE)/version.h: $(PKG_MKFILE)
 	@$(MAKE) -f $(rnmake)/version_h.mk -s pkgroot=$(pkgroot) version_h=$@ \
 								pkg_mk=$(PKG_MKFILE)
 
+# deprecated
 $(ARCH_INCDIR)/install.h: $(ARCH_MKFILE)
 	@test -d $(ARCH_INCDIR) || $(MKDIR) $(ARCH_INCDIR)
 	@$(MAKE) -f $(rnmake)/install_h.mk -s pkgroot=$(pkgroot) install_h=$@ \

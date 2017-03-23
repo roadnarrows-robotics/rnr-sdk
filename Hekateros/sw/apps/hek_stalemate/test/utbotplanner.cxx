@@ -57,7 +57,6 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 #include "rnr/opts.h"
-#include "rnr/install.h"
 
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
