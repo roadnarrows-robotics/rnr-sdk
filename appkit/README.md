@@ -1,9 +1,10 @@
 # appkit
-RoadNarrows Robotics Application Tool Kit
+RoadNarrows Robotics Application Kit
 
 ## Description
-The RoadNarrows **app**lication tool **kit** appkit provides a set of C++ class
-headers and libraries for rapid application and packages develop.
+The RoadNarrows <b>app</b>lication <b>kit</b> is a C++ Software
+Development Kit (SDK) used for rapid application and package develop.
+The <b>appkit</b> comprises C++ class headers and libraries.
 
 The target execution platforms are:
 * (Mostly) POSIX compliant platforms such as Linux.
@@ -15,7 +16,7 @@ To this end, the deliberate design decisions were made to:
 * Limit use of additional system libraries other than "readily" available.
 
 ## Copyright
-&#169; 2013-2017 RoadNarrows LLC<br>
+&copy; 2013-2017 RoadNarrows LLC<br>
 [roadnarrows.com](http://roadnarrows.com)<br>
 All Rights Reserved
 

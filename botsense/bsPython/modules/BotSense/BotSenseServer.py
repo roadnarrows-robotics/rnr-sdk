@@ -5,10 +5,10 @@
 # \brief \h_botsense client - server connection and request functions.
 # 
 # \pkgsynopsis
-#   \h_bs_norm Python Interface
+#   \h_bs_plain Python Interface
 # 
 # \pkgcomponent{Module}
-#   \h_bs_norm.BotSenseServer
+#   \h_bs_plain.BotSenseServer
 #
 # \pkgfile{BotSense/BotSenseServer.py}
 #
