@@ -2,7 +2,7 @@
 ## librnr
 RoadNarrows Robotics Common Library 1
 
-## Description
+## Synopsis
 The librnr C library provides a set of useful interfaces to:
 * Provide a uniform interface for RoadNarrows packages.
 * Quickly develop packages.
@@ -16,5 +16,6 @@ All Rights Reserved
 MIT
 
 ## See Also
-See the [EULA](EULA.md) for more licensing details.\n
-See the documentation for more details.
+See the [EULA](EULA.md) for more licensing details.
+
+See the documentation for more package details.
