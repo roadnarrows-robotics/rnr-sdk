@@ -13,7 +13,8 @@ The librnr C library provides a set of useful interfaces to:
 All Rights Reserved
 
 ## License
-MIT. See the [EULA](EULA.md) for more details.
+MIT
 
 ## See Also
-See documentation for more details.
+See the [EULA](EULA.md) for more licensing details.\n
+See the documentation for more details.
