@@ -1,6 +1,5 @@
 # EULA
-End User License Agreement
-
+## End User License Agreement
 RoadNarrows Robotics is a "Doing Business As" name for RoadNarrows LLC.
 
 ## Package
@@ -34,5 +33,5 @@ the possibility of such damage.
 The author and RoadNarrows Robotics specifically disclaim any warranties,
 including, but not limited to, the implied warranties of merchantability and
 fitness for a particular purpose. the software provided hereunder is on an
-"as is" basis, and the authors and distributors have no obligation tO
+"as is" basis, and the authors and distributors have no obligation to
 provide maintenance, support, updates, enhancements, or modifications.
