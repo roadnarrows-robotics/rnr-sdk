@@ -8,7 +8,7 @@ The librnr C library provides a set of useful interfaces to:
 * Quickly develop packages.
 
 ## Copyright
-&copy; 2005-2016 RoadNarrows LLC<br>
+&copy; 2005-2017 RoadNarrows LLC<br>
 [www.roadnarrows.com](http://roadnarrows.com)<br>
 All Rights Reserved
 
