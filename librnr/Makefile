@@ -62,7 +62,7 @@ pkgroot		= .
 
 
 #------------------------------------------------------------------------------
-# Libraries
+# librnr
 
 SUBDIRS						= examples
 
@@ -96,7 +96,7 @@ rnr.LIBS  = pthread rt
 
 
 #------------------------------------------------------------------------------
-# Interface Headers
+# Distribution Headers
 
 #
 # Distribution Header List Tags
@@ -158,14 +158,31 @@ EXTRA_TGT_ALL_POST = all-post
 
 
 #------------------------------------------------------------------------------
-# Make Includes
+# Include RN Make Rules
 
+# RDK NEW FORM
+# make rnmake=dir ... command-line override
+#ifdef rnmake
+#	RNMAKE=$(rnmake)
+#endif
+#
+# environment 
+#ifndef RNMAKE
+#  $(error Error: RNMAKE environment variable not specified.)
+#endif
+#
+#export RNMAKE := $(realpath $(RNMAKE))
+#
+# Include Top-Level Rules Makefile
+#include $(RNMAKE)/Rules.mk
+
+# RDK OLD FORM
 # Default RoadNarrows make system base directory
 ifndef rnmake
 rnmake := $(realpath $(pkgroot)/../rnmake)
 endif
 
-# Include Rules Makefile
+# Include Top-Level Rules Makefile
 include $(rnmake)/Rules.mk
 
 #------------------------------------------------------------------------------

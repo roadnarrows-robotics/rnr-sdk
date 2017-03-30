@@ -20,7 +20,7 @@
  * \author Nick Anderson (nick@roadnarrows.com)
  *
  * \par Copyright:
- * (C) 2016  RoadNarrows
+ * (C) 2016-2017  RoadNarrows
  * (http://www.RoadNarrows.com)
  * \n All Rights Reserved
  */

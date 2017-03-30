@@ -204,7 +204,7 @@ endif
 # -------------------------------------------------------------------------
 # Architecture Dependent Definitions
 
-# Stanard rules does not support the following targets.
+# Standard rules does not support the following targets.
 ifneq "$(findstring $(arch),atmega16)" ""
 $(error Error: Rules.mk does not support $(arch) rules)
 endif

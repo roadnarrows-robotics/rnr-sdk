@@ -74,6 +74,7 @@
 #include "Laelaps/laeSysDev.h"
 #include "Laelaps/laeI2C.h"
 #include "Laelaps/laeI2CMux.h"
+#include "Laelaps/laeWd.h"
 
 
 static const char *DiagSep = \
