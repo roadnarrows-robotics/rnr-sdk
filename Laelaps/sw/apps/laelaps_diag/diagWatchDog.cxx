@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-01 15:14:45 -0700 (Mon, 01 Feb 2016) $
- * $Rev: 4289 $
- *
  * \brief Perform Laelaps IMU diagnostics.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -80,7 +77,7 @@ using namespace laelaps;
 
 static const char *SubSysName = "WatchDog";
 
-static DiagStats initWatchDog(LaeI2C &i2cBus)
+static DiagStats initWatchDog()
 {
   DiagStats   stats;
 
@@ -90,10 +87,10 @@ static DiagStats initWatchDog(LaeI2C &i2cBus)
   // Requirements
   //
   stats.testCnt += 1;
-  if( i2cBus.isOpen() )
+  if( I2CBus.isOpen() )
   {
     printTestResult(PassTag, "Communication interface %s is open.",
-        i2cBus.getDevName().c_str());
+        I2CBus.getDevName().c_str());
     stats.passCnt += 1;
   }
   else
@@ -107,7 +104,7 @@ static DiagStats initWatchDog(LaeI2C &i2cBus)
   return stats;
 }
 
-static DiagStats readInfo(LaeWd &watchdog)
+static DiagStats readInfo()
 {
   uint_t    uVerNum;
   DiagStats stats;
@@ -115,7 +112,7 @@ static DiagStats readInfo(LaeWd &watchdog)
   printSubHdr("Read WatchDog Info");
 
   ++stats.testCnt;
-  if( watchdog.cmdGetFwVersion(uVerNum) < 0 )
+  if( WatchDog.cmdGetFwVersion(uVerNum) < 0 )
   {
     printTestResult(FailTag, "%s: Failed to read firmware version number.",
           SubSysName);
@@ -135,7 +132,7 @@ static DiagStats readInfo(LaeWd &watchdog)
   return stats;
 }
 
-static DiagStats testAlarms(LaeWd &watchdog)
+static DiagStats testAlarms()
 {
   static uint_t alarms[] =
   {
@@ -165,7 +162,7 @@ static DiagStats testAlarms(LaeWd &watchdog)
     ++stats.testCnt;
     printf("%s Set %s alarms = (0x%04x)\r", WaitTag, names[i], alarms[i]);
     fflush(stdout);
-    if( watchdog.cmdSetAlarms(alarms[i]) < 0 )
+    if( WatchDog.cmdSetAlarms(alarms[i]) < 0 )
     {
       printf("%s\n", FailTag);
     }
@@ -180,7 +177,7 @@ static DiagStats testAlarms(LaeWd &watchdog)
   return stats;
 }
 
-static DiagStats testBatteryCharge(LaeWd &watchdog)
+static DiagStats testBatteryCharge()
 {
   static uint_t charge[] =
   {
@@ -196,7 +193,7 @@ static DiagStats testBatteryCharge(LaeWd &watchdog)
     ++stats.testCnt;
     printf("%s Set battery charge to %u%%\r", WaitTag, charge[i]);
     fflush(stdout);
-    if( watchdog.cmdSetBatterySoC(charge[i]) < 0 )
+    if( WatchDog.cmdSetBatterySoC(charge[i]) < 0 )
     {
       printf("%s\n", FailTag);
     }
@@ -211,7 +208,7 @@ static DiagStats testBatteryCharge(LaeWd &watchdog)
   return stats;
 }
 
-static DiagStats testLeds(LaeWd &watchdog)
+static DiagStats testLeds()
 {
   static byte_t    rgb[][3] =
   {
@@ -234,7 +231,7 @@ static DiagStats testLeds(LaeWd &watchdog)
     printf("%s Set RGB LED to %s = (%u, %u, %u)\r",
           WaitTag, colors[i], rgb[i][0], rgb[i][1], rgb[i][2]);
     fflush(stdout);
-    if( watchdog.cmdSetRgbLed(rgb[i][0], rgb[i][1], rgb[i][2]) < 0 )
+    if( WatchDog.cmdSetRgbLed(rgb[i][0], rgb[i][1], rgb[i][2]) < 0 )
     {
       printf("%s\n", FailTag);
     }
@@ -247,7 +244,7 @@ static DiagStats testLeds(LaeWd &watchdog)
   }
 
   ++stats.testCnt;
-  if( watchdog.cmdResetRgbLed() < 0 )
+  if( WatchDog.cmdResetRgbLed() < 0 )
   {
     printTestResult(FailTag, "Failed to reset RGB LED to state defaults.");
   }
@@ -260,7 +257,7 @@ static DiagStats testLeds(LaeWd &watchdog)
   return stats;
 }
 
-static DiagStats testDigitalIO(LaeWd &watchdog)
+static DiagStats testDigitalIO()
 {
   uint_t      pin;
   uint_t      value;
@@ -277,7 +274,7 @@ static DiagStats testDigitalIO(LaeWd &watchdog)
     // Configure pin as output.
     //
     ++stats.testCnt;
-    if( watchdog.cmdConfigDPin(pin, LaeWdArgDPinDirOut) == LAE_OK )
+    if( WatchDog.cmdConfigDPin(pin, LaeWdArgDPinDirOut) == LAE_OK )
     {
       ++stats.passCnt;
       sTag = PassTag;
@@ -293,7 +290,7 @@ static DiagStats testDigitalIO(LaeWd &watchdog)
     //
     ++stats.testCnt;
     value = LaeWdArgDPinValHigh;
-    if( watchdog.cmdWriteDPin(pin, value) == LAE_OK )
+    if( WatchDog.cmdWriteDPin(pin, value) == LAE_OK )
     {
       ++stats.passCnt;
       sTag = PassTag;
@@ -308,7 +305,7 @@ static DiagStats testDigitalIO(LaeWd &watchdog)
     // Read pin's value.
     //
     ++stats.testCnt;
-    if( watchdog.cmdReadDPin(pin, value) == LAE_OK )
+    if( WatchDog.cmdReadDPin(pin, value) == LAE_OK )
     {
       ++stats.passCnt;
       sTag = PassTag;
@@ -325,7 +322,7 @@ static DiagStats testDigitalIO(LaeWd &watchdog)
     //
     ++stats.testCnt;
     value = LaeWdArgDPinValLow;
-    if( watchdog.cmdWriteDPin(pin, value) == LAE_OK )
+    if( WatchDog.cmdWriteDPin(pin, value) == LAE_OK )
     {
       ++stats.passCnt;
       sTag = PassTag;
@@ -340,7 +337,7 @@ static DiagStats testDigitalIO(LaeWd &watchdog)
   return stats;
 }
 
-static DiagStats testAnalogOutput(LaeWd &watchdog)
+static DiagStats testAnalogOutput()
 {
   uint_t      pin;
   uint_t      value;
@@ -358,7 +355,7 @@ static DiagStats testAnalogOutput(LaeWd &watchdog)
     //
     ++stats.testCnt;
     value = LaeWdArgAOutPinValMax;
-    if( watchdog.cmdWriteAPin(pin, value) == LAE_OK )
+    if( WatchDog.cmdWriteAPin(pin, value) == LAE_OK )
     {
       ++stats.passCnt;
       sTag = PassTag;
@@ -374,7 +371,7 @@ static DiagStats testAnalogOutput(LaeWd &watchdog)
     //
     ++stats.testCnt;
     value = LaeWdArgDPinValLow;
-    if( watchdog.cmdWriteDPin(pin, value) == LAE_OK )
+    if( WatchDog.cmdWriteDPin(pin, value) == LAE_OK )
     {
       ++stats.passCnt;
       sTag = PassTag;
@@ -390,7 +387,7 @@ static DiagStats testAnalogOutput(LaeWd &watchdog)
 }
 
 
-static DiagStats testAnalogInput(LaeWd &watchdog)
+static DiagStats testAnalogInput()
 {
   uint_t      pin;
   uint_t      value;
@@ -407,7 +404,7 @@ static DiagStats testAnalogInput(LaeWd &watchdog)
     // Read pin's value.
     //
     ++stats.testCnt;
-    if( watchdog.cmdReadAPin(pin, value) == LAE_OK )
+    if( WatchDog.cmdReadAPin(pin, value) == LAE_OK )
     {
       ++stats.passCnt;
       sTag = PassTag;
@@ -423,20 +420,17 @@ static DiagStats testAnalogInput(LaeWd &watchdog)
   return stats;
 }
 
-DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
+DiagStats runWatchDogDiagnostics()
 {
-  LaeWd       watchdog(i2cBus);
   DiagStats   statsTest;
   DiagStats   statsTotal;
 
   printHdr("WatchDog Diagnostics");
 
-  watchdog.sync();
-
   //
   // Init Tests
   //
-  statsTest = initWatchDog(i2cBus);
+  statsTest = initWatchDog();
   printSubTotals(statsTest);
   statsTotal += statsTest;
 
@@ -445,7 +439,7 @@ DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
   //
   if( !statsTotal.fatal )
   {
-    statsTest = readInfo(watchdog);
+    statsTest = readInfo();
     printSubTotals(statsTest);
     statsTotal += statsTest;
   }
@@ -455,7 +449,7 @@ DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
   //
   if( !statsTotal.fatal )
   {
-    statsTest = testAlarms(watchdog);
+    statsTest = testAlarms();
     printSubTotals(statsTest);
     statsTotal += statsTest;
   }
@@ -465,7 +459,7 @@ DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
   //
   if( !statsTotal.fatal )
   {
-    statsTest = testBatteryCharge(watchdog);
+    statsTest = testBatteryCharge();
     printSubTotals(statsTest);
     statsTotal += statsTest;
   }
@@ -475,7 +469,7 @@ DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
   //
   if( !statsTotal.fatal )
   {
-    statsTest = testLeds(watchdog);
+    statsTest = testLeds();
     printSubTotals(statsTest);
     statsTotal += statsTest;
   }
@@ -485,7 +479,7 @@ DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
   //
   if( !statsTotal.fatal )
   {
-    statsTest = testDigitalIO(watchdog);
+    statsTest = testDigitalIO();
     printSubTotals(statsTest);
     statsTotal += statsTest;
   }
@@ -495,7 +489,7 @@ DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
   //
   if( !statsTotal.fatal )
   {
-    statsTest = testAnalogOutput(watchdog);
+    statsTest = testAnalogOutput();
     printSubTotals(statsTest);
     statsTotal += statsTest;
   }
@@ -505,7 +499,7 @@ DiagStats runWatchDogDiagnostics(LaeI2C &i2cBus)
   //
   if( !statsTotal.fatal )
   {
-    statsTest = testAnalogInput(watchdog);
+    statsTest = testAnalogInput();
     printSubTotals(statsTest);
     statsTotal += statsTest;
   }

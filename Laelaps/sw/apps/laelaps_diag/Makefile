@@ -75,14 +75,16 @@ laelaps_diag.LIBDEPS  = laelaps
 # C Source Files
 #
 laelaps_diag.SRC.CXX = \
-	laelaps_diag.cxx \
+	diagBatt.cxx \
 	diagCam.cxx \
 	diagCpu.cxx \
 	diagImu.cxx \
 	diagMotors.cxx \
 	diagProd.cxx \
 	diagToF.cxx \
-	diagWatchDog.cxx
+	diagWatchDog.cxx \
+	laelaps_diag.cxx \
+	laelaps_utils.cxx
 
 
 #------------------------------------------------------------------------------

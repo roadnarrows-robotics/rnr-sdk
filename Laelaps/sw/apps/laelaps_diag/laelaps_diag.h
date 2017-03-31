@@ -69,6 +69,7 @@
 // common
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeUtils.h"
+#include "Laelaps/laeDesc.h"
 
 // hardware
 #include "Laelaps/laeSysDev.h"
@@ -77,21 +78,27 @@
 #include "Laelaps/laeWd.h"
 
 
-static const char *DiagSep = \
-"-----------------------------------------------------------------------------";
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// External Data
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-static const char *SubHdrSep = \
-". . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .";
+//
+// Shared interfaces used by diagnostics
+//
+extern laelaps::LaeDesc   RobotDesc;
+extern laelaps::LaeI2C    I2CBus;
+extern laelaps::LaeI2CMux I2CMux;
+extern laelaps::LaeWd     WatchDog;
 
+//
+// Diagnostic Tags
+//
 extern char PassTag[];
 extern char WarnTag[];
 extern char FailTag[];
 extern char WaitTag[];
 extern char YNTag[];
 extern char FatalTag[];
-
-static const char *SubSumTag = "  ...";
-static const char *TotSumTag = "...";
 
 /*!
  * \brief Simple diagnostics statistics class.
@@ -108,9 +115,7 @@ public:
    */
   DiagStats()
   {
-    passCnt = 0;
-    testCnt = 0;
-    fatal   = false;
+    zero();
   }
 
   /*!
@@ -118,6 +123,16 @@ public:
    */
   ~DiagStats()
   {
+  }
+
+  /*!
+   * \brief Zero statistics.
+   */
+  void zero()
+  {
+    passCnt = 0;
+    testCnt = 0;
+    fatal   = false;
   }
 
   /*!
@@ -168,21 +183,24 @@ extern DiagStats runCpuDiagnostics();
 
 extern DiagStats runProductDiagnostics();
 
-extern DiagStats runMotorsDiagnostics(laelaps::LaeI2C &i2cBus,
-                                      bool bTestMotioin);
+extern DiagStats runMotorsDiagnostics(bool bTestMotion);
 
-extern DiagStats runToFDiagnostics(laelaps::LaeI2CMux &i2cMux);
+extern DiagStats runToFDiagnostics();
 
 extern DiagStats runImuDiagnostics();
 
-extern DiagStats runWatchDogDiagnostics(laelaps::LaeI2C &i2cBus);
+extern DiagStats runWatchDogDiagnostics();
 
 extern DiagStats runCamDiagnostics();
+
+extern DiagStats runBatteryDiagnostics(bool bAnyKey);
 
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // Utilities
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+extern void setTags(bool bColor);
 
 extern void printHdr(std::string strDiag);
 
@@ -195,6 +213,8 @@ extern void printSubTotals(DiagStats &stats);
 extern void printTotals(DiagStats &stats);
 
 extern void printGrandTotals(DiagStats &stats);
+
+extern int kbhit();
 
 #endif // _LAELAPS_DIAG_H
 

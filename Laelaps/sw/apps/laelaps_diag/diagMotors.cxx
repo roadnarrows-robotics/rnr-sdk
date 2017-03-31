@@ -129,7 +129,7 @@ static RoboClawComm   MotorCtlrComm;    ///< motor ctrl serial communication bus
 static RoboClaw      *MotorCtlr[LaeNumMotorCtlrs];
                                             ///< RoboClaw motor controllers
 
-static DiagStats initMotorInterfaces(LaeWd &watchdog)
+static DiagStats initMotorInterfaces()
 {
   string      strDevSymName(LaeDevMotorCtlrs);    // symbolic name
   string      strDevName;                         // real device names
@@ -144,7 +144,7 @@ static DiagStats initMotorInterfaces(LaeWd &watchdog)
   //
   ++stats.testCnt;
 
-  if( watchdog.cmdEnableMotorCtlrs(true) < 0 )
+  if( WatchDog.cmdEnableMotorCtlrs(true) < 0 )
   {
     printTestResult(FatalTag, "Motor controllers power enable.");
     stats.fatal = true;
@@ -590,7 +590,7 @@ static DiagStats testMotorsState()
   return statsSubTotal;
 }
 
-static DiagStats testMotors(LaeWd &watchdog)
+static DiagStats testMotors()
 {
   // test speed profile
   static s32_t speedProf[] =
@@ -630,7 +630,7 @@ static DiagStats testMotors(LaeWd &watchdog)
     {
       sTag = PassTag;
       ++stats.passCnt;
-      watchdog.cmdResetRgbLed();
+      WatchDog.cmdResetRgbLed();
     }
     printTestResult(sTag, "%s motors stopped.", sCtlrKey);
 
@@ -679,7 +679,7 @@ static DiagStats testMotors(LaeWd &watchdog)
             green = 0;
             blue = (uint_t)(255.0 * wt);
           }
-          watchdog.cmdSetRgbLed(red, green, blue);
+          WatchDog.cmdSetRgbLed(red, green, blue);
 
           usleep(2000);
         }
@@ -744,7 +744,7 @@ static DiagStats testMotors(LaeWd &watchdog)
       {
         sTag = PassTag;
         ++stats.passCnt;
-        watchdog.cmdResetRgbLed();
+        WatchDog.cmdResetRgbLed();
       }
       printTestResult(sTag, "Motor %s stopped.", sMotorKey);
     }
@@ -753,7 +753,7 @@ static DiagStats testMotors(LaeWd &watchdog)
   return stats;
 }
 
-static DiagStats deinitMotorInterfaces(LaeWd &watchdog)
+static DiagStats deinitMotorInterfaces()
 {
   DiagStats   stats;                              // test stats
 
@@ -764,7 +764,7 @@ static DiagStats deinitMotorInterfaces(LaeWd &watchdog)
   //
   ++stats.testCnt;
 
-  if( watchdog.cmdEnableMotorCtlrs(false) < 0 )
+  if( WatchDog.cmdEnableMotorCtlrs(false) < 0 )
   {
     printTestResult(FailTag, "Motor controllers power disable.");
   }
@@ -792,9 +792,8 @@ static DiagStats deinitMotorInterfaces(LaeWd &watchdog)
   return stats;
 }
 
-DiagStats runMotorsDiagnostics(LaeI2C &i2cBus, bool bTestMotion)
+DiagStats runMotorsDiagnostics(bool bTestMotion)
 {
-  LaeWd       watchdog(i2cBus);
   DiagStats   statsTest;
   DiagStats   statsTotal;
 
@@ -807,12 +806,10 @@ DiagStats runMotorsDiagnostics(LaeI2C &i2cBus, bool bTestMotion)
 
   printf("\n\n");
 
-  watchdog.sync();
-
   //
   // Init Tests
   //
-  statsTest = initMotorInterfaces(watchdog);
+  statsTest = initMotorInterfaces();
 
   printSubTotals(statsTest);
 
@@ -849,7 +846,7 @@ DiagStats runMotorsDiagnostics(LaeI2C &i2cBus, bool bTestMotion)
   {
     if( !statsTotal.fatal )
     {
-      statsTest = testMotors(watchdog);
+      statsTest = testMotors();
 
       printSubTotals(statsTest);
 
@@ -860,7 +857,7 @@ DiagStats runMotorsDiagnostics(LaeI2C &i2cBus, bool bTestMotion)
   //
   // Deinit Tests
   //
-  statsTest = deinitMotorInterfaces(watchdog);
+  statsTest = deinitMotorInterfaces();
 
   printSubTotals(statsTest);
 

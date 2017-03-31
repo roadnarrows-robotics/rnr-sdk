@@ -53,7 +53,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <errno.h>
 
 #include <string>
@@ -62,12 +61,13 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 #include "rnr/opts.h"
-#include "rnr/color.h"
 #include "rnr/pkg.h"
 
 // common
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeUtils.h"
+#include "Laelaps/laeDesc.h"
+#include "Laelaps/laeXmlCfg.h"
 
 // hardware
 #include "Laelaps/laeSysDev.h"
@@ -77,6 +77,7 @@
 #include "Laelaps/laeI2CMux.h"
 
 #include "version.h"
+
 #include "laelaps_diag.h"
 
 using namespace std;
@@ -97,19 +98,17 @@ using namespace laelaps;
 #define APP_EC_ARGS     2   ///< command-line options/arguments error exit code
 #define APP_EC_EXEC     4   ///< execution exit code
 
-static char    *Argv0;                    ///< the command
-static bool_t   OptsNoMotion = false;     ///< no motion option
+static char    *Argv0;                ///< the command
+static bool_t   OptsMotion  = false;  ///< motion option
+static bool_t   OptsAnyKey  = false;  ///< user presses anykey to stop option
 
 /*! \brief Available diagnostics. */
 static const char *DiagnosticsAvail[] =
 {
-  "product", "cpu", "motors", "watchdog", "tof", "imu", "cam"
+  "product", "cpu", "motors", "watchdog", "tof", "imu", "cam", "batt"
 };
 
 static vector<string> DiagnosticsToRun;    ///< diagnostics to run
-
-static LaeI2C     I2CBus;
-static LaeI2CMux  I2CMux(I2CBus);
 
 /*!
  * \brief Program information.
@@ -128,6 +127,7 @@ static OptsPgmInfo_T PgmInfo =
   "\n\n"
   "DIAG: Diagnostic to run. One of:\n"
   "  all       - Run all dignostics.\n"
+  "  batt      - Run battery dignostics.\n"
   "  cam       - Run camera diagnotics.\n"
   "  cpu       - Run main CPU diagnotics.\n"
   "  imu       - Run Inertia Measurement Unit diagnostics.\n"
@@ -146,71 +146,81 @@ static OptsPgmInfo_T PgmInfo =
  */
 static OptsInfo_T OptsInfo[] =
 {
-  // --no-motion
+  // --motion
   {
-    "no-motion",          // long_opt
+    "motion",             // long_opt
     OPTS_NO_SHORT,        // short_opt
     no_argument,          // has_arg
     true,                 // has_default
-    &OptsNoMotion,        // opt_addr
+    &OptsMotion,          // opt_addr
     OptsCvtArgBool,       // fn_cvt
     OptsFmtBool,          // fn_fmt
     NULL,                 // arg_name
                           // opt desc
-    "Do not run diagnositcs that causes the Laelaps to move."
+    "Run diagnositcs that causes the Laelaps to move."
+  },
+
+  // --anykey
+  {
+    "prompt",             // long_opt
+    OPTS_NO_SHORT,        // short_opt
+    no_argument,          // has_arg
+    true,                 // has_default
+    &OptsAnyKey,          // opt_addr
+    OptsCvtArgBool,       // fn_cvt
+    OptsFmtBool,          // fn_fmt
+    NULL,                 // arg_name
+                          // opt desc
+    "For each diagnositc, the user presses any keyboard key to progress to"
+    " the next diagnostic."
   },
 
 
   {NULL, }
 };
 
-#define COLOR_PASS  ANSI_CSI ANSI_SGR_FG_COLOR_GREEN 
-#define COLOR_WARN  ANSI_CSI ANSI_SGR_FG_COLOR_YELLOW 
-#define COLOR_FAIL  ANSI_CSI ANSI_SGR_FG_COLOR_RED 
-#define COLOR_YN    ANSI_CSI ANSI_SGR_FG_COLOR_BLUE 
-#define COLOR_FATAL ANSI_CSI ANSI_SGR_FG_COLOR_LIGHT_RED 
-#define COLOR_OFF   ANSI_COLOR_RESET
 
-static void setTags(bool bColor)
+static DiagStats prelims()
 {
-  if( bColor )
+  bool        bUsesI2C = false;
+  bool        bUsesWd  = false;
+  DiagStats   statsTotal;
+  LaeXmlCfg   xml;
+
+  printHdr("Diagnostic Prelims");
+
+  //
+  // Get robot description (and version)
+  //
+  if( xml.load(RobotDesc, LaeSysCfgPath, LaeEtcCfg) < 0 )
   {
-    sprintf(PassTag,  "[" COLOR_PASS "PASS" COLOR_OFF "] ");
-    sprintf(WarnTag,  "[" COLOR_WARN "WARN" COLOR_OFF "] ");
-    sprintf(FailTag,  "[" COLOR_FAIL "FAIL" COLOR_OFF "] ");
-    sprintf(WaitTag,  "       ");
-    sprintf(YNTag,    "[" COLOR_YN "y/n" COLOR_OFF "]  ");
-    sprintf(FatalTag, "[" COLOR_FATAL "FATAL" COLOR_OFF"] ");
+    printTestResult(FatalTag, "Loading XML file '%s' failed.", LaeEtcCfg);
+    statsTotal.fatal = true;
+    return statsTotal;
   }
   else
   {
-    sprintf(PassTag,  "[PASS] ");
-    sprintf(WarnTag,  "[WARN] ");
-    sprintf(FailTag,  "[FAIL] ");
-    sprintf(WaitTag,  "       ");
-    sprintf(YNTag,    "[y/n]  ");
-    sprintf(FatalTag, "[FATAL]");
+    RobotDesc.markAsDescribed();
+    printTestResult(PassTag, "Robot v%s description from '%s' loaded.\n",
+        RobotDesc.getProdHwVerString().c_str(), LaeEtcCfg);
+    ++statsTotal.passCnt;
   }
-}
-
-static void prelims()
-{
-  bool        bUsesI2C = false;
-  DiagStats   statsTotal;
-
-  printHdr("Diagnostic Prelims");
 
   //
   // Laelaps diagnostics that use the shared I2C bus.
   //
   for(size_t i = 0; i < DiagnosticsToRun.size(); ++i)
   {
-    if( (DiagnosticsToRun[i] == "tof") ||
-        (DiagnosticsToRun[i] == "watchdog") ||
-        (DiagnosticsToRun[i] == "motors") )
+    if( (DiagnosticsToRun[i] == "watchdog") ||
+        (DiagnosticsToRun[i] == "motors") ||
+        (DiagnosticsToRun[i] == "batt") )
     {
-      bUsesI2C = true;
-      break;
+      bUsesI2C  = true;
+      bUsesWd   = true;
+    }
+    else if( (DiagnosticsToRun[i] == "tof") )
+    {
+      bUsesI2C  = true;
     }
   }
 
@@ -229,12 +239,32 @@ static void prelims()
     }
   }
 
+  if( bUsesWd )
+  {
+    uint_t  uFwVer;
+
+    ++statsTotal.testCnt;
+    if( WatchDog.cmdGetFwVersion(uFwVer) < 0 )
+    {
+      printTestResult(FailTag, "WatchDog: Failed to get firmware version.");
+    }
+    else
+    {
+      WatchDog.sync();
+      printTestResult(PassTag, "Connected to WatchDog sub-processor, fwver=%u.",
+          uFwVer);
+      ++statsTotal.passCnt;
+    }
+  }
+
   ++statsTotal.testCnt;
   printTestResult(PassTag, "Preliminaries completed.");
   ++statsTotal.passCnt;
 
   printf("\n");
   printTotals(statsTotal);
+
+  return statsTotal;
 }
 
 /*!
@@ -311,14 +341,13 @@ static void mainInit(int argc, char *argv[])
 // Public Interface
 //------------------------------------------------------------------------------
 
-const int MaxTagSize = 32;
-
-char PassTag[MaxTagSize];
-char WarnTag[MaxTagSize];
-char FailTag[MaxTagSize];
-char WaitTag[MaxTagSize];
-char YNTag[MaxTagSize];
-char FatalTag[MaxTagSize];
+//
+// Shared interfaces used by diagnostics 
+//
+LaeDesc   RobotDesc;
+LaeI2C    I2CBus;
+LaeI2CMux I2CMux(I2CBus);
+LaeWd     WatchDog(I2CBus);
 
 /*!
  * \brief Main.
@@ -337,10 +366,15 @@ int main(int argc, char* argv[])
 
   setTags(LOG_IN_COLOR());
 
-  prelims();
+  statsGrandTotal = prelims();
 
   for(size_t i = 0; i < DiagnosticsToRun.size(); ++i)
   {
+    if( statsGrandTotal.fatal )
+    {
+      break;
+    }
+
     strDiag = DiagnosticsToRun[i];
 
     if( strDiag == "product" )
@@ -353,7 +387,7 @@ int main(int argc, char* argv[])
     }
     else if( strDiag == "motors" )
     {
-      statsGrandTotal += runMotorsDiagnostics(I2CBus, OptsNoMotion==false);
+      statsGrandTotal += runMotorsDiagnostics(OptsMotion);
     }
     else if( strDiag == "cam" )
     {
@@ -361,7 +395,7 @@ int main(int argc, char* argv[])
     }
     else if( strDiag == "tof" )
     {
-      statsGrandTotal += runToFDiagnostics(I2CMux);
+      statsGrandTotal += runToFDiagnostics();
     }
     else if( strDiag == "imu" )
     {
@@ -369,59 +403,17 @@ int main(int argc, char* argv[])
     }
     else if( strDiag == "watchdog" )
     {
-      statsGrandTotal += runWatchDogDiagnostics(I2CBus);
+      statsGrandTotal += runWatchDogDiagnostics();
+    }
+    else if( strDiag == "batt" )
+    {
+      statsGrandTotal += runBatteryDiagnostics(OptsAnyKey);
     }
   }
 
   printGrandTotals(statsGrandTotal);
 
   return APP_EC_OK;
-}
-
-void printHdr(string strDiag)
-{
-  printf("%s\n", DiagSep);
-  printf("%s\n", strDiag.c_str());
-  printf("%s\n\n", DiagSep);
-}
-
-void printSubHdr(string strName)
-{
-  //printf("%s\n", SubHdrSep);
-  printf("+ + %s + +\n", strName.c_str());
-}
-
-void printTestResult(const char *sTag, const char *sFmt, ...)
-{
-  va_list ap;
-
-  va_start(ap, sFmt);
-  printf("%s ", sTag);
-  vprintf(sFmt, ap);
-  printf("\n");
-  va_end(ap);
-  fflush(stdout);
-}
-
-void printSubTotals(DiagStats &stats)
-{
-  printf("%s %d/%d passed.\n\n", SubSumTag, stats.passCnt, stats.testCnt);
-}
-
-void printTotals(DiagStats &stats)
-{
-  printf("%s %d/%d diagnostics passed.\n\n",
-      TotSumTag, stats.passCnt, stats.testCnt);
-}
-
-void printGrandTotals(DiagStats &stats)
-{
-  printf("%s\n", DiagSep);
-  printf("%s\n", DiagSep);
-  printf("Gran Total: %d/%d diagnostics passed.\n",
-      stats.passCnt, stats.testCnt);
-  printf("%s\n", DiagSep);
-  printf("%s\n", DiagSep);
 }
 
 /*!

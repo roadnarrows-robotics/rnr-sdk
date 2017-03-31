@@ -111,7 +111,7 @@ static LaelapsToFInfo ToFInfo[ToFSensorMaxNumOf] =
 
 static vector<LaeVL6180Mux*>  ToFSensors;
 
-static DiagStats initSensors(LaeI2CMux &i2cMux)
+static DiagStats initSensors()
 {
   size_t      i;
   DiagStats   stats;
@@ -122,10 +122,10 @@ static DiagStats initSensors(LaeI2CMux &i2cMux)
   // Requirements
   //
   stats.testCnt += 1;
-  if( i2cMux.isOpen() )
+  if( I2CMux.isOpen() )
   {
     printTestResult(PassTag, "Communication interface %s is open.",
-        i2cMux.getDevName().c_str());
+        I2CMux.getDevName().c_str());
     stats.passCnt += 1;
   }
   else
@@ -141,7 +141,7 @@ static DiagStats initSensors(LaeI2CMux &i2cMux)
   //
   for(i=0; i<arraysize(ToFInfo); ++i)
   {
-    ToFSensors.push_back(new LaeVL6180Mux(i2cMux,
+    ToFSensors.push_back(new LaeVL6180Mux(I2CMux,
                                   ToFInfo[i].m_nChan,
                                   ToFInfo[i].m_fDir,
                                   0.0, 
@@ -407,7 +407,7 @@ static DiagStats measure()
   return stats;
 }
 
-DiagStats runToFDiagnostics(LaeI2CMux &i2cMux)
+DiagStats runToFDiagnostics()
 {
   DiagStats   statsTest;
   DiagStats   statsTotal;
@@ -417,7 +417,7 @@ DiagStats runToFDiagnostics(LaeI2CMux &i2cMux)
   //
   // Init Tests
   //
-  statsTest = initSensors(i2cMux);
+  statsTest = initSensors();
 
   printSubTotals(statsTest);
 

@@ -349,6 +349,40 @@ namespace laelaps
      */
     static int enableMotorCtlrs(void *pArg, bool bEnable);
 
+    //..........................................................................
+    // WatchDog Attribute Methods
+    //..........................................................................
+
+    /*!
+     * \brief Get watchdog's \h_i2c address.
+     *
+     * \return 7-bit address.
+     */
+    uint_t getI2CAddr()
+    {
+      return m_addrSubProc;
+    }
+
+    /*!
+     * \brief Get previously read firmware version.
+     *
+     * \return Firmware version number.
+     */
+    uint_t getFwVersion()
+    {
+      return m_uFwVer;
+    }
+
+    /*!
+     * \brief Test if battery is charging.
+     *
+     * \return Returns true or false.
+     */
+    bool isCharging()
+    {
+      return m_bBatteryIsCharging;
+    }
+
   protected:
     // hardware
     LaeI2C   &m_i2cBus;       ///< bound \h_i2c bus instance
