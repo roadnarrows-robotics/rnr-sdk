@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-01 15:14:45 -0700 (Mon, 01 Feb 2016) $
- * $Rev: 4289 $
- *
  * \brief Perform Laelaps hardware and software interface diagnostics.
  *
  * This C++ version uses the liblaelaps library, so both it and the hardware
@@ -188,6 +185,8 @@ static DiagStats prelims()
   LaeXmlCfg   xml;
 
   printHdr("Diagnostic Prelims");
+
+  ++statsTotal.testCnt;
 
   //
   // Get robot description (and version)

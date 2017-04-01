@@ -87,33 +87,38 @@ static const char *TotSumTag = "...";
 
 static int getch()
 {
-  struct termios old = {0};
+  static bool   bSetup = false;
+  static struct termios orig, nb;
+
   char           c = 0;
 
-  if( tcgetattr(0, &old) < 0 )
+  if( !bSetup )
   {
-    return EOF;
+    if( tcgetattr(0, &orig) < 0 )
+    {
+      return EOF;
+    }
+
+    nb = orig;
+    nb.c_lflag &= ~ICANON;
+    nb.c_lflag &= ~ECHO;
+    nb.c_cc[VMIN] = 0;
+    nb.c_cc[VTIME] = 0;
+
+    bSetup = true;
   }
 
-  old.c_lflag &= ~ICANON;
-  old.c_lflag &= ~ECHO;
-  old.c_cc[VMIN] = 1;
-  old.c_cc[VTIME] = 0;
-
-  if( tcsetattr(0, TCSANOW, &old) < 0 )
+  if( tcsetattr(0, TCSANOW, &nb) < 0 )
   {
-    return EOF;
+    c = EOF;
   }
 
-  if( read(0, &c, 1) < 0 )
+  else if( read(0, &c, 1) < 0 )
   {
-    return EOF;
+    c = EOF;
   }
 
-  old.c_lflag |= ICANON;
-  old.c_lflag |= ECHO;
-
-  if( tcsetattr(0, TCSADRAIN, &old) < 0 )
+  if( tcsetattr(0, TCSANOW, &orig) < 0 )
   {
   }
 
@@ -131,6 +136,11 @@ int kbhit()
   while( (c = getch()) == 0 );
 
   return c;
+}
+
+int kbcheck()
+{
+  return getch();
 }
 
 //

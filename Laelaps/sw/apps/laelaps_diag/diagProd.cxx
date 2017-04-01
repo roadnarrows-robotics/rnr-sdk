@@ -204,7 +204,7 @@ static DiagStats readProdEnv()
       ++stats.passCnt;
       sTag = PassTag;
     }
-    printTestResult(sTag, "%s: %s.", SubSysName, EnvName[i]);
+    printTestResult(sTag, "%s: getenv(%s).", SubSysName, EnvName[i]);
   }
 
   return stats;

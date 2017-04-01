@@ -244,7 +244,7 @@ static DiagStats initMotorInterfaces()
   MotorCtlr[nCtlr]->setMotorDir(LaeMotorLeft, LaeMotorDirNormal);
   MotorCtlr[nCtlr]->setMotorDir(LaeMotorRight, LaeMotorDirNormal);
   printTestResult(PassTag,
-      "%s: Created %s motor controller interface, address=0x%02x.",
+      "%s: Created %s motor controller interface.\n  address=0x%02x.",
       SubSysName, LaeKeyFront, LaeMotorCtlrAddrFront);
   ++stats.passCnt;
 
@@ -268,8 +268,6 @@ static DiagStats initMotorInterfaces()
 
 static DiagStats testBatteryState(int cnt)
 {
-  static  bool  labelfields = true;
-
   int       nCtlr;
   double    voltMotBatt[LaeNumMotorCtlrs];
   double    voltWdJack;
@@ -335,15 +333,16 @@ static DiagStats testBatteryState(int cnt)
 
   if( showLabel )
   {
-    printf("%8s%13s%17s\n", "", "motor-ctlrs", "watchdog    \n");
+    printf("%8s%13s%17s\n", "", "motor-ctlrs", "watchdog   ");
     printf("%8s%6s %6s %6s chg %6s\n", "",
-        LaeKeyFront, LaeKeyRear, "batt", "jack\n");
+        LaeKeyFront, LaeKeyRear, "batt", "jack");
   }
 
   printf("%6d. %5.1lfV %5.1lfV %5.1lfV %s %5.1lfV\r",
       cnt,
       voltMotBatt[0], voltMotBatt[1], voltWdBatt,
       (isCharging? "yes": " no"), voltWdJack);
+  fflush(stdout);
 
   return stats;
 }
@@ -410,9 +409,8 @@ DiagStats runBatteryDiagnostics(bool bAnyKey)
 
   statsTotal += statsTest;
 
-  bQuit = statsTotal.fatal;
   statsTest.zero();
-
+  bQuit = statsTotal.fatal;
   cnt = 0;
 
   printSubHdr("Battery Voltages");
@@ -424,14 +422,17 @@ DiagStats runBatteryDiagnostics(bool bAnyKey)
   {
     statsTest += testBatteryState(cnt++);
 
-    if( !bAnyKey || kbhit() || statsTest.fatal )
+    if( !bAnyKey || kbcheck() || statsTest.fatal )
     {
       printf("\n");
       printSubTotals(statsTest);
       bQuit = true;
     }
 
-    usleep(500000);
+    if( !bQuit )
+    {
+      usleep(500000);
+    }
   }
 
   statsTotal += statsTest;

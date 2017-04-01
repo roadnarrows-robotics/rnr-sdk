@@ -216,5 +216,7 @@ extern void printGrandTotals(DiagStats &stats);
 
 extern int kbhit();
 
+extern int kbcheck();
+
 #endif // _LAELAPS_DIAG_H
 
