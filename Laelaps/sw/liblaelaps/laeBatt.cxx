@@ -273,20 +273,29 @@ void LaeBattery::calcMotorEnergyState()
   m_fMotorWatts     = 0.0;
 
   //
-  // Batteries and motors
+  // Motor controllers have the best voltage sense accuracy. Use if possible.
   //
-  for(nCtlr=0; nCtlr<LaeNumMotorCtlrs; ++nCtlr)
+  if( RtDb.m_gpio.m_bMotorCtlrEn )
   {
-    fVolts = RtDb.m_motorctlr[nCtlr].m_fBatteryVoltage;
-    for(nMotor=0; nMotor<LaeNumMotorsPerCtlr; ++nMotor)
+    //
+    // Batteries and motors
+    //
+    for(nCtlr=0; nCtlr<LaeNumMotorCtlrs; ++nCtlr)
     {
-      fAmps   = RtDb.m_motorctlr[nCtlr].m_fMotorCurrent[nMotor];
-      fWatts  = fAmps * fVolts;
+      fVolts = RtDb.m_motorctlr[nCtlr].m_fBatteryVoltage;
+      for(nMotor=0; nMotor<LaeNumMotorsPerCtlr; ++nMotor)
+      {
+        fAmps   = RtDb.m_motorctlr[nCtlr].m_fMotorCurrent[nMotor];
+        fWatts  = fAmps * fVolts;
 
-      m_fMotorAmps  += fAmps;
-      m_fMotorWatts += fWatts;
+        m_fMotorAmps  += fAmps;
+        m_fMotorWatts += fWatts;
+      }
+      m_fBatteryVoltage += fVolts;
     }
-    m_fBatteryVoltage += fVolts;
+
+    // average
+    m_fBatteryVoltage /= (double)LaeNumMotorCtlrs;
   }
 
   //
@@ -295,15 +304,13 @@ void LaeBattery::calcMotorEnergyState()
   // to the WatchDog processor. This change was needed because the motor
   // controllers' power enable line can be disabled independent of battery
   // state.
+  //
+  // However, voltage sense is less accurate. Use only if motor controllers'
+  // power is disablbed.
   // 
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  else if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
   {
     m_fBatteryVoltage = RtDb.m_energy.m_fBatteryVoltage;
-  }
-  else
-  {
-    // average
-    m_fBatteryVoltage /= (double)LaeNumMotorCtlrs;
   }
 }
 

@@ -106,13 +106,20 @@ const int PIN_A_USER_MAX  = A3;   ///< maximum user available pin number
 // Through experimentation, the op-amp version of the deckboard input voltage
 // biases and trims are part-to-part stable.
 //
+// Specific Robots:
+// ----------------
+// For Rosa's Laelaps (S/N 170311), the battery voltage read between -1.0 to
+// -1.2 from the actual voltage.The jack voltage, ranged from 11 - 13.5. 
+//  JACK_V_MIN  = 11.0
+//  BATT_V_BIAS =  1.1
+//
 const int   PIN_A_JACK_V  = A0;       ///< jack voltage into battery charging
 const int   PIN_A_BATT_V  = A1;       ///< battery output voltage
 const float ADC_V_PER_BIT = 0.01955;  ///< v/bit = 0.0V - 20.0V in 1023 values
-const float JACK_V_MIN    = 13.0;     ///< required minimum voltage to charge
+const float JACK_V_MIN    = 11.0;     ///< required minimum voltage to charge
 const float JACK_V_BIAS   = 0.0;      ///< jack volt bias
 const float JACK_V_MULT   = 1.0;      ///< jack volt multiplier
-const float BATT_V_BIAS   = 0.0;      ///< battery volt bias
+const float BATT_V_BIAS   = 1.1;      ///< battery volt bias
 const float BATT_V_MULT   = 1.0;      ///< battery volt multiplier
 
 #if 0 // DEPRECATED
@@ -697,7 +704,7 @@ void readVoltages()
 
   // read jack voltage input to battery charging circuitry
   sensorval = analogRead(PIN_A_JACK_V);
-  CurJackV  = ((float)sensorval * ADC_V_PER_BIT - JACK_V_BIAS) * JACK_V_MULT;
+  CurJackV  = ((float)sensorval * ADC_V_PER_BIT + JACK_V_BIAS) * JACK_V_MULT;
 
   if( CurJackV >= JACK_V_MIN )
   {
@@ -710,7 +717,7 @@ void readVoltages()
 
   // read battery output voltage
   sensorval = analogRead(PIN_A_BATT_V);
-  CurBattV  = ((float)sensorval * ADC_V_PER_BIT - BATT_V_BIAS) * BATT_V_MULT;
+  CurBattV  = ((float)sensorval * ADC_V_PER_BIT + BATT_V_BIAS) * BATT_V_MULT;
 }
 
 
@@ -1318,7 +1325,7 @@ boolean i2cExecConfigFw()
     {
       CurTimeout = LaeWdTimeoutMin;
     }
-    else if( CurTimeout > LaeWdTimeoutMin )
+    else if( CurTimeout > LaeWdTimeoutMax )
     {
       CurTimeout = LaeWdTimeoutMax;
     }
