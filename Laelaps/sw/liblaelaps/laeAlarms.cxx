@@ -108,6 +108,7 @@ void LaeAlarms::update()
   LaeAlarmInfo  subsys;             // subsystem alarms
   LaeAlarmInfo  mot1;               // motor 1 subsystem alarms
   LaeAlarmInfo  mot2;               // motor 2 subsystem alarms
+  LaeAlarmInfo  sensors;            // sensors subsytem alarms
   u32_t         uStatus;            // subsystem status
   int           nCtlr;              // motor controller index
   int           nMotor1, nMotor2;   // motors 1 and 2 absolute indices
@@ -238,6 +239,30 @@ void LaeAlarms::update()
   updateSysAlarms(subsys, sys);
 
   //
+  // Determine senors alarm state 
+  //
+  clearAlarms(subsys);
+
+  if( !RtDb.m_enable.m_bImu )
+  {
+    subsys.m_uAlarms |= LAE_ALARM_IMU;
+  }
+  if( !RtDb.m_enable.m_bRange )
+  {
+    subsys.m_uAlarms |= LAE_ALARM_RANGE;
+  }
+  if( !RtDb.m_enable.m_bFCam )
+  {
+    subsys.m_uAlarms |= LAE_ALARM_FCAM;
+  }
+
+  // copy to database
+  copyAlarms(subsys, RtDb.m_alarms.m_sensors);
+
+  // update system alarms from subsystem state
+  updateSysAlarms(subsys, sys);
+
+  //
   // Other system alarms.
   //
   if( RtDb.m_robotstatus.m_bIsEStopped )
@@ -256,11 +281,17 @@ void LaeAlarms::update()
 
 void LaeAlarms::updateSysAlarms(const LaeAlarmInfo &subsys, LaeAlarmInfo &sys)
 {
+  //
+  // Any critically alarms subsystem propagates up to the system level.
+  //
   if( subsys.m_bIsCritical )
   {
     sys.m_bIsCritical = true;
   }
 
+  //
+  // Subsytems alarms that propagate up to the system level.
+  //
   if( subsys.m_uAlarms & LAE_ALARM_TEMP )
   {
     sys.m_uAlarms |= LAE_ALARM_TEMP;
@@ -269,12 +300,30 @@ void LaeAlarms::updateSysAlarms(const LaeAlarmInfo &subsys, LaeAlarmInfo &sys)
   {
     sys.m_uAlarms |= LAE_ALARM_BATT;
   }
+  if( subsys.m_uAlarms & LAE_ALARM_IMU )
+  {
+    sys.m_uAlarms |= LAE_ALARM_IMU;
+  }
+  if( subsys.m_uAlarms & LAE_ALARM_RANGE )
+  {
+    sys.m_uAlarms |= LAE_ALARM_RANGE;
+  }
+  if( subsys.m_uAlarms & LAE_ALARM_FCAM )
+  {
+    sys.m_uAlarms |= LAE_ALARM_FCAM;
+  }
 
+  //
+  // Subsystem is [not] alarmed.
+  //
   if( subsys.m_uAlarms != LAE_ALARM_NONE )
   {
     sys.m_uAlarms |= LAE_ALARM_SUBSYS;
   }
 
+  //
+  // Subsytems warnings that propagate up to the system level.
+  //
   if( subsys.m_uWarnings & LAE_WARN_TEMP )
   {
     sys.m_uWarnings |= LAE_WARN_TEMP;

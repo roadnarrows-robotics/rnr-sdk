@@ -1223,16 +1223,28 @@ namespace sensor
        *
        * \param i2cBus  I2C interface.
        */
-      LaeRangeSensorGroup(laelaps::LaeI2C &i2cBus) :
-        m_interface_2_0(i2cBus), m_interface_2_1(i2cBus)
-      {
-      }
+      LaeRangeSensorGroup(laelaps::LaeI2C &i2cBus);
 
       /*!
        * \brief Destructor.
        */
-      ~LaeRangeSensorGroup()
+      ~LaeRangeSensorGroup();
+
+      /*!
+       * \brief Black list range sensor group from robot sensors.
+       *
+       * \return Returns true or false.
+       */
+      virtual void blacklist();
+
+      /*!
+       * \brief Test if range sensor group is black listed.
+       *
+       * \return Returns true or false.
+       */
+      virtual bool isBlackListed()
       {
+        return m_bBlackListed;
       }
 
       /*!
@@ -1350,6 +1362,9 @@ namespace sensor
        * LaeThreadRange thread instance.
        */
       virtual void exec();
+
+    protected:
+      bool      m_bBlackListed; ///< range sensor group is [not] black listed.
 
     }; // class LaeRangeSensorGroup
 

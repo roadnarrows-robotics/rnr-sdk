@@ -72,7 +72,7 @@ LaeDb  laelaps::RtDb =
 {
   // header
   {0, },                  // signature (keep first)
-  LAE_VERSION(1, 1, 0),   // db version
+  LAE_VERSION(1, 2, 0),   // db version
 
   // product
   {
@@ -106,11 +106,14 @@ LaeDb  laelaps::RtDb =
     0.0                   // average interior temperature (C)
   },
 
-  // gpio
+  // enables
   {
     false,        // motor controllers enable
     false,        // battery aux. port enable
-    false         // 5V aux. port enable
+    false,        // 5V aux. port enable
+    false,        // Range sensors enable
+    false,        // IMU sensor enable
+    true          // front camera enable
   },
 
   // motor controllers 
@@ -168,9 +171,12 @@ LaeDb  laelaps::RtDb =
     {false, LAE_ALARM_NONE, LAE_WARN_NONE},
 
     // motor controller alarms
-    { {false, LAE_ALARM_NONE, LAE_WARN_NONE}, },
+    {false, LAE_ALARM_NONE, LAE_WARN_NONE},
 
     // motor alarms
-    { {false, LAE_ALARM_NONE, LAE_WARN_NONE}, }
+    {false, LAE_ALARM_NONE, LAE_WARN_NONE},
+
+    // sensor alarms
+    {false, LAE_ALARM_NONE, LAE_WARN_NONE}
   }
 };

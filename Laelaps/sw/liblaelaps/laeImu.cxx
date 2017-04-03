@@ -126,7 +126,8 @@ void Quaternion::convert(double phi, double theta, double psi)
  
 LaeImu::LaeImu(string strIdent) : m_strIdent(strIdent)
 {
-  m_fd = -1;
+  m_fd           = -1;
+  m_bBlackListed = false;
 
   zeroData();
 
@@ -162,8 +163,11 @@ int LaeImu::open(const string &strDevName, int nBaudRate)
 
   else
   {
-    m_strDevName  = strDevNameReal;
-    m_nBaudRate   = nBaudRate;
+    m_strDevName    = strDevNameReal;
+    m_nBaudRate     = nBaudRate;
+    m_bBlackListed  = false;
+
+    RtDb.m_enable.m_bImu = true;
 
     zeroData();
 
@@ -196,6 +200,18 @@ int LaeImu::close()
   unlockIo();
 
   return LAE_OK;
+}
+
+void LaeImu::blacklist()
+{
+  if( isOpen() )
+  {
+    close();
+  }
+
+  m_bBlackListed = true;
+
+  RtDb.m_enable.m_bImu = false;
 }
 
 int LaeImu::configure(const LaeDesc &desc)
@@ -337,7 +353,12 @@ int LaeImuCleanFlight::readIdentity(string &strIdent)
   MspIdent  ident;
   int       rc;
 
-  if( (rc = mspReadIdent(ident)) == LAE_OK )
+  if( isBlackListed() )
+  {
+    rc = LAE_OK; 
+  }
+
+  else if( (rc = mspReadIdent(ident)) == LAE_OK )
   {
     stringstream  ss;
 
@@ -355,7 +376,12 @@ int LaeImuCleanFlight::readRawImu()
 {
   int   rc;
 
-  if( (rc = mspReadRawImu()) == LAE_OK )
+  if( isBlackListed() )
+  {
+    rc = LAE_OK; 
+  }
+
+  else if( (rc = mspReadRawImu()) == LAE_OK )
   {
     rc = mspReadAttitude();
   }
@@ -365,12 +391,36 @@ int LaeImuCleanFlight::readRawImu()
 
 int LaeImuCleanFlight::readRawInertia()
 {
-  return mspReadRawImu();
+  int   rc;
+
+  if( isBlackListed() )
+  {
+    rc = LAE_OK; 
+  }
+
+  else
+  {
+    rc = mspReadRawImu();
+  }
+
+  return rc;
 }
 
 int LaeImuCleanFlight::readRawRollPitchYaw()
 {
-  return mspReadAttitude();
+  int   rc;
+
+  if( isBlackListed() )
+  {
+    rc = LAE_OK; 
+  }
+
+  else
+  {
+    rc = mspReadAttitude();
+  }
+
+  return rc;
 }
 
 int LaeImuCleanFlight::convertRawToSI()

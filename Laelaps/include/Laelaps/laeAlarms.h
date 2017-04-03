@@ -101,6 +101,13 @@ namespace laelaps
   static const u32_t LAE_ALARM_MOT_FAULT    = 0x00002000;
                                 ///< motor drive fault alarm
 
+  //
+  // Sensor specific alarms.
+  //
+  static const u32_t LAE_ALARM_IMU    = 0x00010000; ///< imu alarm
+  static const u32_t LAE_ALARM_RANGE  = 0x00020000; ///< range alarm
+  static const u32_t LAE_ALARM_FCAM   = 0x00040000; ///< front camera alarm
+
   /*!
    * \brief The [sub]sytem warnings.
    */

@@ -1548,7 +1548,7 @@ void LaeKinematics::exec()
   // The motor controllers should be enabled, but the watchdog thread has
   // detected that they are not. This should not happen, so re-enable.
   //
-  if( m_bIsEnabled && !RtDb.m_gpio.m_bMotorCtlrEn )
+  if( m_bIsEnabled && !RtDb.m_enable.m_bMotorCtlr )
   {
     LOGERROR("Motor controllers have been unexpectedly disaabled. Re-enable.");
     unlock();

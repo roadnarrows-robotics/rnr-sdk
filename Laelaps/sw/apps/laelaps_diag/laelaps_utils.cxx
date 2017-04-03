@@ -43,8 +43,11 @@
  */
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <sys/types.h>
 #include <unistd.h>
 #include <termios.h>
+#include <limits.h>
+#include <dirent.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
@@ -129,7 +132,57 @@ static int getch()
 // Public Interface
 //------------------------------------------------------------------------------
 
-int kbhit()
+long findProc(const string &strName)
+{
+  DIR           *dir;
+  struct dirent *ent;
+  char          *endptr;
+  char           buf[PATH_MAX];
+
+  if( !(dir = opendir("/proc")) )
+  {
+    return -1;
+  }
+
+  while( (ent = readdir(dir)) != NULL )
+  {
+    // if endptr is not a null character, the directory is not
+    // entirely numeric, so ignore it
+    long lpid = strtol(ent->d_name, &endptr, 10);
+
+    if( *endptr != '\0' )
+    {
+      continue;
+    }
+
+    // try to open the cmdline file
+    snprintf(buf, sizeof(buf), "/proc/%ld/cmdline", lpid);
+
+    FILE *fp = fopen(buf, "r");
+
+    if( fp != NULL )
+    {
+      if( fgets(buf, sizeof(buf), fp) != NULL )
+      {
+        // check the first token in the file, the program name
+        string strCmd(strtok(buf, " "));
+
+        if( strCmd.find(strName) != string::npos )
+        {
+          fclose(fp);
+          closedir(dir);
+          return lpid;
+        }
+      }
+      fclose(fp);
+    }
+  }
+
+  closedir(dir);
+  return -1;
+}
+
+int kbblock()
 {
   int   c;
 
@@ -138,7 +191,7 @@ int kbhit()
   return c;
 }
 
-int kbcheck()
+int kbhit()
 {
   return getch();
 }

@@ -6,9 +6,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-09 15:08:50 -0700 (Tue, 09 Feb 2016) $
- * $Rev: 4308 $
- *
  * \brief Laelaps built-in Inertial Measurement Unit class interface.
  *
  * The current Laelaps uses the open-source CleanFlight firmware loaded
@@ -215,6 +212,23 @@ namespace sensor
       virtual bool isOpen()
       {
         return m_fd >= 0? true: false;
+      }
+
+      /*!
+       * \brief Black list IMU from robot sensors.
+       *
+       * \return Returns true or false.
+       */
+      virtual void blacklist();
+
+      /*!
+       * \brief Test if IMU is black listed.
+       *
+       * \return Returns true or false.
+       */
+      virtual bool isBlackListed()
+      {
+        return m_bBlackListed;
       }
 
       /*!
@@ -465,6 +479,7 @@ namespace sensor
       std::string   m_strDevName;   ///< serial device name
       int           m_nBaudRate;    ///< device baudrate
       int           m_fd;           ///< opened device file descriptor
+      bool          m_bBlackListed; ///< IMU is [not] black listed.
 
       //
       // Raw sensor values.

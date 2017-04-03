@@ -275,7 +275,7 @@ void LaeBattery::calcMotorEnergyState()
   //
   // Motor controllers have the best voltage sense accuracy. Use if possible.
   //
-  if( RtDb.m_gpio.m_bMotorCtlrEn )
+  if( RtDb.m_enable.m_bMotorCtlr )
   {
     //
     // Batteries and motors

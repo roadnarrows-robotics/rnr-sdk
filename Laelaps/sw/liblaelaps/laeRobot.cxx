@@ -865,8 +865,8 @@ void LaeRobot::syncDb()
 int LaeRobot::connSensors()
 {
   string  strIdent;
-  int     rc;
   uint_t  uVerMajor, uVerMinor, uFwVer;
+  int     rc;
 
   //
   // Connect to the CleanFlight Intertial Measrurement Unit.
@@ -874,25 +874,33 @@ int LaeRobot::connSensors()
   if( (rc = m_imu.open(LaeDevIMU, LaeBaudRateIMU)) < 0 )
   {
     LOGERROR("%s: Failed to open IMU at %d baud.", LaeDevIMU, LaeBaudRateIMU);
-    return rc;
   }
 
   else if( (rc = m_imu.readIdentity(strIdent)) < 0 )
   {
     LOGERROR("%s: Failed to read IMU identity.", LaeDevIMU);
-    return rc;
   }
 
-  else
+  if( rc == LAE_OK )
   {
     LOGDIAG2("Connected to IMU %s.", strIdent.c_str());
   }
+  else
+  {
+    LOGERROR("IMU is blacklisted from the suite of robot sensors.");
+    m_imu.blacklist();
+    rc = LAE_OK;
+  }
 
+  m_range.blacklist(); // RDK
 #if 0 // RDK
+
   if( (rc = m_range.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer)) < 0 )
   {
     LOGERROR("Failed to read range sensor group interface version.");
-    return rc;
+    LOGERROR("Range sensors are blacklisted from the suite of robot sensors.");
+    m_range.blacklist();
+    rc = LAE_OK;
   }
   else
   {

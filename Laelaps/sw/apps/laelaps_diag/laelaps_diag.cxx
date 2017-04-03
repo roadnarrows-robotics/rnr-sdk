@@ -188,6 +188,25 @@ static DiagStats prelims()
 
   ++statsTotal.testCnt;
 
+  if( findProc("laelaps_control/laelaps_control") > 1 )
+  {
+    printTestResult(FatalTag,
+        "The laelaps_control ROS node cannot be running. "
+        "Stop with either:\n"
+        " - 'laelaps_init' GUI\n"
+        " - 'sudo laelaps_service stop' utility\n"
+        " - 'sudo service laelaps_control stop' system init script.");
+    statsTotal.fatal = true;
+    return statsTotal;
+  }
+  else
+  {
+    printTestResult(PassTag, "The laelaps_control ROS node is not running.");
+    ++statsTotal.passCnt;
+  }
+
+  ++statsTotal.testCnt;
+
   //
   // Get robot description (and version)
   //

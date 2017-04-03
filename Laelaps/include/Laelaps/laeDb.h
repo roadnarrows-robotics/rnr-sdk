@@ -113,11 +113,17 @@ namespace laelaps
     double          m_fTempAvg;         ///< average interior temperature
   };
 
-  struct LaeDbGpio
+  /*!
+   * \brief Enabled subsytems.
+   */
+  struct LaeDbEnable
   {
-    bool    m_bMotorCtlrEn;     ///< motor controller enable
-    bool    m_bAuxPortBattEn;   ///< battery auxilliary port enable
-    bool    m_bAuxPort5vEn;     ///< 5 volt auxilliary port enable
+    bool    m_bMotorCtlr;     ///< motor controller [not] enabled
+    bool    m_bAuxPortBatt;   ///< battery auxilliary port [not] enabled
+    bool    m_bAuxPort5v;     ///< 5 volt auxilliary port [not] enabled
+    bool    m_bRange;         ///< Range sensors [not] enabled
+    bool    m_bImu;           ///< IMU sensor [not] enabled
+    bool    m_bFCam;          ///< Front camera [not] enabled
   };
 
   /*!
@@ -141,7 +147,7 @@ namespace laelaps
   };
 
   /*!
-   * \brief IMU data.
+   * \brief IMU sensor data.
    */
   struct LaeDbImu
   {
@@ -208,6 +214,7 @@ namespace laelaps
     LaeAlarmInfo  m_motorctlr[LaeNumMotorCtlrs];
                                             ///< motor contollers subsytem state
     LaeAlarmInfo  m_motor[LaeMotorsNumOf];  ///< motors subsytem state
+    LaeAlarmInfo  m_sensors;                ///< sensor alarms
   }; // LaeDbAlarms
 
   /*!
@@ -220,7 +227,7 @@ namespace laelaps
     LaeDbProduct      m_product;          ///< product data
     LaeDbConfig       m_config;           ///< configuration data
     LaeDbRobotStatus  m_robotstatus;      ///< robot status data
-    LaeDbGpio         m_gpio;             ///< key gpio state data
+    LaeDbEnable       m_enable;           ///< key gpio state data
     LaeDbMotorCtlr    m_motorctlr[LaeNumMotorCtlrs];
                                           ///< motor controller and motor data
     LaeDbRange        m_range[ToFSensorMaxNumOf];

@@ -2180,6 +2180,23 @@ int LaeRangeMux::getSensorProps(const std::string &strKey,
 // LaeRangeSensorGroup Class
 //------------------------------------------------------------------------------
 
+LaeRangeSensorGroup::LaeRangeSensorGroup(laelaps::LaeI2C &i2cBus) :
+        m_interface_2_0(i2cBus), m_interface_2_1(i2cBus)
+{
+  m_bBlackListed = false;
+  RtDb.m_enable.m_bRange = true;
+}
+
+LaeRangeSensorGroup::~LaeRangeSensorGroup()
+{
+}
+
+void LaeRangeSensorGroup::blacklist()
+{
+  m_bBlackListed = true;
+  RtDb.m_enable.m_bRange = false;
+}
+
 void LaeRangeSensorGroup::clear()
 {
   m_interface_2_0.clear();

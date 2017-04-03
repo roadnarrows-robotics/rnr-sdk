@@ -214,9 +214,11 @@ extern void printTotals(DiagStats &stats);
 
 extern void printGrandTotals(DiagStats &stats);
 
+extern int kbblock();
+
 extern int kbhit();
 
-extern int kbcheck();
+extern long findProc(const std::string &strName);
 
 #endif // _LAELAPS_DIAG_H
 

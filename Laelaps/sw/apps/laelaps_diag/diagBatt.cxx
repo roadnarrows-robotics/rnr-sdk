@@ -422,7 +422,7 @@ DiagStats runBatteryDiagnostics(bool bAnyKey)
   {
     statsTest += testBatteryState(cnt++);
 
-    if( !bAnyKey || kbcheck() || statsTest.fatal )
+    if( !bAnyKey || kbhit() || statsTest.fatal )
     {
       printf("\n");
       printSubTotals(statsTest);

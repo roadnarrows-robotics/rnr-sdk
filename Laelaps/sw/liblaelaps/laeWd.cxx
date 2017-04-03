@@ -130,9 +130,9 @@ LaeWd::LaeWd(LaeI2C &i2cBus, uint_t addr) :
 
   RtDb.m_energy.m_bBatteryIsCharging  = m_bBatteryIsCharging;
   RtDb.m_energy.m_fJackVoltage        = m_fJackVoltage;
-  RtDb.m_gpio.m_bMotorCtlrEn          = m_bMotorCtlrEn;
-  RtDb.m_gpio.m_bAuxPortBattEn        = m_bAuxPortBattEn;
-  RtDb.m_gpio.m_bAuxPort5vEn          = m_bAuxPort5vEn;
+  RtDb.m_enable.m_bMotorCtlr          = m_bMotorCtlrEn;
+  RtDb.m_enable.m_bAuxPortBatt        = m_bAuxPortBattEn;
+  RtDb.m_enable.m_bAuxPort5v          = m_bAuxPort5vEn;
 
   pthread_mutex_init(&m_mutex, NULL);
 }
@@ -740,7 +740,7 @@ int LaeWd::cmdEnableMotorCtlrs(bool bEnable)
     }
 
     m_bMotorCtlrEn              = bEnable;
-    RtDb.m_gpio.m_bMotorCtlrEn  = m_bMotorCtlrEn;
+    RtDb.m_enable.m_bMotorCtlr  = m_bMotorCtlrEn;
   }
 
   else
@@ -789,7 +789,7 @@ int LaeWd::cmdEnableAuxPort5V(bool bEnable)
       LOGDIAG2("Aux 5V port %s.", (bEnable? "enabled": "disabled"));
     }
     m_bAuxPort5vEn              = bEnable; 
-    RtDb.m_gpio.m_bAuxPort5vEn  = m_bAuxPort5vEn;
+    RtDb.m_enable.m_bAuxPort5v  = m_bAuxPort5vEn;
   }
 
   else
@@ -838,7 +838,7 @@ int LaeWd::cmdEnableAuxPortBatt(bool bEnable)
       LOGDIAG2("Aux battery port %s.", (bEnable? "enabled": "disabled"));
     }
     m_bAuxPortBattEn              = bEnable;
-    RtDb.m_gpio.m_bAuxPortBattEn  = m_bAuxPortBattEn;
+    RtDb.m_enable.m_bAuxPortBatt  = m_bAuxPortBattEn;
   }
 
   else
@@ -912,9 +912,9 @@ int LaeWd::cmdReadEnables(bool &bMotorCtlrEn,
     m_bAuxPortBattEn  = bAuxPortBattEn;
 
     // real-time db
-    RtDb.m_gpio.m_bMotorCtlrEn    = m_bMotorCtlrEn;
-    RtDb.m_gpio.m_bAuxPort5vEn    = m_bAuxPort5vEn;
-    RtDb.m_gpio.m_bAuxPortBattEn  = m_bAuxPortBattEn;
+    RtDb.m_enable.m_bMotorCtlr    = m_bMotorCtlrEn;
+    RtDb.m_enable.m_bAuxPort5v    = m_bAuxPort5vEn;
+    RtDb.m_enable.m_bAuxPortBatt  = m_bAuxPortBattEn;
   }
 
   else

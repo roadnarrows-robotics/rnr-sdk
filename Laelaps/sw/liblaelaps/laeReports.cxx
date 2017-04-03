@@ -257,9 +257,9 @@ void LaeRptRobotStatus::generate(LaeRobot *pRobot)
   m_fVoltage      = RtDb.m_energy.m_fBatteryVoltage;
 
   m_fTemperature  = RtDb.m_robotstatus.m_fTempAvg;
-  m_eAuxBattEn    = RtDb.m_gpio.m_bAuxPortBattEn?
+  m_eAuxBattEn    = RtDb.m_enable.m_bAuxPortBatt?
                                       LaeTriStateFalse: LaeTriStateTrue;
-  m_eAux5VEn      = RtDb.m_gpio.m_bAuxPort5vEn?
+  m_eAux5VEn      = RtDb.m_enable.m_bAuxPort5v?
                                       LaeTriStateFalse: LaeTriStateTrue;
 
   LaeAlarms::copyAlarms(RtDb.m_alarms.m_system, m_alarms);
