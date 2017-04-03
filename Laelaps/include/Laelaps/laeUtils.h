@@ -221,8 +221,10 @@ namespace laelaps
   typedef struct timespec timespec_t;   ///< typedef'ed timespec structure
 
   /*!
-   * \brief Compare operator to test if left hand side time is earlier than
-   * the right hand side time.
+   * \brief Less than compare operator.
+   *
+   * Compare if the left hand side time is earlier than the right hand side
+   * time.
    *
    * lhs \h_lt rhs
    *
@@ -234,8 +236,9 @@ namespace laelaps
   bool operator<(const struct timeval& lhs, const struct timeval& rhs);
 
   /*!
-   * \brief Compare operator to test if left hand side time equals
-   * the right hand side time.
+   * \brief Equality compare operator.
+   *
+   * Compare if the two times are equal.
    *
    * lhs == rhs
    *
@@ -247,8 +250,10 @@ namespace laelaps
   bool operator==(const struct timeval& lhs, const struct timeval& rhs);
 
   /*!
-   * \brief Compare operator to test if left hand side time is later than
-   * the right hand side time.
+   * \brief Greater than compare operator.
+   *
+   * Compare if the left hand side time is later than the right hand side
+   * time.
    *
    * lhs \h_gt rhs
    *
@@ -258,6 +263,36 @@ namespace laelaps
    * \return Returns true or false.
    */
   bool operator>(const struct timeval& lhs, const struct timeval& rhs);
+
+  /*!
+   * \brief Less than or equal to compare operator.
+   *
+   * Compare if the left hand side time is equal or earlier than the right hand
+   * side time.
+   *
+   * lhs \h_le rhs
+   *
+   * \param lhs   Left hand side time.
+   * \param rhs   Right hand side time.
+   *
+   * \return Returns true or false.
+   */
+  bool operator<=(const struct timeval& lhs, const struct timeval& rhs);
+
+  /*!
+   * \brief Greater than or equal to compare operator.
+   *
+   * Compare if the left hand side time is equal or later than the right hand
+   * side time.
+   *
+   * lhs \h_ge rhs
+   *
+   * \param lhs   Left hand side time.
+   * \param rhs   Right hand side time.
+   *
+   * \return Returns true or false.
+   */
+  bool operator>=(const struct timeval& lhs, const struct timeval& rhs);
 
   /*!
    * \brief Addition operator.
@@ -315,8 +350,11 @@ namespace laelaps
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   /*!
-   * \brief Compare operator to test if left hand side time is earlier than
-   * the right hand side time.
+   * \brief Less than compare operator.
+   *
+   * Compare if the left hand side time is earlier than the right hand side
+   * time.
+   *
    *
    * lhs \h_lt rhs
    *
@@ -328,8 +366,9 @@ namespace laelaps
   bool operator<(const struct timespec& lhs, const struct timespec& rhs);
 
   /*!
-   * \brief Compare operator to test if left hand side time equals
-   * the right hand side time.
+   * \brief Equality compare operator.
+   *
+   * Compare if the two times are equal.
    *
    * lhs == rhs
    *
@@ -341,8 +380,10 @@ namespace laelaps
   bool operator==(const struct timespec& lhs, const struct timespec& rhs);
 
   /*!
-   * \brief Compare operator to test if left hand side time is later than
-   * the right hand side time.
+   * \brief Greater than compare operator.
+   *
+   * Compare if the left hand side time is later than the right hand side
+   * time.
    *
    * lhs \h_gt rhs
    *
@@ -352,6 +393,36 @@ namespace laelaps
    * \return Returns true or false.
    */
   bool operator>(const struct timespec& lhs, const struct timespec& rhs);
+
+  /*!
+   * \brief Less than or equal to compare operator.
+   *
+   * Compare if the left hand side time is equal or earlier than the right hand
+   * side time.
+   *
+   * lhs \h_le rhs
+   *
+   * \param lhs   Left hand side time.
+   * \param rhs   Right hand side time.
+   *
+   * \return Returns true or false.
+   */
+  bool operator<=(const struct timespec& lhs, const struct timespec& rhs);
+
+  /*!
+   * \brief Greater than or equal to compare operator.
+   *
+   * Compare if the left hand side time is equal or later than the right hand
+   * side time.
+   *
+   * lhs \h_ge rhs
+   *
+   * \param lhs   Left hand side time.
+   * \param rhs   Right hand side time.
+   *
+   * \return Returns true or false.
+   */
+  bool operator>=(const struct timespec& lhs, const struct timespec& rhs);
 
   /*!
    * \brief Addition operator.

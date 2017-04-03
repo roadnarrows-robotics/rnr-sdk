@@ -168,7 +168,17 @@ bool laelaps::operator==(const struct timeval& lhs, const struct timeval& rhs)
 
 bool laelaps::operator>(const struct timeval& lhs, const struct timeval& rhs)
 {
-  return !((lhs < rhs) || (lhs == rhs));
+  return !(lhs < rhs) && !(lhs == rhs);
+}
+
+bool laelaps::operator<=(const struct timeval& lhs, const struct timeval& rhs)
+{
+  return lhs < rhs || lhs == rhs;
+}
+
+bool laelaps::operator>=(const struct timeval& lhs, const struct timeval& rhs)
+{
+  return lhs > rhs || lhs == rhs;
 }
 
 struct timeval laelaps::operator+(const struct timeval& op1,
@@ -227,8 +237,7 @@ double laelaps::dt(struct timeval& t1, struct timeval& t0)
   }
 }
 
-bool laelaps::operator<(const struct timespec& lhs,
-                        const struct timespec& rhs)
+bool laelaps::operator<(const struct timespec& lhs, const struct timespec& rhs)
 {
   if( lhs.tv_sec < rhs.tv_sec )
   {
@@ -244,17 +253,25 @@ bool laelaps::operator<(const struct timespec& lhs,
   }
 }
 
-bool laelaps::operator==(const struct timespec& lhs,
-                         const struct timespec& rhs)
+bool laelaps::operator==(const struct timespec& lhs, const struct timespec& rhs)
 {
   return (lhs.tv_sec == rhs.tv_sec) && (lhs.tv_nsec == rhs.tv_nsec)?
             true: false;
 }
 
-bool laelaps::operator>(const struct timespec& lhs,
-                        const struct timespec& rhs)
+bool laelaps::operator>(const struct timespec& lhs, const struct timespec& rhs)
 {
-  return !((lhs < rhs) || (lhs == rhs));
+  return !(lhs < rhs) && !(lhs == rhs);
+}
+
+bool laelaps::operator<=(const struct timespec& lhs, const struct timespec& rhs)
+{
+  return lhs < rhs || lhs == rhs;
+}
+
+bool laelaps::operator>=(const struct timespec& lhs, const struct timespec& rhs)
+{
+  return lhs > rhs || lhs == rhs;
 }
 
 struct timespec laelaps::operator+(const struct timespec& op1,

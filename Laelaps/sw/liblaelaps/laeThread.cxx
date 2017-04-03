@@ -231,6 +231,8 @@ void LaeThread::setHz(const double fHz)
 
   //prts("execperiod", m_tsExecPeriod);
 
+  m_tsJitter    = {0, 50000000};
+  m_tsJitter    = m_tsJitter + m_tsExecPeriod;
   m_nSlipErrCnt = 0;
 
   unlock();
@@ -265,8 +267,8 @@ void LaeThread::readyBlock()
   
 void LaeThread::schedBlock()
 {
-  struct timespec tsNow;                // now
-  struct timespec tsSlip;               // any slippage
+  struct timespec tsNow;            // now
+  struct timespec tsSlip = {0, 0};  // any slippage
 
   // now
   clock_gettime(CLOCK_REALTIME, &tsNow);
@@ -282,19 +284,22 @@ void LaeThread::schedBlock()
   {
     timedWait(m_tsSched);                   // block
     clock_gettime(CLOCK_REALTIME, &tsNow);  // now again
-    m_tsSched = tsNow + m_tsExecPeriod;     // next scheduled time
-    if( m_nSlipErrCnt > 0 )
-    {
-      --m_nSlipErrCnt;
-    }
   }
 
   //
-  // Scheduled execution cycle is now.
+  // Determine any slip in task schedule.
   //
-  else if( tsNow == m_tsSched )
+  if( tsNow > m_tsSched )
   {
-    m_tsSched = tsNow + m_tsExecPeriod;     // next scheduled time
+    tsSlip = tsNow - m_tsSched;
+  } 
+
+  //
+  // Slipped by less than an execution cycles. Try to make up the time.
+  //
+  if( tsSlip <= m_tsExecPeriod )
+  {
+    m_tsSched = tsNow + m_tsExecPeriod - tsSlip;  // next scheduled time
     if( m_nSlipErrCnt > 0 )
     {
       --m_nSlipErrCnt;
@@ -302,39 +307,31 @@ void LaeThread::schedBlock()
   }
 
   //
-  // Scheduled execution cycle slipped.
+  // Slipped by at least one full cycle, but within acceptable jitter.
+  //
+  else if( tsSlip < m_tsJitter )
+  {
+    m_tsSched = tsNow + m_tsExecPeriod;
+  }
+
+  //
+  // Slipped badly by at least one full cycle.
   //
   else
   {
-    tsSlip = tsNow - m_tsSched;
+    m_tsSched = tsNow + m_tsExecPeriod;
 
-    //
-    // Slipped by less than two execution cycles. Try to make up the time.
-    //
-    if( tsSlip < m_tsExecPeriod )
+    if( m_nSlipErrCnt < 1000 )
     {
-      m_tsSched = tsNow + m_tsExecPeriod - tsSlip;  // next scheduled time
+      ++m_nSlipErrCnt;
     }
 
-    //
-    // Slipped a bunch.
-    //
-    else
+    // log moderated slippage
+    if( m_nSlipErrCnt < 5 )
     {
-      m_tsSched = tsNow + m_tsExecPeriod;
-
-      if( m_nSlipErrCnt < 1000 )
-      {
-        ++m_nSlipErrCnt;
-      }
-
-      // log moderated slippage
-      if( m_nSlipErrCnt < 5 )
-      {
-        LOGWARN("%s thread: "
+      LOGWARN("%s thread: "
           "Execution slipped by %ld.%09ld seconds.",
           m_strThreadName.c_str(), tsSlip.tv_sec, tsSlip.tv_nsec);
-      }
     }
   }
 }

@@ -204,6 +204,7 @@ namespace laelaps
     double          m_fHz;            ///< thread cycle run rate (Hertz)
     double          m_fTExec;         ///< task execution cycle period (seconds)
     struct timespec m_tsExecPeriod;   ///< task execution period (converted)
+    struct timespec m_tsJitter;       ///< allowable scheduling jitter
     struct timespec m_tsSched;        ///< working scheduler time stamp
     struct timespec m_tsExecLast;     ///< start of last execution time stamp
     struct timespec m_tsExecThis;     ///< start of this execution time stamp
