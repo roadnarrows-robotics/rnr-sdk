@@ -435,8 +435,8 @@ int LaeRobot::estop()
 
   if( !m_kin.isEnabled() )
   {
-    m_bIsEStopped       = true;
-    m_bAlarmState       = true;
+    m_bIsEStopped = true;
+    m_bAlarmState = true;
 
     syncDb();
 
@@ -465,8 +465,8 @@ int LaeRobot::resetEStop()
 
   if( m_kin.isEnabled() )
   {
-    m_bIsEStopped       = false;
-    m_bAlarmState       = false;
+    m_bIsEStopped = false;
+    m_bAlarmState = false;
 
     syncDb();
 
@@ -809,12 +809,6 @@ bool LaeRobot::isAlarmed()
   if( isEStopped() )
   {
     bAlarmState = true;
-  }
-
-  if( bAlarmState != m_bAlarmState )
-  {
-    m_bAlarmState = bAlarmState;
-    RtDb.m_robotstatus.m_bAlarmState = m_bAlarmState;
   }
 
   return m_bAlarmState;

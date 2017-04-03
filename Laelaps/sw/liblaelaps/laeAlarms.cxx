@@ -273,6 +273,18 @@ void LaeAlarms::update()
   // copy system alarms to database
   copyAlarms(sys, RtDb.m_alarms.m_system);
 
+  //
+  // Final settings
+  //
+  if( RtDb.m_alarms.m_system.m_uAlarms == LAE_ALARM_NONE )
+  {
+    RtDb.m_robotstatus.m_bAlarmState = false;
+  }
+  else
+  {
+    RtDb.m_robotstatus.m_bAlarmState = true;
+  }
+
   //fprintf(stderr, "DBG: isCrit=%d, alarms=0x%x, warns=0x%x\n", 
   //    RtDb.m_alarms.m_system.m_bIsCritical,
   //    RtDb.m_alarms.m_system.m_uAlarms,
