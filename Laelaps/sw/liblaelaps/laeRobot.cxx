@@ -886,7 +886,12 @@ int LaeRobot::connSensors()
   //
   // Connect to the Range Sensor Group.
   //
-  if( (rc = m_range.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer)) < 0 )
+  if( (rc = m_range.setInterface(m_descLaelaps.getProdHwVer())) < 0 )
+  {
+    LOGERROR("Failed to set range sensor group interface.");
+  }
+
+  else if((rc = m_range.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer)) < 0)
   {
     LOGERROR("Failed to read range sensor group interface version.");
   }

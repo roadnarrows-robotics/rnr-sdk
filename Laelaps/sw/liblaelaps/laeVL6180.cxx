@@ -2218,24 +2218,20 @@ int LaeRangeMuxSubproc::getSensorProps(const std::string &strKey,
 // LaeRangeSensorGroup Class
 //------------------------------------------------------------------------------
 
-LaeRangeSensorGroup::LaeRangeSensorGroup(laelaps::LaeI2C &i2cBus)
+LaeRangeSensorGroup::LaeRangeSensorGroup(laelaps::LaeI2C &i2cBus) :
+    m_i2cBus(i2cBus)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    m_interface = new LaeRangeMuxSubproc(i2cBus);
-  }
-  else
-  {
-    m_interface = new LaeVL6180MuxArray(i2cBus);
-  }
-
+  m_interface            = new LaeRangeInterface(i2cBus); // no-op version
   m_bBlackListed         = false;
   RtDb.m_enable.m_bRange = true;
 }
 
 LaeRangeSensorGroup::~LaeRangeSensorGroup()
 {
-  delete m_interface;
+  if( m_interface != NULL )
+  {
+    delete m_interface;
+  }
 }
 
 void LaeRangeSensorGroup::blacklist()
@@ -2248,6 +2244,26 @@ void LaeRangeSensorGroup::whitelist()
 {
   m_bBlackListed         = false;
   RtDb.m_enable.m_bRange = true;
+}
+
+int LaeRangeSensorGroup::setInterface(uint_t uProdHwVer)
+{
+  if( m_interface != NULL )
+  {
+    delete m_interface;
+    m_interface = NULL;
+  }
+
+  if( uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  {
+    m_interface = new LaeRangeMuxSubproc(m_i2cBus);
+  }
+  else
+  {
+    m_interface = new LaeVL6180MuxArray(m_i2cBus);
+  }
+
+  return LAE_OK;
 }
 
 void LaeRangeSensorGroup::clearSensedData()

@@ -681,7 +681,7 @@ int LaeDesc::markAsDescribed()
   {
     case LaeProdIdStd:
     case LaeProdIdLarge:
-      if( m_uProdHwVer < LAE_VERSION(2, 3, 0) )
+      if( m_uProdHwVer < LAE_VERSION(2, 5, 0) )
       {
         m_pDescBase    = new LaeDescBase();
         m_pDescBattery = new LaeDescBattery();

@@ -95,19 +95,36 @@ static DiagStats initSensors(LaeRangeSensorGroup &rnggrp)
 
   stats.testCnt += 1;
 
-  if( rnggrp.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer) == LAE_OK )
+  if( rnggrp.setInterface(RobotDesc.getProdHwVer()) == LAE_OK )
   {
-    printTestResult(PassTag, "Connected to Range Sensor Group %u.%u, fwver=%u.",
-        uVerMajor, uVerMinor, uFwVer);
+    printTestResult(PassTag, "Range Sensor Group interface set.");
     stats.passCnt += 1;
-
-    rnggrp.clearSensedData();
   }
   else
   {
     printTestResult(FatalTag,
-        "Failed to read range sensor group interface version.");
+        "Failed to set interface with product hw version 0x%x.", 
+        RobotDesc.getProdHwVer());
     stats.fatal = true;
+  }
+
+  if( !stats.fatal )
+  {
+    stats.testCnt += 1;
+
+    if( rnggrp.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer) == LAE_OK )
+    {
+      printTestResult(PassTag, "Range Sensor Group interface %u.%u, fwver=%u.",
+        uVerMajor, uVerMinor, uFwVer);
+      stats.passCnt += 1;
+
+      rnggrp.clearSensedData();
+    }
+    else
+    {
+      printTestResult(FailTag,
+        "Failed to read range sensor group interface version.");
+    }
   }
 
   if( !stats.fatal )

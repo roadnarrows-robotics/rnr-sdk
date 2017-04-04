@@ -774,7 +774,7 @@ namespace sensor
     // -------------------------------------------------------------------------
 
     /*!
-     * \brief Range sensors interface virtual base class.
+     * \brief Range sensors interface base class.
      */
     class LaeRangeInterface
     {
@@ -814,13 +814,15 @@ namespace sensor
         uVerMinor = 0;
         uFwVer    = 0;
 
-        return laelaps::LAE_OK;
+        return -laelaps::LAE_ECODE_NO_RSRC;
       }
 
       /*!
        * \brief Clear sensed data.
        */
-      virtual void clearSensedData() = 0;
+      virtual void clearSensedData()
+      {
+      }
 
       /*!
        * \brief Configure sensor array from product description.
@@ -829,7 +831,10 @@ namespace sensor
        *
        * \copydoc doc_return_std
        */
-      virtual int configure(const laelaps::LaeDesc &desc) = 0;
+      virtual int configure(const laelaps::LaeDesc &desc)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
 
       /*!
        * \brief Configure sensor array from tuning parameters.
@@ -838,7 +843,10 @@ namespace sensor
        *
        * \copydoc doc_return_std
        */
-      virtual int configure(const laelaps::LaeTunes &tunes) = 0;
+      virtual int configure(const laelaps::LaeTunes &tunes)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
 
       /*!
        * \brief Reload configuration tuning parameters.
@@ -847,7 +855,10 @@ namespace sensor
        *
        * \copydoc doc_return_std
        */
-      virtual int reload(const laelaps::LaeTunes &tunes) = 0;
+      virtual int reload(const laelaps::LaeTunes &tunes)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
 
       /*!
        * \brief Execute task in one cycle to take measurements.
@@ -855,7 +866,9 @@ namespace sensor
        * \par Context:
        * LaeThreadRange thread instance.
        */
-      virtual void exec() = 0;
+      virtual void exec()
+      {
+      }
 
 
       //........................................................................
@@ -870,7 +883,10 @@ namespace sensor
        *
        * \copydoc doc_return_std
        */
-      virtual int getRange(const std::string &strKey, double &fRange) = 0;
+      virtual int getRange(const std::string &strKey, double &fRange)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
   
       /*!
        * \brief Get all sensor range measurements.
@@ -882,7 +898,10 @@ namespace sensor
        * \copydoc doc_return_std
        */
       virtual int getRange(std::vector<std::string> &vecNames,
-                           std::vector<double>      &vecRanges) = 0;
+                           std::vector<double>      &vecRanges)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
   
       /*!
        * \brief Get an ambient light illuminance measurement.
@@ -893,7 +912,10 @@ namespace sensor
        * \copydoc doc_return_std
        */
       virtual int getAmbientLight(const std::string &strKey,
-                                  double            &fAmbient) = 0;
+                                  double            &fAmbient)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
   
       /*!
        * \brief Get all sensor ambient light illuminance measurements.
@@ -905,7 +927,10 @@ namespace sensor
        * \copydoc doc_return_std
        */
       virtual int getAmbientLight(std::vector<std::string> &vecNames,
-                                  std::vector<double> &vecAmbient) = 0;
+                                  std::vector<double> &vecAmbient)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
 
       /*!
        * \brief Get range sensor properties.
@@ -924,7 +949,10 @@ namespace sensor
                                  double            &fFoV,
                                  double            &fBeamDir,
                                  double            &fMin,
-                                 double            &fMax) = 0;
+                                 double            &fMax)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
 
     protected:
       laelaps::LaeI2C  &m_i2cBus;       ///< bound \h_i2c bus instance
@@ -1434,7 +1462,14 @@ namespace sensor
       }
 
       /*!
-       * \brief Clear sensedd data.
+       * \brief Set the interface, given the \h_lae hardware version.
+       *
+       * \copydoc doc_return_std
+       */
+      int setInterface(uint_t uProdHwVer);
+
+      /*!
+       * \brief Clear sensed data.
        */
       void clearSensedData();
 
@@ -1550,6 +1585,7 @@ namespace sensor
       virtual void exec();
 
     protected:
+      laelaps::LaeI2C    &m_i2cBus;       ///< bound \h_i2c bus instance
       LaeRangeInterface  *m_interface;    ///< the interface
       bool                m_bBlackListed; ///< sensor group [not] black listed.
 
