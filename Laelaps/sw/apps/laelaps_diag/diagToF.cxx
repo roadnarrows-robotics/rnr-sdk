@@ -182,6 +182,7 @@ static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
     printf("\n");
     printf("%s %s Sensor Info:\n", SubSysName, ProdName);
     printf("  Location:       %s\n", sKey);
+    printf("  Installed:      %s\n", (bInstalled? "yes": "no"));
     printf("  Beam Direction: %.1lf degrees\n", radToDeg(fBeamDir));
     printf("  Radiation:      %s\n", strRadiationType.c_str());
     printf("  FoV:            %.1lf degrees\n", radToDeg(fFoV));
@@ -200,8 +201,8 @@ static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
     printf("  Range Cross-Talk: %u\n", valRangeCrossTalk);
     printf("  ALS Gain:         %u\n", valAlsGain & 0x07);
     printf("  ALS Int. Period:  %u\n", valAlsIntPeriod);
-    printf("\n");
 #endif // 0
+    printf("\n\n");
   }
 
   return stats;
@@ -235,16 +236,29 @@ static DiagStats measureDistance(LaeRangeSensorGroup &rnggrp, int cnt)
 
   if( showLabel )
   {
+    printf("%8s", "");
     for(size_t i = 0; i < keys.size(); ++i)
     {
-      printf("%8s ", keys[i].c_str());
+      printf("%10s ", keys[i].c_str());
     }
     printf("\n");
   }
 
+  printf("%6d. ", cnt);
   for(size_t i = 0; i < distance.size(); ++i)
   {
-    printf("%8.3lf ", distance[i]);
+    if( distance[i] > VL6180X_RANGE_MAX )
+    {
+      printf("%10s ", "noobj");
+    }
+    else if( distance[i] < 0 )
+    {
+      printf("%10s ", "error");
+    }
+    else
+    {
+      printf("%10.3lf ", distance[i]);
+    }
   }
   printf("\r");
   fflush(stdout);
@@ -263,6 +277,8 @@ static DiagStats measureAmbient(LaeRangeSensorGroup &rnggrp, int cnt)
 
   showLabel = cnt == 0;
 
+  ++stats.testCnt;
+
   rc = rnggrp.getAmbientLight(keys, ambient);
 
   if( rc == OK )
@@ -278,16 +294,18 @@ static DiagStats measureAmbient(LaeRangeSensorGroup &rnggrp, int cnt)
 
   if( showLabel )
   {
+    printf("%8s", "");
     for(size_t i = 0; i < keys.size(); ++i)
     {
-      printf("%8s ", keys[i].c_str());
+      printf("%10s ", keys[i].c_str());
     }
     printf("\n");
   }
 
+  printf("%6d. ", cnt);
   for(size_t i = 0; i < ambient.size(); ++i)
   {
-    printf("%8.2lf ", ambient[i]);
+    printf("%10.2lf ", ambient[i]);
   }
   printf("\r");
   fflush(stdout);
@@ -339,6 +357,8 @@ DiagStats runToFDiagnostics(bool bAnyKey)
 
   while( !bQuit )
   {
+    rangegroup.exec();
+
     statsTest += measureDistance(rangegroup, cnt++);
 
     if( !bAnyKey || kbhit() || statsTest.fatal )
@@ -349,7 +369,7 @@ DiagStats runToFDiagnostics(bool bAnyKey)
     }
     else
     {
-      usleep(500000);
+      usleep(100000);
     }
   }
 
@@ -367,6 +387,8 @@ DiagStats runToFDiagnostics(bool bAnyKey)
 
   while( !bQuit )
   {
+    rangegroup.exec();
+
     statsTest += measureAmbient(rangegroup, cnt++);
 
     if( !bAnyKey || kbhit() || statsTest.fatal )

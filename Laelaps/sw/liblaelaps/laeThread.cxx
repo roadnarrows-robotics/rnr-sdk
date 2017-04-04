@@ -231,8 +231,9 @@ void LaeThread::setHz(const double fHz)
 
   //prts("execperiod", m_tsExecPeriod);
 
-  m_tsJitter    = {0, 50000000};
-  m_tsJitter    = m_tsJitter + m_tsExecPeriod;
+  m_tsJitter    = m_tsExecPeriod;
+  m_tsJitter.tv_nsec += 50000000;   // 5/100th of second
+
   m_nSlipErrCnt = 0;
 
   unlock();
