@@ -350,17 +350,14 @@ int LaeRobot::disconnect()
   m_threadWatchDog.terminateThread();
   m_threadKin.terminateThread();
   m_threadImu.terminateThread();
-#if 0 // RDK
   m_threadRange.terminateThread();
-#endif // RDK
 
   m_kin.close();              // close motors
   m_imu.close();              // on usb device
   m_i2cBus.close();           // sensors/watchdog on i2c device
 
-#if 0 // RDK
-  m_range.clear();
-#endif // RDK
+  m_range.clearSensedData();
+  m_imu.clearSensedData();
 
   // reset robot state
   m_bIsConnected      = false;
@@ -881,27 +878,32 @@ int LaeRobot::connSensors()
   }
   else
   {
-    LOGERROR("IMU is blacklisted from the suite of robot sensors.");
     m_imu.blacklist();
+    LOGERROR("IMU is blacklisted from the suite of robot sensors.");
     rc = LAE_OK;
   }
 
-  m_range.blacklist(); // RDK
-#if 0 // RDK
-
+  //
+  // Connect to the Range Sensor Group.
+  //
   if( (rc = m_range.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer)) < 0 )
   {
     LOGERROR("Failed to read range sensor group interface version.");
-    LOGERROR("Range sensors are blacklisted from the suite of robot sensors.");
-    m_range.blacklist();
-    rc = LAE_OK;
   }
-  else
+
+  if( rc == LAE_OK )
   {
+    m_range.clearSensedData();
+
     LOGDIAG2("Connected to Range Sensor Group %u.%u, fwver=%u.",
         uVerMajor, uVerMinor, uFwVer);
   }
-#endif // RDK
+  else
+  {
+    m_range.blacklist();
+    LOGERROR("Range sensors are blacklisted from the suite of robot sensors.");
+    rc = LAE_OK;
+  }
 
   return rc;
 }
@@ -997,7 +999,6 @@ int LaeRobot::configForOperation()
     LOGERROR("Failed to tune IMU.");
   }
 
-#if 0 // RDK
   //
   // Configure range sensors from product description.
   //
@@ -1013,7 +1014,6 @@ int LaeRobot::configForOperation()
   {
     LOGERROR("Failed to configure range sensor group.");
   }
-#endif // RDK
 
   //
   // Good
@@ -1026,6 +1026,7 @@ int LaeRobot::configForOperation()
     //
     //m_powerBatt.enable();
     //m_power5V.enable();
+
     rc = LAE_OK;
   }
 

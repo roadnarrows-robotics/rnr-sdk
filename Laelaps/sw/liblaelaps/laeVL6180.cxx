@@ -145,8 +145,8 @@ LaeVL6180SensorInfo::~LaeVL6180SensorInfo()
 {
 }
 
-LaeVL6180SensorInfo LaeVL6180SensorInfo::operator=(const LaeVL6180SensorInfo
-                                                                          &rhs)
+LaeVL6180SensorInfo LaeVL6180SensorInfo::operator=(
+                                                const LaeVL6180SensorInfo &rhs)
 {
   m_nIndex    = rhs.m_nIndex;
   m_nChan     = rhs.m_nChan;
@@ -1275,7 +1275,7 @@ int LaeVL6180Mux::writeReg16(u16_t reg, u16_t val)
 //------------------------------------------------------------------------------
 
 LaeVL6180MuxArray::LaeVL6180MuxArray(laelaps::LaeI2C &i2cBus) :
-    m_mux(i2cBus)
+    LaeRangeInterface(i2cBus), m_mux(i2cBus)
 {
   m_nAlsIndex   = 0;
   m_nAlsCounter = AlsFreq;
@@ -1291,7 +1291,18 @@ LaeVL6180MuxArray::~LaeVL6180MuxArray()
 
 }
 
-void LaeVL6180MuxArray::clear()
+int LaeVL6180MuxArray::getInterfaceVersion(uint_t &uVerMajor,
+                                           uint_t &uVerMinor,
+                                           uint_t &uFwVer)
+{
+  uVerMajor = LAE_VER_MAJOR(RtDb.m_product.m_uProdHwVer);
+  uVerMinor = LAE_VER_MINOR(RtDb.m_product.m_uProdHwVer);
+  uFwVer    = 0;
+
+  return laelaps::LAE_OK;
+}
+
+void LaeVL6180MuxArray::clearSensedData()
 {
   for(size_t i = 0; i < m_vecToF.size(); ++i)
   {
@@ -1533,31 +1544,55 @@ int LaeVL6180MuxArray::getSensorProps(const std::string &strKey,
 
 
 //------------------------------------------------------------------------------
-// LaeRangeMux Class
+// LaeRangeMuxSubproc Class
 //------------------------------------------------------------------------------
 
-LaeRangeMux::LaeRangeMux(LaeI2C &i2cBus, uint_t addr) :
-    m_i2cBus(i2cBus), m_addrSubProc(addr),
+LaeRangeMuxSubproc::LaeRangeMuxSubproc(LaeI2C &i2cBus, uint_t addr) :
+    LaeRangeInterface(i2cBus), m_addrSubProc(addr),
     m_vecRanges(ToFSensorMaxNumOf, 0.0),
     m_vecLux(ToFSensorMaxNumOf, 0.0)
 {
-  m_uFwVer    = 0;
+  m_uFwVer = 0;
 
   pthread_mutex_init(&m_mutex, NULL);
 }
   
-LaeRangeMux::~LaeRangeMux()
+LaeRangeMuxSubproc::~LaeRangeMuxSubproc()
 {
   pthread_mutex_destroy(&m_mutex);
 }
   
-void LaeRangeMux::clear()
+int LaeRangeMuxSubproc::getInterfaceVersion(uint_t &uVerMajor,
+                                            uint_t &uVerMinor,
+                                            uint_t &uFwVer)
 {
-  m_mapInfo.clear();
-  m_uFwVer = 0;
+  int   rc;
+
+  rc = cmdGetFwVersion(m_uFwVer);
+
+  uVerMajor = LAE_VER_MAJOR(RtDb.m_product.m_uProdHwVer);
+  uVerMinor = LAE_VER_MINOR(RtDb.m_product.m_uProdHwVer);
+  uFwVer    = m_uFwVer;
+
+  return rc;
 }
 
-int LaeRangeMux::configure(const LaeDesc &desc)
+void LaeRangeMuxSubproc::clearSensedData()
+{
+  m_mapInfo.clear();
+
+  for(size_t i = 0; i < m_vecRanges.size(); ++i)
+  {
+    m_vecRanges[i] = VL6180X_RANGE_NO_OBJ;
+  }
+
+  for(size_t i = 0; i < m_vecLux.size(); ++i)
+  {
+    m_vecLux[i] = 0.0;
+  }
+}
+
+int LaeRangeMuxSubproc::configure(const LaeDesc &desc)
 {
   LaeDesc::MapDescRangeSensor::const_iterator iter;
   SensorInfoMap::iterator iter2;
@@ -1571,15 +1606,18 @@ int LaeRangeMux::configure(const LaeDesc &desc)
   int                     rc;
 
   //
-  // Read firmware version.
+  // Read firmware version, if necessary.
   //
-  if( (rc = cmdGetFwVersion(uFwVer)) == LAE_OK )
+  if( m_uFwVer == 0 )
   {
-    LOGDIAG2("ToFMux firmware version: %u.", uFwVer);
-  }
-  else
-  {
-    LOGERROR("Failed to read ToFMux firmware version.");
+    if( (rc = cmdGetFwVersion(uFwVer)) == LAE_OK )
+    {
+      LOGDIAG2("ToFMux firmware version: %u.", uFwVer);
+    }
+    else
+    {
+      LOGERROR("Failed to read ToFMux firmware version.");
+    }
   }
  
   //
@@ -1606,7 +1644,7 @@ int LaeRangeMux::configure(const LaeDesc &desc)
 
     if( rc == LAE_OK )
     {
-      LOGDIAG3("VL6180 %s(%d) sensor:\n"
+      LOGDIAG2("VL6180 %s(%d) sensor:\n"
           "  Location: %s\n"
           "  Model:    %u v%u.%u\n"
           "  Module:   v%u.%u\n"
@@ -1630,7 +1668,7 @@ int LaeRangeMux::configure(const LaeDesc &desc)
 
     if( rc == LAE_OK )
     {
-      LOGDIAG3("VL6180 %s(%d) sensor: Tuning register values\n"
+      LOGDIAG2("VL6180 %s(%d) sensor: Tuning register values\n"
           "  ToF Offset:              %d(%u)\n"
           "  ToF CrossTalk:           %u\n"
           "  ALS Gain:                %.2lf\n"
@@ -1644,7 +1682,7 @@ int LaeRangeMux::configure(const LaeDesc &desc)
   return LAE_OK;
 }
 
-int LaeRangeMux::configure(const LaeTunes &tunes)
+int LaeRangeMuxSubproc::configure(const LaeTunes &tunes)
 {
   int     nRangeOffset;
   int     nRangeCrossTalk;
@@ -1702,18 +1740,18 @@ int LaeRangeMux::configure(const LaeTunes &tunes)
   return rc;
 }
 
-int LaeRangeMux::reload(const LaeTunes &tunes)
+int LaeRangeMuxSubproc::reload(const LaeTunes &tunes)
 {
   return configure(tunes);
 }
 
-void LaeRangeMux::exec()
+void LaeRangeMuxSubproc::exec()
 {
   cmdGetRanges();
   cmdGetAmbientLight();
 }
       
-int LaeRangeMux::cmdGetFwVersion(uint_t &uVerNum)
+int LaeRangeMuxSubproc::cmdGetFwVersion(uint_t &uVerNum)
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   byte_t  rsp[LaeToFMuxI2CMaxRspLen];
@@ -1739,8 +1777,8 @@ int LaeRangeMux::cmdGetFwVersion(uint_t &uVerNum)
   return rc;
 }
   
-int LaeRangeMux::cmdGetIdent(const std::string &strKey,
-                             VL6180xIdentification &ident)
+int LaeRangeMuxSubproc::cmdGetIdent(const std::string &strKey,
+                                    VL6180xIdentification &ident)
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   byte_t  rsp[LaeToFMuxI2CMaxRspLen];
@@ -1791,7 +1829,7 @@ int LaeRangeMux::cmdGetIdent(const std::string &strKey,
   return rc;
 }
 
-int LaeRangeMux::cmdGetRanges()
+int LaeRangeMuxSubproc::cmdGetRanges()
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   byte_t  rsp[LaeToFMuxI2CMaxRspLen];
@@ -1840,7 +1878,7 @@ int LaeRangeMux::cmdGetRanges()
   return rc;
 }
 
-int LaeRangeMux::cmdGetRanges(std::vector<double> &vecRanges)
+int LaeRangeMuxSubproc::cmdGetRanges(std::vector<double> &vecRanges)
 {
   int   rc;
 
@@ -1852,7 +1890,7 @@ int LaeRangeMux::cmdGetRanges(std::vector<double> &vecRanges)
   return rc;
 }
     
-int LaeRangeMux::cmdGetAmbientLight()
+int LaeRangeMuxSubproc::cmdGetAmbientLight()
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   byte_t  rsp[LaeToFMuxI2CMaxRspLen];
@@ -1894,7 +1932,7 @@ int LaeRangeMux::cmdGetAmbientLight()
   return rc;
 }
 
-int LaeRangeMux::cmdGetAmbientLight(std::vector<double> &vecLux)
+int LaeRangeMuxSubproc::cmdGetAmbientLight(std::vector<double> &vecLux)
 {
   int   rc;
 
@@ -1906,11 +1944,11 @@ int LaeRangeMux::cmdGetAmbientLight(std::vector<double> &vecLux)
   return rc;
 }
   
-int LaeRangeMux::cmdGetTunes(const std::string &strKey,
-                             uint_t            &uRangeOffset,
-                             uint_t            &uRangeCrossTalk,
-                             double            &fAlsGain,
-                             uint_t            &uAlsIntPeriod)
+int LaeRangeMuxSubproc::cmdGetTunes(const std::string &strKey,
+                                    uint_t            &uRangeOffset,
+                                    uint_t            &uRangeCrossTalk,
+                                    double            &fAlsGain,
+                                    uint_t            &uAlsIntPeriod)
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   byte_t  rsp[LaeToFMuxI2CMaxRspLen];
@@ -1969,9 +2007,9 @@ int LaeRangeMux::cmdGetTunes(const std::string &strKey,
   return rc;
 }
 
-int LaeRangeMux::cmdTuneToFSensor(const std::string &strKey,
-                                  uint_t             uRangeOffset,
-                                  uint_t             uRangeCrossTalk)
+int LaeRangeMuxSubproc::cmdTuneToFSensor(const std::string &strKey,
+                                         uint_t             uRangeOffset,
+                                         uint_t             uRangeCrossTalk)
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   size_t  lenCmd = 0;
@@ -2030,9 +2068,9 @@ int LaeRangeMux::cmdTuneToFSensor(const std::string &strKey,
   return rc;
 }
 
-int LaeRangeMux::cmdTuneAls(const std::string &strKey,
-                            double             fAlsGain,
-                            uint_t             uAlsIntPeriod)
+int LaeRangeMuxSubproc::cmdTuneAls(const std::string &strKey,
+                                   double             fAlsGain,
+                                   uint_t             uAlsIntPeriod)
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
   size_t  lenCmd = 0;
@@ -2082,7 +2120,7 @@ int LaeRangeMux::cmdTuneAls(const std::string &strKey,
   return rc;
 }
 
-int LaeRangeMux::getRange(const std::string &strKey, double &fRange)
+int LaeRangeMuxSubproc::getRange(const std::string &strKey, double &fRange)
 {
   SensorInfoMap::iterator pos;
 
@@ -2099,8 +2137,8 @@ int LaeRangeMux::getRange(const std::string &strKey, double &fRange)
   return LAE_OK;
 }
       
-int LaeRangeMux::getRange(std::vector<std::string> &vecNames,
-                          std::vector<double>      &vecRanges)
+int LaeRangeMuxSubproc::getRange(std::vector<std::string> &vecNames,
+                                 std::vector<double>      &vecRanges)
 {
   SensorInfoMap::iterator iter;
 
@@ -2116,7 +2154,7 @@ int LaeRangeMux::getRange(std::vector<std::string> &vecNames,
   return LAE_OK;
 }
   
-int LaeRangeMux::getAmbientLight(const std::string &strKey, double &fLux)
+int LaeRangeMuxSubproc::getAmbientLight(const std::string &strKey, double &fLux)
 {
   SensorInfoMap::iterator pos;
 
@@ -2133,8 +2171,8 @@ int LaeRangeMux::getAmbientLight(const std::string &strKey, double &fLux)
   return LAE_OK;
 }
   
-int LaeRangeMux::getAmbientLight(std::vector<std::string> &vecNames,
-                                 std::vector<double>      &vecLux)
+int LaeRangeMuxSubproc::getAmbientLight(std::vector<std::string> &vecNames,
+                                        std::vector<double>      &vecLux)
 {
   SensorInfoMap::iterator iter;
 
@@ -2149,12 +2187,12 @@ int LaeRangeMux::getAmbientLight(std::vector<std::string> &vecNames,
 
 }
 
-int LaeRangeMux::getSensorProps(const std::string &strKey,
-                                std::string       &strRadiationType,
-                                double            &fFoV,
-                                double            &fBeamDir,
-                                double            &fMin,
-                                double            &fMax)
+int LaeRangeMuxSubproc::getSensorProps(const std::string &strKey,
+                                       std::string       &strRadiationType,
+                                       double            &fFoV,
+                                       double            &fBeamDir,
+                                       double            &fMin,
+                                       double            &fMax)
 {
   SensorInfoMap::iterator pos;
 
@@ -2180,85 +2218,84 @@ int LaeRangeMux::getSensorProps(const std::string &strKey,
 // LaeRangeSensorGroup Class
 //------------------------------------------------------------------------------
 
-LaeRangeSensorGroup::LaeRangeSensorGroup(laelaps::LaeI2C &i2cBus) :
-        m_interface_2_0(i2cBus), m_interface_2_1(i2cBus)
+LaeRangeSensorGroup::LaeRangeSensorGroup(laelaps::LaeI2C &i2cBus)
 {
-  m_bBlackListed = false;
+  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  {
+    m_interface = new LaeRangeMuxSubproc(i2cBus);
+  }
+  else
+  {
+    m_interface = new LaeVL6180MuxArray(i2cBus);
+  }
+
+  m_bBlackListed         = false;
   RtDb.m_enable.m_bRange = true;
 }
 
 LaeRangeSensorGroup::~LaeRangeSensorGroup()
 {
+  delete m_interface;
 }
 
 void LaeRangeSensorGroup::blacklist()
 {
-  m_bBlackListed = true;
+  m_bBlackListed         = true;
   RtDb.m_enable.m_bRange = false;
 }
 
-void LaeRangeSensorGroup::clear()
+void LaeRangeSensorGroup::whitelist()
 {
-  m_interface_2_0.clear();
-  m_interface_2_1.clear();
+  m_bBlackListed         = false;
+  RtDb.m_enable.m_bRange = true;
+}
+
+void LaeRangeSensorGroup::clearSensedData()
+{
+  m_interface->clearSensedData();
 }
 
 int LaeRangeSensorGroup::getInterfaceVersion(uint_t &uVerMajor,
                                              uint_t &uVerMinor,
                                              uint_t &uFwVer)
 {
-  int   rc;
-
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    uVerMajor = 2;
-    uVerMinor = 1;
-    rc        = m_interface_2_1.cmdGetFwVersion(uFwVer);
-  }
-  else
-  {
-    uVerMajor = 2;
-    uVerMinor = 0;
-    uFwVer    = 0;
-    rc        = LAE_OK;
-  }
-
-  return rc;
+  // ignore blacklist
+  return m_interface->getInterfaceVersion(uVerMajor, uVerMinor, uFwVer);
 }
 
 int LaeRangeSensorGroup::configure(const LaeDesc &desc)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  if( !isBlackListed() )
   {
-    return m_interface_2_1.configure(desc);
+    return m_interface->configure(desc);
   }
   else
   {
-    return m_interface_2_0.configure(desc);
+    return LAE_OK;
   }
 }
 
 int LaeRangeSensorGroup::configure(const LaeTunes &tunes)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  if( !isBlackListed() )
   {
-    return m_interface_2_1.configure(tunes);
+    return m_interface->configure(tunes);
   }
   else
   {
-    return m_interface_2_0.configure(tunes);
+    return LAE_OK;
   }
 }
 
 int LaeRangeSensorGroup::reload(const LaeTunes &tunes)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  if( !isBlackListed() )
   {
-    return m_interface_2_1.reload(tunes);
+    return m_interface->reload(tunes);
   }
   else
   {
-    return m_interface_2_0.reload(tunes);
+    return LAE_OK;
   }
 }
 
@@ -2269,80 +2306,43 @@ int LaeRangeSensorGroup::getSensorProps(const string &strKey,
                                         double       &fMin,
                                         double       &fMax)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    return m_interface_2_1.getSensorProps(strKey, 
-                                  strRadiationType,
-                                  fFoV, fBeamDir,
-                                  fMin, fMax);
-  }
-  else
-  {
-    return m_interface_2_0.getSensorProps(strKey, 
-                                  strRadiationType,
-                                  fFoV, fBeamDir,
-                                  fMin, fMax);
-  }
+  // read-only data - nothing to blacklist
+  return m_interface->getSensorProps(strKey, 
+                                     strRadiationType,
+                                     fFoV, fBeamDir,
+                                     fMin, fMax);
 }
 
 int LaeRangeSensorGroup::getRange(const string &strKey, double &fRange)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    return m_interface_2_1.getRange(strKey, fRange);
-  }
-  else
-  {
-    return m_interface_2_0.getRange(strKey, fRange);
-  }
+  // shadowed data - nothing to blacklist
+  return m_interface->getRange(strKey, fRange);
 }
 
 int LaeRangeSensorGroup::getRange(vector<string> &vecNames,
                                   vector<double> &vecRanges)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    return m_interface_2_1.getRange(vecNames, vecRanges);
-  }
-  else
-  {
-    return m_interface_2_0.getRange(vecNames, vecRanges);
-  }
+  // shadowed data - nothing to blacklist
+  return m_interface->getRange(vecNames, vecRanges);
 }
 
 int LaeRangeSensorGroup::getAmbientLight(const string &strKey, double &fAmbient)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    return m_interface_2_1.getAmbientLight(strKey, fAmbient);
-  }
-  else
-  {
-    return m_interface_2_0.getAmbientLight(strKey, fAmbient);
-  }
+  // shadowed data - nothing to blacklist
+  return m_interface->getAmbientLight(strKey, fAmbient);
 }
 
 int LaeRangeSensorGroup::getAmbientLight(vector<string> &vecNames,
                                          vector<double> &vecAmbient)
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
-  {
-    return m_interface_2_1.getAmbientLight(vecNames, vecAmbient);
-  }
-  else
-  {
-    return m_interface_2_0.getAmbientLight(vecNames, vecAmbient);
-  }
+  // shadowed data - nothing to blacklist
+  return m_interface->getAmbientLight(vecNames, vecAmbient);
 }
 
 void LaeRangeSensorGroup::exec()
 {
-  if( RtDb.m_product.m_uProdHwVer >= LAE_VERSION(2, 1, 0) )
+  if( !isBlackListed() )
   {
-    m_interface_2_1.exec();
-  }
-  else
-  {
-    m_interface_2_0.exec();
+    m_interface->exec();
   }
 }

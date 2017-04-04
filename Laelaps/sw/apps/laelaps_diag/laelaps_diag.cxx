@@ -169,7 +169,7 @@ static OptsInfo_T OptsInfo[] =
     NULL,                 // arg_name
                           // opt desc
     "For each diagnositc, the user presses any keyboard key to progress to"
-    " the next diagnostic."
+    " the next diagnostic. Only valid for batt, imu, tof diagnostics."
   },
 
 
@@ -197,7 +197,6 @@ static DiagStats prelims()
         " - 'sudo laelaps_service stop' utility\n"
         " - 'sudo service laelaps_control stop' system init script.");
     statsTotal.fatal = true;
-    return statsTotal;
   }
   else
   {
@@ -210,22 +209,25 @@ static DiagStats prelims()
   //
   // Get robot description (and version)
   //
-  if( xml.load(RobotDesc, LaeSysCfgPath, LaeEtcCfg) < 0 )
+  if( !statsTotal.fatal )
   {
-    printTestResult(FatalTag, "Loading XML file '%s' failed.", LaeEtcCfg);
-    statsTotal.fatal = true;
-    return statsTotal;
-  }
-  else
-  {
-    RobotDesc.markAsDescribed();
-    printTestResult(PassTag, "Robot v%s description from '%s' loaded.\n",
+    if( xml.load(RobotDesc, LaeSysCfgPath, LaeEtcCfg) < 0 )
+    {
+      printTestResult(FatalTag, "Loading XML file '%s' failed.", LaeEtcCfg);
+      statsTotal.fatal = true;
+      return statsTotal;
+    }
+    else
+    {
+      RobotDesc.markAsDescribed();
+      printTestResult(PassTag, "Robot v%s description from '%s' loaded.\n",
         RobotDesc.getProdHwVerString().c_str(), LaeEtcCfg);
-    ++statsTotal.passCnt;
+      ++statsTotal.passCnt;
+    }
   }
 
   //
-  // Laelaps diagnostics that use the shared I2C bus.
+  // Laelaps diagnostics that use shared resources.
   //
   for(size_t i = 0; i < DiagnosticsToRun.size(); ++i)
   {
@@ -242,7 +244,7 @@ static DiagStats prelims()
     }
   }
 
-  if( bUsesI2C )
+  if( !statsTotal.fatal && bUsesI2C )
   {
     ++statsTotal.testCnt;
     if( I2CBus.open(LaeDevI2C) < 0 )
@@ -257,7 +259,7 @@ static DiagStats prelims()
     }
   }
 
-  if( bUsesWd )
+  if( !statsTotal.fatal && bUsesWd )
   {
     uint_t  uFwVer;
 
@@ -413,7 +415,7 @@ int main(int argc, char* argv[])
     }
     else if( strDiag == "tof" )
     {
-      statsGrandTotal += runToFDiagnostics();
+      statsGrandTotal += runToFDiagnostics(OptsAnyKey);
     }
     else if( strDiag == "imu" )
     {

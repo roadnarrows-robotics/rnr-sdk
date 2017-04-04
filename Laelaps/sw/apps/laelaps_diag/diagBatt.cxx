@@ -429,7 +429,7 @@ DiagStats runBatteryDiagnostics(bool bAnyKey)
       bQuit = true;
     }
 
-    if( !bQuit )
+    else
     {
       usleep(500000);
     }

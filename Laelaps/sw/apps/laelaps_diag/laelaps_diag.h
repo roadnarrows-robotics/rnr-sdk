@@ -185,7 +185,7 @@ extern DiagStats runProductDiagnostics();
 
 extern DiagStats runMotorsDiagnostics(bool bTestMotion);
 
-extern DiagStats runToFDiagnostics();
+extern DiagStats runToFDiagnostics(bool bAnyKey);
 
 extern DiagStats runImuDiagnostics();
 

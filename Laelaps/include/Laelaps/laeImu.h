@@ -162,7 +162,8 @@ namespace sensor
       void convert(double phi, double theta, double psi);
 
     protected:
-    };
+
+    }; // class Quaternion
 
 
     //--------------------------------------------------------------------------
@@ -216,10 +217,13 @@ namespace sensor
 
       /*!
        * \brief Black list IMU from robot sensors.
-       *
-       * \return Returns true or false.
        */
       virtual void blacklist();
+
+      /*!
+       * \brief White list IMU sensor.
+       */
+      virtual void whitelist();
 
       /*!
        * \brief Test if IMU is black listed.
@@ -230,6 +234,11 @@ namespace sensor
       {
         return m_bBlackListed;
       }
+
+      /*!
+       * \brief Clear IMU sensed data.
+       */
+      virtual void clearSensedData();
 
       /*!
        * \brief Get the total IMU degress of freedom.
@@ -559,12 +568,7 @@ namespace sensor
       {
         pthread_mutex_unlock(&m_mutexOp);
       }
-
-      /*!
-       * \brief Zero IMU data.
-       */
-      void zeroData();
-    };
+    }; // class LaeImu
 #endif // SWIG
 
 
@@ -935,7 +939,7 @@ namespace sensor
        */
       int unpack32(byte_t buf[], uint_t &val);
 
-    };
+    }; // class LaeImuCleanFlight;
 #endif // SWIG
 
 #ifndef SWIG

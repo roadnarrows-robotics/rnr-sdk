@@ -171,7 +171,7 @@ int LaeKinematics::open(const std::string &strDevMotorCtlrs,
     return -LAE_ECODE_MOT_CTLR;
   }
 
-  LOGDIAG3("Opened motor controllers chip select signal on GPIO %d.",
+  LOGDIAG2("Opened motor controllers chip select signal on GPIO %d.",
         LaeGpioMotorCtlrCs);
 #endif // LAE_DEPRECATED
 
@@ -186,7 +186,7 @@ int LaeKinematics::open(const std::string &strDevMotorCtlrs,
     return -LAE_ECODE_MOT_CTLR;
   }
 
-   LOGDIAG3("Open motor controllers serial communication on %s@%d.",
+  LOGDIAG3("Open motor controllers serial communication on %s@%d.",
         strDevName.c_str(), nBaudRate);
 
   // 
@@ -241,6 +241,8 @@ int LaeKinematics::close()
     LOGWARN("Failed to disable power to motor controllers.");
   }
 
+  LOGDIAG2("Closed motor controllers serial communication.");
+
   return LAE_OK;
 }
 
@@ -261,6 +263,7 @@ void LaeKinematics::enableMotorCtlrs()
     if( (rc = m_fnEnableMotorCtlrs(m_pEnableArg, true)) == LAE_OK )
     {
       m_bIsEnabled = true;
+      LOGDIAG2("Power to motor controllers enabled.");
     }
   }
 
@@ -295,6 +298,8 @@ void LaeKinematics::disableMotorCtlrs()
 
       RtDb.m_robotstatus.m_bAreMotorsPowered  = m_bAreMotorsPowered;
       RtDb.m_robotstatus.m_bInMotion          = m_bIsStopped? false: true;
+
+      LOGDIAG2("Power to motor controllers disabled.");
     }
   }
 

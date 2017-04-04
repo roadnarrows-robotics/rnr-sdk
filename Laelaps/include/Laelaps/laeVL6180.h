@@ -770,6 +770,169 @@ namespace sensor
 
 
     // -------------------------------------------------------------------------
+    // LaeRangeInterface Class
+    // -------------------------------------------------------------------------
+
+    /*!
+     * \brief Range sensors interface virtual base class.
+     */
+    class LaeRangeInterface
+    {
+    public:
+      /*!
+       * \brief Initialization constructor.
+       *
+       * \note The constructor should be kept light weight.
+       *
+       * \param i2cbus  Bound open \h_i2c bus instance.
+       */
+      LaeRangeInterface(laelaps::LaeI2C &i2cBus) : m_i2cBus(i2cBus)
+      {
+      }
+
+      /*!
+       * \brief Destructor.
+       */
+      virtual ~LaeRangeInterface()
+      {
+      }
+
+      /*!
+       * \brief Get interface version.
+       *
+       * \param [out] uVerMajor   Interface version major number.
+       * \param [out] uVerMinor   Interface version minor number.
+       * \param [out] uFwVer      Firmware version.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getInterfaceVersion(uint_t &uVerMajor,
+                                      uint_t &uVerMinor,
+                                      uint_t &uFwVer)
+      {
+        uVerMajor = 0;
+        uVerMinor = 0;
+        uFwVer    = 0;
+
+        return laelaps::LAE_OK;
+      }
+
+      /*!
+       * \brief Clear sensed data.
+       */
+      virtual void clearSensedData() = 0;
+
+      /*!
+       * \brief Configure sensor array from product description.
+       *
+       * \param desc    Product description.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int configure(const laelaps::LaeDesc &desc) = 0;
+
+      /*!
+       * \brief Configure sensor array from tuning parameters.
+       *
+       * \param tunes   Tuning parameters.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int configure(const laelaps::LaeTunes &tunes) = 0;
+
+      /*!
+       * \brief Reload configuration tuning parameters.
+       *
+       * \param tunes   Tuning parameters.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int reload(const laelaps::LaeTunes &tunes) = 0;
+
+      /*!
+       * \brief Execute task in one cycle to take measurements.
+       *
+       * \par Context:
+       * LaeThreadRange thread instance.
+       */
+      virtual void exec() = 0;
+
+
+      //........................................................................
+      // Attribute Member Functions
+      //........................................................................
+  
+      /*!
+       * \brief Get a range measurement.
+       *
+       * \param strKey        Sensor's unique name (key).
+       * \param [out] fRange  Sensed object range (meters).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getRange(const std::string &strKey, double &fRange) = 0;
+  
+      /*!
+       * \brief Get all sensor range measurements.
+       *
+       * \param [out] vecNames    Vector of sensor unique names.
+       * \param [out] vecRanges   Vector of associated sensor measured ranges
+       *                          (meters).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getRange(std::vector<std::string> &vecNames,
+                           std::vector<double>      &vecRanges) = 0;
+  
+      /*!
+       * \brief Get an ambient light illuminance measurement.
+       *
+       * \param strKey          Sensor's unique name (key).
+       * \param [out] fAmbient  Sensed ambient light (lux).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getAmbientLight(const std::string &strKey,
+                                  double            &fAmbient) = 0;
+  
+      /*!
+       * \brief Get all sensor ambient light illuminance measurements.
+       *
+       * \param strKey            Sensor's unique name (key).
+       * \param [out] vecAmbient  Vector of associated sensor measured ambients
+       *                          (lux).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getAmbientLight(std::vector<std::string> &vecNames,
+                                  std::vector<double> &vecAmbient) = 0;
+
+      /*!
+       * \brief Get range sensor properties.
+       *
+       * \param strKey                 Sensor's unique name id (key).
+       * \param [out] strRadiationType Radiation type.
+       * \param [out] fFoV             Field of View (radians).
+       * \param [out] fBeamdir         Center of beam direction (radians).
+       * \param [out] fMin             Minimum range (meters).
+       * \param [out] fMax             Maximum range (meters).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getSensorProps(const std::string &strKey,
+                                 std::string       &strRadiationType,
+                                 double            &fFoV,
+                                 double            &fBeamDir,
+                                 double            &fMin,
+                                 double            &fMax) = 0;
+
+    protected:
+      laelaps::LaeI2C  &m_i2cBus;       ///< bound \h_i2c bus instance
+
+    }; // class LaeRangeInterface
+
+
+    // -------------------------------------------------------------------------
     // LaeVL6180MuxArray Class
     // -------------------------------------------------------------------------
     
@@ -781,7 +944,7 @@ namespace sensor
      *
      * Used in 2.0 hardware.
      */
-    class LaeVL6180MuxArray
+    class LaeVL6180MuxArray : public LaeRangeInterface
     {
     public:
       static const int AlsFreq = 4; ///< take an ambient measurement cycle rate
@@ -792,10 +955,9 @@ namespace sensor
       /*!
        * \brief Initialization constructor.
        *
-       * \note The constructor should be kept light weight, since hardware
-       * version determines if this class is used. See \ref LaeRangeMux.
+       * \note The constructor should be kept light weight.
        *
-       * \param mux       \h_i2c multiplexer switch.
+       * \param i2cbus  Bound open \h_i2c bus instance.
        */
       LaeVL6180MuxArray(laelaps::LaeI2C &i2cBus);
 
@@ -805,9 +967,22 @@ namespace sensor
       virtual ~LaeVL6180MuxArray();
 
       /*!
-       * \brief Clear data.
+       * \brief Get interface version.
+       *
+       * \param [out] uVerMajor   Interface version major number.
+       * \param [out] uVerMinor   Interface version minor number.
+       * \param [out] uFwVer      Firmware version.
+       *
+       * \copydoc doc_return_std
        */
-      void clear();
+      virtual int getInterfaceVersion(uint_t &uVerMajor,
+                                      uint_t &uVerMinor,
+                                      uint_t &uFwVer);
+
+      /*!
+       * \brief Clear sensed data.
+       */
+      virtual void clearSensedData();
 
       /*!
        * \brief Configure sensor array from product description.
@@ -922,7 +1097,7 @@ namespace sensor
 
 
     // -------------------------------------------------------------------------
-    // LaeRangeMux Class
+    // LaeRangeMuxSubproc Class
     // -------------------------------------------------------------------------
 
     /*!
@@ -934,7 +1109,7 @@ namespace sensor
      *
      * Used in 2.1+ hardware.
      */
-    class LaeRangeMux
+    class LaeRangeMuxSubproc : public LaeRangeInterface
     {
     public:
       //
@@ -951,24 +1126,36 @@ namespace sensor
       /*!
        * \brief Initialization constructor.
        *
-       * \note The constructor should be kept light weight, since hardware
-       * version determines if this class is used. See \ref LaeVL6180MuxArray.
+       * \note The constructor should be kept light weight.
        *
        * \param i2cbus  Bound open \h_i2c bus instance.
        * \param addr    ToF multiplexor sub-processor I2C address.
        */
-      LaeRangeMux(laelaps::LaeI2C &i2cBus,
-                  uint_t addr=laelaps::LaeI2CAddrToFMux);
+      LaeRangeMuxSubproc(laelaps::LaeI2C &i2cBus,
+                         uint_t addr=laelaps::LaeI2CAddrToFMux);
   
       /*!
        * \brief Destructor.
        */
-      virtual ~LaeRangeMux();
+      virtual ~LaeRangeMuxSubproc();
   
       /*!
-       * \brief Clear data.
+       * \brief Get interface version.
+       *
+       * \param [out] uVerMajor   Interface version major number.
+       * \param [out] uVerMinor   Interface version minor number.
+       * \param [out] uFwVer      Firmware version.
+       *
+       * \copydoc doc_return_std
        */
-      void clear();
+      virtual int getInterfaceVersion(uint_t &uVerMajor,
+                                      uint_t &uVerMinor,
+                                      uint_t &uFwVer);
+
+      /*!
+       * \brief Clear sensed data.
+       */
+      virtual void clearSensedData();
 
       /*!
        * \brief Configure sensor array from product description.
@@ -1158,7 +1345,6 @@ namespace sensor
       
     protected:
       // hardware
-      laelaps::LaeI2C  &m_i2cBus;       ///< bound \h_i2c bus instance
       uint_t            m_addrSubProc;  ///< \h_i2c sub-processor address
       uint_t            m_uFwVer;       ///< firmware version number
 
@@ -1200,7 +1386,7 @@ namespace sensor
 
       int cmdGetAmbientLight();
 
-    }; // class LaeRangeMux
+    }; // class LaeRangeMuxSubproc
 
 
     // -------------------------------------------------------------------------
@@ -1210,14 +1396,11 @@ namespace sensor
     /*!
      * \brief Range sensor group class.
      *
-     * Laelaps sensor hardware changed between v2.0 and v2.1.
+     * Laelaps sensor hardware had major changes between v2.0 and v2.1.
      */
     class LaeRangeSensorGroup
     {
     public:
-      LaeVL6180MuxArray m_interface_2_0;  ///< interface v2.0
-      LaeRangeMux       m_interface_2_1;  ///< interface v2.1+
-
       /*!
        * \brief Default constructor.
        *
@@ -1232,10 +1415,13 @@ namespace sensor
 
       /*!
        * \brief Black list range sensor group from robot sensors.
-       *
-       * \return Returns true or false.
        */
       virtual void blacklist();
+
+      /*!
+       * \brief White list range sensor group from robot sensors.
+       */
+      virtual void whitelist();
 
       /*!
        * \brief Test if range sensor group is black listed.
@@ -1248,9 +1434,9 @@ namespace sensor
       }
 
       /*!
-       * \brief Clear data.
+       * \brief Clear sensedd data.
        */
-      void clear();
+      void clearSensedData();
 
       /*!
        * \brief Get interface version.
@@ -1364,7 +1550,8 @@ namespace sensor
       virtual void exec();
 
     protected:
-      bool      m_bBlackListed; ///< range sensor group is [not] black listed.
+      LaeRangeInterface  *m_interface;    ///< the interface
+      bool                m_bBlackListed; ///< sensor group [not] black listed.
 
     }; // class LaeRangeSensorGroup
 

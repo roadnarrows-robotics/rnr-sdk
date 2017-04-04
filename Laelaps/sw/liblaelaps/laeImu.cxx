@@ -129,7 +129,7 @@ LaeImu::LaeImu(string strIdent) : m_strIdent(strIdent)
   m_fd           = -1;
   m_bBlackListed = false;
 
-  zeroData();
+  clearSensedData();
 
   pthread_mutex_init(&m_mutexIo, NULL);
   pthread_mutex_init(&m_mutexOp, NULL);
@@ -169,9 +169,9 @@ int LaeImu::open(const string &strDevName, int nBaudRate)
 
     RtDb.m_enable.m_bImu = true;
 
-    zeroData();
+    clearSensedData();
 
-    LOGDIAG3("Opened interface to IMU on %s@%d.",
+    LOGDIAG2("Opened interface to IMU on %s@%d.",
       strDevNameReal.c_str(), nBaudRate);
 
     rc = LAE_OK;
@@ -189,8 +189,7 @@ int LaeImu::close()
   if( m_fd >= 0 )
   {
     SerDevClose(m_fd);
-    LOGDIAG3("Closed %s interface to IMU.", 
-        m_strDevName.c_str());
+    LOGDIAG2("Closed %s interface to IMU.", m_strDevName.c_str());
   }
 
   m_strDevName.clear();
@@ -209,9 +208,14 @@ void LaeImu::blacklist()
     close();
   }
 
-  m_bBlackListed = true;
-
+  m_bBlackListed       = true;
   RtDb.m_enable.m_bImu = false;
+}
+
+void LaeImu::whitelist()
+{
+  m_bBlackListed       = false;
+  RtDb.m_enable.m_bImu = true;
 }
 
 int LaeImu::configure(const LaeDesc &desc)
@@ -229,7 +233,7 @@ int LaeImu::reload(const LaeTunes &tunes)
   return LAE_OK;
 }
 
-void LaeImu::zeroData()
+void LaeImu::clearSensedData()
 {
   for(int i = 0; i < NumOfAxes; ++i)
   {
@@ -264,6 +268,11 @@ void LaeImu::computeDynamics()
 
 void LaeImu::exec()
 {
+  if( isBlackListed() )
+  {
+    return;
+  }
+
   lockOp();
 
   if( readRawImu() == LAE_OK )
@@ -355,6 +364,7 @@ int LaeImuCleanFlight::readIdentity(string &strIdent)
 
   if( isBlackListed() )
   {
+    strIdent = "Unknown - blacklisted";
     rc = LAE_OK; 
   }
 
@@ -453,6 +463,11 @@ int LaeImuCleanFlight::mspReadIdent(MspIdent &ident)
   byte_t  rspData[RspDataLen];
   int     rc;
 
+  if( !isOpen() )
+  {
+    return -LAE_ECODE_IO;
+  }
+
   lockIo();
 
   if( (rc = sendCmd(CmdId, NULL, 0)) == LAE_OK )
@@ -481,6 +496,11 @@ int LaeImuCleanFlight::mspReadRawImu()
   byte_t  rspData[RspDataLen];
   int     i, n;
   int     rc;
+
+  if( !isOpen() )
+  {
+    return -LAE_ECODE_IO;
+  }
 
   lockIo();
 
@@ -518,6 +538,11 @@ int LaeImuCleanFlight::mspReadAttitude()
   byte_t  rspData[RspDataLen];
   int     i, n;
   int     rc;
+
+  if( !isOpen() )
+  {
+    return -LAE_ECODE_IO;
+  }
 
   lockIo();
 
@@ -659,7 +684,6 @@ void LaeImuCleanFlight::resyncComm()
 
   LOGDIAG3("IMU: Resynchronizing serial communication.");
 
-
   for(nTries = 0; nTries < nMaxTries; ++nTries)
   {
     flush(TFlushDelay);
@@ -670,6 +694,9 @@ void LaeImuCleanFlight::resyncComm()
   }
 
   LOGWARN("IMU: Failed to resynchronize communication in %d tries.", nMaxTries);
+  LOGWARN("IMU: Blacklisting.", nMaxTries);
+
+  blacklist();
 }
 
 void LaeImuCleanFlight::flush(uint_t t)

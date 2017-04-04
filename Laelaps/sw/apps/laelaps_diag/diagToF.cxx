@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-01 15:14:45 -0700 (Mon, 01 Feb 2016) $
- * $Rev: 4289 $
- *
  * \brief Perform Laelaps Time-of-Flight sensors diagnostics.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -66,11 +63,11 @@
 // common
 #include "Laelaps/laelaps.h"
 #include "Laelaps/laeUtils.h"
+#include "Laelaps/laeDesc.h"
 
 // hardware
 #include "Laelaps/laeSysDev.h"
 #include "Laelaps/laeI2C.h"
-#include "Laelaps/laeI2CMux.h"
 #include "Laelaps/laeVL6180.h"
 
 #include "laelaps_diag.h"
@@ -82,207 +79,117 @@ using namespace sensor::vl6180;
 static const char *SubSysName = "ToF";
 static const char *ProdName   = "VL6180";
 
-/*!
- * \brief Laelaps Time-of-Flight subsystem information structure.
- */
-struct LaelapsToFInfo
+static const char *SensorKeys[ToFSensorMaxNumOf] = 
 {
-  const char *m_sNameKey;     ///< sensor name key
-  int         m_nChan;        ///< sensor mux channel
-  double      m_fDir;         ///< sensor beam center direction
-  bool        m_bIsStd;       ///< sensor is [not] standard option
-  bool        m_bBlackListed; ///< sensor is black listed (bad)
+  "front", "left_front", "left", "left_rear",
+  "rear", "right_rear", "right", "right_front"
 };
 
-/*!
- * \brief Laelaps Time-of-Flight subsystem information.
- */
-static LaelapsToFInfo ToFInfo[ToFSensorMaxNumOf] =
+static DiagStats initSensors(LaeRangeSensorGroup &rnggrp)
 {
-  {"front",       ToFSensor0Chan, ToFSensor0Dir, true,    false},
-  {"left_front",  ToFSensor1Chan, ToFSensor1Dir, true,    false},
-  {"left",        ToFSensor2Chan, ToFSensor2Dir, false,   false},
-  {"left_rear",   ToFSensor3Chan, ToFSensor3Dir, false,   false},
-  {"rear",        ToFSensor4Chan, ToFSensor4Dir, false,   false},
-  {"right_rear",  ToFSensor5Chan, ToFSensor5Dir, false,   false},
-  {"right",       ToFSensor6Chan, ToFSensor6Dir, false,   false},
-  {"right_front", ToFSensor7Chan, ToFSensor7Dir, true,    false}
-};
+  uint_t    uVerMajor, uVerMinor, uFwVer;
 
-static vector<LaeVL6180Mux*>  ToFSensors;
-
-static DiagStats initSensors()
-{
-  size_t      i;
   DiagStats   stats;
 
   printSubHdr("Initialize Sensors");
 
-  //
-  // Requirements
-  //
   stats.testCnt += 1;
-  if( I2CMux.isOpen() )
+
+  if( rnggrp.getInterfaceVersion(uVerMajor, uVerMinor, uFwVer) == LAE_OK )
   {
-    printTestResult(PassTag, "Communication interface %s is open.",
-        I2CMux.getDevName().c_str());
+    printTestResult(PassTag, "Connected to Range Sensor Group %u.%u, fwver=%u.",
+        uVerMajor, uVerMinor, uFwVer);
     stats.passCnt += 1;
+
+    rnggrp.clearSensedData();
   }
   else
   {
     printTestResult(FatalTag,
-        "Communication interface not open - cannot continue.");
+        "Failed to read range sensor group interface version.");
     stats.fatal = true;
-    return stats;
   }
 
-  //
-  // Create
-  //
-  for(i=0; i<arraysize(ToFInfo); ++i)
+  if( !stats.fatal )
   {
-    ToFSensors.push_back(new LaeVL6180Mux(I2CMux,
-                                  ToFInfo[i].m_nChan,
-                                  ToFInfo[i].m_fDir,
-                                  0.0, 
-                                  ToFInfo[i].m_sNameKey));
-  }
+    stats.testCnt += 1;
 
-  //
-  // Initialize
-  //
-  for(i=0; i<ToFSensors.size(); ++i)
-  {
-    if( !ToFInfo[i].m_bIsStd )
+    if( rnggrp.configure(RobotDesc) == LAE_OK )
     {
-      continue;
-    }
-
-    ++stats.testCnt;
-
-    if( ToFSensors[i]->initSensor() == LAE_OK )
-    {
-      printTestResult(PassTag, "%s Sensor %s(%d): Initialized.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-      ++stats.passCnt;
+      printTestResult(PassTag,
+          "Configured range sensors from robot description.");
+      stats.passCnt += 1;
     }
     else
     {
-      printTestResult(FailTag, "%s Sensor %s(%d): Failed to initialize.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-      ToFInfo[i].m_bBlackListed = true;
+      printTestResult(FailTag, "Failed to configure range sensors.");
     }
   }
 
   return stats;
 }
 
-static DiagStats readInfo()
+static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
 {
-  struct VL6180xIdentification id;
-  byte_t        valRangeOffset;
-  byte_t        valRangeCrossTalk;
-  byte_t        valAlsGain;
-  u16_t         valAlsIntPeriod;
-  const char   *sTag;
+  const char *sKey;
+  string      strRadiationType;
+  double      fFoV;
+  double      fBeamDir;
+  double      fMin;
+  double      fMax;
+  bool        bInstalled;
+  int         rc;
+
   DiagStats     stats;
 
-  printSubHdr("Read Sensors Information and Configuration");
+  printSubHdr("Read Sensors Properties and Tuning");
 
   //
   // Read Info and Config
   //
-  for(size_t i = 0; i < ToFSensors.size(); ++i)
+  for(size_t i = 0; i < ToFSensorMaxNumOf; ++i)
   {
-    if( !ToFInfo[i].m_bIsStd )
+    sKey = SensorKeys[i];
+
+    stats.testCnt += 1;
+
+    rc = rnggrp.getSensorProps(sKey, strRadiationType,
+                               fFoV, fBeamDir, fMin, fMax);
+
+    if( rc == LAE_OK )
     {
-      continue;
+      printTestResult(PassTag, "%s %s sensor: Got sensor properties.",
+          ProdName, sKey);
+      stats.passCnt += 1;
+      bInstalled = true;
+    }
+    else if( rc == -LAE_ECODE_BAD_VAL )
+    {
+      printTestResult(PassTag, "%s %s sensor: NOT INSTALLED.", ProdName, sKey);
+      stats.passCnt += 1;
+      bInstalled = false;
+    }
+    else 
+    {
+      printTestResult(FailTag, "%s %s sensor: Failed to get sensor properties.",
+          ProdName, sKey);
+      bInstalled = false;
     }
 
-    if( ToFInfo[i].m_bBlackListed )
-    {
-      ++stats.testCnt;
-      printTestResult(FailTag, "%s %s(%d) sensor: Black listed.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-      continue;
-    }
-
-    ++stats.testCnt;
-
-    memset(&id, 0, sizeof(struct VL6180xIdentification));
-    sTag = FailTag;
-    if( ToFSensors[i]->readId(id) == LAE_OK )
-    {
-      ++stats.passCnt;
-      sTag = PassTag;
-    }
-    printTestResult(sTag,
-          "%s %s(%d) sensor: Read sensor identification.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-
-    ++stats.testCnt;
-
-    valRangeOffset = 0;
-    sTag = FailTag;
-    if( ToFSensors[i]->readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET,
-                                valRangeOffset) == LAE_OK )
-    {
-      ++stats.passCnt;
-      sTag = PassTag;
-    }
-    printTestResult(sTag,
-          "%s %s(%d) sensor: Read range sensor part-to-part offset.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-
-    ++stats.testCnt;
-
-    valRangeCrossTalk = 0;
-    sTag = FailTag;
-    if( ToFSensors[i]->readReg8(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE,
-                                valRangeCrossTalk) == LAE_OK )
-    {
-      ++stats.passCnt;
-      sTag = PassTag;
-    }
-    printTestResult(sTag,
-          "%s %s(%d) sensor: Read range sensor cross-talk compensation.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-
-    ++stats.testCnt;
-
-    valAlsGain = 0;
-    sTag = FailTag;
-    if( ToFSensors[i]->readReg8(VL6180X_SYSALS_ANALOGUE_GAIN,
-                                valAlsGain) == LAE_OK )
-    {
-      ++stats.passCnt;
-      sTag = PassTag;
-    }
-    printTestResult(sTag,
-          "%s %s(%d) sensor: Read ambient light sensor gain.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-
-    ++stats.testCnt;
-
-    valAlsIntPeriod = 0;
-    sTag = FailTag;
-    if( ToFSensors[i]->readReg16(VL6180X_SYSALS_INTEGRATION_PERIOD,
-                                valAlsIntPeriod) == LAE_OK )
-    {
-      ++stats.passCnt;
-      sTag = PassTag;
-    }
-    printTestResult(sTag,
-          "%s %s(%d) sensor: Read ambient light sensor integration period.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-
+    // GET IDENT
+    // GET TUNING
+ 
     printf("\n");
-    printf("%s %s(%d) Sensor Info:\n",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
+    printf("%s %s Sensor Info:\n", SubSysName, ProdName);
+    printf("  Location:       %s\n", sKey);
+    printf("  Beam Direction: %.1lf degrees\n", radToDeg(fBeamDir));
+    printf("  Radiation:      %s\n", strRadiationType.c_str());
+    printf("  FoV:            %.1lf degrees\n", radToDeg(fFoV));
+    printf("  Min Distance:   %.3lf meters\n", fMin);
+    printf("  MAx Distance:   %.3lf meters", fMax);
+#if 0
     printf("  Name:             %s\n", ToFSensors[i]->getNameId().c_str());
     printf("  Desc:             %s\n", ToFSensors[i]->getDesc().c_str());
-    printf("  Beam Direction:   %.1lf degress\n",
-        radToDeg(ToFSensors[i]->getBeamDir()));
     printf("  Sensor:           %s\n", ProdName);
     printf("  Model:            0x%02x v%u.%u\n",
           id.idModel, id.idModelRevMajor, id.idModelRevMinor);
@@ -294,130 +201,115 @@ static DiagStats readInfo()
     printf("  ALS Gain:         %u\n", valAlsGain & 0x07);
     printf("  ALS Int. Period:  %u\n", valAlsIntPeriod);
     printf("\n");
+#endif // 0
   }
 
   return stats;
 }
 
-static DiagStats measure()
+static DiagStats measureDistance(LaeRangeSensorGroup &rnggrp, int cnt)
 {
-  double    fMeters;
-  double    fLux;
-  int       cnt;
-  int       measCnt;
+  vector<string>  keys;
+  vector<double>  distance;
+  bool            showLabel;
+  int             rc;
+
   DiagStats stats;
 
-  printSubHdr("Make Measurements");
+  showLabel = cnt == 0;
 
-  //
-  // Measure
-  //
-  for(size_t i = 0; i < ToFSensors.size(); ++i)
+  ++stats.testCnt;
+
+  rc = rnggrp.getRange(keys, distance);
+
+  if( rc == OK )
   {
-    if( !ToFInfo[i].m_bIsStd )
-    {
-      continue;
-    }
-
-    if( ToFInfo[i].m_bBlackListed )
-    {
-      ++stats.testCnt;
-
-      printTestResult(FailTag, "%s %s(%d) sensor: Black listed.",
-          SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-      continue;
-    }
-
-    printf("%s %s %s(%d) sensor: Range(meters): ",
-          WaitTag, SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-    fflush(stdout);
-
-    //
-    // Meassure object range N times.
-    //
-    ++stats.testCnt;
-
-    for(cnt = 0, measCnt = 0; cnt < 4; ++cnt)
-    {
-      fMeters = ToFSensors[i]->measureRange();
-
-      if( fMeters == VL6180X_ERR_MEAS )
-      {
-        printf("error ");
-      }
-      else if( fMeters == VL6180X_RANGE_NO_OBJ )
-      {
-        ++measCnt;
-        printf("no_obj ");
-      }
-      else
-      {
-        ++measCnt;
-        printf("%.3lf ", fMeters);
-      }
-      fflush(stdout);
-    }
-
-    if( measCnt >= (cnt - 1) )
-    {
-      printf("\r%s\n", PassTag);
-      ++stats.passCnt;
-    }
-    else
-    {
-      printf("\r%s\n", FailTag);
-    }
-
-    printf("%s %s %s(%d) sensor: Ambient(lux):  ",
-          WaitTag, SubSysName, ToFInfo[i].m_sNameKey, ToFInfo[i].m_nChan);
-    fflush(stdout);
-
-    //
-    // Meassure ambient light N times.
-    //
-    ++stats.testCnt;
-
-    for(cnt = 0, measCnt = 0; cnt < 4; ++cnt)
-    {
-      fLux = ToFSensors[i]->measureAmbientLight();
-
-      if( fLux == VL6180X_ERR_MEAS )
-      {
-        printf("error ");
-      }
-      else
-      {
-        ++measCnt;
-        printf("%.1lf ", fLux);
-      }
-      fflush(stdout);
-    }
-
-    if( measCnt >= (cnt - 1) )
-    {
-      printf("\r%s\n", PassTag);
-      ++stats.passCnt;
-    }
-    else
-    {
-      printf("\r%s\n", FailTag);
-    }
+    ++stats.passCnt;
   }
+  else
+  {
+    printTestResult(FailTag, "%s: Failed to get distance measurements.",
+      SubSysName);
+    showLabel = true;
+  }
+
+  if( showLabel )
+  {
+    for(size_t i = 0; i < keys.size(); ++i)
+    {
+      printf("%8s ", keys[i].c_str());
+    }
+    printf("\n");
+  }
+
+  for(size_t i = 0; i < distance.size(); ++i)
+  {
+    printf("%8.3lf ", distance[i]);
+  }
+  printf("\r");
+  fflush(stdout);
 
   return stats;
 }
 
-DiagStats runToFDiagnostics()
+static DiagStats measureAmbient(LaeRangeSensorGroup &rnggrp, int cnt)
+{
+  vector<string>  keys;
+  vector<double>  ambient;
+  bool            showLabel;
+  int             rc;
+
+  DiagStats stats;
+
+  showLabel = cnt == 0;
+
+  rc = rnggrp.getAmbientLight(keys, ambient);
+
+  if( rc == OK )
+  {
+    ++stats.passCnt;
+  }
+  else
+  {
+    printTestResult(FailTag, "%s: Failed to get ambient light measurements.",
+      SubSysName);
+    showLabel = true;
+  }
+
+  if( showLabel )
+  {
+    for(size_t i = 0; i < keys.size(); ++i)
+    {
+      printf("%8s ", keys[i].c_str());
+    }
+    printf("\n");
+  }
+
+  for(size_t i = 0; i < ambient.size(); ++i)
+  {
+    printf("%8.2lf ", ambient[i]);
+  }
+  printf("\r");
+  fflush(stdout);
+
+  return stats;
+}
+
+DiagStats runToFDiagnostics(bool bAnyKey)
 {
   DiagStats   statsTest;
   DiagStats   statsTotal;
+  int         cnt;
+  bool        bQuit;
 
   printHdr("Time-of-Flight Sensors Diagnostics");
+
+  LaeRangeSensorGroup  rangegroup(I2CBus);
 
   //
   // Init Tests
   //
-  statsTest = initSensors();
+  statsTest = initSensors(rangegroup);
 
   printSubTotals(statsTest);
 
@@ -428,25 +320,69 @@ DiagStats runToFDiagnostics()
   //
   if( !statsTotal.fatal )
   {
-    statsTest = readInfo();
+    statsTest = getSensorInfo(rangegroup);
 
     printSubTotals(statsTest);
 
     statsTotal += statsTest;
   }
+
+  //
+  // Take distance measurements.
+  //
  
-  //
-  // Take measurements
-  //
-  if( !statsTotal.fatal )
+  statsTest.zero();
+  bQuit = statsTotal.fatal;
+  cnt = 0;
+
+  printSubHdr("Distance Measurements");
+
+  while( !bQuit )
   {
-    statsTest = measure();
+    statsTest += measureDistance(rangegroup, cnt++);
 
-    printSubTotals(statsTest);
-
-    statsTotal += statsTest;
+    if( !bAnyKey || kbhit() || statsTest.fatal )
+    {
+      printf("\n");
+      printSubTotals(statsTest);
+      bQuit = true;
+    }
+    else
+    {
+      usleep(500000);
+    }
   }
- 
+
+  statsTotal += statsTest;
+
+  //
+  // Take ambient light measurements
+  //
+
+  statsTest.zero();
+  bQuit = statsTotal.fatal;
+  cnt = 0;
+
+  printSubHdr("Ambient Light Measurements");
+
+  while( !bQuit )
+  {
+    statsTest += measureAmbient(rangegroup, cnt++);
+
+    if( !bAnyKey || kbhit() || statsTest.fatal )
+    {
+      printf("\n");
+      printSubTotals(statsTest);
+      bQuit = true;
+    }
+    else
+    {
+      usleep(500000);
+    }
+  }
+
+  statsTotal += statsTest;
+
   //
   // Summary
   //

@@ -687,6 +687,9 @@ namespace laelaps
     /*!
      * \brief Connect to the \h_laelaps built-in sensors.
      *
+     * Sensors are not critical to core operation, so failed sensors are 
+     * simply blacklisted, rather than failing the robot.
+     *
      * \par Sensors:
      * * IMU
      * * ToF infrared distance sensors
