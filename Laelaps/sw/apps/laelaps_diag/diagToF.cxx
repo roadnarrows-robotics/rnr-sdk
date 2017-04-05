@@ -156,18 +156,18 @@ static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
   double      fBeamDir;
   double      fMin;
   double      fMax;
-  bool        bInstalled = false;
+  bool        bInstalled;
 
   // identity
   VL6180xIdentification ident;
-  bool                  bIdent = false;
+  bool                  bIdent;
 
   // tuning
   uint_t      uRangeOffset;
   uint_t      uRangeCrossTalk;
   double      fAlsGain;
   uint_t      uAlsIntPeriod;
-  bool        bTunes = false;
+  bool        bTunes;
 
   int           rc;
   DiagStats     stats;
@@ -180,6 +180,10 @@ static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
   for(size_t i = 0; i < ToFSensorMaxNumOf; ++i)
   {
     sKey = SensorKeys[i];
+
+    bInstalled  = false;
+    bIdent      = false;
+    bTunes      = false;
 
     stats.testCnt += 1;
 
