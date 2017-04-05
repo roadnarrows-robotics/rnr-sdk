@@ -259,13 +259,13 @@ namespace sensor
     
     struct VL6180xIdentification
     {
-      uint8_t idModel;
-      uint8_t idModelRevMajor;
-      uint8_t idModelRevMinor;
-      uint8_t idModuleRevMajor;
-      uint8_t idModuleRevMinor;
-      uint16_t idDate;
-      uint16_t idTime;
+      uint8_t   idModel;
+      uint8_t   idModelRevMajor;
+      uint8_t   idModelRevMinor;
+      uint8_t   idModuleRevMajor;
+      uint8_t   idModuleRevMinor;
+      uint16_t  idDate;
+      uint16_t  idTime;
     };
 
 
@@ -870,11 +870,6 @@ namespace sensor
       {
       }
 
-
-      //........................................................................
-      // Attribute Member Functions
-      //........................................................................
-  
       /*!
        * \brief Get a range measurement.
        *
@@ -954,6 +949,41 @@ namespace sensor
         return -laelaps::LAE_ECODE_NO_RSRC;
       }
 
+      /*!
+       * \brief Read sensor's identification.
+       *
+       * \param strKey      Sensor's unique name id (key).
+       * \param [out] ident Identification structure.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorIdentity(const std::string     &strKey,
+                                     VL6180xIdentification &ident)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
+  
+      /*!
+       * \brief Read sensor's current tuning parameters.
+       *
+       * \param strKey                Sensor's unique name id (key).
+       * \param [out] uRangeOffset    ToF sensor part-to-part offset.
+       * \param [out] uRangeCrossTalk ToF sensor cross-talk compensation.
+       * \param [out] fAlsGain        Ambient light sensor analog gain.
+       * \param [out] uAlsIntPeriod   Ambient light sensor integration period
+       *                                (msec).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorTunes(const std::string &strKey,
+                                  uint_t            &uRangeOffset,
+                                  uint_t            &uRangeCrossTalk,
+                                  double            &fAlsGain,
+                                  uint_t            &uAlsIntPeriod)
+      {
+        return -laelaps::LAE_ECODE_NO_RSRC;
+      }
+  
     protected:
       laelaps::LaeI2C  &m_i2cBus;       ///< bound \h_i2c bus instance
 
@@ -1046,14 +1076,11 @@ namespace sensor
        * LaeThreadRange thread instance.
        */
       virtual void exec();
-
-
-      //........................................................................
-      // Attribute Member Functions
-      //........................................................................
   
       /*!
-       * \brief Get a range measurement.
+       * \brief Get the shadowed range measurement.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param strKey        Sensor's unique name (key).
        * \param [out] fRange  Sensed object range (meters).
@@ -1063,7 +1090,9 @@ namespace sensor
       virtual int getRange(const std::string &strKey, double &fRange);
   
       /*!
-       * \brief Get all sensor range measurements.
+       * \brief Get all shadowed sensor range measurements.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param [out] vecNames    Vector of sensor unique names.
        * \param [out] vecRanges   Vector of associated sensor measured ranges
@@ -1075,7 +1104,9 @@ namespace sensor
                            std::vector<double>      &vecRanges);
   
       /*!
-       * \brief Get an ambient light illuminance measurement.
+       * \brief Get the shadowed ambient light illuminance measurement.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param strKey          Sensor's unique name (key).
        * \param [out] fAmbient  Sensed ambient light (lux).
@@ -1085,7 +1116,9 @@ namespace sensor
       virtual int getAmbientLight(const std::string &strKey, double &fAmbient);
   
       /*!
-       * \brief Get all sensor ambient light illuminance measurements.
+       * \brief Get all shadowed sensor ambient light illuminance measurements.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param strKey            Sensor's unique name (key).
        * \param [out] vecAmbient  Vector of associated sensor measured ambients
@@ -1115,11 +1148,49 @@ namespace sensor
                                  double            &fMin,
                                  double            &fMax);
 
+      /*!
+       * \brief Read sensor's identification.
+       *
+       * \param strKey      Sensor's unique name id (key).
+       * \param [out] ident Identification structure.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorIdentity(const std::string     &strKey,
+                                     VL6180xIdentification &ident);
+  
+      /*!
+       * \brief Read sensor's current tuning parameters.
+       *
+       * \param strKey                Sensor's unique name id (key).
+       * \param [out] uRangeOffset    ToF sensor part-to-part offset.
+       * \param [out] uRangeCrossTalk ToF sensor cross-talk compensation.
+       * \param [out] fAlsGain        Ambient light sensor analog gain.
+       * \param [out] uAlsIntPeriod   Ambient light sensor integration period
+       *                                (msec).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorTunes(const std::string &strKey,
+                                  uint_t            &uRangeOffset,
+                                  uint_t            &uRangeCrossTalk,
+                                  double            &fAlsGain,
+                                  uint_t            &uAlsIntPeriod);
+  
     protected:
       laelaps::LaeI2CMux  m_mux;          ///< \h_i2c multiplexor
       VecToFSensors       m_vecToF;       ///< time of flight sensors
       int                 m_nAlsIndex;    ///< ambient light sensor index
       int                 m_nAlsCounter;  ///< when zero, make measurement
+
+      /*
+       * \brief Find index of sensor key.
+       *
+       * \param strKey                Sensor's unique name id (key).
+       *
+       * \return Returns index if found, -1 otherwise.
+       */
+      int keyIndex(const std::string &strKey);
 
     }; // LaeVL6180MuxArray
 
@@ -1219,6 +1290,137 @@ namespace sensor
        * LaeThreadRange thread instance.
        */
       virtual void exec();
+      /*!
+       * \brief Get a range measurement.
+       *
+       * \param strKey        Sensor's unique name (key).
+       * \param [out] fRange  Sensed object range (meters).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getRange(const std::string &strKey, double &fRange);
+  
+      /*!
+       * \brief Get all sensor range measurements.
+       *
+       * \param [out] vecNames    Vector of sensor unique names.
+       * \param [out] vecRanges   Vector of associated sensor measured ranges
+       *                          (meters).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getRange(std::vector<std::string> &vecNames,
+                           std::vector<double>      &vecRanges);
+  
+      /*!
+       * \brief Get an ambient light illuminance measurement.
+       *
+       * \param strKey          Sensor's unique name (key).
+       * \param [out] fAmbient  Sensed ambient light (lux).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getAmbientLight(const std::string &strKey, double &fAmbient);
+  
+      /*!
+       * \brief Get all sensor ambient light illuminance measurements.
+       *
+       * \param [out] vecNames    Vector of sensor unique names.
+       * \param [out] vecAmbient  Vector of associated sensor measured ambients
+       *                          (lux).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getAmbientLight(std::vector<std::string> &vecNames,
+                                  std::vector<double> &vecAmbient);
+  
+      /*!
+       * \brief Get range sensor properties.
+       *
+       * \param strKey                 Sensor's unique name id (key).
+       * \param [out] strRadiationType Radiation type.
+       * \param [out] fFoV             Field of View (radians).
+       * \param [out] fBeamdir         Center of beam direction (radians).
+       * \param [out] fMin             Minimum range (meters).
+       * \param [out] fMax             Maximum range (meters).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int getSensorProps(const std::string &strKey,
+                                 std::string       &strRadiationType,
+                                 double            &fFoV,
+                                 double            &fBeamDir,
+                                 double            &fMin,
+                                 double            &fMax);
+      /*!
+       * \brief Read sensor's identification.
+       *
+       * \param strKey      Sensor's unique name id (key).
+       * \param [out] ident Identification structure.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorIdentity(const std::string     &strKey,
+                                     VL6180xIdentification &ident);
+  
+      /*!
+       * \brief Read sensor's current tuning parameters.
+       *
+       * \param strKey                Sensor's unique name id (key).
+       * \param [out] uRangeOffset    ToF sensor part-to-part offset.
+       * \param [out] uRangeCrossTalk ToF sensor cross-talk compensation.
+       * \param [out] fAlsGain        Ambient light sensor analog gain.
+       * \param [out] uAlsIntPeriod   Ambient light sensor integration period
+       *                                (msec).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorTunes(const std::string &strKey,
+                                  uint_t            &uRangeOffset,
+                                  uint_t            &uRangeCrossTalk,
+                                  double            &fAlsGain,
+                                  uint_t            &uAlsIntPeriod);
+  
+      
+    protected:
+      // hardware
+      uint_t            m_addrSubProc;  ///< \h_i2c sub-processor address
+      uint_t            m_uFwVer;       ///< firmware version number
+
+      // sensor information
+      SensorInfoMap     m_mapInfo;      ///< map of sensor properties by key
+
+      // shadow values
+      std::vector<double> m_vecRanges;  ///< measured distances (meters)
+      std::vector<double> m_vecLux;     ///< measured ambient light (lux)
+
+      // mutual exclusion
+      pthread_mutex_t m_mutex;          ///< mutex
+  
+      /*!
+       * \brief Lock the share resource.
+       *
+       * The lock()/unlock() primitives provide a thread safe mechanism.
+       *
+       * \par Context:
+       * Any.
+       */
+      void lock()
+      {
+        pthread_mutex_lock(&m_mutex);
+      }
+  
+      /*!
+       * \brief Unlock the shared resource.
+       *
+       * \par Context:
+       * Any.
+       */
+      void unlock()
+      {
+        pthread_mutex_unlock(&m_mutex);
+      }
+
 
       //........................................................................
       // ToFMux Sub-Processor Member Functions
@@ -1304,114 +1506,18 @@ namespace sensor
                      uint_t             uAlsIntPeriod);
 
 
-      //........................................................................
-      // Attribute Member Functions
-      //........................................................................
-  
       /*!
-       * \brief Get a range measurement.
-       *
-       * \param strKey        Sensor's unique name (key).
-       * \param [out] fRange  Sensed object range (meters).
+       * \brief Get range distance measurments command.
        *
        * \copydoc doc_return_std
        */
-      virtual int getRange(const std::string &strKey, double &fRange);
-  
-      /*!
-       * \brief Get all sensor range measurements.
-       *
-       * \param [out] vecNames    Vector of sensor unique names.
-       * \param [out] vecRanges   Vector of associated sensor measured ranges
-       *                          (meters).
-       *
-       * \copydoc doc_return_std
-       */
-      virtual int getRange(std::vector<std::string> &vecNames,
-                           std::vector<double>      &vecRanges);
-  
-      /*!
-       * \brief Get an ambient light illuminance measurement.
-       *
-       * \param strKey          Sensor's unique name (key).
-       * \param [out] fAmbient  Sensed ambient light (lux).
-       *
-       * \copydoc doc_return_std
-       */
-      virtual int getAmbientLight(const std::string &strKey, double &fAmbient);
-  
-      /*!
-       * \brief Get all sensor ambient light illuminance measurements.
-       *
-       * \param [out] vecNames    Vector of sensor unique names.
-       * \param [out] vecAmbient  Vector of associated sensor measured ambients
-       *                          (lux).
-       *
-       * \copydoc doc_return_std
-       */
-      virtual int getAmbientLight(std::vector<std::string> &vecNames,
-                                  std::vector<double> &vecAmbient);
-  
-      /*!
-       * \brief Get range sensor properties.
-       *
-       * \param strKey                 Sensor's unique name id (key).
-       * \param [out] strRadiationType Radiation type.
-       * \param [out] fFoV             Field of View (radians).
-       * \param [out] fBeamdir         Center of beam direction (radians).
-       * \param [out] fMin             Minimum range (meters).
-       * \param [out] fMax             Maximum range (meters).
-       *
-       * \copydoc doc_return_std
-       */
-      virtual int getSensorProps(const std::string &strKey,
-                                 std::string       &strRadiationType,
-                                 double            &fFoV,
-                                 double            &fBeamDir,
-                                 double            &fMin,
-                                 double            &fMax);
-      
-    protected:
-      // hardware
-      uint_t            m_addrSubProc;  ///< \h_i2c sub-processor address
-      uint_t            m_uFwVer;       ///< firmware version number
-
-      // sensor info indexed by key
-      SensorInfoMap m_mapInfo;
-
-      // shadow values
-      std::vector<double>   m_vecRanges;  ///< measured distances (meters)
-      std::vector<double>   m_vecLux;     ///< measured ambient light (lux)
-
-      // mutual exclusion
-      pthread_mutex_t m_mutex;          ///< mutex
-  
-      /*!
-       * \brief Lock the share resource.
-       *
-       * The lock()/unlock() primitives provide a thread safe mechanism.
-       *
-       * \par Context:
-       * Any.
-       */
-      void lock()
-      {
-        pthread_mutex_lock(&m_mutex);
-      }
-  
-      /*!
-       * \brief Unlock the shared resource.
-       *
-       * \par Context:
-       * Any.
-       */
-      void unlock()
-      {
-        pthread_mutex_unlock(&m_mutex);
-      }
-
       int cmdGetRanges();
 
+      /*!
+       * \brief Get ambient light measurments command.
+       *
+       * \copydoc doc_return_std
+       */
       int cmdGetAmbientLight();
 
     }; // class LaeRangeMuxSubproc
@@ -1533,7 +1639,38 @@ namespace sensor
                                  double            &fMax);
 
       /*!
-       * \brief Get a range measurement.
+       * \brief Read sensor's identification.
+       *
+       * \param strKey      Sensor's unique name id (key).
+       * \param [out] ident Identification structure.
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorIdentity(const std::string     &strKey,
+                                     VL6180xIdentification &ident);
+  
+      /*!
+       * \brief Read sensor's current tuning parameters.
+       *
+       * \param strKey                Sensor's unique name id (key).
+       * \param [out] uRangeOffset    ToF sensor part-to-part offset.
+       * \param [out] uRangeCrossTalk ToF sensor cross-talk compensation.
+       * \param [out] fAlsGain        Ambient light sensor analog gain.
+       * \param [out] uAlsIntPeriod   Ambient light sensor integration period
+       *                                (msec).
+       *
+       * \copydoc doc_return_std
+       */
+      virtual int readSensorTunes(const std::string &strKey,
+                                  uint_t            &uRangeOffset,
+                                  uint_t            &uRangeCrossTalk,
+                                  double            &fAlsGain,
+                                  uint_t            &uAlsIntPeriod);
+  
+      /*!
+       * \brief Get the shadowed range measurement.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param strKey        Sensor's unique name (key).
        * \param [out] fRange  Sensed object range (meters).
@@ -1543,7 +1680,9 @@ namespace sensor
       virtual int getRange(const std::string &strKey, double &fRange);
   
       /*!
-       * \brief Get all sensor range measurements.
+       * \brief Get all shadowed sensor range measurements.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param [out] vecNames    Vector of sensor unique names.
        * \param [out] vecRanges   Vector of associated sensor measured ranges
@@ -1555,7 +1694,9 @@ namespace sensor
                            std::vector<double>      &vecRanges);
   
       /*!
-       * \brief Get an ambient light illuminance measurement.
+       * \brief Get the shadowed ambient light illuminance measurement.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param strKey          Sensor's unique name (key).
        * \param [out] fAmbient  Sensed ambient light (lux).
@@ -1565,7 +1706,9 @@ namespace sensor
       virtual int getAmbientLight(const std::string &strKey, double &fAmbient);
   
       /*!
-       * \brief Get all sensor ambient light illuminance measurements.
+       * \brief Get all shadowed sensor ambient light illuminance measurements.
+       *
+       * The exec() call pulls the measured sensed from the actual sensors.
        *
        * \param strKey            Sensor's unique name (key).
        * \param [out] vecAmbient  Vector of associated sensor measured ambients

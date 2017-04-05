@@ -140,7 +140,7 @@ namespace laelaps
    */
   static const double LAE_WARN_BATT_SOC = 20.0;
                         ///< battery warning state of charge threshold
-  static const double LAE_CRIT_BATT_SOC = 15.0;
+  static const double LAE_CRIT_BATT_SOC = 5.0;
                         ///< battery critical state of charge threshold
 
   static const u32_t  LAE_CRIT_MOTCTLR  = LAE_ALARM_MOTCTLR_LOGIC_V_LOW;

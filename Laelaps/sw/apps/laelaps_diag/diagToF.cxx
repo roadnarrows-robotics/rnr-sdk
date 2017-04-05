@@ -81,8 +81,8 @@ static const char *ProdName   = "VL6180";
 
 static const char *SensorKeys[ToFSensorMaxNumOf] = 
 {
-  "front", "left_front", "left", "left_rear",
-  "rear", "right_rear", "right", "right_front"
+  "front", "left_front", "left",  "left_rear",
+  "rear",  "right_rear", "right", "right_front"
 };
 
 static DiagStats initSensors(LaeRangeSensorGroup &rnggrp)
@@ -149,14 +149,27 @@ static DiagStats initSensors(LaeRangeSensorGroup &rnggrp)
 static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
 {
   const char *sKey;
+
+  // properties
   string      strRadiationType;
   double      fFoV;
   double      fBeamDir;
   double      fMin;
   double      fMax;
-  bool        bInstalled;
-  int         rc;
+  bool        bInstalled = false;
 
+  // identity
+  VL6180xIdentification ident;
+  bool                  bIdent = false;
+
+  // tuning
+  uint_t      uRangeOffset;
+  uint_t      uRangeCrossTalk;
+  double      fAlsGain;
+  uint_t      uAlsIntPeriod;
+  bool        bTunes = false;
+
+  int           rc;
   DiagStats     stats;
 
   printSubHdr("Read Sensors Properties and Tuning");
@@ -184,42 +197,81 @@ static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
     {
       printTestResult(PassTag, "%s %s sensor: NOT INSTALLED.", ProdName, sKey);
       stats.passCnt += 1;
-      bInstalled = false;
     }
     else 
     {
       printTestResult(FailTag, "%s %s sensor: Failed to get sensor properties.",
           ProdName, sKey);
-      bInstalled = false;
     }
 
-    // GET IDENT
-    // GET TUNING
- 
+    if( bInstalled )
+    {
+      stats.testCnt += 1;
+
+      rc = rnggrp.readSensorIdentity(sKey, ident);
+
+      if( rc == LAE_OK )
+      {
+        printTestResult(PassTag, "%s %s sensor: Read sensor identity.",
+          ProdName, sKey);
+        stats.passCnt += 1;
+        bIdent = true;
+      }
+      else
+      {
+        printTestResult(FailTag,
+          "%s %s sensor: Failed to read sensor identity.",
+          ProdName, sKey);
+      }
+
+      stats.testCnt += 1;
+
+      rc = rnggrp.readSensorTunes(sKey, uRangeOffset, uRangeCrossTalk,
+                                        fAlsGain,     uAlsIntPeriod);
+
+      if( rc == LAE_OK )
+      {
+        printTestResult(PassTag, "%s %s sensor: Read sensor tuning parameters.",
+          ProdName, sKey);
+        stats.passCnt += 1;
+        bTunes = true;
+      }
+      else
+      {
+        printTestResult(PassTag,
+            "%s %s sensor: Failed to read sensor tuning parameters.",
+          ProdName, sKey);
+      }
+    }
+
     printf("\n");
     printf("%s %s Sensor Info:\n", SubSysName, ProdName);
+    printf("    Properties\n");
     printf("  Location:       %s\n", sKey);
     printf("  Installed:      %s\n", (bInstalled? "yes": "no"));
     printf("  Beam Direction: %.1lf degrees\n", radToDeg(fBeamDir));
     printf("  Radiation:      %s\n", strRadiationType.c_str());
     printf("  FoV:            %.1lf degrees\n", radToDeg(fFoV));
     printf("  Min Distance:   %.3lf meters\n", fMin);
-    printf("  MAx Distance:   %.3lf meters", fMax);
-#if 0
-    printf("  Name:             %s\n", ToFSensors[i]->getNameId().c_str());
-    printf("  Desc:             %s\n", ToFSensors[i]->getDesc().c_str());
-    printf("  Sensor:           %s\n", ProdName);
-    printf("  Model:            0x%02x v%u.%u\n",
-          id.idModel, id.idModelRevMajor, id.idModelRevMinor);
-    printf("  Module:           v%u.%u\n",
-        id.idModuleRevMajor, id.idModuleRevMinor);
-    printf("  Date/Time:        %u/%u\n", id.idDate, id.idTime);
-    printf("  Range Offset:     %u\n", valRangeOffset);
-    printf("  Range Cross-Talk: %u\n", valRangeCrossTalk);
-    printf("  ALS Gain:         %u\n", valAlsGain & 0x07);
-    printf("  ALS Int. Period:  %u\n", valAlsIntPeriod);
-#endif // 0
-    printf("\n\n");
+    printf("  MAx Distance:   %.3lf meters\n", fMax);
+    if( bIdent )
+    {
+      printf("    Identity\n");
+      printf("  Model:            0x%02x v%u.%u\n",
+            ident.idModel, ident.idModelRevMajor, ident.idModelRevMinor);
+      printf("  Module:           v%u.%u\n",
+        ident.idModuleRevMajor, ident.idModuleRevMinor);
+      printf("  Date/Time:        %u/%u\n", ident.idDate, ident.idTime);
+    }
+    if( bTunes )
+    {
+      printf("    Tuning\n");
+      printf("  Range Offset:     %u\n", uRangeOffset);
+      printf("  Range Cross-Talk: %u\n", uRangeCrossTalk);
+      printf("  ALS Gain:         %.2lf\n", fAlsGain);
+      printf("  ALS Int. Period:  %u\n", uAlsIntPeriod);
+    }
+    printf("\n");
   }
 
   return stats;

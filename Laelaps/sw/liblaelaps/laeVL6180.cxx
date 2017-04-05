@@ -526,7 +526,7 @@ void LaeVL6180Mux::readShadowRegs(byte_t &regRangeOffset,
   regRangeOffset    = m_regRangeOffset;
   regRangeCrossTalk = m_regRangeCrossTalk;
   regAlsGain        = m_regAlsGain;
-  regAlsIntPeriod     = m_regAlsIntPeriod;
+  regAlsIntPeriod   = m_regAlsIntPeriod;
 }
 
 int LaeVL6180Mux::readId(struct VL6180xIdentification &id)
@@ -1400,12 +1400,20 @@ int LaeVL6180MuxArray::configure(const LaeTunes &tunes)
     }
   }
 
+  LOGDIAG2("Configured VL6180 range sensor group tuning parameters.");
+
   return LAE_OK;
 }
 
 int LaeVL6180MuxArray::reload(const LaeTunes &tunes)
 {
-  return configure(tunes);
+  int   rc;
+  
+  if( (rc = configure(tunes)) == LAE_OK )
+  {
+    LOGDIAG2("Reloaded VL6180 range sensor group tuning parameters.");
+  }
+  return rc;
 }
 
 void LaeVL6180MuxArray::exec()
@@ -1443,20 +1451,19 @@ void LaeVL6180MuxArray::exec()
 
 int LaeVL6180MuxArray::getRange(const std::string &strKey, double &fRange)
 {
-  double  fAmbient;
+  double  fAmbient; // not used
+  int     i;
 
-  for(size_t i = 0; i < m_vecToF.size(); ++i)
+  if( (i = keyIndex(strKey)) >= 0 )
   {
-    if( m_vecToF[i]->getNameId() == strKey )
-    {
-      m_vecToF[i]->getMeasurements(fRange, fAmbient);
-      return LAE_OK;
-    }
+    m_vecToF[i]->getMeasurements(fRange, fAmbient);
+    return LAE_OK;
   }
-
-  LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
-
-  return -LAE_ECODE_BAD_VAL;
+  else
+  {
+    LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
+    return -LAE_ECODE_BAD_VAL;
+  }
 }
       
 int LaeVL6180MuxArray::getRange(std::vector<std::string> &vecNames,
@@ -1481,20 +1488,19 @@ int LaeVL6180MuxArray::getRange(std::vector<std::string> &vecNames,
   
 int LaeVL6180MuxArray::getAmbientLight(const std::string &strKey, double &fLux)
 {
-  double    fRange;
+  double  fRange; // not used
+  int     i;
 
-  for(size_t i = 0; i < m_vecToF.size(); ++i)
+  if( (i = keyIndex(strKey)) >= 0 )
   {
-    if( m_vecToF[i]->getNameId() == strKey )
-    {
-      m_vecToF[i]->getMeasurements(fRange, fLux);
-      return LAE_OK;
-    }
+    m_vecToF[i]->getMeasurements(fRange, fLux);
+    return LAE_OK;
   }
-
-  LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
-
-  return -LAE_ECODE_BAD_VAL;
+  else
+  {
+    LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
+    return -LAE_ECODE_BAD_VAL;
+  }
 }
   
 int LaeVL6180MuxArray::getAmbientLight(std::vector<std::string> &vecNames,
@@ -1524,24 +1530,81 @@ int LaeVL6180MuxArray::getSensorProps(const std::string &strKey,
                                       double            &fMin,
                                       double            &fMax)
 {
+  int   i;
+
+  if( (i = keyIndex(strKey)) >= 0 )
+  {
+    strRadiationType  = m_vecToF[i]->getRadiationType();
+    fFoV              = m_vecToF[i]->getFoV();
+    fBeamDir          = m_vecToF[i]->getBeamDir();
+    m_vecToF[i]->getMinMax(fMin, fMax);
+    return LAE_OK;
+  }
+  else
+  {
+    LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
+    return -LAE_ECODE_BAD_VAL;
+  }
+}
+
+int LaeVL6180MuxArray::readSensorIdentity(const string          &strKey,
+                                          VL6180xIdentification &ident)
+{
+  int   i;
+
+  if( (i = keyIndex(strKey)) >= 0 )
+  {
+    return m_vecToF[i]->readId(ident);
+  }
+  else
+  {
+    LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
+    return -LAE_ECODE_BAD_VAL;
+  }
+}
+
+int LaeVL6180MuxArray::readSensorTunes(const string &strKey,
+                                       uint_t       &uRangeOffset,
+                                       uint_t       &uRangeCrossTalk,
+                                       double       &fAlsGain,
+                                       uint_t       &uAlsIntPeriod)
+{
+  byte_t  regRangeOffset;
+  u16_t   regRangeCrossTalk;
+  byte_t  regAlsGain;
+  u16_t   regAlsIntPeriod;
+  int     i;
+
+  if( (i = keyIndex(strKey)) >= 0 )
+  {
+    m_vecToF[i]->readShadowRegs(regRangeOffset, regRangeCrossTalk,
+                                regAlsGain,     regAlsIntPeriod);
+
+    uRangeOffset    = (uint_t)regRangeOffset;
+    uRangeCrossTalk = (uint_t)regRangeCrossTalk;
+
+    fAlsGain     = LaeVL6180Mux::gainEnumToAnalog((vl6180x_als_gain)regAlsGain);
+    uAlsIntPeriod = (uint)regAlsIntPeriod + 1;
+    return LAE_OK;
+  }
+  else
+  {
+    LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
+    return -LAE_ECODE_BAD_VAL;
+  }
+}
+
+int LaeVL6180MuxArray::keyIndex(const string &strKey)
+{
   for(size_t i = 0; i < m_vecToF.size(); ++i)
   {
     if( m_vecToF[i]->getNameId() == strKey )
     {
-      strRadiationType  = m_vecToF[i]->getRadiationType();
-      fFoV              = m_vecToF[i]->getFoV();
-      fBeamDir          = m_vecToF[i]->getBeamDir();
-      m_vecToF[i]->getMinMax(fMin, fMax);
-
-      return LAE_OK;
+      return (int)i;
     }
   }
-
-  LOGERROR("VL6180 range sensor %s does not exist.", strKey.c_str());
-
-  return -LAE_ECODE_BAD_VAL;
+  return -1;
 }
-
 
 //------------------------------------------------------------------------------
 // LaeRangeMuxSubproc Class
@@ -1706,7 +1769,7 @@ int LaeRangeMuxSubproc::configure(const LaeTunes &tunes)
       rc = cmdTuneToFSensor(iter->first,  (uint_t)nRangeOffset,
                                           (uint_t)nRangeCrossTalk);
 
-      if( rc -= LAE_OK )
+      if( rc == LAE_OK )
       {
         LOGDIAG3("VL6180 range sensor %s: Time-of-flight sensor tuned.",
             iter->first.c_str());
@@ -1737,12 +1800,20 @@ int LaeRangeMuxSubproc::configure(const LaeTunes &tunes)
     }
   }
 
+  LOGDIAG2("Configured VL6180 range sensor group tuning parameters.");
+
   return rc;
 }
 
 int LaeRangeMuxSubproc::reload(const LaeTunes &tunes)
 {
-  return configure(tunes);
+  int   rc;
+
+  if( (rc = configure(tunes)) == LAE_OK )
+  {
+    LOGDIAG2("Reloaded VL6180 range sensor group tuning parameters.");
+  }
+  return rc;
 }
 
 void LaeRangeMuxSubproc::exec()
@@ -2213,6 +2284,23 @@ int LaeRangeMuxSubproc::getSensorProps(const std::string &strKey,
   return LAE_OK;
 }
 
+int LaeRangeMuxSubproc::readSensorIdentity(const string          &strKey,
+                                           VL6180xIdentification &ident)
+    
+{
+  return cmdGetIdent(strKey, ident);
+}
+
+int LaeRangeMuxSubproc::readSensorTunes(const string &strKey,
+                                         uint_t       &uRangeOffset,
+                                         uint_t       &uRangeCrossTalk,
+                                         double       &fAlsGain,
+                                         uint_t       &uAlsIntPeriod)
+{
+  return cmdGetTunes(strKey, uRangeOffset, uRangeCrossTalk,
+                             fAlsGain,     uAlsIntPeriod);
+}
+
 
 //------------------------------------------------------------------------------
 // LaeRangeSensorGroup Class
@@ -2327,6 +2415,42 @@ int LaeRangeSensorGroup::getSensorProps(const string &strKey,
                                      strRadiationType,
                                      fFoV, fBeamDir,
                                      fMin, fMax);
+}
+
+int LaeRangeSensorGroup::readSensorIdentity(const string          &strKey,
+                                            VL6180xIdentification &ident)
+    
+{
+  if( !isBlackListed() )
+  {
+    m_interface->readSensorIdentity(strKey, ident);
+  }
+  else
+  {
+    memset(&ident, 0, sizeof(VL6180xIdentification));
+    return LAE_OK;
+  }
+}
+
+int LaeRangeSensorGroup::readSensorTunes(const string &strKey,
+                                         uint_t       &uRangeOffset,
+                                         uint_t       &uRangeCrossTalk,
+                                         double       &fAlsGain,
+                                         uint_t       &uAlsIntPeriod)
+{
+  if( !isBlackListed() )
+  {
+    m_interface->readSensorTunes(strKey, uRangeOffset, uRangeCrossTalk,
+                                         fAlsGain,     uAlsIntPeriod);
+  }
+  else
+  {
+    uRangeOffset    = 0;
+    uRangeCrossTalk = 0;
+    fAlsGain        = 0.0;
+    uAlsIntPeriod   = 0;
+    return LAE_OK;
+  }
 }
 
 int LaeRangeSensorGroup::getRange(const string &strKey, double &fRange)
