@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-12 12:34:58 -0700 (Fri, 12 Feb 2016) $
- * $Rev: 4316 $
- *
  * \brief \h_laelaps XML tuning class implementation.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -109,8 +106,7 @@ int LaeXmlTune::load(LaeTunes     &tunes,
 
       if( rc == LAE_OK )
       {
-        LOGDIAG2("Tuning parameters from XML file %s loaded.",
-            fqname.c_str());
+        LOGDIAG2("Loaded tuning parameters from XML file %s.", fqname.c_str());
       }
 
       if( !bAllInstances )

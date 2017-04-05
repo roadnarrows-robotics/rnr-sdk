@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2015-10-27 14:39:57 -0600 (Tue, 27 Oct 2015) $
- * $Rev: 4167 $
- *
  * \brief \h_laelaps XML configuration class implementation.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -105,7 +102,7 @@ int LaeXmlCfg::load(LaeDesc      &desc,
 
       if( rc == LAE_OK )
       {
-        LOGDIAG2("Laelaps description from XML file %s loaded.",
+        LOGDIAG2("Loaded Laelaps description from XML file %s.",
             fqname.c_str());
       }
 

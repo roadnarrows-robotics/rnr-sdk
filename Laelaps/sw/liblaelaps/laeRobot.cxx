@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-04-11 14:45:31 -0600 (Mon, 11 Apr 2016) $
- * $Rev: 4382 $
- *
  * \brief Laelaps Robot Class implementation.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -410,7 +407,7 @@ int LaeRobot::reload()
 
   if( rc == LAE_OK )
   {
-    LOGDIAG2("Reloaded tuning parameters and reconfigured.");
+    LOGDIAG2("Reloaded tuning parameters and reconfigured robot.");
   }
 
   return rc;
@@ -900,7 +897,7 @@ int LaeRobot::connSensors()
   {
     m_range.clearSensedData();
 
-    LOGDIAG2("Connected to Range Sensor Group %u.%u, fwver=%u.",
+    LOGDIAG2("Connected to Range Sensor Group v%u.%u, fwver=%u.",
         uVerMajor, uVerMinor, uFwVer);
   }
   else
@@ -946,8 +943,7 @@ int LaeRobot::connMotorControllers(const std::string &strDevMotorCtlrs,
         strDevMotorCtlrs.c_str(), nBaudRate);
   }
 
-  LOGDIAG2("Front and rear motor controllers created on %s@%d.",
-        strDevMotorCtlrs.c_str(), nBaudRate);
+  LOGDIAG2("Created front and rear motor controller interfaces.");
 
   return rc;
 }
@@ -1060,7 +1056,6 @@ int LaeRobot::startCoreThreads()
   //
   // Time-of-Flight range sensors thread.
   //
-#if 0 // RDK
   nPriority = LaeThreadRange::ThreadRangePrioDft;
   fHz       = m_tunes.getRangeHz();
 
@@ -1068,7 +1063,6 @@ int LaeRobot::startCoreThreads()
   {
     return rc;
   }
-#endif // RDK
 
   //
   // Inertia Measurement Unit thread.

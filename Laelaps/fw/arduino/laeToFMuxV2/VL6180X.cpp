@@ -75,7 +75,7 @@
 #define DBG_SENSOR  7
 
 /*! \brief define or'ed bits of DBG_SECT code sections */
-#define DBG_MASK    DBG_SECT_INI
+#define DBG_MASK    DBG_SECT_TOF
 
 #ifdef DBG_ENABLE
 
@@ -630,7 +630,7 @@ boolean VL6180x::asyncMeasureAmbientLight()
         }
 
         // initialize state
-        m_uAsyncTWait   = (unsigned long)((float)m_regAlsIntPeriod * 1.2);
+        m_uAsyncTWait   = (unsigned long)((float)m_regAlsIntPeriod * 1.5);
         m_uAsyncTStart  = millis();
         m_eAsyncState   = AsyncStateWaitForReady;
         break;
@@ -712,7 +712,7 @@ boolean VL6180x::asyncMeasureAmbientLight()
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
-        // get range distance and status values
+        // get ambient lux and status values
         raw     = readReg16(VL6180X_RESULT_ALS_VAL);
         status  = readReg8(VL6180X_RESULT_ALS_STATUS);
   

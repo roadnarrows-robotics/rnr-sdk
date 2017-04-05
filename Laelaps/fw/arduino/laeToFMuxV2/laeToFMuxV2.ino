@@ -143,6 +143,7 @@ void setup()
   // Probe and initialize sensors and class object data.
   //
   probe();
+  AlsSensorId = -1; // disable als
 
   //
   // I2C slave setup. Receive and send from/to I2C master by asynchronous

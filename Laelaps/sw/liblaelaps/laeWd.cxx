@@ -6,9 +6,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2015-08-07 14:25:35 -0600 (Fri, 07 Aug 2015) $
- * $Rev: 4051 $
- *
  * \brief Laelaps WatchDog software class implementation.
  *
  * The class provides the interface between the library software and the
@@ -174,11 +171,17 @@ int LaeWd::configure(const LaeTunes &tunes)
 
   rc = cmdConfigOperation(uTimeout);
 
+  if( rc == LAE_OK )
+  {
+    LOGDIAG2("Tuned WatchDog.");
+  }
+
   return rc;
 }
 
 int LaeWd::reload(const LaeTunes &tunes)
 {
+  LOGDIAG2("Reloading WatchDog tuning parameters...");
   return configure(tunes);
 }
 
@@ -727,7 +730,7 @@ int LaeWd::cmdEnableMotorCtlrs(bool bEnable)
     // disable to enable
     if( !m_bMotorCtlrEn && bEnable)
     {
-      LOGDIAG1("Motor controllers enabled.");
+      LOGDIAG1("Enabled motor controllers.");
       m_timeMotorCtlrs.markNow();
     }
 
@@ -786,7 +789,7 @@ int LaeWd::cmdEnableAuxPort5V(bool bEnable)
   {
     if( m_bAuxPort5vEn != bEnable )
     {
-      LOGDIAG2("Aux 5V port %s.", (bEnable? "enabled": "disabled"));
+      LOGDIAG2("%s 5V aux port %s.", (bEnable? "Enabled": "Disabled"));
     }
     m_bAuxPort5vEn              = bEnable; 
     RtDb.m_enable.m_bAuxPort5v  = m_bAuxPort5vEn;
@@ -794,7 +797,7 @@ int LaeWd::cmdEnableAuxPort5V(bool bEnable)
 
   else
   {
-    LOGERROR("Failed to %s aux 5V port.", (bEnable? "enable": "disable"));
+    LOGERROR("Failed to %s 5V aux port.", (bEnable? "enable": "disable"));
   }
 
   unlock();
@@ -835,7 +838,7 @@ int LaeWd::cmdEnableAuxPortBatt(bool bEnable)
   {
     if( m_bAuxPortBattEn != bEnable )
     {
-      LOGDIAG2("Aux battery port %s.", (bEnable? "enabled": "disabled"));
+      LOGDIAG2("%s battery aux port %s.", (bEnable? "Enabled": "Disabled"));
     }
     m_bAuxPortBattEn              = bEnable;
     RtDb.m_enable.m_bAuxPortBatt  = m_bAuxPortBattEn;
@@ -843,7 +846,7 @@ int LaeWd::cmdEnableAuxPortBatt(bool bEnable)
 
   else
   {
-    LOGERROR("Failed to %s aux batter port.", (bEnable? "enable": "disable"));
+    LOGERROR("Failed to %s battery aux port.", (bEnable? "enable": "disable"));
   }
 
   unlock();

@@ -261,11 +261,11 @@ static DiagStats getSensorInfo(LaeRangeSensorGroup &rnggrp)
     if( bIdent )
     {
       printf("    Identity\n");
-      printf("  Model:            0x%02x v%u.%u\n",
+      printf("  Model:          0x%02x v%u.%u\n",
             ident.idModel, ident.idModelRevMajor, ident.idModelRevMinor);
-      printf("  Module:           v%u.%u\n",
+      printf("  Module:         v%u.%u\n",
         ident.idModuleRevMajor, ident.idModuleRevMinor);
-      printf("  Date/Time:        %u/%u\n", ident.idDate, ident.idTime);
+      printf("  Date/Time:      %u/%u\n", ident.idDate, ident.idTime);
     }
     if( bTunes )
     {
@@ -457,6 +457,10 @@ DiagStats runToFDiagnostics(bool bAnyKey)
   cnt = 0;
 
   printSubHdr("Ambient Light Measurements");
+
+  printf("\n");
+  printf("Warning: The ALS is experimental and is disabled in production.\n");
+  printf("\n");
 
   while( !bQuit )
   {

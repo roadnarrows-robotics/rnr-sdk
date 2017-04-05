@@ -1400,20 +1400,16 @@ int LaeVL6180MuxArray::configure(const LaeTunes &tunes)
     }
   }
 
-  LOGDIAG2("Configured VL6180 range sensor group tuning parameters.");
+  LOGDIAG2("Tuned VL6180 range sensor group.");
 
   return LAE_OK;
 }
 
 int LaeVL6180MuxArray::reload(const LaeTunes &tunes)
 {
-  int   rc;
+  LOGDIAG2("Reloading VL6180 range sensor group tuning parameters...");
   
-  if( (rc = configure(tunes)) == LAE_OK )
-  {
-    LOGDIAG2("Reloaded VL6180 range sensor group tuning parameters.");
-  }
-  return rc;
+  return configure(tunes);
 }
 
 void LaeVL6180MuxArray::exec()
@@ -1659,25 +1655,37 @@ int LaeRangeMuxSubproc::configure(const LaeDesc &desc)
 {
   LaeDesc::MapDescRangeSensor::const_iterator iter;
   SensorInfoMap::iterator iter2;
-  uint_t                  uFwVer;
+
+  // subproc version
+  uint_t  uFwVer;
+
+  // sensor identity
   VL6180xIdentification   ident;
-  uint_t                  uRangeOffset;
-  uint_t                  uRangeCrossTalk;
-  double                  fAlsGain;
-  uint_t                  uAlsIntPeriod;
-  s8_t                    nOffset;
-  int                     rc;
+  bool                    bIdent;
+
+  // sensor tuning values
+  uint_t  uRangeOffset;
+  uint_t  uRangeCrossTalk;
+  double  fAlsGain;
+  uint_t  uAlsIntPeriod;
+  s8_t    nOffset;
+  bool    bTunes;
+
+  // sensor properties
+  string  strRadiationType;
+  double  fFoV;
+  double  fBeamDir;
+  double  fMin;
+  double  fMax;
+
+  int     rc;
 
   //
   // Read firmware version, if necessary.
   //
   if( m_uFwVer == 0 )
   {
-    if( (rc = cmdGetFwVersion(uFwVer)) == LAE_OK )
-    {
-      LOGDIAG2("ToFMux firmware version: %u.", uFwVer);
-    }
-    else
+    if( (rc = cmdGetFwVersion(uFwVer)) != LAE_OK )
     {
       LOGERROR("Failed to read ToFMux firmware version.");
     }
@@ -1703,20 +1711,12 @@ int LaeRangeMuxSubproc::configure(const LaeDesc &desc)
   //
   for(iter2 = m_mapInfo.begin(); iter2 != m_mapInfo.end(); ++iter2)
   {
-    rc = cmdGetIdent(iter2->first, ident);
+    bIdent = false;
+    bTunes = false;
 
-    if( rc == LAE_OK )
+    if( (rc = cmdGetIdent(iter2->first, ident)) == LAE_OK )
     {
-      LOGDIAG2("VL6180 %s(%d) sensor:\n"
-          "  Location: %s\n"
-          "  Model:    %u v%u.%u\n"
-          "  Module:   v%u.%u\n"
-          "  Date:     %u/%u",
-        iter2->first.c_str(), iter2->second.m_nIndex,
-        iter2->second.m_strDesc.c_str(),
-        ident.idModel, ident.idModelRevMajor, ident.idModelRevMinor,
-        ident.idModuleRevMajor, ident.idModuleRevMinor,
-        ident.idDate, ident.idTime);
+      bIdent = true;
     }
     else
     {
@@ -1727,20 +1727,55 @@ int LaeRangeMuxSubproc::configure(const LaeDesc &desc)
     rc = cmdGetTunes(iter2->first, uRangeOffset, uRangeCrossTalk,
                                     fAlsGain, uAlsIntPeriod);
 
-    nOffset = (s8_t)(uRangeOffset & 0xff);
-
     if( rc == LAE_OK )
     {
-      LOGDIAG2("VL6180 %s(%d) sensor: Tuning register values\n"
-          "  ToF Offset:              %d(%u)\n"
-          "  ToF CrossTalk:           %u\n"
-          "  ALS Gain:                %.2lf\n"
-          "  ALS Integration Period:  %u",
-        iter2->first.c_str(), iter2->second.m_nIndex,
-        nOffset, uRangeOffset, uRangeCrossTalk,
-        fAlsGain, uAlsIntPeriod);
+      bTunes = true;
     }
+    else
+    {
+      LOGERROR("VL6180 range %s sensor: Failed to read tune parameters.",
+          iter2->first.c_str());
+    }
+
+    nOffset = (s8_t)(uRangeOffset & 0xff);
+
+    getSensorProps(iter2->first, strRadiationType,
+                                 fFoV, fBeamDir, fMin, fMax);
+
+    LOGDIAG2("VL6180 %s(%d) Sensor Info:\n"
+              "    Properties\n"
+              "  Location:        %s\n"
+              "  Beam Direction:  %.1lf degrees\n"
+              "  Radiation:       %s\n"
+              "  FoV:             %.1lf degrees\n"
+              "  Min Distance:    %.3lf meters\n"
+              "  MAx Distance:    %.3lf meters\n"
+              "    Identity\n"
+              "  Model:           0x%02x v%u.%u\n"
+              "  Module:          v%u.%u\n"
+              "  Date/Time:       %u/%u\n"
+              "    Tuning\n"
+              "  ToF Offset:      %d(%u)\n"
+              "  ToF Cross-Talk:  %u\n"
+              "  ALS Gain:        %.2lf\n"
+              "  ALS Int. Period: %u msec",
+        iter2->first.c_str(), iter2->second.m_nIndex,
+        iter2->first.c_str(),
+        radToDeg(fBeamDir),
+        strRadiationType.c_str(),
+        radToDeg(fFoV),
+        fMin,
+        fMax,
+        ident.idModel, ident.idModelRevMajor, ident.idModelRevMinor,
+        ident.idModuleRevMajor, ident.idModuleRevMinor,
+        ident.idDate, ident.idTime,
+        nOffset, uRangeOffset,
+        uRangeCrossTalk,
+        fAlsGain,
+        uAlsIntPeriod);
   }
+
+  LOGDIAG2("Configured Range Sensor Group from robot description.");
 
   return LAE_OK;
 }
@@ -1800,20 +1835,16 @@ int LaeRangeMuxSubproc::configure(const LaeTunes &tunes)
     }
   }
 
-  LOGDIAG2("Configured VL6180 range sensor group tuning parameters.");
+  LOGDIAG2("Tuned VL6180 range sensor group.");
 
   return rc;
 }
 
 int LaeRangeMuxSubproc::reload(const LaeTunes &tunes)
 {
-  int   rc;
+  LOGDIAG2("Reloading VL6180 range sensor group tuning parameters...");
 
-  if( (rc = configure(tunes)) == LAE_OK )
-  {
-    LOGDIAG2("Reloaded VL6180 range sensor group tuning parameters.");
-  }
-  return rc;
+  return configure(tunes);
 }
 
 void LaeRangeMuxSubproc::exec()

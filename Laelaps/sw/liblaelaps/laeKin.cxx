@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-04-12 14:32:48 -0600 (Tue, 12 Apr 2016) $
- * $Rev: 4385 $
- *
  * \brief The Laelaps kinematics and dynamics class implemenation.
  *
  * \par Copyright
@@ -213,7 +210,7 @@ int LaeKinematics::open(const std::string &strDevMotorCtlrs,
   RtDb.m_robotstatus.m_bAreMotorsPowered  = m_bAreMotorsPowered;
   RtDb.m_robotstatus.m_bInMotion          = m_bIsStopped? false: true;
 
-  LOGDIAG2("Front and rear motor controllers created on %s@%d.",
+  LOGDIAG2("Created front and rear motor controllers on %s@%d.",
         strDevName.c_str(), nBaudRate);
   //LOGDIAG2("Front and rear motor controllers created on %s@%d, cs=%d.",
   //      strDevName.c_str(), nBaudRate, LaeGpioMotorCtlrCs);
@@ -263,7 +260,7 @@ void LaeKinematics::enableMotorCtlrs()
     if( (rc = m_fnEnableMotorCtlrs(m_pEnableArg, true)) == LAE_OK )
     {
       m_bIsEnabled = true;
-      LOGDIAG2("Power to motor controllers enabled.");
+      LOGDIAG2("Enabled power to motor controllers.");
     }
   }
 
@@ -299,7 +296,7 @@ void LaeKinematics::disableMotorCtlrs()
       RtDb.m_robotstatus.m_bAreMotorsPowered  = m_bAreMotorsPowered;
       RtDb.m_robotstatus.m_bInMotion          = m_bIsStopped? false: true;
 
-      LOGDIAG2("Power to motor controllers disabled.");
+      LOGDIAG2("Disabled power to motor controllers.");
     }
   }
 
@@ -362,6 +359,8 @@ int LaeKinematics::configure(const LaeDesc &desc)
   //
   m_kinPlatform.configure(*desc.m_pDescBase);
 
+  LOGDIAG2("Configured motor controllers from robot description.");
+
   return rc;
 }
 
@@ -379,6 +378,11 @@ int LaeKinematics::configure(const LaeTunes &tunes)
   }
 
   m_kinPlatform.configure(tunes);
+
+  if( rc == LAE_OK )
+  {
+    LOGDIAG2("Tuned motor controllers.");
+  }
 
   return rc;
 }
@@ -893,6 +897,8 @@ int LaeKinematics::saveConfigToNvm(int nCtlrId)
 int LaeKinematics::reload(const LaeTunes &tunes)
 {
   LaeMapPowertrain::iterator iter;    // kinematics chain iterator
+
+  LOGDIAG2("Reloading motor controller tuning parameters...");
 
   for(iter = m_kinPowertrains.begin(); iter != m_kinPowertrains.end(); ++iter)
   {
