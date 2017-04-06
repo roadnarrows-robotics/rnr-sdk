@@ -920,7 +920,7 @@ int LaeRobot::connWatchDog()
   }
   else
   {
-    LOGDIAG3("Connected to WatchDog sub-processor, fwver=%u.", uFwVer);
+    LOGDIAG2("Connected to WatchDog sub-processor, fwver=%u.", uFwVer);
 
     // sync watchdog state with subprocessor
     m_watchdog.sync();
@@ -955,7 +955,7 @@ int LaeRobot::configForOperation()
   //
   // Configure watchdog from product description
   //
-  if( (rc = m_watchdog.configure(m_tunes)) != LAE_OK )
+  if( (rc = m_watchdog.configure(m_descLaelaps)) != LAE_OK )
   {
     LOGERROR("Failed to configure WatchDog.");
   }

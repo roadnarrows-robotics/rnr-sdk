@@ -789,7 +789,7 @@ int LaeWd::cmdEnableAuxPort5V(bool bEnable)
   {
     if( m_bAuxPort5vEn != bEnable )
     {
-      LOGDIAG2("%s 5V aux port %s.", (bEnable? "Enabled": "Disabled"));
+      LOGDIAG2("%s 5V aux port.", (bEnable? "Enabled": "Disabled"));
     }
     m_bAuxPort5vEn              = bEnable; 
     RtDb.m_enable.m_bAuxPort5v  = m_bAuxPort5vEn;
@@ -838,7 +838,7 @@ int LaeWd::cmdEnableAuxPortBatt(bool bEnable)
   {
     if( m_bAuxPortBattEn != bEnable )
     {
-      LOGDIAG2("%s battery aux port %s.", (bEnable? "Enabled": "Disabled"));
+      LOGDIAG2("%s battery aux port.", (bEnable? "Enabled": "Disabled"));
     }
     m_bAuxPortBattEn              = bEnable;
     RtDb.m_enable.m_bAuxPortBatt  = m_bAuxPortBattEn;
