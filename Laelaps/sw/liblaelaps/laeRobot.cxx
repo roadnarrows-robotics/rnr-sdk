@@ -876,7 +876,7 @@ int LaeRobot::connSensors()
   else
   {
     m_imu.blacklist();
-    LOGERROR("IMU is blacklisted from the suite of robot sensors.");
+    LOGWARN("IMU is blacklisted from the suite of robot sensors.");
     rc = LAE_OK;
   }
 
@@ -903,7 +903,7 @@ int LaeRobot::connSensors()
   else
   {
     m_range.blacklist();
-    LOGERROR("Range sensors are blacklisted from the suite of robot sensors.");
+    LOGWARN("Range sensors are blacklisted from the suite of robot sensors.");
     rc = LAE_OK;
   }
 

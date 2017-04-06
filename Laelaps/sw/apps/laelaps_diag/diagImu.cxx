@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-01 15:14:45 -0700 (Mon, 01 Feb 2016) $
- * $Rev: 4289 $
- *
  * \brief Perform Laelaps IMU diagnostics.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -130,6 +127,20 @@ static DiagStats readInfo(LaeImuCleanFlight &imu)
 
   printTestResult(sTag, "Read IMU identity.", LaeDevIMU);
 
+  ++stats.testCnt;
+
+  if( imu.readRawImu() == LAE_OK )
+  {
+    sTag = PassTag;
+    ++stats.passCnt;
+  }
+  else
+  {
+    sTag = FailTag;
+  }
+
+  printTestResult(sTag, "Read raw IMU data");
+
   printf("\n");
   printf("  %s\n", strIdent.c_str());
   printf("\n");
@@ -137,50 +148,53 @@ static DiagStats readInfo(LaeImuCleanFlight &imu)
   return stats;
 }
 
-static DiagStats readImu(LaeImuCleanFlight &imu)
+static DiagStats readImu(LaeImuCleanFlight &imu, int cnt)
 {
   double      accel[NumOfAxes];
   double      gyro[NumOfAxes];
+  double      mag[NumOfAxes];
   double      rpy[NumOfAxes];
-  int         cnt;
+  Quaternion  q;
+  bool        showLabel;
 
   DiagStats   stats;
 
-  printSubHdr("Read IMU Sensor Data");
+  showLabel = cnt == 0;
 
-  for(cnt = 0; cnt < 10; ++cnt)
+  ++stats.testCnt;
+
+  imu.getImuData(accel, gyro, mag, rpy, q);
+
+  ++stats.passCnt;
+
+  if( showLabel )
   {
-    ++stats.testCnt;
-    if( imu.readRawImu() == LAE_OK )
-    {
-      ++stats.passCnt;
-      printTestResult(PassTag, "Read raw IMU data");
-
-      imu.convertRawToSI();
-
-      imu.getInertiaData(accel, gyro);
-      imu.getAttitude(rpy[ROLL], rpy[PITCH], rpy[YAW]);
-
-      printf("Data:\n");
-      printf("  accel[x,y,z] (m/s^2): %.4lf, %.4lf, %.4lf\n",
-          accel[X], accel[Y], accel[Z]);
-      printf("  gyro[x,y,z] (rad/s):  %.4lf, %.4lf, %.4lf\n",
-          gyro[X], gyro[Y], gyro[Z]);
-      printf("  roll,pitch,yaw (rad): %.4lf, %.4lf, %.4lf\n",
-          rpy[ROLL], rpy[PITCH], rpy[YAW]);
-    }
-    else
-    {
-      printTestResult(FailTag, "Read raw IMU data.");
-    }
+    printf("%7s %36s %36s %36s\n",
+        "",
+        "accel[x,y,z)  (meters/s^2)  ",
+        "gyro[x,y,z]  (radians/s)    ",
+        "[roll,pitch,yaw]  (radians) ");
   }
+
+  printf("%6d. "
+        "(%10.4lf, %10.4lf, %10.4lf) "
+        "(%10.4lf, %10.4lf, %10.4lf) "
+        "(%10.4lf, %10.4lf, %10.4lf)\r",
+    cnt,
+    accel[X], accel[Y], accel[Z],
+    gyro[X], gyro[Y], gyro[Z],
+    rpy[ROLL], rpy[PITCH], rpy[YAW]);
+
+  fflush(stdout);
 
   return stats;
 }
 
-DiagStats runImuDiagnostics()
+DiagStats runImuDiagnostics(bool bAnyKey)
 {
   LaeImuCleanFlight imu;
+  int               cnt;
+  bool              bQuit;
   DiagStats         statsTest;
   DiagStats         statsTotal;
 
@@ -208,17 +222,34 @@ DiagStats runImuDiagnostics()
   }
  
   //
-  // Read Information Tests
+  // Read Sensor Data Tests
   //
-  if( !statsTotal.fatal )
+  statsTest.zero();
+  bQuit = statsTotal.fatal;
+  cnt = 0;
+
+  printSubHdr("Read IMU Sensor Data");
+
+  while( !bQuit )
   {
-    statsTest = readImu(imu);
+    imu.exec();
 
-    printSubTotals(statsTest);
+    statsTest += readImu(imu, cnt++);
 
-    statsTotal += statsTest;
+    if( !bAnyKey || kbhit() || statsTest.fatal )
+    {
+      printf("\n");
+      printSubTotals(statsTest);
+      bQuit = true;
+    }
+    else
+    {
+      usleep(100000);
+    }
   }
- 
+
+  statsTotal += statsTest;
+
   //
   // Summary
   //

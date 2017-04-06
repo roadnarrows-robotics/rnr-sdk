@@ -187,7 +187,7 @@ extern DiagStats runMotorsDiagnostics(bool bTestMotion);
 
 extern DiagStats runToFDiagnostics(bool bAnyKey);
 
-extern DiagStats runImuDiagnostics();
+extern DiagStats runImuDiagnostics(bool bAnyKey);
 
 extern DiagStats runWatchDogDiagnostics();
 

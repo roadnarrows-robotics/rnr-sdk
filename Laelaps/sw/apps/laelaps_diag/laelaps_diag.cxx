@@ -419,7 +419,7 @@ int main(int argc, char* argv[])
     }
     else if( strDiag == "imu" )
     {
-      statsGrandTotal += runImuDiagnostics();
+      statsGrandTotal += runImuDiagnostics(OptsAnyKey);
     }
     else if( strDiag == "watchdog" )
     {
