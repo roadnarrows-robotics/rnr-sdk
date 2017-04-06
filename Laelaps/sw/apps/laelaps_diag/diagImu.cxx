@@ -169,17 +169,18 @@ static DiagStats readImu(LaeImuCleanFlight &imu, int cnt)
 
   if( showLabel )
   {
-    printf("%7s %36s %36s %36s\n",
+    printf("%7s %34s | %34s | %34s\n",
         "",
-        "accel[x,y,z)  (meters/s^2)  ",
-        "gyro[x,y,z]  (radians/s)    ",
-        "[roll,pitch,yaw]  (radians) ");
+     //  1234567890123456789012345678901234 567890
+        "      accel[x,y,z] (meters/s^2)   ",
+        "      gyro[x,y,z] (radians/s)     ",
+        "    rpy[roll,pitch,yaw] (radians) ");
   }
 
   printf("%6d. "
-        "(%10.4lf, %10.4lf, %10.4lf) "
-        "(%10.4lf, %10.4lf, %10.4lf) "
-        "(%10.4lf, %10.4lf, %10.4lf)\r",
+        "%10.4lf, %10.4lf, %10.4lf | "
+        "%10.4lf, %10.4lf, %10.4lf | "
+        "%10.4lf, %10.4lf, %10.4lf\r",
     cnt,
     accel[X], accel[Y], accel[Z],
     gyro[X], gyro[Y], gyro[Z],

@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-01 15:14:45 -0700 (Mon, 01 Feb 2016) $
- * $Rev: 4289 $
- *
  * \brief Perform Laelaps motors diagnostics.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -408,22 +405,23 @@ static DiagStats testMotorCtlrsState()
 
 static DiagStats readMotorState(LaelapsMotorsInfo &info, int nMotor)
 {
-  RoboClaw   *pCtlr;          // motor controller
-  const char *sCtlrKey;       // motor controller key
-  const char *sMotorKey;      // motor key
-  byte_t      mode, dummy;    // motor encoder modes
-  string      strEncMode;     // encoder mode, translated
-  u32_t       uKp, uKi, uKd;  // PID constants
-  u32_t       qpps;           // quadrature pulses/second
-  double      Kp, Ki, Kd;     // PID constants (translated)
-  s64_t       encoder;        // motor encoder position
-  s32_t       speed;          // motor speed (qpps)
-  double      fMaxAmps;       // motor maximum current limit
-  double      amps, dummy2;   // motor current draw (amperes)
-  int         rc;             // return code
+  RoboClaw   *pCtlr;            // motor controller
+  const char *sCtlrKey;         // motor controller key
+  const char *sMotorKey;        // motor key
+  byte_t      mode, dummy;      // motor encoder modes
+  string      strEncMode;       // encoder mode, translated
+  u32_t       uKp, uKi, uKd;    // PID constants
+  u32_t       qpps;             // quadrature pulses/second
+  double      Kp, Ki, Kd;       // PID constants (translated)
+  s64_t       encoder;          // motor encoder position
+  s32_t       speed;            // motor speed (qpps)
+  double      fMaxMaxMotorAmps; // motor maximum maximum current limit
+  double      fMaxAmps;         // motor maximum current limit
+  double      amps, dummy2;     // motor current draw (amperes)
+  int         rc;               // return code
 
-  const char *sTag;           // pass/fail/fatal tag
-  DiagStats   stats;          // test stats
+  const char *sTag;             // pass/fail/fatal tag
+  DiagStats   stats;            // test stats
 
   printSubHdr("Read Motor Information and State");
 
@@ -498,15 +496,25 @@ static DiagStats readMotorState(LaelapsMotorsInfo &info, int nMotor)
   }
   printTestResult(sTag, "Motor %s: Read maximum current limit.", sMotorKey);
 
+  if( RobotDesc.getProdHwVer() > LAE_VERSION(2, 0, 0) )
+  {
+    fMaxMaxMotorAmps = LaeMotorMaxAmps_2_1;
+  }
+  else
+  {
+    fMaxMaxMotorAmps = LaeMotorMaxAmps_2_0;
+  }
+
   ++stats.testCnt;
   sTag = FailTag;
-  if( fMaxAmps == LaeMotorMaxAmps )
+  if( fMaxAmps <= fMaxMaxMotorAmps )
   {
     sTag = PassTag;
     ++stats.passCnt;
   }
-  printTestResult(sTag, "Motor %s: Maximum current limit %.2lf = req'd %.2lf.",
-      sMotorKey, fMaxAmps, LaeMotorMaxAmps);
+  printTestResult(sTag,
+      "Motor %s: Maximum current limit %.2lf <= system max of %.2lf amps.",
+      sMotorKey, fMaxAmps, fMaxMaxMotorAmps);
 
   ++stats.testCnt;
   encoder = 0;
