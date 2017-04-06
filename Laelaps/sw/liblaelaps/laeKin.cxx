@@ -832,11 +832,11 @@ int LaeKinematics::configMotorMaxAmpLimit(const LaeTunes &tunes,
 
   if( RtDb.m_product.m_uProdHwVer == LAE_VERSION(2, 0, 0) )
   {
-    fMaxAmps = LaeMotorMaxAmps;
+    fMaxAmps = LaeMotorMaxAmps_2_0 - 0.05;
   }
   else
   {
-    fMaxAmps = LaeMotorMaxAmps_2_1;
+    fMaxAmps = LaeMotorMaxAmps_2_1 - 0.05;
   }
 
   //

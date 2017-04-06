@@ -168,6 +168,7 @@ namespace laelaps
                                                     ///< stall torque (N-m) @5A
   static const double LaeMotorRatedAmps   = 5.0;    ///< motor rated max amps.
   static const double LaeMotorMaxAmps     = 30.0;   ///< max amp limit/motor
+  static const double LaeMotorMaxAmps_2_0 = 2.5;    ///< max amp limit/motor
   static const double LaeMotorMaxAmps_2_1 = 5.0;    ///< max amp limit/motor
 
 
