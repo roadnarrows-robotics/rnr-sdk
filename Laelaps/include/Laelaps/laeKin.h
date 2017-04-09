@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-04-12 14:32:48 -0600 (Tue, 12 Apr 2016) $
- * $Rev: 4385 $
- *
  * \brief The Laelaps kinematics and dynamics class interface.
  *
  * The class instance starts a kinematics thread to sense kinematic chain
@@ -465,6 +462,24 @@ namespace laelaps
     virtual int setGoalDutyCycles(const LaeMapDutyCycle &duty);
 
     /*!
+     * \brief Set new or updated robot twist velocity goals.
+     *
+     * The velocity actions are very simple actions (contrast with a 
+     * multi-position task). Therefore, to reduce thread context switching and
+     * increase responsiveness, after the new/updated velocity goals are set,
+     * the plan and execute steps are immediately called.
+     *
+     * \par Context:
+     * Calling thread.
+     *
+     * \param fVelLinear  Linear velocity (meters/second).
+     * \param fVelAngular Angular velocity (radians/second).
+     *
+     * \copydoc doc_return_std
+     */
+    virtual int setGoalTwist(double fVelLinear, double fVelAngular);
+
+    /*!
      * \brief Execute kinematics task(s).
      *
      * \par Context:
@@ -764,11 +779,12 @@ namespace laelaps
      */
     enum ActionType
     {
-      ActionTypeIdle,        ///< idle action
-      ActionTypeVelocity,    ///< move by angular velocities
-      ActionTypeDutyCycle,   ///< move by motor duty cycles
-      ActionTypeNavForDist,  ///< navigate for distances
-      ActionTypeNavToPos     ///< navigate to positions
+      ActionTypeIdle,       ///< idle action
+      ActionTypeVelocity,   ///< move by angular velocities
+      ActionTypeDutyCycle,  ///< move by motor duty cycles
+      ActionTypeTwist,      ///< move robot by twist values
+      ActionTypeNavForDist, ///< navigate for distances
+      ActionTypeNavToPos    ///< navigate to positions
     };
 
     /*!
@@ -1076,6 +1092,85 @@ namespace laelaps
     void clear();
 
   }; // class LaeKinActionDutyCycle
+
+
+  // ---------------------------------------------------------------------------
+  // LaeKinActionTwist Class
+  // ---------------------------------------------------------------------------
+  
+  /*!
+   * \brief Laelaps kinematics velocity action class.
+   *
+   * A velocity action only sets the velocities of a (sub)set of the powertrain
+   * velocities. Powertrains not specified are kept at their current 
+   * velocities.
+   */
+  class LaeKinActionTwist : public LaeKinAction
+  {
+  public:
+    /*!
+     * \brief Default initialization constructor.
+     *
+     * \param kin       Bound kinemeatics driver.
+     */
+    LaeKinActionTwist(LaeKinematics &kin);
+
+    /*!
+     * \brief Destructor.
+     */
+    virtual ~LaeKinActionTwist()
+    {
+    }
+
+    /*!
+     * \brief Update with new velocities.
+     *
+     * \param fVelLinear  Linear velocity (meters/second).
+     * \param fVelAngular Angular velocity (radians/second).
+     *
+     * \copydoc doc_return_std
+     */
+    int update(double fVelLinear, double fVelAngular);
+
+    /*!
+     * \brief Plan next execution. 
+     *
+     * If new velocities, the motor quad pulse per second are calculated.
+     *
+     * \copydoc doc_return_std
+     */
+    virtual int plan();
+
+    /*!
+     * \brief Execution new velocities.
+     *
+     * All motors with new velocities are written with new speeds.
+     *
+     * \copydoc doc_return_std
+     */
+    virtual int execute();
+
+    /*!
+     * \brief Terminate action.
+     *
+     * All motors are stopped.
+     *
+     * \copydoc doc_return_std
+     */
+    virtual int terminate();
+
+  protected:
+    double    m_fGoalVelLinear;   ///< goal platform linear velocity
+    double    m_fGoalVelAngular;  ///< goal platform angular velocity
+    s32_t     m_speed[LaeNumMotorCtlrs][LaeNumMotorsPerCtlr];
+                                  ///< target motor speeds (qpps)
+
+    /*!
+     * \brief Clear goal.
+     */
+    void clear();
+
+  }; // class LaeKinActionVelocity
 
 } // namespace laelaps
 

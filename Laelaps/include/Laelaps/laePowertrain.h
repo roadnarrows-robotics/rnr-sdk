@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-15 12:16:48 -0700 (Mon, 15 Feb 2016) $
- * $Rev: 4319 $
- *
  * \brief Laelaps powertrain class interfaces.
  *
  * There are four powertrains. A powertrain is defined as:\n

@@ -1367,6 +1367,54 @@ int LaeKinematics::setGoalDutyCycles(const LaeMapDutyCycle &duty)
   return rc;
 }
 
+int LaeKinematics::setGoalTwist(double fVelLinear, double fVelAngular)
+{
+  LaeKinActionTwist  *pAction;  // velocity action pointer
+  int                 rc;       // return code
+
+  lock();
+
+  if( m_bIsEnabled )
+  {
+    //
+    // Current action is not a velocity action. Terminate the action and
+    // create an this new action.
+    //
+    if( m_pAction->getActionType() != LaeKinAction::ActionTypeTwist )
+    {
+      m_pAction = LaeKinAction::replaceAction(*this, m_pAction,
+                                            LaeKinAction::ActionTypeTwist); 
+    }
+
+    pAction = (LaeKinActionTwist *)m_pAction;
+
+    //  update with new goals
+    rc = pAction->update(fVelLinear, fVelAngular);
+
+    if( pAction->isPlanningRequired() )
+    {
+      rc = pAction->plan();
+    }
+
+    if( pAction->isExecutionRequired() )
+    {
+      if( (rc = pAction->execute()) == LAE_OK )
+      {
+        m_bAreMotorsPowered = true;
+        RtDb.m_robotstatus.m_bAreMotorsPowered = m_bAreMotorsPowered;
+      }
+    }
+  }
+  else
+  {
+    rc = -LAE_ECODE_BAD_OP;
+  }
+
+  unlock();
+
+  return rc;
+}
+
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // Kinodynamic Thread Operations
@@ -1596,6 +1644,8 @@ LaeKinAction *LaeKinAction::newAction(LaeKinematics    &kin,
       return new LaeKinActionVelocity(kin);
     case ActionTypeDutyCycle:
       return new LaeKinActionDutyCycle(kin);
+    case ActionTypeTwist:
+      return new LaeKinActionTwist(kin);
     case ActionTypeNavForDist:        // future
     case ActionTypeNavToPos:          // future
       return new LaeKinAction(kin);
@@ -1963,4 +2013,227 @@ int LaeKinActionDutyCycle::terminate()
 void LaeKinActionDutyCycle::clear()
 {
   m_mapGoalDutyCycle.clear();
+}
+
+
+// ---------------------------------------------------------------------------
+// LaeKinActionVelocity
+// ---------------------------------------------------------------------------
+
+LaeKinActionTwist::LaeKinActionTwist(LaeKinematics &kin)
+    : LaeKinAction(kin, ActionTypeTwist)
+{
+  clear();
+}
+
+int LaeKinActionTwist::update(double fVelLinear, double fVelAngular)
+{
+  // set state to update
+  m_eActionState = ActionStateUpdate;
+
+  if( (fVelLinear != m_fGoalVelLinear) || (fVelAngular != m_fGoalVelAngular) )
+  {
+    m_fGoalVelLinear  = fVelLinear; 
+    m_fGoalVelAngular = fVelAngular;
+    m_eActionState    = ActionStatePlan;
+
+    LOGDIAG3("Robot linear velocity = %lf m/s, angular velocity = %lf deg/s.",
+        m_fGoalVelLinear, radToDeg(m_fGoalVelAngular));
+  }
+
+  // updated, but no planning and execution required
+  else
+  {
+    m_eActionState = ActionStateIdle;
+  }
+
+  return LAE_OK;
+}
+
+int LaeKinActionTwist::plan()
+{
+  int                       nCtlr;      // motor controller id
+  int                       nMotor;     // motor index
+  LaePowertrain            *pTrain;     // working powertrain
+  int                       nSpeed;     // motor speed (qpps)
+
+  if( !isPlanningRequired() )
+  {
+    return LAE_OK;
+  }
+
+  LaeKinAction::plan();
+
+  double halftrack = m_kin.getPlatform().m_fWheeltrack / 2.0; // radius
+  double velAngLin = m_fGoalVelAngular * halftrack;   // anglur to linear
+  double ppm;                     // quad pulses/meter
+  double ppsLin;                  // quad pulses/second for linear component
+  double ppsAng;                  // quad  pulses/second for angular component
+  double ppsAbsMax = 0.0;         // absolute max qqps
+  double ppsRatedMinMax = 10e10;  // lowest max rated powertrain qpps
+  double pps[LaeNumMotorCtlrs][LaeNumMotorsPerCtlr];  // goal qpps
+
+  //
+  // Iterate through motors and convert twist to speeds.
+  //
+  for(nCtlr = 0; nCtlr < LaeNumMotorCtlrs; ++nCtlr)
+  {
+    for(nMotor = 0; nMotor < LaeNumMotorsPerCtlr; ++nMotor)
+    {
+      if( (pTrain = m_kin.getPowertrain(nCtlr, nMotor)) == NULL )
+      {
+        continue;
+      }
+
+      ppm = 1.0 / pTrain->m_attr.m_fMetersPerPulse;
+
+      ppsLin  = m_fGoalVelLinear * ppm;
+      ppsAng  = velAngLin * ppm;
+
+      if( nMotor == LaeMotorLeft )
+      {
+        pps[nCtlr][nMotor] = ppsLin - ppsAng;
+      }
+      else
+      {
+        pps[nCtlr][nMotor] = ppsLin + ppsAng;
+      }
+
+      // powetrain with the highest absolute speed
+      if( fabs(pps[nCtlr][nMotor]) > ppsAbsMax )
+      {
+        ppsAbsMax = fabs(pps[nCtlr][nMotor]);
+      }
+
+      // powertrain with the lowest maximum speed
+      if( (double)pTrain->m_attr.m_uMaxQpps < ppsRatedMinMax )
+      {
+        ppsRatedMinMax = (double)pTrain->m_attr.m_uMaxQpps;
+      }
+    }
+  }
+
+  //
+  // Derate speed to work within the specs of the lowest motor capabilites.
+  //
+  if( ppsAbsMax > ppsRatedMinMax )
+  {
+    double derate = ppsRatedMinMax / ppsAbsMax;
+
+    for(nCtlr = 0; nCtlr < LaeNumMotorCtlrs; ++nCtlr)
+    {
+      for(nMotor = 0; nMotor < LaeNumMotorsPerCtlr; ++nMotor)
+      {
+        pps[nCtlr][nMotor] *= derate;
+      }
+    }
+  }
+
+  //
+  // Now set the target motor speeds.
+  //
+  for(nCtlr = 0; nCtlr < LaeNumMotorCtlrs; ++nCtlr)
+  {
+    for(nMotor = 0; nMotor < LaeNumMotorsPerCtlr; ++nMotor)
+    {
+      nSpeed = (int)pps[nCtlr][nMotor];
+
+      //
+      // New speed
+      //
+      if( m_speed[nCtlr][nMotor] != nSpeed )
+      {
+        m_speed[nCtlr][nMotor] = nSpeed;
+        m_eActionState = ActionStateExecute;
+      }
+    }
+  }
+
+  // planned, but no execution required
+  if( m_eActionState != ActionStateExecute )
+  {
+    m_eActionState = ActionStateIdle;
+  }
+}
+
+int LaeKinActionTwist::execute()
+{
+  int       nCtlr;
+  RoboClaw *pMotorCtlr;
+  int       rc = LAE_OK;
+
+  // no execution required
+  if( !isExecutionRequired() )
+  {
+    return LAE_OK;
+  }
+
+  LaeKinAction::execute();
+
+  // set motor speeds
+  for(nCtlr = 0; nCtlr < LaeNumMotorCtlrs; ++nCtlr)
+  {
+    pMotorCtlr = m_kin.getMotorCtlr(nCtlr);
+
+    //rc = pMotorCtlr->cmdQDrive2(m_speed[nCtlr][LaeMotorLeft],
+    //                            m_speed[nCtlr][LaeMotorRight]);
+
+    rc = pMotorCtlr->cmdQDriveWithAccel(
+        m_speed[nCtlr][LaeMotorLeft],  MoveAccel,
+        m_speed[nCtlr][LaeMotorRight], MoveAccel);
+
+    if( rc != OK )
+    {
+      rc = -LAE_ECODE_MOT_CTLR;
+      break;
+    }
+  }
+
+  m_eActionState = ActionStateIdle;
+
+  return rc;
+}
+
+int LaeKinActionTwist::terminate()
+{
+  LaeMapVelocity::iterator  iter;
+  int                       nCtlr;
+  RoboClaw                 *pMotorCtlr;
+
+  // already terminated
+  if( hasTerminated() )
+  {
+    return LAE_OK;
+  }
+
+  //
+  // Stop all motors.
+  //
+  // Note: Do not call m_kin.stop() here, since it calls this function.
+  //
+  for(nCtlr = 0; nCtlr < LaeNumMotorCtlrs; ++nCtlr)
+  {
+    pMotorCtlr = m_kin.getMotorCtlr(nCtlr);
+    pMotorCtlr->cmdStopWithDecel(StopDecel);
+  }
+
+  clear();
+
+  LaeKinAction::terminate();
+
+  return LAE_OK;
+}
+
+void LaeKinActionTwist::clear()
+{
+  m_fGoalVelLinear  = 0.0;
+  m_fGoalVelAngular = 0.0;
+
+  for(int nCtlr = 0; nCtlr < LaeNumMotorCtlrs; ++nCtlr)
+  {
+    for(int nMotor = 0; nMotor < LaeNumMotorsPerCtlr; ++nMotor)
+    {
+      m_speed[nCtlr][nMotor] = 0;
+    }
+  }
 }

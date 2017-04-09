@@ -529,12 +529,8 @@ int LaeRobot::move(double fVelLinear, double fVelAngular)
 {
   LAE_TRY_CONN();
 
-  // TODO
-  //if( (rc = m_kin.setX(velocity)) == LAE_OK )
-  //{
-  //}
+  return m_kin.setGoalTwist(fVelLinear, fVelAngular);
 
- return LAE_OK;
 } 
 
 int LaeRobot::setDutyCycles(const LaeMapDutyCycle &duty)

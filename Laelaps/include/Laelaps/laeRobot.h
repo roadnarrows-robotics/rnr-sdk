@@ -213,6 +213,10 @@ namespace laelaps
     /*!
      * \brief Move at the given linear and angular velocities.
      *
+     * This move is typically used with the ROS Twist message where:
+     *  - linear velocity is the x component Twist.linear.x
+     *  - angular velocity is the yaw component Twist.angular.z
+     *
      * \param fVelLinear  Linear velocity (meters/second).
      * \param fVelAngular Angular velocity (radians/second).
      *
