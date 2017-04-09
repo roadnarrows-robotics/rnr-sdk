@@ -159,7 +159,7 @@ namespace laelaps
   // Motor properties.
   //
   // For v2.0 platforms, there is 1 battery circuit with a maximum of 10 amps.
-  // For v2.1+ platforms, there are 2 battery curcuits with a max of 20 amps.
+  // For v2.1+ platforms, there are 2 battery circuits with a max of 20 amps.
   //
   static const int    LaeQuadPulsesPerRev = 64;     ///< pulses/motor revolution
   static const double LaeMotorGearRatio   = 30.0;   ///< gear ratio

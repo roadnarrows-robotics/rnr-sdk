@@ -310,7 +310,6 @@ int LaePlatform::updateStateDynamics(const LaeMapPowertrain &mapPowertrains)
   //
   fDeltaOd = fabs(fDeltaOd / (double)LaeMotorsNumOf);
   m_fOdometer += fDeltaOd;
-fprintf(stderr, "rdk: deltaod=%lf, od=%lf\n", fDeltaOd, m_fOdometer);
 
   //
   // Average the velocity sum. The velocity is calculated from the platform

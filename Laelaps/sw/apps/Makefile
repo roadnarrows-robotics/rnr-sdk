@@ -6,9 +6,6 @@ ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2014-10-22 10:04:28 -0600 (Wed, 22 Oct 2014) $  
-$Rev: 3791 $ 
-
 \brief Make the Laelaps applications.
 
 RN Make System Specific Makefile
@@ -59,7 +56,7 @@ pkgroot		= ../..
 #------------------------------------------------------------------------------
 
 # Subdirectories to Build
-SUBDIRS = laelaps_diag laelaps_tof
+SUBDIRS = laelaps_diag
 
 
 #------------------------------------------------------------------------------
