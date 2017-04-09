@@ -62,6 +62,8 @@
 #define LAE_TOF_MUX_VERSION  1                      ///< sw/fw version.
 #endif
 
+#undef LAE_USE_ALS  ///< undef/define to [not] build firmware with ALS support
+
 /*!
  *  \brief The \h_laelaps namespace encapsulates all \h_laelaps related
  *  constructs.

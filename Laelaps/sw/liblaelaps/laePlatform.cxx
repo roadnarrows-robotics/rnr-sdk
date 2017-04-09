@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-04-08 15:42:39 -0600 (Fri, 08 Apr 2016) $
- * $Rev: 4380 $
- *
  * \brief Laelaps robotic platform control and dynamics state implementation.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -313,6 +310,7 @@ int LaePlatform::updateStateDynamics(const LaeMapPowertrain &mapPowertrains)
   //
   fDeltaOd = fabs(fDeltaOd / (double)LaeMotorsNumOf);
   m_fOdometer += fDeltaOd;
+fprintf(stderr, "rdk: deltaod=%lf, od=%lf\n", fDeltaOd, m_fOdometer);
 
   //
   // Average the velocity sum. The velocity is calculated from the platform

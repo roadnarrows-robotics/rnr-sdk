@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-09 15:08:50 -0700 (Tue, 09 Feb 2016) $
- * $Rev: 4308 $
- *
  * \brief The VL6180 Time-of-Flight sensor class implementation.
  *
  * This code is based on the Arduino library freely available from Sparkfun.
@@ -58,6 +55,7 @@
 #include <SoftwareWire.h>
 
 #include "VL6180X.h"
+
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // Debugging Macros
@@ -474,7 +472,7 @@ boolean VL6180x::asyncMeasureRange()
         }
 
         // initialize state
-        m_uAsyncTWait   = 20;
+        m_uAsyncTWait   = 40;
         m_uAsyncTStart  = millis();
         m_eAsyncState   = AsyncStateWaitForReady;
         break;

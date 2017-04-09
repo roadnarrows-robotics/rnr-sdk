@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate$
- * $Rev$
- *
  * \brief Laelaps time-of-flight multiplexor Arduino compatible firmware.
  *
  * The firmware is an I2C slave device to the host and an I2C master to the
@@ -40,6 +37,9 @@
 #include <stdlib.h>
 #include <Wire.h>
 #include <SoftwareWire.h>
+
+//#include <avr/wdt.h>    // dangerous
+
 //
 // Bridge between standard POSIX C/C++ Linux and Arduino constructs.
 //
@@ -84,6 +84,7 @@ SoftwareWire *SoftWire[LaeToFMuxNumOfChan] =
 //
 VL6180x    *ToFSensor[LaeToFMuxNumOfChan];  ///< the sensor objects
 int         ToFNumConn;                     ///< number of sensors connected
+
 const int   DistAlsRatio = 16;              ///< dist to amb sense approx ratio
 int         AlsSensorId;                    ///< current ALS sensor id
 int         AlsCounter;                     ///< ALS sense counter
@@ -107,6 +108,12 @@ boolean   SerContinuousMode;
 byte      SerContinuousOutput;
 
 //
+// One or more sensors need reseting. Do this by letting this subprocessor
+// watchdog timeout.
+//
+//boolean   ForceWdtTimeout;
+
+//
 // Define level of serial help output. There is limited global variable space.
 // Choices are: HELP_MIN HELP_FULL HELP_SYN
 //
@@ -122,6 +129,17 @@ byte      SerContinuousOutput;
 void setup()
 {
   int   i;
+
+  //
+  // Do this quickly.
+  //
+  // Note:
+  // Watchdog timer is dangerous. It can brick the processor while downloading
+  // new firmware. Also, the reset on timeout does not pull the VL6180 sensors
+  // to power reset, which is where the problem lies. Hung sensors. And the 
+  // sensors provide no reset register.
+  //
+  //wdt_disable();
 
   //
   // Begin software wires.
@@ -143,7 +161,16 @@ void setup()
   // Probe and initialize sensors and class object data.
   //
   probe();
-  AlsSensorId = -1; // disable als
+
+#ifndef LAE_USE_ALS
+  //
+  // Disable firmware from taking ALS measurements.
+  //
+  // Note:
+  // The serial command-line interface can reenable.
+  //
+  AlsSensorId = -1;
+#endif
 
   //
   // I2C slave setup. Receive and send from/to I2C master by asynchronous
@@ -161,6 +188,15 @@ void setup()
   SerArgc           = 0;
   SerContinuousMode = false;
   Serial.begin(115200);
+
+  //
+  // Enable watchdog timer.
+  //
+  // Note:
+  //  The maximum watchdog timeout is 8 seconds.
+  //
+  //wdt_enable(WDTO_8S);
+  //ForceWdtTimeout = false;
 }
 
 /*!
@@ -191,6 +227,14 @@ void loop()
       serExecCmd();
     }
   }
+
+  //
+  // Pet the watchdog be reseting its timeout counter.
+  //
+  //if( !ForceWdtTimeout )
+  //{
+  //  wdt_reset();  
+  //}
 }
 
 
@@ -261,16 +305,17 @@ void measure()
 
     //
     // This sensor is scheduled or is actively taking an ambient light
-    // measurement.
+    // sensor measurement.
     //
     if( AlsSensorId == i )
     {
       //
-      // Scheduled.
+      // However, sensor is still taking a range measurement.
       //
       if( AlsCounter > 0 )
       {
-        // continue taking distance measurements
+        // Pushing distance measurement through its states.
+        // Returns true when finished.
         if( ToFSensor[i]->asyncMeasureRange() )
         {
           --AlsCounter; // when done decrement ALS counter.
@@ -279,11 +324,12 @@ void measure()
       }
 
       //
-      // Active.
+      // Take an ALS measurement.
       //
       else
       {
-        // push ambient light measurement until done
+        // Push ambient light measurement through its states.
+        // Returns true when finished.
         if( ToFSensor[i]->asyncMeasureAmbientLight() )
         {
           //if( i == 0 ) p("%d m ..... done\n", i);
@@ -299,13 +345,25 @@ void measure()
     }
 
     //
-    // This sensor is not scheduled or is actively taking an ambient light
-    // measurement. So take a distance measurement.
+    // This sensor is not marked for taking an ambient light sensor measurement.
+    // So take a distance measurement.
     //
     else
     {
+      // Push. Returns true when finished.
       ToFSensor[i]->asyncMeasureRange();
     }
+
+    //
+    // Any hung sensor will force the processor watchdog timer to enventually
+    // timeout and reset the processor.
+    //
+    // Dangerouse, not used.
+    //
+    //if( ToFSensor[i].isHung() )
+    //{
+    //  ForceWdtTimeout = true;
+    //}
   }
 }
 
