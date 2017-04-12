@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-03-08 10:43:48 -0700 (Tue, 08 Mar 2016) $
- * $Rev: 4346 $
- *
  * \brief The VL6180 Time-of-Flight sensor class interface.
  *
  * This code is based on the Arduino library freely available from Sparkfun.
@@ -216,7 +213,7 @@ struct VL6180xIdentification
 //------------------------------------------------------------------------------
 
 /*!
- *
+ * \brief VL6180x class.
  */
 class VL6180x
 {
@@ -393,6 +390,11 @@ public:
   //............................................................................
 
   /*!
+   * \brief Enable/disable debugging.
+   */
+  void debug(boolean onoff);
+
+  /*!
    * \brief Get sensor's assigned id.
    *
    * \return Sensor id.
@@ -510,6 +512,8 @@ protected:
   int           m_addr;               ///< address of sensor
   boolean       m_bBlackListed;       ///< is [not] blacklisted
   boolean       m_bBusy;              ///< is [not] busy 
+  uint16_t      m_uErrCnt;            ///< communication error count
+  boolean       m_bDebug;             ///< enable/disable debugging
 
   // read values
   VL6180xIdentification m_ident;      ///< sensor identity

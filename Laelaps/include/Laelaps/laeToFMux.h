@@ -487,7 +487,6 @@ namespace laelaps
   const char   LaeToFMuxSerCmdIdProbe   = 'p';  ///< command id
   const byte_t LaeToFMuxSerCmdArgcProbe = 1;    ///< cmd argument count
   const byte_t LaeToFMuxSerRspArgcProbe = 2;    ///< rsp argument count
-
  
   //
   // List state of ToF sensors.
@@ -556,15 +555,16 @@ namespace laelaps
   const byte_t LaeToFMuxSerRspArgcWriteReg  = 2;    ///< rsp argument count
 
   //
-  // Debug (not implemented)
+  // Debug sensor.
   //
-  // Command format:  'x' level EOC
-  // Response format: 'x' level EOR
+  // Command format:  'x' sensor enable
+  // Response format: 'x' enable EOR
   // Arguments:
-  //  level ::= INT
+  //  sensor  ::= INT
+  //  enable  ::= 0 | 1
   //
-  const char   LaeToFMuxSerCmdIdDebug   = 'X';  ///< command id
-  const byte_t LaeToFMuxSerCmdArgcDebug = 2;    ///< cmd argument count
+  const char   LaeToFMuxSerCmdIdDebug   = 'x';  ///< command id
+  const byte_t LaeToFMuxSerCmdArgcDebug = 3;    ///< cmd argument count
   const byte_t LaeToFMuxSerRspArgcDebug = 2;    ///< rsp argument count
 
 #ifndef SWIG

@@ -54,56 +54,89 @@
 
 #include <SoftwareWire.h>
 
-#include "VL6180X.h"
+//
+// Bridge between standard POSIX C/C++ Linux and Arduino constructs.
+//
+typedef byte byte_t;
 
+#include "laeToFMux.h"  // interface between firmware and software.
+#include "VL6180X.h"    // interface to sensor class
+
+
+extern void p(const char *fmt, ...);
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // Debugging Macros
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-/*! \brief Define to include debug hooks, undef to exclude */
-#undef DBG_ENABLE
+/*! \brief Define to include debug hooks, undef to exclude.
+ *
+ * Warning: Lots of spontaneous output can and does interfere with firmware 
+ * downloads. Nice.
+ *
+ * \{
+ */
+#define DBG_ENABLE
 
-// debug sections
+//
+// Debug sections.
+//
 #define DBG_SECT_INI    0x01    ///< debug initialization code section
 #define DBG_SECT_TOF    0x02    ///< debug time-of-flight code section
 #define DBG_SECT_ALS    0x04    ///< debug ambient light code section
+#define DBG_SECT_ERR    0x08    ///< debug error handling code section
 
-/*! \brief define sensor to debug [0-7] */
-#define DBG_SENSOR  7
+#define DBG_INIT_SENSOR 7       ///< define sensor to debug initialization [0-7]
 
-/*! \brief define or'ed bits of DBG_SECT code sections */
-#define DBG_MASK    DBG_SECT_TOF
+#define DBG_MASK    DBG_SECT_ERR ///< define or'ed bits of DBG_SECT sections
 
 #ifdef DBG_ENABLE
 
-#define DBG_PRINT(sensor, section, arg) \
+/*!
+ * \brief Debug print string.
+ */
+#define DBG_PRINT(dbg, section, fmt, ...) \
   do \
   { \
-    if( ((sensor) == DBG_SENSOR) && ((section) & DBG_MASK) ) \
+    if( dbg && ((section) & DBG_MASK) ) \
     { \
-      Serial.print(arg); \
+      p("%s: " fmt, sectName(section), ##__VA_ARGS__); \
     } \
   } \
   while(false)
 
-#define DBG_PRINT_NUM(sensor, section, arg, fmt) \
-  do \
-  { \
-    if( ((sensor) == DBG_SENSOR) && ((section) & DBG_MASK) ) \
-    { \
-      Serial.print(arg, fmt); \
-    } \
-  } \
-  while(false)
+const char *sectName(uint8_t section)
+{
+  if( section & DBG_SECT_INI )
+  {
+    return "ini";
+  }
+  else if( section & DBG_SECT_TOF )
+  {
+    return "tof";
+  }
+  else if( section & DBG_SECT_ALS )
+  {
+    return "als";
+  }
+  else if( section & DBG_SECT_ERR )
+  {
+    return "err";
+  }
+  else
+  {
+    return "any";
+  }
+}
 
 #else // disable
 
-#define DBG_PRINT(sensor, section, ...)
-#define DBG_PRINT_NUM(sensor, section, arg, fmt)
+#define DBG_PRINT(dbg, section, ...)
 
 #endif // DBG_ENABLE
-
+/*
+ * \}
+ */
 
 /*!
  * \brief Elapse delta time.
@@ -140,6 +173,8 @@ VL6180x::VL6180x(int sensorId, SoftwareWire &wire, uint8_t address) :
 {
   m_bBlackListed  = false;
   m_bBusy         = false;
+  m_uErrCnt       = 0;
+  m_bDebug        = false;
 
   memset(&m_ident, 0, sizeof(VL6180xIdentification));
 
@@ -168,7 +203,10 @@ boolean VL6180x::waitForBootup(int tries)
     d = readReg8(VL6180X_FIRMWARE_BOOTUP);
     if( d & 0x01 )
     {
-      DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: booted\n");
+      if( m_nSensorId == DBG_INIT_SENSOR )
+      {
+        DBG_PRINT(true, DBG_SECT_INI, "booted\n");
+      }
       return true;
     }
     else
@@ -177,7 +215,11 @@ boolean VL6180x::waitForBootup(int tries)
     }
   }
 
-  DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: not booted\n");
+  if( m_nSensorId == DBG_INIT_SENSOR )
+  {
+    DBG_PRINT(true, DBG_SECT_INI, "not booted\n");
+  }
+
   return false;
 }
 
@@ -194,10 +236,10 @@ boolean VL6180x::ping(int tries)
 
     if( (d != 0) && (d != 0xff) )
     {
-      DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: pinged, tries=");
-      DBG_PRINT_NUM(m_nSensorId, DBG_SECT_INI, i+1, DEC);
-      DBG_PRINT(m_nSensorId, DBG_SECT_INI, "\n");
-
+      if( m_nSensorId == DBG_INIT_SENSOR )
+      {
+        DBG_PRINT(true, DBG_SECT_INI, "pinged, tries=%d\n", i+1);
+      }
       m_bBusy = false;
       return true;
     }
@@ -205,9 +247,10 @@ boolean VL6180x::ping(int tries)
     delay(10);
   }
 
-  DBG_PRINT(m_nSensorId, DBG_SECT_INI, "ini: no response, tries=");
-  DBG_PRINT_NUM(m_nSensorId, DBG_SECT_INI, 1, DEC);
-  DBG_PRINT(m_nSensorId, DBG_SECT_INI, "\n");
+  if( m_nSensorId == DBG_INIT_SENSOR )
+  {
+    DBG_PRINT(true, DBG_SECT_INI, "no response, tries=%d\\n", i);
+  }
 
   m_bBusy = false;
 
@@ -276,10 +319,6 @@ void VL6180x::writeSensorDefaults()
   // Recommended settings from datasheet
   // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
 
-  // enable interrupts on conversion complete (any source)
-  // Set GPIO1 high when sample complete
-  writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, (4 << 3)|(4) );
-
   // Set GPIO1 high when sample complete
   writeReg8(VL6180X_SYSTEM_MODE_GPIO1, 0x10);
 
@@ -313,13 +352,16 @@ void VL6180x::writeSensorDefaults()
   // set default ALS inter-measurement period to 100ms
   writeReg8(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 0x0A);
 
-  // configures interrupt on ‘new sample ready threshold event’ 
+  //
+  // Configure interrupt on ‘new sample' ready threshold event 
+  // Note: only new sample bit works, the rest is shit.
   writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24);
 
   // additional settings defaults from community
   writeReg8(VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME, 0x32);
   writeReg8(VL6180X_SYSRANGE_RANGE_CHECK_ENABLES, 0x10 | 0x01);
   writeReg16(VL6180X_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE, 0x7B );
+  writeReg16(VL6180X_SYSRANGE_THRESH_HIGH, 0xD2 );  // 210 mm
 
   writeReg8(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD,0x30);
   writeReg8(VL6180X_FIRMWARE_RESULT_SCALER,0x01);
@@ -409,6 +451,7 @@ byte VL6180x::measureRange()
 
 float VL6180x::measureAmbientLight()
 {
+#ifdef LAE_USE_ALS
   unsigned int  alsRaw;
   byte          status;
 
@@ -435,6 +478,12 @@ float VL6180x::measureAmbientLight()
 
   m_bBusy = false;
 
+#else // !LAE_USE_ALS
+
+  m_lux = 0;
+
+#endif // LAE_USE_ALS
+
   return m_lux;
 }
 #endif // INCLUDE_EXTRAS
@@ -460,7 +509,7 @@ boolean VL6180x::asyncMeasureRange()
       // Initialize data for measurment.
       //
       case AsyncStateInit:
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: init\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF, "init\n");
 
         // mark sensor busy
         m_bBusy = true;
@@ -481,7 +530,7 @@ boolean VL6180x::asyncMeasureRange()
       // Wait for the sensor to be ready.
       //
       case AsyncStateWaitForReady:
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: wait ready\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF, "waitforready\n");
 
         // read range status register
         status = readReg8(VL6180X_RESULT_RANGE_STATUS);
@@ -499,6 +548,7 @@ boolean VL6180x::asyncMeasureRange()
         // timeout - abort
         else
         {
+          DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "waitforready: ");
           m_eAsyncState = AsyncStateAbort;
         }
         break;
@@ -507,27 +557,30 @@ boolean VL6180x::asyncMeasureRange()
       // Start a measurement.
       //
       case AsyncStateStartMeas:
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: start meas\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF, "startmeas\n");
 
+        // start measurement
         writeReg8(VL6180X_SYSRANGE_START, 0x01);
-        bExec         = false;
-        m_eAsyncState = AsyncStateWaitForResult;
+
+        // initialize state
+        bExec           = false;
+        m_uAsyncTWait   = 40;
+        m_uAsyncTStart  = millis();
+        m_eAsyncState   = AsyncStateWaitForResult;
         break;
 
       //
       // Wait for the measurement's result.
       //
       case AsyncStateWaitForResult:
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: wait meas, status=0x");
-
         // read gpio interrupt status 
         status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
 
-        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_TOF, status, HEX);
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF, "waitforresult: status=0x%02x\n",
+            status);
 
         // result ready
-        if( status & 0x04 )
+        if( status & 0x07 )
         {
           m_eAsyncState = AsyncStateDone;
         }
@@ -539,6 +592,7 @@ boolean VL6180x::asyncMeasureRange()
         // timeout - abort
         else
         {
+          DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "waitforresult: ");
           m_eAsyncState = AsyncStateAbort;
         }
         break;
@@ -547,18 +601,38 @@ boolean VL6180x::asyncMeasureRange()
       // Sensor measurement has completed, retrieve the value.
       //
       case AsyncStateDone:
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: done in msec=");
-        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_TOF, dt(m_uAsyncTStart), DEC);
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF, "done: msec=%d\n",
+            dt(m_uAsyncTStart));
 
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
         // get range distance and status values
-        range   = readReg8(VL6180X_RESULT_RANGE_VAL);
-        status  = readReg8(VL6180X_RESULT_RANGE_STATUS);
+        range = readReg8(VL6180X_RESULT_RANGE_VAL);
 
-        m_range = cvtRangeRawToDist(range, status);
+        // legacy
+        //status  = readReg8(VL6180X_RESULT_RANGE_STATUS);
+
+        // not used
+        //m_range = cvtRangeRawToDist(range, status);
+
+        //
+        // Got a valid measurement.
+        //
+        m_range = VL6180X_RANGE_NO_OBJ;
+        if( status & 0x04 )
+        {
+          if( range <= VL6180X_RANGE_MAX )
+          {
+            m_range = range;
+          }
+          if( m_uErrCnt > 0 )
+          {
+            --m_uErrCnt;
+          }
+        }
+
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "range=%d\n", m_range);
 
         bExec         = false;
         bDone         = true;
@@ -570,12 +644,13 @@ boolean VL6180x::asyncMeasureRange()
       // Abort measurement.
       //
       case AsyncStateAbort:
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "tof: abort after msec=");
-        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_TOF, dt(m_uAsyncTStart), DEC);
-        DBG_PRINT(m_nSensorId, DBG_SECT_TOF, "\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "abort after msec=%d\n",
+            dt(m_uAsyncTStart));
 
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
+
+        ++m_uErrCnt;
 
         bExec         = false;
         bDone         = true;
@@ -597,6 +672,8 @@ boolean VL6180x::asyncMeasureRange()
 
 boolean VL6180x::asyncMeasureAmbientLight()
 {
+#ifdef LAE_USE_ALS
+
   boolean   bExec;  // can [not] continue to execute on this pass
   boolean   bDone;  // measurement is [not] done
   uint16_t  raw;    // als raw value
@@ -616,7 +693,7 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Initialize data for measurment.
       //
       case AsyncStateInit:
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: init\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_ALS, "init\n");
 
         // mark sensor busy
         m_bBusy = true;
@@ -637,7 +714,7 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Wait for the sensor to be ready.
       //
       case AsyncStateWaitForReady:
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: wait ready\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_ALS, "wait ready\n");
 
         // read range status register
         status = readReg8(VL6180X_RESULT_ALS_STATUS);
@@ -663,7 +740,7 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Start a measurement.
       //
       case AsyncStateStartMeas:
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: start meas\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_ALS, "start meas\n");
 
         writeReg8(VL6180X_SYSALS_START, 0x01);
         bExec         = false;
@@ -674,13 +751,11 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Wait for the measurement's result.
       //
       case AsyncStateWaitForResult:
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: wait meas, status=0x");
-
         // read gpio interrupt status 
         status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
 
-        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_ALS, status, HEX);
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_ALS, "wait meas, status=0x%02x\n",
+            status);
 
         // result ready
         if( status & 0x20 )
@@ -703,9 +778,8 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Sensor measurement has completed, retrieve the value.
       //
       case AsyncStateDone:
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: done in msec=");
-        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_ALS, dt(m_uAsyncTStart), DEC);
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_ALS, "done in msec=%d\n",
+          dt(m_uAsyncTStart));
 
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
@@ -726,9 +800,8 @@ boolean VL6180x::asyncMeasureAmbientLight()
       // Abort measurement.
       //
       case AsyncStateAbort:
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "als: abort after msec=");
-        DBG_PRINT_NUM(m_nSensorId, DBG_SECT_ALS, dt(m_uAsyncTStart), DEC);
-        DBG_PRINT(m_nSensorId, DBG_SECT_ALS, "\n");
+        DBG_PRINT(m_bDebug, DBG_SECT_ALS|DBG_SECT_ERR, "abort after msec=%d\n",
+            dt(m_uAsyncTStart));
 
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
@@ -749,6 +822,14 @@ boolean VL6180x::asyncMeasureAmbientLight()
   }
 
   return bDone;
+
+#else // !LAE_USE_ALS
+
+   m_lux = 0;
+
+  return true;
+
+#endif // LAE_USE_ALS
 }
 
 byte VL6180x::cvtRangeRawToDist(byte rangeRaw, byte rangeStatus)
@@ -933,6 +1014,11 @@ void VL6180x::getDefaultTunes(byte &offset, uint16_t &crosstalk,
   intPeriod = VL6180X_AMBIENT_INT_T_REC;
 }
 
+void VL6180x::debug(boolean onoff)
+{
+  m_bDebug = onoff;
+}
+
 int VL6180x::getSensorId()
 {
   return m_nSensorId;
@@ -950,55 +1036,122 @@ float VL6180x::getAmbientLight()
 
 byte VL6180x::readReg8(uint16_t regAddr)
 {
-  byte data;
+  uint8_t n;
+  byte    data;
+  uint8_t rc;
 
-  m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(regAddr & 0xFF); //LSB of register address
-  m_wire.endTransmission(false); //Send address and register address bytes
-  m_wire.requestFrom( m_addr , 1);
-  data = m_wire.read(); //Read Data from selected register
+  m_wire.beginTransmission(m_addr);     // sensor address
+  m_wire.write((regAddr >> 8) & 0xFF);  // MSB of register address
+  m_wire.write(regAddr & 0xFF);         // LSB of register address
+  rc = m_wire.endTransmission(false);   // send address and register bytes
+
+  if( rc == SOFTWAREWIRE_NO_ERROR )
+  {
+    n = m_wire.requestFrom(m_addr , 1); // request 1 byte back
+    if( n >= 1 )
+    {
+      data = m_wire.read();             // read data from selected register
+    }
+    else
+    {
+      rc = SOFTWAREWIRE_OTHER; 
+    }
+  }
+
+  if( rc != SOFTWAREWIRE_NO_ERROR )
+  {
+    data = 0;
+    ++m_uErrCnt;
+
+    DBG_PRINT(m_bDebug, DBG_SECT_ERR, "readReg8(%0x04x), errcnt=%u\n",
+        regAddr, m_uErrCnt);
+  }
 
   return data;
 }
 
 uint16_t VL6180x::readReg16(uint16_t regAddr)
 {
-  uint8_t data_low;
-  uint8_t data_high;
-  uint16_t data;
+  uint8_t   n;
+  uint8_t   data_low;
+  uint8_t   data_high;
+  uint16_t  data;
+  uint8_t   rc;
 
-  m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(regAddr & 0xFF); //LSB of register address
-  m_wire.endTransmission(false); //Send address and register address bytes
+  m_wire.beginTransmission(m_addr);     // sensor address
+  m_wire.write((regAddr >> 8) & 0xFF);  // MSB of register address
+  m_wire.write(regAddr & 0xFF);         // LSB of register address
+  rc = m_wire.endTransmission(false);   // send address and register bytes
 
-  m_wire.requestFrom( m_addr, 2);
-  data_high = m_wire.read(); //Read Data from selected register
-  data_low = m_wire.read(); //Read Data from selected register
-  data = (data_high << 8)|data_low;
+  if( rc == SOFTWAREWIRE_NO_ERROR )
+  {
+    n = m_wire.requestFrom(m_addr , 2); // request 2 bytes back
+    if( n >= 2 )
+    {
+      data_high = m_wire.read();          // read MSB from selected register
+      data_low = m_wire.read();           // read LSB from selected register
+      data = (data_high << 8)|data_low;
+    }
+    else
+    {
+      rc = SOFTWAREWIRE_OTHER; 
+    }
+  }
+
+  if( rc != SOFTWAREWIRE_NO_ERROR )
+  {
+    data = 0;
+    ++m_uErrCnt;
+
+    DBG_PRINT(m_bDebug, DBG_SECT_ERR, "readReg16(%0x04x), errcnt=%u\n",
+        regAddr, m_uErrCnt);
+  }
 
   return data;
 }
 
 void VL6180x::writeReg8(uint16_t regAddr, byte data)
 {
-  m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(regAddr & 0xFF); //LSB of register address
-  m_wire.write(data); // Data/setting to be sent to device.
-  m_wire.endTransmission(); //Send address and register address bytes
+  uint8_t   rc;
+
+  m_wire.beginTransmission(m_addr);     // sensor address
+  m_wire.write((regAddr >> 8) & 0xFF);  // MSB of register address
+  m_wire.write(regAddr & 0xFF);         // LSB of register address
+
+  m_wire.write(data);                   // write register data
+
+  rc = m_wire.endTransmission();        // send
+
+  if( rc != SOFTWAREWIRE_NO_ERROR )
+  {
+    ++m_uErrCnt;
+
+    DBG_PRINT(m_bDebug, DBG_SECT_ERR, "writeReg8(%0x04x), errcnt=%u\n",
+        regAddr, m_uErrCnt);
+  }
 }
 
 void VL6180x::writeReg16(uint16_t regAddr, uint16_t data)
 {
-  m_wire.beginTransmission( m_addr ); // Address set on class instantiation
-  m_wire.write((regAddr >> 8) & 0xFF); //MSB of register address
-  m_wire.write(regAddr & 0xFF); //LSB of register address
-  uint8_t temp;
+  uint8_t   temp;
+  uint8_t   rc;
+
+  m_wire.beginTransmission(m_addr);     // sensor address
+  m_wire.write((regAddr >> 8) & 0xFF);  // MSB of register address
+  m_wire.write(regAddr & 0xFF);         // LSB of register address
+
   temp = (data >> 8) & 0xff;
-  m_wire.write(temp); // Data/setting to be sent to device
+  m_wire.write(temp);                   // write MSB register data
   temp = data & 0xff;
-  m_wire.write(temp); // Data/setting to be sent to device
-  m_wire.endTransmission(); //Send address and register address bytes
+  m_wire.write(temp);                   // write LSB register data
+
+  rc = m_wire.endTransmission();        // send
+
+  if( rc != SOFTWAREWIRE_NO_ERROR )
+  {
+    ++m_uErrCnt;
+
+    DBG_PRINT(m_bDebug, DBG_SECT_ERR, "writeReg16(%0x04x), errcnt=%u\n",
+        regAddr, m_uErrCnt);
+  }
 }

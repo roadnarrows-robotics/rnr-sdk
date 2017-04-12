@@ -45,9 +45,8 @@
 //
 typedef byte byte_t;
 
-// Interface between firmware and software.
-#include "laeToFMux.h"
-#include "VL6180X.h"
+#include "laeToFMux.h"  // interface between firmware and software.
+#include "VL6180X.h"    // interface to sensor class
 
 using namespace laelaps;
 
@@ -274,6 +273,10 @@ void probe()
       ToFSensor[i]->blacklist();
     }
   }
+
+#ifndef LAE_USE_ALS
+  AlsSensorId = -1;
+#endif // !LAE_USE_ALS
 
   if( ToFNumConn > 0 )
   {
@@ -1233,7 +1236,8 @@ void serExecCmd()
       serExecWriteReg();
       break;
     case LaeToFMuxSerCmdIdDebug:
-      break;  // TODO
+      serExecDebug();
+      break;
     default:
       serErrorRsp("unknown command");
       break;
@@ -1263,6 +1267,7 @@ void serExecHelp()
     LaeToFMuxSerCmdIdTunes,
     LaeToFMuxSerCmdIdGetVersion,
     LaeToFMuxSerCmdIdWriteReg,
+    LaeToFMuxSerCmdIdDebug,
     0
   };
 
@@ -1290,6 +1295,7 @@ void serExecHelp()
                                     "get/set tune params"},
     {"v",                           "get firmware version"},
     {"w sensor addr {1|2} val",     "write sensor register"},
+    {"x sensor {0|1}",              "debug sensor"},
     {NULL, NULL}
   };
 
@@ -1317,6 +1323,7 @@ void serExecHelp()
     "t {g|s} sensor [offset xtalk gain period]",
     "v",
     "w sensor addr {1|2} val",
+    "x sensor {0|1}",
     NULL
   };
 
@@ -1338,7 +1345,7 @@ void serExecGetVersion()
 {
   if( serChkArgCnt(LaeToFMuxSerCmdArgcGetVersion) )
   {
-    serRsp("Laelaps ToFMux v%d", LAE_TOF_MUX_FW_VERSION);
+    serRsp("Laelaps ToFMux v%d - 1", LAE_TOF_MUX_FW_VERSION);
   }
 }
 
@@ -1369,6 +1376,7 @@ void serExecConfig()
 
       if( ok )
       {
+#ifdef LAE_USE_ALS
         if( state == 0 )
         {
           AlsSensorId = -1;
@@ -1377,6 +1385,7 @@ void serExecConfig()
         {
           AlsSensorId = AlsSensorId < 0? nextSensor(0): AlsSensorId;
         }
+#endif // LAE_USE_ALS
       }
       break;
 
@@ -1759,4 +1768,30 @@ void serExecWriteReg()
       serRsp("0x%02x", regRVal);
       break;
   }
+}
+
+/*!
+ * \brief Execute debug sensor.
+ */
+void serExecDebug()
+{
+  int     sensor;
+  long    enable;
+
+  if( !serChkArgCnt(LaeToFMuxSerCmdArgcDebug) )
+  {
+    return;
+  }
+  else if( !serParseSensorId(SerArgv[1], sensor) ) 
+  {
+    return;
+  }
+  else if( !serParseNumber("enable", SerArgv[2], 0, 1, enable) )
+  {
+    return;
+  }
+
+  ToFSensor[sensor]->debug(enable==1);
+
+  serRsp("%d", enable);
 }
