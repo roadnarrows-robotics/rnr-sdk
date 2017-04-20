@@ -159,7 +159,16 @@ namespace sensor
        * \param theta Angle between z axis and the Z axis (radians).
        * \param phi   Angle between N axis and the X axis (radians).
        */
-      void convert(double phi, double theta, double psi);
+      void convertEuler(double phi, double theta, double psi);
+
+      /*!
+       * \brief Convert Tait-Bryan angles to quaternion.
+       *
+       * \param roll  Rotation about the x-axis.
+       * \param pitch Rotation about the y-axis.
+       * \param yaw   Rotation about the z-axis.
+       */
+      void convertTaitBryan(double roll, double pitch, double yaw);
 
     protected:
 

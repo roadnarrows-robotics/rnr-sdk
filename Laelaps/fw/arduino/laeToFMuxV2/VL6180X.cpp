@@ -76,7 +76,7 @@ extern void p(const char *fmt, ...);
  *
  * \{
  */
-#define DBG_ENABLE
+#undef DBG_ENABLE   ///< define/undef
 
 //
 // Debug sections.
@@ -494,6 +494,7 @@ boolean VL6180x::asyncMeasureRange()
   boolean bDone;  // measurement is [not] done
   byte    range;  // range raw value
   byte    status; // status register value
+  byte    clear;  // interrupt clear bits
 
   bExec = true;
   bDone = false;
@@ -521,7 +522,7 @@ boolean VL6180x::asyncMeasureRange()
         }
 
         // initialize state
-        m_uAsyncTWait   = 40;
+        m_uAsyncTWait   = 20;
         m_uAsyncTStart  = millis();
         m_eAsyncState   = AsyncStateWaitForReady;
         break;
@@ -549,6 +550,7 @@ boolean VL6180x::asyncMeasureRange()
         else
         {
           DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "waitforready: ");
+          clear = 0x04;   // clear error interrupts
           m_eAsyncState = AsyncStateAbort;
         }
         break;
@@ -593,6 +595,7 @@ boolean VL6180x::asyncMeasureRange()
         else
         {
           DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "waitforresult: ");
+          clear = 0x07;   // clear range, als, and error interrupts
           m_eAsyncState = AsyncStateAbort;
         }
         break;
@@ -648,14 +651,25 @@ boolean VL6180x::asyncMeasureRange()
             dt(m_uAsyncTStart));
 
         // clear interrupts
-        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, clear);
 
         ++m_uErrCnt;
 
-        bExec         = false;
-        bDone         = true;
-        m_eAsyncState = AsyncStateInit;
-        m_bBusy       = false;
+        // Abort this attempt of measurement.
+        if( m_uErrCnt < 100 )
+        {
+          bExec         = false;
+          bDone         = true;
+          m_eAsyncState = AsyncStateInit;
+          m_bBusy       = false;
+        }
+
+        // Sensor is probably hung. Try making a measurement anyway to unhang.
+        else
+        {
+          m_eAsyncState = AsyncStateStartMeas;
+          m_uErrCnt = 0;
+        }
         break;
 
       //

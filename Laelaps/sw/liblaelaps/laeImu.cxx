@@ -95,7 +95,7 @@ void Quaternion::clear()
   m_w = 1.0;
 }
 
-void Quaternion::convert(double phi, double theta, double psi)
+void Quaternion::convertEuler(double phi, double theta, double psi)
 {
   double half_phi, half_theta, half_psi;
   double cos_phi, sin_phi;
@@ -117,6 +117,25 @@ void Quaternion::convert(double phi, double theta, double psi)
   m_y = sin_phi*cos_theta*cos_psi - cos_phi*sin_theta*sin_psi;
   m_z = cos_phi*sin_theta*cos_psi + sin_phi*cos_theta*sin_psi;
   m_w = cos_phi*cos_theta*sin_psi - sin_phi*sin_theta*cos_psi;
+}
+
+void Quaternion::convertTaitBryan(double roll, double pitch, double yaw)
+{
+  double half_roll  = 0.5 * roll;
+  double half_pitch = 0.5 * pitch;
+  double half_yaw   = 0.5 * yaw;
+
+  double t0 = cos(half_yaw);
+  double t1 = sin(half_yaw);
+  double t2 = cos(half_roll);
+  double t3 = sin(half_roll);
+  double t4 = cos(half_pitch);
+  double t5 = sin(half_pitch);
+
+  m_w = t0 * t2 * t4 + t1 * t3 * t5;
+  m_x = t0 * t3 * t4 - t1 * t2 * t5;
+  m_y = t0 * t2 * t5 + t1 * t3 * t4;
+  m_z = t1 * t2 * t4 - t0 * t3 * t5;
 }
 
 
@@ -259,7 +278,7 @@ void LaeImu::compute()
 
 void LaeImu::computeQuaternion()
 {
-  m_quaternion.convert(m_rpy[ROLL], m_rpy[PITCH], m_rpy[YAW]);
+  m_quaternion.convertTaitBryan(m_rpy[ROLL], m_rpy[PITCH], m_rpy[YAW]);
 }
 
 void LaeImu::computeDynamics()
