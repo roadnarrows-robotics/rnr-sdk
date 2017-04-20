@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=lae_twist
+Icon=/opt/rnr_ros/kinetic/src/laelaps/laelaps_control/src/laelaps_control/images/icons/LaelapsTwistIcon.png
+Exec=rosrun laelaps_control laelaps_twist
