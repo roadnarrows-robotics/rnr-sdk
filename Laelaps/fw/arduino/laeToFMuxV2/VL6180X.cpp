@@ -88,7 +88,7 @@ extern void p(const char *fmt, ...);
 
 #define DBG_INIT_SENSOR 7       ///< define sensor to debug initialization [0-7]
 
-#define DBG_MASK    DBG_SECT_ERR ///< define or'ed bits of DBG_SECT sections
+#define DBG_MASK    DBG_SECT_TOF ///< define or'ed bits of DBG_SECT sections
 
 #ifdef DBG_ENABLE
 
@@ -193,20 +193,22 @@ VL6180x::VL6180x(int sensorId, SoftwareWire &wire, uint8_t address) :
   m_regAlsIntPeriod   = VL6180X_AMBIENT_INT_T_REC;  // als int time 100 msec
 }
 
+// This version uses the bootup register.
 boolean VL6180x::waitForBootup(int tries)
 {
   int   i;
-  byte  d;
+  byte  bootstate;
 
   for(i = 0; i < tries; ++i)
   {
-    d = readReg8(VL6180X_FIRMWARE_BOOTUP);
-    if( d & 0x01 )
+    bootstate = readReg8(VL6180X_FIRMWARE_BOOTUP);
+    if( bootstate & 0x01 )
     {
       if( m_nSensorId == DBG_INIT_SENSOR )
       {
         DBG_PRINT(true, DBG_SECT_INI, "booted\n");
       }
+      writeReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET, 0); // clear reset
       return true;
     }
     else
@@ -222,6 +224,40 @@ boolean VL6180x::waitForBootup(int tries)
 
   return false;
 }
+
+#if 0
+// This version uses the fresh_out_of_reset register.
+boolean VL6180x::waitForBootup(int tries)
+{
+  int   i;
+  byte  reset;
+
+  for(i = 0; i < tries; ++i)
+  {
+    reset = readReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET);
+    if( reset & 0x01 )
+    {
+      if( m_nSensorId == DBG_INIT_SENSOR )
+      {
+        DBG_PRINT(true, DBG_SECT_INI, "fresh_out_of_reset\n");
+      }
+      writeReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET, 0); // clear reset
+      return true;
+    }
+    else
+    {
+      delay(1);
+    }
+  }
+
+  if( m_nSensorId == DBG_INIT_SENSOR )
+  {
+    DBG_PRINT(true, DBG_SECT_INI, "not fresh_out_of_reset\n");
+  }
+
+  return false;
+}
+#endif // 0
 
 boolean VL6180x::ping(int tries)
 {
@@ -259,55 +295,87 @@ boolean VL6180x::ping(int tries)
 
 void VL6180x::initSensor()
 {
-  byte reset;
-
   m_bBusy = true;
 
-  reset = readReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET);
-
+  // . . .
+  // REGISTER_TUNING_SR03_270514_CustomerView.txt
   //
-  // Sensor came out of reset
-  //
-  if( reset & 0x01 )
-  {
-    //
-    // Required by datasheet
-    // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
-    //
-    writeReg8(0x0207, 0x01);
-    writeReg8(0x0208, 0x01);
-    writeReg8(0x0096, 0x00);
-    writeReg8(0x0097, 0xfd);
-    writeReg8(0x00e3, 0x00);
-    writeReg8(0x00e4, 0x04);
-    writeReg8(0x00e5, 0x02);
-    writeReg8(0x00e6, 0x01);
-    writeReg8(0x00e7, 0x03);
-    writeReg8(0x00f5, 0x02);
-    writeReg8(0x00d9, 0x05);
-    writeReg8(0x00db, 0xce);
-    writeReg8(0x00dc, 0x03);
-    writeReg8(0x00dd, 0xf8);
-    writeReg8(0x009f, 0x00);
-    writeReg8(0x00a3, 0x3c);
-    writeReg8(0x00b7, 0x00);
-    writeReg8(0x00bb, 0x3c);
-    writeReg8(0x00b2, 0x09);
-    writeReg8(0x00ca, 0x09);  
-    writeReg8(0x0198, 0x01);
-    writeReg8(0x01b0, 0x17);
-    writeReg8(0x01ad, 0x00);
-    writeReg8(0x00ff, 0x05);
-    writeReg8(0x0100, 0x05);
-    writeReg8(0x0199, 0x05);
-    writeReg8(0x01a6, 0x1b);
-    writeReg8(0x01ac, 0x3e);
-    writeReg8(0x01a7, 0x1f);
-    writeReg8(0x0030, 0x00);
+  // See: https://github.com/kirananto/ONEPLUS2RAZOR/tree/master/drivers/media/platform/msm/camera_v2/sensor/vl6180
+  // . . .
+  writeReg8(0x0207, 0x01);
+  writeReg8(0x0208, 0x01);
+  writeReg8(0x0096, 0x00);
+  writeReg8(0x0097, 0xfd);
+  writeReg8(0x00e3, 0x00);
+  writeReg8(0x00e4, 0x04);
+  writeReg8(0x00e5, 0x02);
+  writeReg8(0x00e6, 0x01);
+  writeReg8(0x00e7, 0x03);
+  writeReg8(0x00f5, 0x02);
+  writeReg8(0x00d9, 0x05);
+  writeReg8(0x00db, 0xce);
+  writeReg8(0x00dc, 0x03);
+  writeReg8(0x00dd, 0xf8);
+  writeReg8(0x009f, 0x00);
+  writeReg8(0x00a3, 0x3c);
+  writeReg8(0x00b7, 0x00);
+  writeReg8(0x00bb, 0x3c);
+  writeReg8(0x00b2, 0x09);
+  writeReg8(0x00ca, 0x09);
+  writeReg8(0x0198, 0x01);
+  writeReg8(0x01b0, 0x17);
+  writeReg8(0x01ad, 0x00);
+  writeReg8(0x00ff, 0x05);
+  writeReg8(0x0100, 0x05);
+  writeReg8(0x0199, 0x05);
+  writeReg8(0x01a6, 0x1b);
+  writeReg8(0x01ac, 0x3e);
+  writeReg8(0x01a7, 0x1f);
+  writeReg8(0x0030, 0x00);
 
-    // clear reset
-    writeReg8(VL6180X_SYSTEM_FRESH_OUT_OF_RESET, 0);
-  }
+#if 0
+  // . . .
+  // Recommended : Public registers - See data sheet for more detail
+  //
+  // Note: These registers are set in writeSensorDefaults().
+  // . . .
+
+  // enables polling for New Sample ready when measurement completes
+  writeReg8(VL6180X_SYSTEM_MODE_GPIO1, 0x10);
+
+  // set the averaging sample period (compromise between lower noise and
+  // increased execution time)
+  writeReg8(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30);
+
+  // set the light and dark gain (upper nibble)
+  // Note: dark gain should not be changed
+  writeReg8(VL6180X_SYSALS_ANALOGUE_GAIN, 0x46);
+
+  // set the # of range measurements after which auto calibration of system
+  // is performed 
+  writeReg8(VL6180X_SYSRANGE_VHV_REPEAT_RATE, 255);
+
+  // set ALS integration time to 100ms
+  writeReg8(VL6180X_SYSALS_INTEGRATION_PERIOD, 99);
+
+  // perform a single temperature calibration of the ranging sensor
+  writeReg8(VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01);
+
+  // . . .
+  // Optional: Public registers - See data sheet for more detail
+  //
+  // Note: These registers are set in writeSensorDefaults().
+  // . . .
+  
+  // set default ranging inter-measurement period to 100ms
+  writeReg8(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09);
+
+  // set default ALS inter-measurement period to 500ms
+  writeReg8(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 0x31);
+
+  // configures interrupt on New sample ready
+  writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24);
+#endif // 0
 
   m_bBusy = false;
 }
@@ -316,55 +384,75 @@ void VL6180x::writeSensorDefaults()
 {
   m_bBusy = true;
 
-  // Recommended settings from datasheet
-  // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  // System
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  // Set GPIO1 high when sample complete
+  // set GPIO interrupt active high when sample complete
   writeReg8(VL6180X_SYSTEM_MODE_GPIO1, 0x10);
 
-  // Set avg sample period
+  // set averaging sample period to reset-default
   writeReg8(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD, 0x30);
 
-  // factory calibrated offset
-  m_regRangeOffsetDft = readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET);
-
-  // cross-talk compensation
-  writeReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE, m_regRangeCrossTalk);
-
-  // set the ALS gain
-  writeReg8(VL6180X_SYSALS_ANALOGUE_GAIN, (0x40 | m_regAlsGain));
-
-  // set auto calibration period (Max = 255)/(OFF = 0)
-  writeReg8(VL6180X_SYSRANGE_VHV_REPEAT_RATE, 0xFF);
-
-  // Set ALS integration time to 100ms
-  writeReg16(VL6180X_SYSALS_INTEGRATION_PERIOD, m_regAlsIntPeriod-1);
-
-  // perform a single temperature calibration
-  writeReg8(VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01);
-
-  // Optional settings from datasheet
-  // http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/DM00122600.pdf
- 
-  // set default ranging inter-measurement period to 100ms
-  writeReg8(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, 0x09);
-
-  // set default ALS inter-measurement period to 100ms
-  writeReg8(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 0x0A);
+  // set firmware als result scaler to reset-default
+  writeReg8(VL6180X_FIRMWARE_RESULT_SCALER, 0x01);
 
   //
-  // Configure interrupt on ‘new sample' ready threshold event 
+  // Configure interrupt on ‘new als and range sample' ready threshold event.
   // Note: only new sample bit works, the rest is shit.
+  //
   writeReg8(VL6180X_SYSTEM_INTERRUPT_CONFIG_GPIO, 0x24);
 
-  // additional settings defaults from community
-  writeReg8(VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME, 0x32);
-  writeReg8(VL6180X_SYSRANGE_RANGE_CHECK_ENABLES, 0x10 | 0x01);
-  writeReg16(VL6180X_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE, 0x7B );
-  writeReg16(VL6180X_SYSRANGE_THRESH_HIGH, 0xD2 );  // 210 mm
 
-  writeReg8(VL6180X_READOUT_AVERAGING_SAMPLE_PERIOD,0x30);
-  writeReg8(VL6180X_FIRMWARE_RESULT_SCALER,0x01);
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  // Range Sensor
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+ 
+  // get factory calibrated range offset (part to part variance)
+  m_regRangeOffsetDft = readReg8(VL6180X_SYSRANGE_PART_TO_PART_RANGE_OFFSET);
+
+  // set cross-talk compensation to reset-default on initialization
+  writeReg16(VL6180X_SYSRANGE_CROSSTALK_COMPENSATION_RATE, m_regRangeCrossTalk);
+
+  // set ranging inter-measurement period to 100ms (0 == 10ms, step size == 10)
+  writeReg8(VL6180X_SYSRANGE_INTERMEASUREMENT_PERIOD, 9);
+
+  // set max range convergence time 50ms (reset-default is 0x31 = 49)
+  writeReg8(VL6180X_SYSRANGE_MAX_CONVERGENCE_TIME, 50);
+
+  // set range checks to reset-defaults of early convergence and S/N enables
+  writeReg8(VL6180X_SYSRANGE_RANGE_CHECK_ENABLES, 0x10 | 0x01);
+
+  // set early convergence estimate threshold. (value here from some notes)
+  writeReg16(VL6180X_SYSRANGE_EARLY_CONVERGENCE_ESTIMATE, 0x7B);
+
+  // set range distance thresholds in mm
+  writeReg8(VL6180X_SYSRANGE_THRESH_HIGH, 200);
+  writeReg8(VL6180X_SYSRANGE_THRESH_LOW,  5);
+
+  // set auto calibration repeat rate (0 is off, >0 autocals after every n meas)
+  writeReg8(VL6180X_SYSRANGE_VHV_REPEAT_RATE, 0);
+
+  // perform a single temperature calibration (must be done when sensor stopped)
+  writeReg8(VL6180X_SYSRANGE_VHV_RECALIBRATE, 0x01);
+
+  // typical calibration time is less than 200usec
+  delay(1);
+
+
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+  // Ambient Light Sensor
+  // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+  // set default ALS continuous mode inter-measurement period to 500ms
+  writeReg8(VL6180X_SYSALS_INTERMEASUREMENT_PERIOD, 49);
+
+  // set the ALS gain to reset-default
+  writeReg8(VL6180X_SYSALS_ANALOGUE_GAIN, (0x40 | m_regAlsGain));
+
+  // set ALS integration time to 100ms
+  writeReg16(VL6180X_SYSALS_INTEGRATION_PERIOD, m_regAlsIntPeriod-1);
+
 
   m_bBusy = false;
 }
@@ -491,10 +579,10 @@ float VL6180x::measureAmbientLight()
 boolean VL6180x::asyncMeasureRange()
 {
   boolean bExec;  // can [not] continue to execute on this pass
-  boolean bDone;  // measurement is [not] done
+  boolean bDone;  // measurement cycle is [not] done
   byte    range;  // range raw value
-  byte    status; // status register value
-  byte    clear;  // interrupt clear bits
+  byte    status; // interrupt status register bits
+  byte    error;  // error bits
 
   bExec = true;
   bDone = false;
@@ -521,8 +609,14 @@ boolean VL6180x::asyncMeasureRange()
           tuneRangeSensor(m_newRangeOffset, m_newRangeCrossTalk);
         }
 
+        //
+        // Clear interrupts. If device is stopped with bits uncleared, a new
+        // measurement will never happen.
+        //
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x01);
+
         // initialize state
-        m_uAsyncTWait   = 20;
+        m_uAsyncTWait   = 40;
         m_uAsyncTStart  = millis();
         m_eAsyncState   = AsyncStateWaitForReady;
         break;
@@ -546,12 +640,12 @@ boolean VL6180x::asyncMeasureRange()
         {
           bExec = false;
         }
-        // timeout - abort
+        // timeout - take measurement anyway
         else
         {
-          DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "waitforready: ");
-          clear = 0x04;   // clear error interrupts
-          m_eAsyncState = AsyncStateAbort;
+          DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR,
+              "waitforready: timeout\n");
+          m_eAsyncState = AsyncStateStartMeas;
         }
         break;
 
@@ -566,7 +660,7 @@ boolean VL6180x::asyncMeasureRange()
 
         // initialize state
         bExec           = false;
-        m_uAsyncTWait   = 40;
+        m_uAsyncTWait   = 60;
         m_uAsyncTStart  = millis();
         m_eAsyncState   = AsyncStateWaitForResult;
         break;
@@ -575,6 +669,8 @@ boolean VL6180x::asyncMeasureRange()
       // Wait for the measurement's result.
       //
       case AsyncStateWaitForResult:
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF, "waitforresult\n");
+
         // read gpio interrupt status 
         status = readReg8(VL6180X_RESULT_INTERRUPT_STATUS_GPIO);
 
@@ -594,48 +690,71 @@ boolean VL6180x::asyncMeasureRange()
         // timeout - abort
         else
         {
-          DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "waitforresult: ");
-          clear = 0x07;   // clear range, als, and error interrupts
+          DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR,
+              "waitforresult: timeout\n");
           m_eAsyncState = AsyncStateAbort;
         }
         break;
 
       //
-      // Sensor measurement has completed, retrieve the value.
+      // Sensor measurement cycle has completed, retrieve the value.
       //
       case AsyncStateDone:
         DBG_PRINT(m_bDebug, DBG_SECT_TOF, "done: msec=%d\n",
             dt(m_uAsyncTStart));
 
+        // get the range distance raw value
+        range = readReg8(VL6180X_RESULT_RANGE_VAL);
+
+        // get any error status
+        error = readReg8(VL6180X_RESULT_RANGE_STATUS);
+        error >>= 4;
+
         // clear interrupts
         writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
-        // get range distance and status values
-        range = readReg8(VL6180X_RESULT_RANGE_VAL);
-
-        // legacy
-        //status  = readReg8(VL6180X_RESULT_RANGE_STATUS);
-
-        // not used
-        //m_range = cvtRangeRawToDist(range, status);
-
-        //
-        // Got a valid measurement.
-        //
-        m_range = VL6180X_RANGE_NO_OBJ;
+        // got a measurement as indicated by an interrupt status bit
         if( status & 0x04 )
         {
-          if( range <= VL6180X_RANGE_MAX )
+          // no errors
+          if( error == 0x00 )
           {
-            m_range = range;
+            // sketchy out of range value
+            if( range > VL6180X_RANGE_MAX )
+            {
+              range = VL6180X_RANGE_NO_OBJ;
+            }
+            // decrement error count
+            if( m_uErrCnt > 0 )
+            {
+              --m_uErrCnt;
+            }
           }
-          if( m_uErrCnt > 0 )
+
+          // early convergence estimate, not an error, but rather no object
+          //else if( error == 0x06 )
+          //{
+          //  range = VL6180X_RANGE_NO_OBJ;
+          //}
+
+          // some range sensing error result
+          else
           {
-            --m_uErrCnt;
+            DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR,
+                "done: error=0x%02x\n", error);
+            range = VL6180X_RANGE_NO_OBJ;
           }
         }
 
-        DBG_PRINT(m_bDebug, DBG_SECT_TOF|DBG_SECT_ERR, "range=%d\n", m_range);
+        // failed to get a result
+        else
+        {
+          range = VL6180X_RANGE_NO_OBJ;
+        }
+
+        m_range = range;
+
+        DBG_PRINT(m_bDebug, DBG_SECT_TOF, "range=%d\n", m_range);
 
         bExec         = false;
         bDone         = true;
@@ -651,25 +770,31 @@ boolean VL6180x::asyncMeasureRange()
             dt(m_uAsyncTStart));
 
         // clear interrupts
-        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, clear);
+        writeReg8(VL6180X_SYSTEM_INTERRUPT_CLEAR, 0x07);
 
         ++m_uErrCnt;
 
-        // Abort this attempt of measurement.
-        if( m_uErrCnt < 100 )
+        // Sensor is probably hung. Try to revive via firmware. There are no
+        // power reset options for the sensor.
+        if( m_uErrCnt > 10 )
         {
-          bExec         = false;
-          bDone         = true;
-          m_eAsyncState = AsyncStateInit;
-          m_bBusy       = false;
+          DBG_PRINT(m_bDebug, DBG_SECT_ERR, "abort: reset %d\n", m_nSensorId);
+
+          // maybe the i2c is screwed up
+          if( !ping(1) )
+          {
+            DBG_PRINT(m_bDebug, DBG_SECT_ERR, "abort: restart i2c\n");
+            m_wire.end();
+            delay(10);
+            m_wire.begin();
+            delay(10);
+          }
         }
 
-        // Sensor is probably hung. Try making a measurement anyway to unhang.
-        else
-        {
-          m_eAsyncState = AsyncStateStartMeas;
-          m_uErrCnt = 0;
-        }
+        bExec         = false;
+        bDone         = true;
+        m_eAsyncState = AsyncStateInit;
+        m_bBusy       = false;
         break;
 
       //

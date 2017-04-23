@@ -92,8 +92,10 @@ int         AlsFreq;                        ///< ALS sense frequency
 //
 // I2C slave data
 //
-byte        I2CRspBuf[LaeToFMuxI2CMaxRspLen];  ///< response buffer
-int         I2CRspLen;                      ///< response length
+byte        I2CRspBuf[LaeToFMuxI2CMaxRspLen]; ///< response buffer
+int         I2CRspLen;                        ///< response length
+boolean     I2CHaveRsp;                       ///< do [not] have a full response
+boolean     I2CHaveMasterReq;                 ///< do [not] have master request
 
 //
 // Serial CLI
@@ -175,7 +177,10 @@ void setup()
   // I2C slave setup. Receive and send from/to I2C master by asynchronous
   // callbacks.
   //
-  I2CRspLen = 0;
+  I2CRspLen         = 0;
+  I2CHaveRsp        = false;
+  I2CHaveMasterReq  = false;
+
   Wire.begin(LaeI2CAddrToFMux);
   Wire.onReceive(i2cReceiveCmd);
   Wire.onRequest(i2cSendRsp);
@@ -361,7 +366,7 @@ void measure()
     // Any hung sensor will force the processor watchdog timer to enventually
     // timeout and reset the processor.
     //
-    // Dangerouse, not used.
+    // Dangerous, not used.
     //
     //if( ToFSensor[i].isHung() )
     //{
@@ -460,8 +465,9 @@ void i2cReceiveCmd(int n)
 
   if( Wire.available() > 0 )
   {
-    cmdId     = Wire.read();
-    I2CRspLen = 0;
+    cmdId       = Wire.read();
+    I2CRspLen   = 0;
+    I2CHaveRsp  = false;
 
     switch( cmdId )
     {
@@ -491,37 +497,73 @@ void i2cReceiveCmd(int n)
         bOk = false;
     }
   }
+
+  if( I2CRspLen > 0 )
+  {
+    I2CHaveRsp = true;
+
+    // Got an asynchronous request for a response before the response message
+    // was ready. Transmit now.
+    if( I2CHaveMasterReq )
+    {
+      i2cSendRsp();
+    }
+  }
 }
 
 /*!
- * \brief Send any response pre-loaded in response buffer.
+ * \brief Send any full response pre-loaded in response buffer.
  */
 void i2cSendRsp()
 {
-  if( I2CRspLen > 0 )
+  // response ready
+  if( I2CHaveRsp )
   {
-    Wire.write(I2CRspBuf, I2CRspLen);
-    I2CRspLen = 0;
+    I2CHaveMasterReq = false;
+    if( I2CRspLen > 0 )
+    {
+      Wire.write(I2CRspBuf, I2CRspLen);
+    }
+    I2CRspLen   = 0;
+    I2CHaveRsp  = false;
+  }
+
+  // response not ready
+  else
+  {
+    I2CHaveMasterReq = true;
   }
 }
 
 /*!
  * \brief I2C error response for bad commands the expect data back.
  *
- * \param n   Length of expected non-error response.
+ * Error response byte format:
+ *  [fail [cmd [sensor [pattern]]]]
+ *
+ * \param cmdid     Bad command id.
+ * \param sensorId  Sensor id. 
+ * \param rspLen    Length of expected non-error response.
  */
-void i2cErrorRsp(int n)
+void i2cErrorRsp(byte cmdId, byte sensorId, int rspLen)
 {
   byte  b;
 
   // flush input 
   i2cFlushRead();
 
+  I2CRspBuf[I2CRspLen++] = LaeToFMuxI2CArgFail;
+  I2CRspBuf[I2CRspLen++] = cmdId;
+  I2CRspBuf[I2CRspLen++] = sensorId;
+
   // fill response buffer with recognizable error pattern ABC...
-  for(b = 'A'; I2CRspLen < n; ++I2CRspLen, ++b)
+  for(b = 'A'; I2CRspLen < rspLen; ++b)
   {
-    I2CRspBuf[I2CRspLen] = b;
+    I2CRspBuf[I2CRspLen++] = b;
   }
+
+  // truncate to expected response message length
+  I2CRspLen = rspLen;
 }
 
 /*!
@@ -582,7 +624,7 @@ boolean i2cExecGetIdent()
   }
 
   // error
-  i2cErrorRsp(LaeToFMuxI2CRspLenGetIdent);
+  i2cErrorRsp(LaeToFMuxI2CCmdIdGetIdent, sensor, LaeToFMuxI2CRspLenGetIdent);
 
   return false;
 }
@@ -675,12 +717,14 @@ boolean i2cExecTuneRange()
     if( sensor < LaeToFMuxNumOfChan ) 
     {
       ToFSensor[sensor]->markRangeForTuning(offset, crosstalk);
+      I2CRspBuf[I2CRspLen++] = LaeToFMuxI2CArgPass;
       return true;
     }
   }
 
   // error
-  i2cErrorRsp(LaeToFMuxI2CRspLenTuneToFSensor);
+  i2cErrorRsp(LaeToFMuxI2CCmdIdTuneToFSensor, sensor,
+      LaeToFMuxI2CRspLenTuneToFSensor);
 
   return false;
 }
@@ -709,12 +753,13 @@ boolean i2cExecTuneAls()
     if( sensor < LaeToFMuxNumOfChan ) 
     {
       ToFSensor[sensor]->markAlsForTuning(gain, intPeriod);
+      I2CRspBuf[I2CRspLen++] = LaeToFMuxI2CArgPass;
       return true;
     }
   }
 
   // error
-  i2cErrorRsp(LaeToFMuxI2CRspLenTuneAls);
+  i2cErrorRsp(LaeToFMuxI2CCmdIdTuneAls, sensor, LaeToFMuxI2CRspLenTuneAls);
 
   return false;
 }
@@ -761,7 +806,7 @@ boolean i2cExecGetTunes()
   }
 
   // error
-  i2cErrorRsp(LaeToFMuxI2CRspLenGetTunes);
+  i2cErrorRsp(LaeToFMuxI2CCmdIdGetTunes, sensor, LaeToFMuxI2CRspLenGetTunes);
 
   return false;
 }
@@ -1530,7 +1575,7 @@ void serExecTunes()
     // tof range sensor offset
     if( !serParseTuneParam("tof_offset", SerArgv[3],
                         rangeOffset, rangeOffsetDft,
-                        VL6180X_RANGE_OFFSET_MIN, VL6180X_RANGE_OFFSET_MIN,
+                        VL6180X_RANGE_OFFSET_MIN, VL6180X_RANGE_OFFSET_MAX,
                         val) )
     {
       return;
@@ -1541,7 +1586,7 @@ void serExecTunes()
     // tof range sensor cross talk
     if( !serParseTuneParam("tof_cross_talk", SerArgv[4],
                           rangeCrossTalk, rangeCrossTalkDft,
-                          VL6180X_RANGE_XTALK_MIN, VL6180X_RANGE_XTALK_MIN,
+                          VL6180X_RANGE_XTALK_MIN, VL6180X_RANGE_XTALK_MAX,
                           val) )
     {
       return;

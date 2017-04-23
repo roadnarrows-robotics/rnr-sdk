@@ -1850,7 +1850,10 @@ int LaeRangeMuxSubproc::reload(const LaeTunes &tunes)
 void LaeRangeMuxSubproc::exec()
 {
   cmdGetRanges();
+
+#ifdef LAE_USE_ALS
   cmdGetAmbientLight();
+#endif // LAE_USE_ALS
 }
       
 int LaeRangeMuxSubproc::cmdGetFwVersion(uint_t &uVerNum)
@@ -2114,12 +2117,14 @@ int LaeRangeMuxSubproc::cmdTuneToFSensor(const std::string &strKey,
                                          uint_t             uRangeCrossTalk)
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
+  byte_t  rsp[LaeToFMuxI2CMaxRspLen];
   size_t  lenCmd = 0;
+  size_t  lenRsp = LaeToFMuxI2CRspLenTuneToFSensor;
   byte_t  sensorIndex;
   byte_t  regOffset;
   u16_t   regCrossTalk;
   byte_t  val_hi, val_lo;
-  int     n;
+  byte_t  pf;
   int     rc;
 
   SensorInfoMap::iterator pos;
@@ -2156,13 +2161,11 @@ int LaeRangeMuxSubproc::cmdTuneToFSensor(const std::string &strKey,
     cmd[lenCmd++] = regCrossTalk;
   }
 
-  if( (n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd)) == (int)lenCmd )
+  rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+
+  if( rc == LAE_OK )
   {
-    rc = LAE_OK;
-  }
-  else
-  {
-    rc = -LAE_ECODE_IO;
+    pf = rsp[0];  // pass/fail
   }
 
   unlock();
@@ -2175,11 +2178,13 @@ int LaeRangeMuxSubproc::cmdTuneAls(const std::string &strKey,
                                    uint_t             uAlsIntPeriod)
 {
   byte_t  cmd[LaeToFMuxI2CMaxCmdLen];
+  byte_t  rsp[LaeToFMuxI2CMaxRspLen];
   size_t  lenCmd = 0;
+  size_t  lenRsp = LaeToFMuxI2CRspLenTuneAls;
   byte_t  sensorIndex;
   byte_t  regAlsGain;
   byte_t  val_hi, val_lo;
-  int     n;
+  byte_t  pf;
   int     rc;
 
   SensorInfoMap::iterator pos;
@@ -2208,13 +2213,11 @@ int LaeRangeMuxSubproc::cmdTuneAls(const std::string &strKey,
   cmd[lenCmd++] = val_hi;
   cmd[lenCmd++] = val_lo;
 
-  if( (n = m_i2cBus.write(m_addrSubProc, cmd, lenCmd)) == (int)lenCmd )
+  rc = m_i2cBus.write_read(m_addrSubProc, cmd, lenCmd, rsp, lenRsp, TStd);
+
+  if( rc == LAE_OK )
   {
-    rc = LAE_OK;
-  }
-  else
-  {
-    rc = -LAE_ECODE_IO;
+    pf = rsp[0];  // pass/fail
   }
 
   unlock();

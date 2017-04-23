@@ -144,6 +144,7 @@
 #define VL6180X_RANGE_MIN     0     ///< minimum valid measured distance (mm)
 #define VL6180X_RANGE_MAX     200   ///< maximum valid measured distance (mm)
 #define VL6180X_RANGE_NO_OBJ  255   ///< no object detected special value
+#define VL6180X_RANGE_ERR     253   ///< range error
 
 // part-to-part offset calibration (part to part default varies)
 #define VL6180X_RANGE_OFFSET_MIN  0     ///< minimum tof offset

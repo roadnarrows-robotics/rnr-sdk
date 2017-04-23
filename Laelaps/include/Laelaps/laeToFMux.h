@@ -96,14 +96,18 @@ namespace laelaps
   // I2C Slave Binary Interface
   //
   // The I2C inteface is a big-endian, byte oriented, binary interface. Any
-  // signed numbers are in 2-compliment format.
+  // signed numbers are in 2s-compliment format.
   //
   // The (Partial) BNF
   //
-  // cmd  ::= cmd_id, {byte}
-  // rsp  ::= {byte}
+  // cmd    ::= cmd_id, {byte}
+  // rsp    ::= {byte}
+  // errrsp ::= fail, [cmd_id, [sensor, [abc_pat_0...]]]
   //
-  // cmd_id ::= u8
+  // cmd_id     ::= u8
+  // fail       ::= u8 [0]
+  // sensor     ::= u8 [0-7]
+  // abc_pat_k  ::= u8 [A, B, C, ...]
   //----------------------------------------------------------------------------
  
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -214,14 +218,15 @@ namespace laelaps
   //
   // Command format:  cmd_id sensor
   //                    tof_offset tof_cross_talk_high tof_cross_talk_low
-  // Response format: N/A
+  // Response format: pass
   //
   // Argument data types and ranges:
-  //  sensor              ::= u8 [1-7]
+  //  sensor              ::= u8 [0-7]
   //  tof_offset          ::= u8
   //  tof_cross_talk_high ::= u8
   //  tof_cross_talk_low  ::= u8
   //  tof_cross_talk      ::= u16
+  //  pass                ::= u8 [1]
   //
   // Conversions:
   //  tof_cross_talk_high = tof_cross_talk >> 8
@@ -229,7 +234,7 @@ namespace laelaps
   //
   const byte_t LaeToFMuxI2CCmdIdTuneToFSensor   = 4;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenTuneToFSensor  = 5;  ///< command length
-  const byte_t LaeToFMuxI2CRspLenTuneToFSensor  = 0;  ///< response length
+  const byte_t LaeToFMuxI2CRspLenTuneToFSensor  = 1;  ///< response length
 
   // ---
  
@@ -238,14 +243,15 @@ namespace laelaps
   //
   // Command format:  cmd_id sensor
   //                    als_gain als_int_period_high als_int_period_low
-  // Response format: N/A
+  // Response format: pass
   //
   // Argument data types and ranges:
-  //  sensor              ::= u8 [1-7]
+  //  sensor              ::= u8 [0-7]
   //  als_gain            ::= u8 [0-7]
   //  als_int_period_high ::= u8
   //  als_int_period_low  ::= u8
   //  als_int_period      ::= u16 [1-512]
+  //  pass                ::= u8 [1]
   //
   // Conversions:
   //  als_int_period_high = als_int_period >> 8
@@ -253,7 +259,7 @@ namespace laelaps
   //
   const byte_t LaeToFMuxI2CCmdIdTuneAls   = 5;  ///< command id
   const byte_t LaeToFMuxI2CCmdLenTuneAls  = 5;  ///< command length (bytes)
-  const byte_t LaeToFMuxI2CRspLenTuneAls  = 0;  ///< response length (bytes)
+  const byte_t LaeToFMuxI2CRspLenTuneAls  = 1;  ///< response length (bytes)
 
   // ---
  
@@ -265,7 +271,7 @@ namespace laelaps
   //                  als_gain als_int_period_high als_int_period_low
   //
   // Argument data types and ranges:
-  //  sensor              ::= u8 [1-7]
+  //  sensor              ::= u8 [0-7]
   //  tof_offset          ::= u8
   //  tof_cross_talk_high ::= u8
   //  tof_cross_talk_low  ::= u8
