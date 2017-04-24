@@ -3,7 +3,7 @@ Version: @VERSION@
 Section: devel
 Priority: optional
 Architecture: @ARCH@
-Depends: rnr-librnr-dev (>=1.13.0)
+Depends: rnr-librnr-dev (>=1.14.0)
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
 Description: RoadNarrows network messaging packing/unpacking library.
   The NetMsgs package provides both build-time and run-time support of

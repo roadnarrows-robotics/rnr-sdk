@@ -62,8 +62,8 @@ endif
 PKG 								= odroid
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 0
-PKG_VERSION_RELEASE = 1
-PKG_VERSION_DATE    = 2016
+PKG_VERSION_RELEASE = 2
+PKG_VERSION_DATE    = 2017
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"
 PKG_DISCLAIMER			= "(C) 2015 RoadNarrows LLC. All rights reserved."

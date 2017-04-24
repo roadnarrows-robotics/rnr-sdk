@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-04-11 13:03:57 -0600 (Mon, 11 Apr 2016) $
- * $Rev: 4381 $
- *
  * \brief Laelaps Time-of-Flight sensors. The ToFs are used as a virtual bumper
  * for close-in obstacle detection.
  *

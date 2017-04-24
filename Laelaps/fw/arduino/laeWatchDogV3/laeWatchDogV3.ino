@@ -8,9 +8,6 @@
 //
 /*! \file
  *
- * $LastChangedDate$
- * $Rev$
- *
  * \brief Laelaps Arduino compatible watchdog firmware.
  *
  * * Board: Arduino Leonardo
@@ -222,6 +219,9 @@ LedPattern_T LedPat[LedPatIdxNumOf] =
 //
 byte        I2CRspBuf[LaeWdMaxRspLen];  ///< response buffer
 int         I2CRspLen;                  ///< response length
+boolean     I2CHaveRsp;                 ///< do [not] have a full response
+boolean     I2CHaveMasterReq;           ///< do [not] have master request
+
 
 //
 // Serial CLI
@@ -322,7 +322,11 @@ void setup()
   // I2C slave setup. Receive and send from/to I2C master by asynchronous
   // callbacks.
   //
-  I2CRspLen = 0;
+  I2CRspLen         = 0;
+  I2CHaveRsp        = false;
+  I2CHaveMasterReq  = false;
+
+
   Wire.begin(LaeI2CAddrArduino);
   Wire.onReceive(i2cReceiveCmd);
   Wire.onRequest(i2cSendRsp);
@@ -739,8 +743,9 @@ void i2cReceiveCmd(int n)
 
   if( Wire.available() > 0 )
   {
-    cmdId     = Wire.read();
-    I2CRspLen = 0;
+    I2CHaveRsp  = false;
+    I2CRspLen   = 0;
+    cmdId       = Wire.read();
 
     switch( cmdId )
     {
@@ -807,12 +812,26 @@ void i2cReceiveCmd(int n)
     }
   }
 
-  if( !bOk )
+  // good or bad command response
+  if( I2CRspLen > 0 )
+  {
+    I2CHaveRsp = true;
+
+    // Got an asynchronous request for a response before the response message
+    // was ready. Transmit now.
+    if( I2CHaveMasterReq )
+    {
+      i2cSendRsp();
+    }
+  } 
+
+  // bad command without a response
+  else if( !bOk )
   {
     i2cFlushRead();
   }
 
-  // mollify the dog if received a good command
+  // mollify the dog when good command is received
   PleasePetTheDog = bOk;
 }
 
@@ -821,30 +840,52 @@ void i2cReceiveCmd(int n)
  */
 void i2cSendRsp()
 {
-  if( I2CRspLen > 0 )
+  // response ready
+  if( I2CHaveRsp )
   {
-    Wire.write(I2CRspBuf, I2CRspLen);
-    I2CRspLen = 0;
+    I2CHaveMasterReq = false;
+    if( I2CRspLen > 0 )
+    {
+      Wire.write(I2CRspBuf, I2CRspLen);
+    }
+    I2CRspLen   = 0;
+    I2CHaveRsp  = false;
+  }
+
+  // response not ready
+  else
+  {
+    I2CHaveMasterReq = true;
   }
 }
 
 /*!
- * \brief Error response for bad commands the expect data back.
+ * \brief I2C error response for bad commands the expect data back.
  *
- * \param n   Length of expected response.
+ * Error response byte format:
+ *  [fail [cmd [sensor [pattern]]]]
+ *
+ * \param cmdId     Bad command id.
+ * \param rspLen    Length of expected non-error response.
  */
-void i2cErrorRsp(int n)
+void i2cErrorRsp(byte cmdId, int rspLen)
 {
   byte  b;
 
   // flush input 
   i2cFlushRead();
 
+  I2CRspBuf[I2CRspLen++] = LaeWdArgFail;
+  I2CRspBuf[I2CRspLen++] = cmdId;
+
   // fill response buffer with recognizable error pattern ABC...
-  for(b = 'A'; I2CRspLen < n; ++I2CRspLen, ++b)
+  for(b = 'A'; I2CRspLen < rspLen; ++b)
   {
-    I2CRspBuf[I2CRspLen] = b;
+    I2CRspBuf[I2CRspLen++] = b;
   }
+
+  // truncate to expected response message length
+  I2CRspLen = rspLen;
 }
 
 /*!
@@ -884,7 +925,7 @@ boolean i2cExecGetVersion()
 }
 
 /*!
- * \brief Execute I2C command to set the battery charge state.
+ * \brief Execute I2C command to set the battery's state of charge.
  *
  * \return Returns true on success, false on failure.
  */
@@ -896,6 +937,7 @@ boolean i2cExecSetBattCharge()
   if( Wire.available() == len )
   {
     batt_soc = (unsigned int)Wire.read();
+
     if( batt_soc > LaeWdArgBattSoCMax )
     {
       batt_soc = LaeWdArgBattSoCMax;
@@ -917,7 +959,10 @@ boolean i2cExecSetBattCharge()
   }
 
   // error
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 /*!
@@ -941,7 +986,10 @@ boolean i2cExecSetAlarms()
   }
 
   // error
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 /*!
@@ -966,7 +1014,10 @@ boolean i2cExecSetRgbLed()
   }
 
   // error
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 /*!
@@ -1040,7 +1091,7 @@ boolean i2cExecReadDPin()
   }
 
   // error
-  i2cErrorRsp(LaeWdRspLenReadDPin);
+  i2cErrorRsp(LaeWdCmdIdReadDPin, LaeWdRspLenReadDPin);
 
   return false;
 }
@@ -1115,7 +1166,7 @@ boolean i2cExecReadAPin()
   }
 
   // error
-  i2cErrorRsp(LaeWdRspLenReadAPin);
+  i2cErrorRsp(LaeWdCmdIdReadAPin, LaeWdRspLenReadAPin);
 
   return false;
 }
@@ -1195,9 +1246,12 @@ boolean i2cExecEnableMotorCtlrs()
   }
 
   // error
-  i2cErrorRsp(LaeWdRspLenEnableMotorCtlrs);
+  else
+  {
+    i2cErrorRsp(LaeWdCmdIdEnableMotorCtlrs, LaeWdRspLenEnableMotorCtlrs);
 
-  return false;
+    return false;
+  }
 }
 
 /*!
@@ -1241,7 +1295,10 @@ boolean i2cExecEnableAuxPort()
   }
 
   // error
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 /*!
@@ -1334,7 +1391,10 @@ boolean i2cExecConfigFw()
   }
 
   // error
-  return false;
+  else
+  {
+    return false;
+  }
 }
 
 
@@ -1730,7 +1790,7 @@ void serExecGetVersion()
 {
   if( serChkArgCnt(LaeWdSerCmdArgcGetVersion) )
   {
-    serRsp("Laelaps WatchDog v%d", LAE_WD_FW_VERSION);
+    serRsp("Laelaps WatchDog v%d - %s", LAE_WD_FW_VERSION, __DATE__);
   }
 }
 

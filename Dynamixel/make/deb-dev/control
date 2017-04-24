@@ -3,6 +3,6 @@ Version: @VERSION@
 Section: devel
 Priority: optional
 Architecture: @ARCH@
-Depends: rnr-librnr-dev (>=1.13.0), rnr-libserial-dev (>=1.6.0), rnr-gpio-dev (>=1.4.0), rnr-netmsgs-dev(>=1.2.0), rnr-botsense-dev (>=3.1.0), libgsl0-dev (>=1.13.0)
+Depends: rnr-librnr-dev (>=1.14.0), rnr-libserial-dev (>=1.6.0), rnr-gpio-dev (>=1.4.0), rnr-netmsgs-dev(>=1.2.0), rnr-botsense-dev (>=3.1.0), libgsl0-dev (>=1.13.0)
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
 Description:  Advanced Dynamixel control library.

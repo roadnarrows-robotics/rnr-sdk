@@ -6,9 +6,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-02-22 18:11:12 -0700 (Mon, 22 Feb 2016) $
- * $Rev: 4328 $
- *
  * \brief Laelaps built-in Arduino sub-processor.
  * 
  * The Arduino serves to monitor the system health and to control the system
@@ -150,10 +147,13 @@ namespace laelaps
   //
   // The (Partial) BNF
   //
-  // cmd  ::= cmd_id, {byte}
-  // rsp  ::= {byte}
+  // cmd    ::= cmd_id, {byte}
+  // rsp    ::= {byte}
+  // errrsp ::= fail, [cmd_id, [abc_pat_0...]]]
   //
-  // cmd_id ::= u8
+  // cmd_id     ::= u8
+  // fail       ::= u8 [0]
+  // abc_pat_k  ::= u8 [A, B, C, ...]
   //----------------------------------------------------------------------------
  
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 

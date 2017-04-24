@@ -465,9 +465,9 @@ void i2cReceiveCmd(int n)
 
   if( Wire.available() > 0 )
   {
-    cmdId       = Wire.read();
-    I2CRspLen   = 0;
     I2CHaveRsp  = false;
+    I2CRspLen   = 0;
+    cmdId       = Wire.read();
 
     switch( cmdId )
     {
@@ -541,7 +541,7 @@ void i2cSendRsp()
  * Error response byte format:
  *  [fail [cmd [sensor [pattern]]]]
  *
- * \param cmdid     Bad command id.
+ * \param cmdId     Bad command id.
  * \param sensorId  Sensor id. 
  * \param rspLen    Length of expected non-error response.
  */
