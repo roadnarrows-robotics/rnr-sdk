@@ -61,16 +61,8 @@ pkgroot		= ../..
 # Executable Scripts
 
 SCRIPTS = \
-	laelaps_fcam_udp \
-	laelaps_fcam_client_udp \
-	laelaps_imu.py \
 	laelaps_init.d.py \
-	laelaps_ping_tof \
-	laelaps_service \
-	laelaps_sane.py \
-	laelaps_speed.py \
-	laelaps_stop.py \
-	laelaps_wd_mon \
+	laelaps_service
 
 #	laelaps_diag.py 
 #	laelaps_tune_motors.py
