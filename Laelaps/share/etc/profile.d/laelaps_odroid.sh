@@ -25,7 +25,7 @@ if [ -d ${rnr_ros} ]
 then
   # Get a list of distros from newest to oldest release order.
   # Based on the assumption that ROS distros are alphabetic.
-  ros_distro_list=$(ls -1r ${rnr_ros})
+  ros_distro_list=$(/bin/ls -1r ${rnr_ros})
 
   for distro in ${ros_distro_list}
   do
@@ -57,7 +57,7 @@ then
 
   if [ -d ${rnr_ros} ]
   then
-    ros_distro_list=$(ls -1r ${rnr_ros})
+    ros_distro_list=$(/bin/ls -1r ${rnr_ros})
 
     for distro in ${ros_distro_list}
     do
