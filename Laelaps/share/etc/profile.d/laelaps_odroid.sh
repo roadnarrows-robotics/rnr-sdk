@@ -5,27 +5,75 @@
 # Odroid version
 #
 # RoadNarrows Laelaps global environment.
-# 2015.07.27
+# 2017.04.25
 #
 ###############################################################################
 
 # ..............................................................................
 # ROS environment
 # ..............................................................................
-if [ -f /opt/rnr_ros/indigo/devel/setup.sh ]
+
+# ros setup file
+setupfile=
+
+#
+# Standard RNR ROS directory
+#
+rnr_ros='/opt/rnr_ros'
+
+if [ -d ${rnr_ros} ]
 then
-  . /opt/rnr_ros/indigo/devel/setup.sh
-elif [ -f /opt/laelaps_ros/devel/setup.sh ]
-then
-  . /opt/laelaps_ros/devel/setup.sh
-elif [ -f /prj/ros/jade/devel/setup.sh ]
-then
-  . /prj/ros/jade/devel/setup.sh
-elif [ -f /opt/ros/indigo/setup.sh ]
-then
-  . /opt/ros/indigo/setup.sh
+  # Get a list of distros from newest to oldest release order.
+  # Based on the assumption that ROS distros are alphabetic.
+  ros_distro_list=$(ls -1r ${rnr_ros})
+
+  for distro in ${ros_distro_list}
+  do
+    if [ -f ${rnr_ros}/${distro}/devel/setup.sh ]
+    then
+      setupfile=${rnr_ros}/${distro}/devel/setup.sh
+      break
+    fi
+  done
 fi
 
+#
+# Legacy RNR ROS directory
+#
+if [ -z "${setupfile}" ]
+then
+  if [ -f /opt/laelaps_ros/devel/setup.sh ]
+  then
+    setupfile=/opt/laelaps_ros/devel/setup.sh
+  fi
+fi
+
+#
+# Development machine
+#
+if [ -z "${setupfile}" ]
+then
+  rnr_ros='/prj/ros'
+
+  if [ -d ${rnr_ros} ]
+  then
+    ros_distro_list=$(ls -1r ${rnr_ros})
+
+    for distro in ${ros_distro_list}
+    do
+      if [ -f ${rnr_ros}/${distro}/devel/setup.sh ]
+      then
+        setupfile=${rnr_ros}/${distro}/devel/setup.sh
+        break
+      fi
+    done
+  fi
+fi
+
+if [ -n "${setupfile}" ]
+then
+  source ${setupfile}
+fi
 
 # ..............................................................................
 # Tune Parameter: ROS_MASTER_URI
