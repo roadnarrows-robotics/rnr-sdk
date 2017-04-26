@@ -70,9 +70,11 @@ then
   fi
 fi
 
+echo ${setupfile}
+
 if [ -n "${setupfile}" ]
 then
-  source ${setupfile}
+  . ${setupfile}
 fi
 
 # ..............................................................................
