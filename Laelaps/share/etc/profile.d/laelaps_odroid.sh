@@ -70,8 +70,6 @@ then
   fi
 fi
 
-echo ${setupfile}
-
 if [ -n "${setupfile}" ]
 then
   . ${setupfile}
