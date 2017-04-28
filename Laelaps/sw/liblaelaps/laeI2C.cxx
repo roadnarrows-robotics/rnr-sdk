@@ -6,9 +6,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2015-08-07 11:55:07 -0600 (Fri, 07 Aug 2015) $
- * $Rev: 4050 $
- *
  * \brief Laelaps I2C class implementation.
  *
  * The I2C class supports safe multi-threading.
@@ -56,10 +53,48 @@
 #include "rnr/log.h"
 
 #include  "Laelaps/laelaps.h"
+#include  "Laelaps/laeUtils.h"
+#include  "Laelaps/laeSysDev.h"
 #include  "Laelaps/laeI2C.h"
 
 using namespace std;
 using namespace laelaps;
+
+//------------------------------------------------------------------------------
+// I2C Utilities
+//------------------------------------------------------------------------------
+
+int laelaps::i2cTryOpen(LaeI2C &i2cBus, uint_t addr)
+{
+  const char *devNames[] = { LaeDevI2C_0, LaeDevI2C_1, LaeDevI2C_2, NULL };
+
+  int   rc;
+
+  for(int i = 0; devNames[i] != NULL; ++i)
+  {
+    LOGDIAG2("Try I2C device %s.", devNames[i]);
+
+    if( (rc = i2cBus.open(devNames[i])) == LAE_OK )
+    {
+      if( i2cBus.check(addr) )
+      {
+        LOGDIAG2("Address 0x%02x found on I2C device %s.", addr, devNames[i]);
+        return LAE_OK;
+      }
+      else
+      {
+        LOGDIAG2("No address 0x%02x found on I2C device %s.",
+            addr, devNames[i]);
+        i2cBus.close();
+      }
+    }
+  }
+  rc = -LAE_ECODE_NO_DEV;
+}
+
+//------------------------------------------------------------------------------
+// LaeI2C Class
+//------------------------------------------------------------------------------
 
 /*! \brief No bound \h_i2c bus. */
 static i2c_t I2CBusNone = { -1, I2C_ADDR_NONE};
@@ -78,21 +113,25 @@ LaeI2C::~LaeI2C()
 
 int LaeI2C::open(const string &strDevName)
 {
-  int   rc;
+  string  strDevNameReal;
+  int     rc;
 
   lock();
 
-  if( i2c_open(&m_i2c, strDevName.c_str()) < 0 )
+  // Get the real device name, not any symbolic links.
+  strDevNameReal  = getRealDeviceName(strDevName);
+
+  if( i2c_open(&m_i2c, strDevNameReal.c_str()) < 0 )
   {
-    LOGSYSERROR("%s.", strDevName.c_str());
+    LOGSYSERROR("%s.", strDevNameReal.c_str());
     rc = -LAE_ECODE_NO_DEV;
   }
 
   else
   {
-    m_strDevName = strDevName;
+    m_strDevName = strDevNameReal;
 
-    LOGDIAG3("I2C device %s opened.", m_strDevName.c_str());
+    LOGDIAG2("I2C device %s opened.", m_strDevName.c_str());
 
     rc = LAE_OK;
   }
@@ -118,6 +157,11 @@ int LaeI2C::close()
   unlock();
 
   return LAE_OK;
+}
+
+bool LaeI2C::check(uint_t addr)
+{
+  return i2c_exists(&m_i2c, (i2c_addr_t)addr) == 1;
 }
 
 int LaeI2C::read(uint_t addr, byte_t buf[], size_t len)

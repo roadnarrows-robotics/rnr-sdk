@@ -6,9 +6,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2015-08-07 14:25:35 -0600 (Fri, 07 Aug 2015) $
- * $Rev: 4051 $
- *
  * \brief Laelaps I2C class interface.
  *
  * The I2C class supports safe multi-threading.
@@ -104,6 +101,15 @@ namespace laelaps
      * \copydoc doc_return_std
      */
     virtual int close();
+
+    /*!
+     * \brief Check if an \h_i2c slave endpoint exists.
+     *
+     * \param addr      Endpoint \h_i2c device's 7/10-bit address.
+     *
+     * \return Returns true or false. 
+     */
+    virtual bool check(uint_t addr);
 
     /*! 
      * \brief Read from a \h_i2c slave endpoint device.
@@ -231,8 +237,29 @@ namespace laelaps
       pthread_mutex_unlock(&m_mutex);
     }
 
-  };
+  }; // class LaeI2C
   
+
+  //----------------------------------------------------------------------------
+  // LaeI2C Utilities
+  //----------------------------------------------------------------------------
+
+  /*!
+   * \brief Try to open a series of \h_i2c devices to fine the required
+   * endpoint.
+   *
+   * If the enpoint does not exist, the device is closed and the next device
+   * is tried.
+   *
+   * On success, the device bus is left open.
+   *
+   * \param i2cBus    The \h_i2c bus.
+   * \param addr      Endpoint \h_i2c device's 7/10-bit address.
+   *
+   * \copydoc doc_return_std
+   */
+  int i2cTryOpen(LaeI2C &i2cBus, uint_t addr);
+
 #ifndef SWIG
 } // namespace laelaps
 #endif // SWIG

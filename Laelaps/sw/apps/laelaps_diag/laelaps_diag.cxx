@@ -220,7 +220,7 @@ static DiagStats prelims()
     else
     {
       RobotDesc.markAsDescribed();
-      printTestResult(PassTag, "Robot v%s description from '%s' loaded.\n",
+      printTestResult(PassTag, "Robot v%s description from '%s' loaded.",
         RobotDesc.getProdHwVerString().c_str(), LaeEtcCfg);
       ++statsTotal.passCnt;
     }
@@ -247,14 +247,14 @@ static DiagStats prelims()
   if( !statsTotal.fatal && bUsesI2C )
   {
     ++statsTotal.testCnt;
-    if( I2CBus.open(LaeDevI2C) < 0 )
+    if( i2cTryOpen(I2CBus, LaeI2CAddrWd) < 0 )
     {
-      printTestResult(FailTag, "Open I2C bus %s failed: %s(%d).",
-          LaeDevI2C, strerror(errno), errno);
+      printTestResult(FailTag, "Open I2C bus failed.");
+      statsTotal.fatal = true;
     }
     else
     {
-      printTestResult(PassTag, "I2C bus %s opened.", LaeDevI2C);
+      printTestResult(PassTag, "I2C bus opened.");
       ++statsTotal.passCnt;
     }
   }

@@ -5,8 +5,12 @@
 # Motor Controllers multi-drop serial 
 KERNEL=="ttySAC0",SUBSYSTEM=="tty",MODE="666",SYMLINK+="motorctlrs"
 
-# Laelaps Sensors I2C bus
-KERNEL=="i2c-3",MODE="666",SYMLINK+="i2c-sensors"
+# Laelaps Subprocessors and Sensors I2C bus
+#
+# Note: Odroid firmware or kernel moved the user hardware I2C device from 3 to 4
+# as some point. Hence, need to support legacy robots and current.
+KERNEL=="i2c-4",MODE="666",SYMLINK+="i2c-laelaps"
+KERNEL=="i2c-3",MODE="666",SYMLINK+="i2c-laelaps-alt"
 
 # USB IMU device
 ATTRS{idVendor}=="10c4",ATTRS{idProduct}=="ea60",MODE="666",SYMLINK+="imu"

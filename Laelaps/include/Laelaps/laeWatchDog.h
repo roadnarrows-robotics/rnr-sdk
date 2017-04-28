@@ -160,7 +160,9 @@ namespace laelaps
   // I2C Addressing and Packet Format
   //. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
 
+  // badly named - once was only 1 arduino
   const byte_t LaeI2CAddrArduino = 0x32;  ///< arduino \h_i2c 7-bit address
+  const byte_t LaeI2CAddrWd = LaeI2CAddrArduino;  ///< watchdog \h_i2c address
 
   const int    LaeWdMaxCmdLen = 8;   ///< maximum command length
   const int    LaeWdMaxRspLen = 8;   ///< maximum response length

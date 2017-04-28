@@ -90,7 +90,8 @@ rnr_appkit.SRC.CXX = \
 	Time.cxx \
 	Xml.cxx
 
-rnr_appkit.LIBS  = rnr_tinyxml rnr readline
+rnr_appkit.LIBS    = rnr_tinyxml rnr readline
+rnr_appkit.LIBDEPS = rnr_tinyxml rnr readline
 
 #------------------------------------------------------------------------------
 # Optional Variables 

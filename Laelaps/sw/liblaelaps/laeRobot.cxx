@@ -249,9 +249,9 @@ int LaeRobot::connect()
   //
   // Laelaps peripherals I2C bus.
   //
-  if( (rc = m_i2cBus.open(LaeDevI2C)) < 0 )
+  if( (rc = i2cTryOpen(m_i2cBus, LaeI2CAddrWd)) < 0 )
   {
-    LOGSYSERROR("%s.", LaeDevI2C);
+    LOGSYSERROR("Failed to opend I2C bus.");
   }
 
   //

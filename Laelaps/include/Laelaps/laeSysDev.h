@@ -6,9 +6,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2016-01-21 16:50:25 -0700 (Thu, 21 Jan 2016) $
- * $Rev: 4268 $
- *
  * \brief Laelaps system devices.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
@@ -97,17 +94,33 @@ namespace laelaps
   #endif
 
   //
-  // I2C default device name.
+  // I2C default device names.
   //
-  // Note:  The Odroid comes with 2 available I2C interfaces through the 
-  //        expansion pins. The hardware I2C (/dev/i2c-3) and the bit-banged
-  //        GPIO I2C (/dev/i2c-10?). The Laelaps uses the hardware I2C.
+  // Note 1:
+  //  The Odroid comes with 2 available I2C interfaces through the expansion
+  //  pins. The hardware I2C and the bit-banged software GPIO I2C.
+  //                                    HW            SW
+  //  Kernel/Ubuntu   3.10.z/trusty   /dev/i2c-3    /dev/12c-10
+  //  Kernel/Ubuntu   3.10.z/xenial   /dev/i2c-4    /dev/i2c-10
   //
-  #ifdef LAE_DEV_I2C
-  const char* const LaeDevI2C = LAE_DEV_I2C;   ///< \h_i2c device name
+  // Note 2:
+  //  The Laelaps uses the hardware I2C.
+  //
+  // Note 3:
+  //  The Odroid documentation says i2c-1 rather than i2c-3. We have never found
+  //  this to be true.
+  //
+  // Note 4.
+  //  The Laelaps udev rules will make symbolic links to the hardware I2C for
+  //  the primary and secondary.
+  //
+  #ifdef LAE_DEV_I2C_0
+  const char* const LaeDevI2C_0 = LAE_DEV_I2C;            ///< \h_i2c primary
   #else
-  const char* const LaeDevI2C = "/dev/i2c-3";  ///< odroid \h_i2c device name
+  const char* const LaeDevI2C_0 = "/dev/i2c-laelaps";     ///< \h_i2c primary
   #endif
+  const char* const LaeDevI2C_1 = "/dev/i2c-laelaps-alt"; ///< \h_i2c secondary
+  const char* const LaeDevI2C_2 = "/dev/i2c-1";           ///< \h_i2c tertiary
 
   //
   // Front USB camera.

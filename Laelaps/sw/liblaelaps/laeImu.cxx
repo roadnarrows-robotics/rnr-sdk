@@ -6,9 +6,6 @@
 //
 /*! \file
  *
- * $LastChangedDate: 2015-08-10 17:01:47 -0600 (Mon, 10 Aug 2015) $
- * $Rev: 4056 $
- *
  * \brief Laelaps built-in Inertial Measurement Unit class implementation.
  *
  * The current Laelaps uses the open-source CleanFlight firmware loaded

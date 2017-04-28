@@ -427,7 +427,9 @@ static DiagStats readInfo()
   printf("    Description:       %s\n", strDistribDesc.c_str());
   printf("  System Devices:\n");
   printf("    Motor Controllers: %s\n", LaeDevMotorCtlrs);
-  printf("    I2C Bus:           %s\n", LaeDevI2C);
+  printf("    I2C Bus:           %s\n", LaeDevI2C_0);
+  printf("                       %s\n", LaeDevI2C_1);
+  printf("                       %s\n", LaeDevI2C_2);
   printf("    IMU:               %s\n", LaeDevIMU);
   printf("    Dynamixel Bus:     %s\n", LaeDevDynabus);
   printf("    Front Camera:      %s\n", LaeDevFCam);

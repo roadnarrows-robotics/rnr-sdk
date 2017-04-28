@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
 Terminal=false
-Name=rqt_graph
+Name=rviz
 Icon=/opt/rnr_ros/kinetic/src/laelaps/laelaps_control/src/laelaps_control/images/icons/ROSIcon.png
-Exec=rqt_graph
+Exec=rviz
