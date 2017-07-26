@@ -876,7 +876,7 @@ namespace rnr
    * flags settings.
    * 
    * \param os  Output stream.
-   * \param lob Log book.
+   * \param log Log book.
    *
    * \return Reference to output stream.
    */

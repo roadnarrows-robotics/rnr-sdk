@@ -85,7 +85,11 @@ tinyxml.HDRS.H = \
 	rnr/tinyxml/tinyxml.h
 
 librnr_appkit.HDRS.H = \
+	rnr/appkit/CommandLine.h \
+	rnr/appkit/LogBook.h \
 	rnr/appkit/Random.h \
+	rnr/appkit/ReadLine.h \
+	rnr/appkit/RegEx.h \
 	rnr/appkit/Session.h \
 	rnr/appkit/State.h \
 	rnr/appkit/StateKb.h \
