@@ -77,7 +77,14 @@ LIB_SUBDIR = rnr
 
 # Source Files
 rnr_appkit.SRC.CXX = \
+	CmdAddOns.cxx \
+	CmdArgDef.cxx \
+	CmdCore.cxx \
+	CmdDef.cxx \
+	CmdExtArg.cxx \
+	CmdFormDef.cxx \
 	CommandLine.cxx \
+	IOManip.cxx \
 	LogBook.cxx \
 	Random.cxx \
 	ReadLine.cxx \
@@ -86,8 +93,10 @@ rnr_appkit.SRC.CXX = \
 	State.cxx \
 	StateKb.cxx \
 	StateMach.cxx \
+	StringTheory.cxx \
 	Thread.cxx \
 	Time.cxx \
+	Token.cxx \
 	Xml.cxx
 
 rnr_appkit.LIBS    = rnr_tinyxml rnr readline

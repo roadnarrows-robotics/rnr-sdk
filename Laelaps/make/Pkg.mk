@@ -63,7 +63,7 @@ endif
 PKG 								= Laelaps
 PKG_VERSION_MAJOR   = 2
 PKG_VERSION_MINOR   = 3
-PKG_VERSION_RELEASE = 2
+PKG_VERSION_RELEASE = 3
 PKG_VERSION_DATE    = 2017
 PKG_AUTHORS					= "Robin Knight"
 PKG_OWNERS					= "RoadNarrows LLC"

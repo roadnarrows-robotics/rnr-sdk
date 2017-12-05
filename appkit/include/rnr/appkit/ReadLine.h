@@ -79,6 +79,8 @@
 #endif // HAVE_READLINE
 
 
+#include "rnr/appkit/StringTheory.h"
+
 /*!
  * \brief RoadNarrows Robotics Command Namespace
  */
@@ -137,10 +139,8 @@ namespace rnr
        *
        * ReadLine Support Methods:
        *  - ReadLine::dupstr() - string allocation.
-       *  - ReadLine::strip() - strips leading and trailing whitespace.
        *  - ReadLine::tokenize() - simple, whitespace token generator.
        *  - ReadLine::wc() count whitespace separated words.
-       *  - ReadLine::c14n() - simple cannicalization.
        *
        * \param pAppArg     Generator function argument.
        * \param strText     Partial text string to complete.
@@ -544,6 +544,8 @@ namespace rnr
       /*!
        * \brief Duplicate string.
        *
+       * The readline library requires allocated char*'s.
+       *
        * \param str   String to dup.
        *
        * \return Duplicated, allocated char*.
@@ -556,37 +558,13 @@ namespace rnr
       /*!
        * \brief Duplicate string.
        *
+       * The readline library requires allocated char*'s.
+       *
        * \param s   Null-terminated string to dup.
        *
        * \return Duplicated, allocated char *.
        */
       static char *dupstr(const char *s);
-    
-      /*!
-       * \brief Strip a copy of the string of leading and trailing white space.
-       *
-       * \param [in] str    Input string to strip.
-       *
-       * \return Stripped copy.
-       */
-      static std::string strip(const std::string &str);
-    
-      /*!
-       * \brief Simple canonicalization of a string.
-       *
-       * The string is canonical when:
-       *   - leading and trailing whitespace is stripped
-       *   - only single space between words
-       *
-       * \note c14n is an cute abbreviation where 14 represents the number of
-       * letters between the 'c' and 'n' in the word "canonicalization".
-       *
-       * \param str     String to canonicalize.
-       * \param uLen    (Sub)length of string to canonicalize.
-       *
-       * \return Return copy of string holding canonical form.
-       */
-      static std::string c14n(const std::string &str, size_t uLen);
     
       /*!
        * \brief Tokenize the given string.
@@ -599,8 +577,7 @@ namespace rnr
        *
        * \return Number of tokens.
        */
-      static size_t tokenize(const std::string        &str,
-                             std::vector<std::string> &tokens);
+      static size_t tokenize(const std::string &str, str::StringVec &tokens);
     
       /*!
        * \brief In-place string tokenizer.

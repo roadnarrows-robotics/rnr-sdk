@@ -63,7 +63,7 @@ C_DECLS_BEGIN
 /*!
  * \defgroup rnr_color_ansi
  *
- * ANSI escape code colors.
+ * ANSI escape color codes.
  *
  * \{
  */
@@ -71,50 +71,163 @@ C_DECLS_BEGIN
 #define ANSI_CSI  "\033["     ///< Control Sequence Introducer
 
 //
-// Start and end color sequences.
+// Start, separator, and end color escape sequences.
 //
 #define ANSI_COLOR_PRE    ANSI_CSI        ///< color escape sequence prefix
-#define ANSI_COLOR_RESET  ANSI_CSI "0m"   ///< color reset to default
+#define ANSI_COLOR_SEP    ";"             ///< color values separator
+#define ANSI_COLOR_MODE   "m"             ///< color mode
 
 //
-// Select Graphic Rendition foreground color parameters.
+// Select Graphic Rendition text attribute codes.
 //
-#define ANSI_SGR_FG_COLOR_BLACK         "0;30m"     ///< normal black
-#define ANSI_SGR_FG_COLOR_RED           "0;31m"     ///< normal red
-#define ANSI_SGR_FG_COLOR_GREEN         "0;32m"     ///< normal green
-#define ANSI_SGR_FG_COLOR_YELLOW        "0;33m"     ///< normal yellow (brown)
-#define ANSI_SGR_FG_COLOR_BLUE          "0;34m"     ///< normal blue
-#define ANSI_SGR_FG_COLOR_MAGENTA       "0;35m"     ///< normal magenta
-#define ANSI_SGR_FG_COLOR_CYAN          "0;36m"     ///< normal cyan
-#define ANSI_SGR_FG_COLOR_GRAY          "0;37m"     ///< normal gray
-#define ANSI_SGR_FG_COLOR_DARK_GRAY     "1;30m"     ///< light black
-#define ANSI_SGR_FG_COLOR_LIGHT_RED     "1;31m"     ///< light red
-#define ANSI_SGR_FG_COLOR_LIGHT_GREEN   "1;32m"     ///< light green
-#define ANSI_SGR_FG_COLOR_LIGHT_YELLOW  "1;33m"     ///< light yellow
-#define ANSI_SGR_FG_COLOR_LIGHT_BLUE    "1;34m"     ///< light blue
-#define ANSI_SGR_FG_COLOR_LIGHT_MAGENTA "1;35m"     ///< light magenta
-#define ANSI_SGR_FG_COLOR_LIGHT_CYAN    "1;36m"     ///< light cyan
-#define ANSI_SGR_FG_COLOR_WHITE         "1;37m"     ///< white
+#define ANSI_SGR_TEXT_NORMAL        "0"   ///< color normal and reset to default
+#define ANSI_SGR_TEXT_BOLD          "1"   ///< bold or increase intensity
+#define ANSI_SGR_TEXT_UNDERSCORE    "4"   ///< underscore
+#define ANSI_SGR_TEXT_BLINK         "5"   ///< slow blink
+#define ANSI_SGR_TEXT_REVERSE       "7"   ///< swap fg and bg colors
 
 //
-// Select Graphic Rendition background color parameters.
+// Select Graphic Rendition foreground color codes.
 //
-#define ANSI_SGR_BG_COLOR_BLACK         "0;40m"     ///< normal black
-#define ANSI_SGR_BG_COLOR_RED           "0;41m"     ///< normal red
-#define ANSI_SGR_BG_COLOR_GREEN         "0;42m"     ///< normal green
-#define ANSI_SGR_BG_COLOR_YELLOW        "0;43m"     ///< normal yellow (brown)
-#define ANSI_SGR_BG_COLOR_BLUE          "0;44m"     ///< normal blue
-#define ANSI_SGR_BG_COLOR_MAGENTA       "0;45m"     ///< normal magenta
-#define ANSI_SGR_BG_COLOR_CYAN          "0;46m"     ///< normal cyan
-#define ANSI_SGR_BG_COLOR_GRAY          "0;47m"     ///< normal gray
-#define ANSI_SGR_BG_COLOR_DARK_GRAY     "1;40m"     ///< light black
-#define ANSI_SGR_BG_COLOR_LIGHT_RED     "1;41m"     ///< light red
-#define ANSI_SGR_BG_COLOR_LIGHT_GREEN   "1;42m"     ///< light green
-#define ANSI_SGR_BG_COLOR_LIGHT_YELLOW  "1;43m"     ///< light yellow
-#define ANSI_SGR_BG_COLOR_LIGHT_BLUE    "1;44m"     ///< light blue
-#define ANSI_SGR_BG_COLOR_LIGHT_MAGENTA "1;45m"     ///< light magenta
-#define ANSI_SGR_BG_COLOR_LIGHT_CYAN    "1;46m"     ///< light cyan
-#define ANSI_SGR_BG_COLOR_WHITE         "1;47m"     ///< white
+#define ANSI_SGR_FG_COLOR_BLACK         "30"     ///< normal black
+#define ANSI_SGR_FG_COLOR_RED           "31"     ///< normal red
+#define ANSI_SGR_FG_COLOR_GREEN         "32"     ///< normal green
+#define ANSI_SGR_FG_COLOR_YELLOW        "33"     ///< normal yellow (brown)
+#define ANSI_SGR_FG_COLOR_BLUE          "34"     ///< normal blue
+#define ANSI_SGR_FG_COLOR_MAGENTA       "35"     ///< normal magenta
+#define ANSI_SGR_FG_COLOR_CYAN          "36"     ///< normal cyan
+#define ANSI_SGR_FG_COLOR_WHITE         "37"     ///< normal white (gray)
+
+//
+// Select Graphic Rendition background color codes.
+//
+#define ANSI_SGR_BG_COLOR_BLACK         "40"     ///< normal black
+#define ANSI_SGR_BG_COLOR_RED           "41"     ///< normal red
+#define ANSI_SGR_BG_COLOR_GREEN         "42"     ///< normal green
+#define ANSI_SGR_BG_COLOR_YELLOW        "43"     ///< normal yellow (brown)
+#define ANSI_SGR_BG_COLOR_BLUE          "44"     ///< normal blue
+#define ANSI_SGR_BG_COLOR_MAGENTA       "45"     ///< normal magenta
+#define ANSI_SGR_BG_COLOR_CYAN          "46"     ///< normal cyan
+#define ANSI_SGR_BG_COLOR_WHITE         "47"     ///< normal white (gray)
+
+/*!
+ * \brief Macro to build color escape sequence string.
+ *
+ * \param _attr Text attribute.
+ * \param _fg   Foreground color.
+ * \param _bg   Background color.
+ */
+#define ANSI_COLOR(_attr, _fg, _bg) \
+  ANSI_COLOR_PRE _attr ANSI_COLOR_SEP _fg ANSI_COLOR_SEP _bg ANSI_COLOR_MODE
+
+/*!
+ * \brief Macro to build normal foreground color escape sequence string.
+ *
+ * Background color is left at current setting.
+ *
+ * \param _fg   Foreground color.
+ */
+#define ANSI_FG_COLOR(_fg) \
+  ANSI_COLOR_PRE ANSI_SGR_TEXT_NORMAL ANSI_COLOR_SEP _fg ANSI_COLOR_MODE
+
+/*!
+ * \brief Macro to build bright foreground color escape sequence string.
+ *
+ * Background color is left at current setting.
+ *
+ * \param _fg   Foreground color.
+ */
+#define ANSI_FG_BRIGHT_COLOR(_fg) \
+  ANSI_COLOR_PRE ANSI_SGR_TEXT_BOLD ANSI_COLOR_SEP _fg ANSI_COLOR_MODE
+
+/*!
+ * \brief Macro to build foreground color with the given text attribute
+ * escape sequence string.
+ *
+ * Background color is left at current setting.
+ *
+ * \param _attr Text attribute.
+ * \param _fg   Foreground color.
+ */
+#define ANSI_FG_ATTR_COLOR(_attr, _fg) \
+  ANSI_COLOR_PRE _attr ANSI_COLOR_SEP _fg ANSI_COLOR_MODE
+
+/*!
+ * \brief Macro to build background color escape sequence string.
+ *
+ * Foreground color is left at current setting.
+ *
+ * \param _bg   Foreground color.
+ */
+#define ANSI_BG_COLOR(_bg)  ANSI_COLOR_PRE _bg ANSI_COLOR_MODE
+
+/*!
+ * \brief Macro to build normal color escape sequence string.
+ * 
+ * Actual colors are dependent on the terminal emulator.
+ *
+ * \param _fg   Foreground color.
+ * \param _bg   Background color.
+ */
+#define ANSI_NORMAL_COLOR(_fg, _bg) ANSI_COLOR(ANSI_SGR_TEXT_NORMAL, _fg, _bg)
+
+/*!
+ * \brief Macro to build bright color escape sequence string.
+ * 
+ * Actual colors are dependent on the terminal emulator.
+ *
+ * \param _fg   Foreground color.
+ * \param _bg   Background color.
+ */
+#define ANSI_BRIGHT_COLOR(_fg, _bg) ANSI_COLOR(ANSI_SGR_TEXT_BOLD, _fg, _bg)
+
+//
+// Handy, common color escape sequences.
+//
+
+/*!
+ * \brief color reset to default
+ */
+#define ANSI_COLOR_RESET  \
+  ANSI_CSI ANSI_SGR_TEXT_NORMAL ANSI_COLOR_MODE
+
+/*!
+ * \brief Foreground colors escape sequences.
+ * \{
+ */
+#define ANSI_FG_BLACK   ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_BLACK)
+#define ANSI_FG_RED     ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_RED)
+#define ANSI_FG_GREEN   ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_GREEN)
+#define ANSI_FG_YELLOW  ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_YELLOW)
+#define ANSI_FG_BLUE    ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_BLUE)
+#define ANSI_FG_MAGENTA ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_MAGENTA)
+#define ANSI_FG_CYAN    ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_CYAN)
+#define ANSI_FG_WHITE   ANSI_FG_COLOR(ANSI_SGR_FG_COLOR_WHITE)
+
+#define ANSI_FG_BRIGHT_BLACK    ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_BLACK)
+#define ANSI_FG_BRIGHT_RED      ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_RED)
+#define ANSI_FG_BRIGHT_GREEN    ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_GREEN)
+#define ANSI_FG_BRIGHT_YELLOW   ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_YELLOW)
+#define ANSI_FG_BRIGHT_BLUE     ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_BLUE)
+#define ANSI_FG_BRIGHT_MAGENTA  ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_MAGENTA)
+#define ANSI_FG_BRIGHT_CYAN     ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_CYAN)
+#define ANSI_FG_BRIGHT_WHITE    ANSI_FG_BRIGHT_COLOR(ANSI_SGR_FG_COLOR_WHITE)
+/*! \} */
+
+/*!
+ * \brief Background colors escape sequences.
+ * \{
+ */
+#define ANSI_BG_BLACK   ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_BLACK)
+#define ANSI_BG_RED     ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_RED)
+#define ANSI_BG_GREEN   ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_GREEN)
+#define ANSI_BG_YELLOW  ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_YELLOW)
+#define ANSI_BG_BLUE    ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_BLUE)
+#define ANSI_BG_MAGENTA ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_MAGENTA)
+#define ANSI_BG_CYAN    ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_CYAN)
+#define ANSI_BG_WHITE   ANSI_FG_COLOR(ANSI_SGR_BG_COLOR_WHITE)
+/*! \} */
+
 
 //-----------------------------------------------------------------------------
 // Color Functions
@@ -130,7 +243,7 @@ C_DECLS_BEGIN
  */
 INLINE_IN_H void set_color(const char *sColor)
 {
-  printf("%s%s", ANSI_COLOR_PRE, sColor);
+  printf("%s%s%s", ANSI_COLOR_PRE, sColor, ANSI_COLOR_MODE);
 }
 
 /*!

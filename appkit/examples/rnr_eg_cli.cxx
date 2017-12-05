@@ -48,7 +48,9 @@
 #include "rnr/pkg.h"
 
 #include "rnr/appkit/Time.h"
+#include "rnr/appkit/CmdExtArg.h"
 #include "rnr/appkit/CommandLine.h"
+#include "rnr/appkit/CmdAddOns.h"
 
 #include "version.h"
 
@@ -553,8 +555,6 @@ Time ActivityTime;  ///< activity time
 const string    CliName("Adopt-An-Animal");   ///< CLI name 
 const string    CliPrompt("aaa> ");           ///< CLI prompt
 CommandLine     Cli(CliName, CliPrompt);      ///< the CLI
-bool            CliQuit = false;              ///< do [not] quit
-map<int, int>   UidToIndexMap;                ///< uid to index map
 
 /*!
  * \{
@@ -588,7 +588,7 @@ map<int, int>   UidToIndexMap;                ///< uid to index map
  *
  * \return OK(0) on success, negative value on failure.
  */
-int checkCmd(const ExtArg &argv0, int argc, const string strTgtName = "")
+int checkCmd(const CmdExtArg &argv0, int argc, const string strTgtName = "")
 {
   const string &strDefName = Cli.at(argv0.uid()).getName();
 
@@ -611,26 +611,8 @@ int checkCmd(const ExtArg &argv0, int argc, const string strTgtName = "")
 
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-// CommandLine Commands Definitions
+// CommandLine Exec2 Command Definitions
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-
-// forward declarations
-static int execHelp(const ExtArgVec &argv);
-static int execCliTest(const ExtArgVec &argv);
-
-/*!
- * \brief Execute 'quit' command.
- *
- * \param argv  Command line arguments.
- *
- * \return OK(0) on success, negative value on failure.
- */
-static int execQuit(const ExtArgVec &argv)
-{
-  CliQuit = true;
-
-  return OK;
-}
 
 /*!
  * \brief Execute 'adopt' command.
@@ -639,7 +621,7 @@ static int execQuit(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execAdopt(const ExtArgVec &argv)
+static int execAdopt(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "adopt";
 
@@ -686,7 +668,7 @@ static int execAdopt(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execSleep(const ExtArgVec &argv)
+static int execSleep(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "sleep";
 
@@ -751,7 +733,7 @@ static int execSleep(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execNameAnimal(const ExtArgVec &argv)
+static int execNameAnimal(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "name";
 
@@ -799,7 +781,7 @@ static int execNameAnimal(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execNamaste(const ExtArgVec &argv)
+static int execNamaste(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "namaste";
 
@@ -815,7 +797,7 @@ static int execNamaste(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execFeedAnimal(const ExtArgVec &argv)
+static int execFeedAnimal(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "feed";
 
@@ -904,7 +886,7 @@ static int execFeedAnimal(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execWalkAnimal(const ExtArgVec &argv)
+static int execWalkAnimal(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "walk";
 
@@ -982,7 +964,7 @@ static int execWalkAnimal(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execListAnimals(const ExtArgVec &argv)
+static int execListAnimals(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "list";
 
@@ -1003,7 +985,7 @@ static int execListAnimals(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execGetPetsState(const ExtArgVec &argv)
+static int execGetPetsState(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "get";
 
@@ -1115,7 +1097,7 @@ static int execGetPetsState(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execReward(const ExtArgVec &argv)
+static int execReward(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "reward";
 
@@ -1229,7 +1211,7 @@ static int execReward(const ExtArgVec &argv)
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execSave(const ExtArgVec &argv)
+static int execSave(const CmdExtArgVec &argv)
 {
   static const char *cmdname = "save";
 
@@ -1308,7 +1290,7 @@ static int execSave(const ExtArgVec &argv)
 /*!
  * \brief Command description and exectuion structure.
  */
-struct CmdExec
+struct AppCmdExec
 {
   CmdDesc       m_desc;     ///< command description and syntax specification
   CmdExec2Func  m_fnExec;   ///< command execution function
@@ -1317,28 +1299,8 @@ struct CmdExec
 /*!
  * \brief The command descriptions.
  */
-CmdExec Commands[] =
+AppCmdExec Commands[] =
 {
-  { { "help",
-      "help [{--usage | -u}] [<cmd:word>]",
-      "Print this help.",
-      "Print command help. If the --usage option is specified, then only the "
-      "command(s) usages are printed. If the <cmd> is specified, then only "
-      "help for that command is printed. Otherwise all command help is "
-      "printed.\n\n"
-      "Demonstrates multiple optional variable arguments."
-    },
-    execHelp
-  },
-
-  { { "quit",
-      "quit",
-      "Quit example application.",
-      NULL
-    },
-    execQuit
-  },
-
   { { "adopt",
       "adopt <animal>",
       "Adopt an available animal",
@@ -1406,8 +1368,7 @@ CmdExec Commands[] =
 
   { { "list",
       "list",
-      "Get list of animals.",
-      NULL
+      "Get the list of animals.",
     },
     execListAnimals
   },
@@ -1440,27 +1401,6 @@ CmdExec Commands[] =
       "Demonstrates a file variable argument type."
     },
     execSave
-  },
-
-  { { "clitest",
-      "<clitest:re(^t[abcdpr].+)> [<modifier:multiword>]",
-      "Test CommandLine interface features.",
-      "The 'clitest' command validates command wild carding and provides test "
-      "functions to validate the CommandLine and underlining classes.\n\n"
-      "Supported Test Functions:\n"
-      "tadd <cmd>     - Add command to interface.\n"
-      "tbt            - Backtrace log.\n"
-      "tcompile       - (Re)compile interface.\n"
-      "tdump [<cmd>]  - Dump all or <cmd> definitions.\n"
-      "tprint <attr>  - Print attribute, where <attr> is one of:\n"
-      "                   name prompt numcmds errstr.\n"
-      "tpush <prompt> - Push new <prompt> string.\n"
-      "tpop           - Pop current prompt string.\n"
-      "tremove <cmd>  - Remove command from interface.\n\n"
-      "Demonstrates command name wild carding.\n"
-      "Demonstrates a regular expresson variable argument type."
-    },
-    execCliTest
   }
 };
 
@@ -1480,7 +1420,7 @@ static int findCommand(const std::string &strName)
 {
   for(int i = 0; i < NumOfCmds; ++i)
   {
-    if( strName == Commands[i].m_desc.m_sName )
+    if( strName == Commands[i].m_desc.name )
     {
       return i;
     }
@@ -1488,163 +1428,350 @@ static int findCommand(const std::string &strName)
   return -1;
 }
 
+
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// CommandLine Exec3 Command Definitions
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+static const char *CliTestCmdName = "clitest";
+
 /*!
- * \brief Execute 'help' command.
+ * \brief Execute clitest tadd subcommand.
  *
- * help [{usage | long}] [<cmd>]
+ * Add a new command to interface.
  *
+ * \param cli   Command line interface.
  * \param argv  Command line arguments.
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execHelp(const ExtArgVec &argv)
+static int execTAdd(CommandLine &cli, const CmdExtArgVec &argv)
 {
-  static const char *cmdname = "help";
+  size_t  nCmd = 0;   // index to command name 
+  size_t  nArg = 1;   // index to current working argument
+  int     i;
+  int     nUid;
+  int     rc = RC_ERROR;
 
-  size_t  argc = argv.size();
-  int     iCmd;
-  size_t  i;
-
-  // optional defaults
-  bool    bLongHelp = true;
-  string  strCmdName;
-
-  if( checkCmd(argv[0], argc, cmdname) != OK )
+  if( nArg >= argv.size() )
   {
-    return RC_ERROR;
+    PCMDERROR(CliTestCmdName, argv[nCmd] << ": No <cmd> specified.");
   }
-
-  //
-  // Process Input arguments.
-  //
-  for(i = 1; i < argv.size(); ++i)
+  else if( (i = findCommand(argv[nArg].s())) < 0 )
   {
-    if( i == 1 )
-    {
-      if( (argv[i] == "--usage") || (argv[i] == "-u") )
-      {
-        bLongHelp = false;
-      }
-      else
-      {
-        strCmdName = argv[i].s();
-      }
-    }
-    else if( i == 2 )
-    {
-      strCmdName = argv[i].s();
-    }
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+            << ": Unknown <cmd> '" << argv[nArg] << "'.");
   }
-
-  //
-  // Print help for all commands.
-  //
-  if( strCmdName.empty() )
+  else if( cli.hasCmd(argv[nArg].s()) )
   {
-    for(i = 0; i < NumOfCmds; ++i)
-    {
-      if( Cli.hasCmd(Commands[i].m_desc.m_sName) )
-      {
-        help(cout, Commands[i].m_desc, bLongHelp);
-        if( bLongHelp )
-        {
-          cout << "    ---" << endl << endl;
-        }
-        else
-        {
-          cout << endl;
-        }
-      }
-    }
-    cout << "  " << Cli.numOfCmds() << " commands" << endl;
-    return OK;
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+          << ": The <cmd> '" << argv[nArg]
+          << "' is already present in the interface.");
   }
-
-  //
-  // Print help for a solitary command.
-  //
-  else if( ((iCmd = findCommand(strCmdName)) >= 0) && Cli.hasCmd(strCmdName) )
+  else if( (nUid = cli.addCommand(Commands[i].m_desc, Commands[i].m_fnExec)) ==
+                                                          NoUid )
   {
-    help(cout, Commands[iCmd].m_desc, bLongHelp);
-    return OK;
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+          << ": Failed to add <cmd> '" << argv[nArg] << "': "
+          << cli.getErrorStr() << ".");
   }
-
-  //
-  // No help.
-  //
+  else if( (rc = cli.compile()) != OK )
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+          << ": Failed to (re)compile interface: "
+          << cli.getErrorStr() << ".");
+  }
   else
   {
-    PCMDERROR(cmdname, "No help for command '" << strCmdName << "'.");
-    return RC_ERROR;
+    cout << "Command '" << argv[nArg] << ", uid(" << nUid << ") added."
+        << endl;
+    rc = OK;
   }
+
+  return rc;
+}
+
+/*!
+ * \brief Execute clitest tbt subcommand.
+ *
+ * Print interface attribute.
+ *
+ * \param cli   Command line interface.
+ * \param argv  Command line arguments.
+ *
+ * \return OK(0) on success, negative value on failure.
+ */
+static int execTBt(CommandLine &cli, const CmdExtArgVec &argv)
+{
+  cli.backtrace(cout, true);
+
+  return OK;
+}
+
+/*!
+ * \brief Execute clitest tcompile subcommand.
+ *
+ * (Re)compile the interface.
+ *
+ * \param cli   Command line interface.
+ * \param argv  Command line arguments.
+ *
+ * \return OK(0) on success, negative value on failure.
+ */
+static int execTCompile(CommandLine &cli, const CmdExtArgVec &argv)
+{
+  size_t  nCmd = 0;   // index to command name 
+  int     rc;
+
+  if( (rc = cli.compile()) != OK )
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+            << ": Failed to (re)compile interface: "
+            << cli.getErrorStr() << ".");
+    rc = RC_ERROR;
+  }
+  else
+  {
+    cout << "Compiled " << cli.numOfCmds() << " commands." << endl;
+    rc = OK;
+  }
+
+  return rc;
+}
+
+/*!
+ * \brief Execute clitest tdump subcommand.
+ *
+ * Dump specified command or full command-line interface.
+ *
+ * \param cli   Command line interface.
+ * \param argv  Command line arguments.
+ *
+ * \return OK(0) on success, negative value on failure.
+ */
+static int execTDump(CommandLine &cli, const CmdExtArgVec &argv)
+{
+  size_t  nCmd = 0;   // index to command name 
+  size_t  nArg = 1;   // index to current working argument
+  int     rc;
+
+  // dump command definition
+  if( nArg < argv.size() )
+  {
+    if( cli.at(argv[nArg].s()).getUid() == NoUid )
+    {
+      PCMDERROR(CliTestCmdName, argv[nCmd]
+            << ": The <cmd> '" << argv[nArg]
+            << "' is not present in the interface.");
+      rc = RC_ERROR;
+    }
+    else
+    {
+      cout << cli.at(argv[nArg].s()) << endl;  // dump command
+      rc = OK;
+    }
+  }
+
+  // dump full interface
+  else
+  {
+    cout << cli << endl;
+    rc = OK;
+  }
+
+  return rc;
+}
+
+/*!
+ * \brief Execute clitest tkbhit subcommand.
+ *
+ * Loop to check non-blocking input.
+ *
+ * \param cli   Command line interface.
+ * \param argv  Command line arguments.
+ *
+ * \return OK(0) on success, negative value on failure.
+ */
+static int execTKbhit(CommandLine &cli, const CmdExtArgVec &argv)
+{
+  int   c = 0;
+
+  cout << "Press any key, 's' to stop test." << endl;
+
+  while( c != 's' )
+  {
+    if( cli.kbhit() )
+    {
+      c = getchar();
+      cout << "     \r" << std::flush;
+      switch( c )
+      {
+        case '\n':
+          cout << "\\n";
+          break;
+        case '\t':
+          cout << "\\t";
+          break;
+        default:
+          cout << (char)c;
+          break;
+      }
+      cout << "\r" << std::flush;
+    }
+  }
+
+  cout << endl;
+
+  return OK;
+}
+
+/*!
+ * \brief Execute clitest tprint subcommand.
+ *
+ * Print interface attribute.
+ *
+ * \param cli   Command line interface.
+ * \param argv  Command line arguments.
+ *
+ * \return OK(0) on success, negative value on failure.
+ */
+static int execTPrint(CommandLine &cli, const CmdExtArgVec &argv)
+{
+  size_t  nCmd = 0;   // index to command name 
+  size_t  nArg = 1;   // index to current working argument
+  int     rc   = OK;
+
+  if( nArg >= argv.size() )
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd] << ": No <attr> specified.");
+    rc = RC_ERROR;
+  }
+  else if( argv[nArg] == "name" )       // interface name
+  {
+    cout << cli.getName() << endl;
+  }
+  else if( argv[nArg] == "prompt" )     // current prompt string
+  {
+    cout << cli.getPrompt() << endl;
+  }
+  else if( argv[nArg] == "numcmds" )    // number of added commands
+  {
+    cout << cli.numOfCmds() << endl;
+  }
+  else if( argv[nArg] == "errstr" )     // last error 
+  {
+    cout << cli.getErrorStr() << endl;
+  }
+  else
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+        << ": Unknown <attr> '" << argv[nArg] << "'.");
+    rc = RC_ERROR;
+  }
+
+  return rc;
+}
+
+/*!
+ * \brief Execute clitest tpush subcommand.
+ *
+ * Push new prompt.
+ *
+ * \param cli   Command line interface.
+ * \param argv  Command line arguments.
+ *
+ * \return OK(0) on success, negative value on failure.
+ */
+static int execTPush(CommandLine &cli, const CmdExtArgVec &argv)
+{
+  size_t  nCmd = 0;   // index to command name 
+  size_t  nArg = 1;   // index to current working argument
+  int     rc;
+
+  // push prompt string
+  if( nArg < argv.size() )
+  {
+    cli.pushPrompt(argv[nArg].s());
+    rc = OK;
+  }
+  else
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd] << ": No <prompt> specified.");
+    rc = RC_ERROR;
+  }
+
+  return rc;
+}
+
+/*!
+ * \brief Execute clitest tremove subcommand.
+ *
+ * Remove command from the interface.
+ *
+ * \param cli   Command line interface.
+ * \param argv  Command line arguments.
+ *
+ * \return OK(0) on success, negative value on failure.
+ */
+static int execTRemove(CommandLine &cli, const CmdExtArgVec &argv)
+{
+  size_t  nCmd = 0;   // index to command name 
+  size_t  nArg = 1;   // index to current working argument
+  int     nUid;
+  int     rc;
+
+  rc = RC_ERROR;
+
+  if( nArg >= argv.size() )
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd] << ": No <cmd> specified.");
+  }
+  else if( (nUid = cli.at(argv[nArg].s()).getUid()) == NoUid )
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+          << ": The <cmd> '" << argv[nArg]
+          << "' is not present in the interface.");
+  }
+  else if( (rc = cli.removeCommand(argv[nArg].s())) != OK )
+  {
+    PCMDERROR(CliTestCmdName, argv[nCmd]
+          << ": Failed to remove <cmd> '" << argv[nArg] << "': "
+          << cli.getErrorStr() << ".");
+  }
+  else
+  {
+    cout << "Command '" << argv[nArg] << "', uid(" << nUid << ") removed."
+        << endl;
+    rc = OK;
+  }
+
+  return rc;
 }
 
 /*!
  * \brief Execute command-line interface methods command.
  *
+ * \param cli   Command line interface.
  * \param argv  Command line arguments.
  *
  * \return OK(0) on success, negative value on failure.
  */
-static int execCliTest(const ExtArgVec &argv)
+static int execCliTest(CommandLine &cli, const CmdExtArgVec &argv)
 {
-  static const char *cmdname = "clitest";
-
-  size_t  argc = argv.size();
   size_t  nCmd = 0;  
-  size_t  nArg = 1;  
   int     rc;
 
-  if( checkCmd(argv[nCmd], argc) != OK )
+  if( checkCmd(argv[nCmd], argv.size()) != OK )
   {
-    return RC_ERROR;
+    rc = RC_ERROR;
   }
 
   //
   // Add command to interface.
   //
-  if( argv[nCmd] == "tadd" )
+  else if( argv[nCmd] == "tadd" )
   {
-    int i;
-    int nUid;
-
-    rc = RC_ERROR;
-
-    if( nArg >= argc )
-    {
-      PCMDERROR(cmdname, argv[nCmd] << ": No <cmd> specified.");
-    }
-    else if( (i = findCommand(argv[nArg].s())) < 0 )
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-              << ": Unknown <cmd> '" << argv[nArg] << "'.");
-    }
-    else if( Cli.hasCmd(argv[nArg].s()) )
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-            << ": The <cmd> '" << argv[nArg]
-            << "' is already present in the interface.");
-    }
-    else if( (nUid = Cli.addCommand(Commands[i].m_desc.m_sSyntax)) ==
-                                                            CommandLine::NoUid )
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-            << ": Failed to add <cmd> '" << argv[nArg] << "': "
-            << Cli.getErrorStr() << ".");
-    }
-    else if( (rc = Cli.compile()) != OK )
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-            << ": Failed to (re)compile interface: "
-            << Cli.getErrorStr() << ".");
-    }
-    else
-    {
-      UidToIndexMap[nUid] = i;
-      cout << "Command '" << argv[nArg] << ", uid(" << nUid << ") added."
-          << endl;
-      rc = OK;
-    }
+    rc = execTAdd(cli, argv);
   }
 
   //
@@ -1652,8 +1779,7 @@ static int execCliTest(const ExtArgVec &argv)
   //
   else if( argv[nCmd] == "tbt" )
   {
-    Cli.backtrace(cout, true);
-    rc = OK;
+    rc = execTBt(cli, argv);
   }
 
   //
@@ -1661,18 +1787,7 @@ static int execCliTest(const ExtArgVec &argv)
   //
   else if( argv[nCmd] == "tcompile" )
   {
-    if( (rc = Cli.compile()) != OK )
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-            << ": Failed to (re)compile interface: "
-            << Cli.getErrorStr() << ".");
-      rc = RC_ERROR;
-    }
-    else
-    {
-      cout << "Compiled " << Cli.numOfCmds() << " commands." << endl;
-      rc = OK;
-    }
+    rc = execTCompile(cli, argv);
   }
 
   //
@@ -1680,15 +1795,15 @@ static int execCliTest(const ExtArgVec &argv)
   //
   else if( argv[nCmd] == "tdump" )
   {
-    if( nArg < argc )
-    {
-      cout << Cli.at(argv[nArg].s()) << endl;  // dump command
-    }
-    else
-    {
-      cout << Cli << endl;                    // dump full interface
-    }
-    rc = OK;
+    rc = execTDump(cli, argv);
+  }
+
+  //
+  // Check for keyboard hits.
+  //
+  else if( argv[nCmd] == "tkbhit" )
+  {
+    rc = execTKbhit(cli, argv);
   }
 
   //
@@ -1696,35 +1811,7 @@ static int execCliTest(const ExtArgVec &argv)
   //
   else if( argv[nCmd] == "tprint" )
   {
-    rc = OK;
-
-    if( nArg >= argc )
-    {
-      PCMDERROR(cmdname, argv[nCmd] << ": No <attr> specified.");
-      rc = RC_ERROR;
-    }
-    else if( argv[nArg] == "name" )       // interface name
-    {
-      cout << Cli.getName() << endl;
-    }
-    else if( argv[nArg] == "prompt" )     // current prompt string
-    {
-      cout << Cli.getPrompt() << endl;
-    }
-    else if( argv[nArg] == "numcmds" )    // number of added commands
-    {
-      cout << Cli.numOfCmds() << endl;
-    }
-    else if( argv[nArg] == "errstr" )     // last error 
-    {
-      cout << Cli.getErrorStr() << endl;
-    }
-    else
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-          << ": Unknown <attr> '" << argv[nArg] << "'.");
-      rc = RC_ERROR;
-    }
+    rc = execTPrint(cli, argv);
   }
 
   //
@@ -1732,16 +1819,7 @@ static int execCliTest(const ExtArgVec &argv)
   //
   else if( argv[nCmd] == "tpush" )
   {
-    if( nArg < argc )
-    {
-      Cli.pushPrompt(argv[nArg].s());
-      rc = OK;
-    }
-    else
-    {
-      PCMDERROR(cmdname, argv[nCmd] << ": No <prompt> specified.");
-      rc = RC_ERROR;
-    }
+    rc = execTPush(cli, argv);
   }
 
   //
@@ -1749,7 +1827,7 @@ static int execCliTest(const ExtArgVec &argv)
   //
   else if( argv[nCmd] == "tpop" )
   {
-    Cli.popPrompt();
+    cli.popPrompt();
     rc = OK;
   }
 
@@ -1758,43 +1836,60 @@ static int execCliTest(const ExtArgVec &argv)
   //
   else if( argv[nCmd] == "tremove" ) 
   {
-    int   nUid;
-
-    rc = RC_ERROR;
-
-    if( nArg >= argc )
-    {
-      PCMDERROR(cmdname, argv[nCmd] << ": No <cmd> specified.");
-    }
-    else if( (nUid = Cli.at(argv[nArg].s()).getUid()) == CommandLine::NoUid )
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-            << ": The <cmd> '" << argv[nArg]
-            << "' is not present in the interface.");
-    }
-    else if( (rc = Cli.removeCommand(argv[nArg].s())) != OK )
-    {
-      PCMDERROR(cmdname, argv[nCmd]
-            << ": Failed to remove <cmd> '" << argv[nArg] << "': "
-            << Cli.getErrorStr() << ".");
-    }
-    else
-    {
-      UidToIndexMap.erase(nUid);
-      cout << "Command '" << argv[nArg] << ", uid(" << nUid << ") removed."
-          << endl;
-      rc = OK;
-    }
+    rc = execTRemove(cli, argv);
   }
 
   else
   {
-    PCMDERROR(cmdname, "Do not know how to execute '" << argv[nCmd] << "'.");
+    PCMDERROR(CliTestCmdName,
+        "Do not know how to execute '" << argv[nCmd] << "'.");
     rc = RC_ERROR;
   }
 
   return rc;
 }
+
+/*!
+ * \brief Self-Reference command description and exectuion structure.
+ */
+struct AppCmdExec3
+{
+  CmdDesc       m_desc;     ///< command description and syntax specification
+  CmdExec3Func  m_fnExec;   ///< command execution function
+};
+
+/*!
+ * \brief The command descriptions.
+ */
+AppCmdExec3 Command3s[] =
+{
+  { { CliTestCmdName,
+      "<clitest:re(^t[abcdkpr].+)> [<modifier:multiword>]",
+      "Test CommandLine interface features.",
+      "The 'clitest' command validates command wild carding and provides test "
+      "functions to validate the CommandLine and underlining classes.\n\n"
+      "Supported Test Functions:\n"
+      "  tadd <cmd>     - Add command to interface.\n"
+      "  tbt            - Backtrace log.\n"
+      "  tcompile       - (Re)compile interface.\n"
+      "  tdump [<cmd>]  - Dump all or <cmd> definitions.\n"
+      "  tkbhit         - Check for keyboard hits.\n"
+      "  tprint <attr>  - Print attribute, where <attr> is one of:\n"
+      "                     name prompt numcmds errstr.\n"
+      "  tpush <prompt> - Push new <prompt> string.\n"
+      "  tpop           - Pop current prompt string.\n"
+      "  tremove <cmd>  - Remove command from interface.\n\n"
+      "Demonstrates command name wild carding.\n"
+      "Demonstrates regular expresson variable argument type."
+    },
+    execCliTest
+  }
+};
+
+/*!
+ * \brief Number of commands.
+ */
+const size_t NumOfCmd3s = arraysize(Command3s);
 
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
@@ -1858,26 +1953,51 @@ static int loadCommands(CommandLine &cli)
   int   nUid;
   int   rc;
 
+  //
+  // Add "normal" commands to command-line interface.
+  //
   for(size_t i = 0; i < NumOfCmds; ++i)
   {
-    nUid = cli.addCommand(Commands[i].m_desc.m_sSyntax);
+    nUid = cli.addCommand(Commands[i].m_desc, Commands[i].m_fnExec);
 
-    if( nUid == CommandLine::NoUid )
+    if( nUid == NoUid )
     {
-      PERROR("Failed to add command '" << Commands[i].m_desc.m_sName << "'.");
+      PERROR("Failed to add command '" << Commands[i].m_desc.name << "'.");
       return RC_ERROR;
     }
-
-    UidToIndexMap[nUid] = i;
   }
 
+  //
+  // Add "self-referenced" commands to command-line interface.
+  //
+  for(size_t i = 0; i < NumOfCmd3s; ++i)
+  {
+    nUid = cli.addCommand(Command3s[i].m_desc, Command3s[i].m_fnExec);
+
+    if( nUid == NoUid )
+    {
+      PERROR("Failed to add command '" << Command3s[i].m_desc.name << "'.");
+      return RC_ERROR;
+    }
+  }
+
+  //
+  // Add built-in commands to interface.
+  //
+  addons::addHelpCommand(cli);
+  addons::addQuitCommand(cli);
+  addons::addBtEnableCommand(cli);
+
+  //
+  // Now compile comamnd-line interace.
+  //
   if( (rc = cli.compile()) != OK )
   {
     PERROR("Compile failed.");
   }
 
   // see the results of the compile
-  //cli.backtrace(cerr, true);
+  cli.backtrace(cerr, true);
 
   return rc;
 }
@@ -1891,10 +2011,10 @@ static int loadCommands(CommandLine &cli)
  */
 static int run(CommandLine &cli)
 {
-  ExtArgVec argv;     // vector of string input arguments
-  int       rc;       // return code
+  CmdExtArgVec  argv;     // vector of string input arguments
+  int           rc;       // return code
 
-  while( !CliQuit )
+  while( cli.ok() )
   {
     rc = cli.readCommand(argv);
 
@@ -1907,7 +2027,7 @@ static int run(CommandLine &cli)
 
       if( argv.size() > 0 ) 
       {
-        rc = Commands[UidToIndexMap[argv[0].uid()]].m_fnExec(argv);
+        rc = cli.execute(argv);
 
         if( rc == OK )
         {
@@ -1917,8 +2037,9 @@ static int run(CommandLine &cli)
     }
     else
     {
-      PERROR("Bad command. (backtrace):");
-      cli.backtrace(cout);
+      PERROR("Bad command.");
+      // cerr << "backtrace:" << endl;
+      // cli.backtrace(cerr);
     }
   }
 

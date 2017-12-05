@@ -67,8 +67,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm> 
-#include <functional> 
 #include <cctype>
 #include <locale>
 
@@ -80,10 +78,12 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
+#include "rnr/appkit/StringTheory.h"
 #include "rnr/appkit/ReadLine.h"
 
 using namespace std;
 using namespace rnr;
+using namespace rnr::str;
 using namespace rnr::cmd;
 
 
@@ -95,46 +95,6 @@ namespace rnr
 {
   namespace cmd
   {
-    /*!
-     * \brief Trim string in-place of leading whitespace.
-     *
-     * \param str String to trim.
-     *
-     * \return Left trimmed string.
-     */
-    static inline std::string &ltrim(std::string &str)
-    {
-      str.erase( str.begin(), std::find_if(str.begin(), str.end(),
-                std::not1(std::ptr_fun<int, int>(std::isspace))) );
-      return str;
-    }
-    
-    /*!
-     * \brief Trim string in-place of trailing whitespace.
-     *
-     * \param str String to trim.
-     *
-     * \return Right trimmed string.
-     */
-    static inline std::string &rtrim(std::string &str)
-    {
-      str.erase( std::find_if(str.rbegin(), str.rend(),
-          std::not1(std::ptr_fun<int, int>(std::isspace))).base(), str.end() );
-      return str;
-    }
-    
-    /*!
-     * \brief Trim string in-place of trailing and trailing whitespace.
-     *
-     * \param str String to trimmed.
-     *
-     * \return Trimmed string.
-     */
-    static inline std::string &trim(std::string &str)
-    {
-      return ltrim(rtrim(str));
-    }
-
   } // namespace cmd
 } // namespace rnr
 
@@ -163,8 +123,8 @@ ReadLine::ReadLine(const string strName,
 #ifdef HAVE_READLINE
   //
   // Only one instance of this class can be instantiated since:
-  //  1. The readline library provides no user argument for callbacks to use.
-  //  2. And most importantly, readline library uses global variables.
+  //  1. The readline library provides no user argument(s) for callbacks to use.
+  //  2. And more importantly, readline library uses global variables.
   //
   assert(ThisObj == NULL);
 
@@ -182,6 +142,7 @@ ReadLine::ReadLine(const string strName,
 
 ReadLine::~ReadLine()
 {
+  ThisObj = NULL;
 }
 
 void ReadLine::registerGenerator(AppGenFunc fnAppGen, void *pAppArg)
@@ -358,7 +319,6 @@ bool ReadLine::isInteractive(FILE *fp)
   return isatty(fileno(fp))? true: false;
 }
 
-
 const string &ReadLine::getErrorStr() const
 {
   return m_strError;
@@ -401,38 +361,7 @@ char *ReadLine::dupstr(const char *s)
   return t;
 }
 
-string ReadLine::strip(const string &str)
-{
-  string  stripped(str);
-
-  trim(stripped);
-
-  return stripped;
-}
-
-string ReadLine::c14n(const string &str, size_t uLen)
-{
-  string  strc14n(str, uLen);
-  size_t  pos;
-
-  // strip leading and trailing whitespace
-  trim(strc14n);
-
-  // convert multiple whitespace sequences to a single blank
-  if( strc14n.length() != 0 )
-  {
-    while( (pos = strc14n.find("  ")) != strc14n.npos )
-    {
-      strc14n = strc14n.replace(pos, 2, " ");
-    }
-  }
-
-  //cout << "  (" << str << ")" << endl;
-
-  return strc14n;
-}
-
-size_t ReadLine::tokenize(const string &str, vector<string> &tokens)
+size_t ReadLine::tokenize(const string &str, StringVec &tokens)
 {
   size_t    i, len;
   string    tok;

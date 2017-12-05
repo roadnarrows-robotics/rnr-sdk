@@ -52,6 +52,28 @@ On error, the appropriate \h_lt 0 USBLIB_ERROR_* code is returned.
 
 /*!
  * \ingroup doxy_includes
+ * \defgroup doc_return_cl doc_return_cl
+ * \{
+\return
+On success, AOk(0) is returned.
+On error, a CommandLine error code (\< 0) is returned.
+See \ref getErroStr() and backtrace() to retrieve or print error(s).
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
+ * \defgroup doc_return_ssize doc_return_ssize
+ * \{
+\return
+On success, returns size (count).
+On error, a CommandLine error code (\< 0) is returned.
+See \ref getErroStr() and backtrace() to retrieve or print error(s).
+ * \}
+ */
+
+/*!
+ * \ingroup doxy_includes
  * \defgroup doc_args_std doc_args_std
  * \{
  *  \termblock

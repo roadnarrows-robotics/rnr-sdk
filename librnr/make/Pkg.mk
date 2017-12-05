@@ -65,7 +65,7 @@ endif
 PKG 								= librnr
 PKG_VERSION_MAJOR   = 1
 PKG_VERSION_MINOR   = 14
-PKG_VERSION_RELEASE = 2
+PKG_VERSION_RELEASE = 3
 PKG_VERSION_DATE    = 2017
 PKG_AUTHORS					= "Robin Knight, Kim Wheeler, Daniel Packard"
 PKG_OWNERS					= "RoadNarrows LLC"

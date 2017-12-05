@@ -85,7 +85,14 @@ tinyxml.HDRS.H = \
 	rnr/tinyxml/tinyxml.h
 
 librnr_appkit.HDRS.H = \
+	rnr/appkit/CmdAddOns.h \
+	rnr/appkit/CmdArgDef.h \
+	rnr/appkit/CmdCore.h \
+	rnr/appkit/CmdDef.h \
+	rnr/appkit/CmdExtArg.h \
+	rnr/appkit/CmdFormDef.h \
 	rnr/appkit/CommandLine.h \
+	rnr/appkit/IOManip.h \
 	rnr/appkit/LogBook.h \
 	rnr/appkit/Random.h \
 	rnr/appkit/ReadLine.h \
@@ -94,8 +101,10 @@ librnr_appkit.HDRS.H = \
 	rnr/appkit/State.h \
 	rnr/appkit/StateKb.h \
 	rnr/appkit/StateMach.h \
+	rnr/appkit/StringTheory.h \
 	rnr/appkit/Thread.h \
 	rnr/appkit/Time.h \
+	rnr/appkit/Token.h \
 	rnr/appkit/Xml.h
 
 librnr_cam.HDRS.H = \
