@@ -94,6 +94,7 @@ librnr_appkit.HDRS.H = \
 	rnr/appkit/CommandLine.h \
 	rnr/appkit/IOManip.h \
 	rnr/appkit/LogBook.h \
+	rnr/appkit/LogStream.h \
 	rnr/appkit/Random.h \
 	rnr/appkit/ReadLine.h \
 	rnr/appkit/RegEx.h \

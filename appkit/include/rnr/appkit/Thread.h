@@ -180,14 +180,14 @@ namespace rnr
     pthread_t       m_thread;         ///< pthread identifier 
 
     // scheduler
-    int       m_nPriority;          ///< thread OS scheduling priority
-    double    m_fHz;                ///< thread cycle run rate (Hertz)
-    double    m_fTExec;             ///< task execution cycle period (seconds)
-    Time      m_tExecPeriod;        ///< task execution period (converted)
-    Time      m_tSched;             ///< working scheduler time
-    Time      m_tExecLastTimeStamp; ///< start of last execution time stamp
-    Time      m_tExecThisTimeStamp; ///< start of this execution time stamp
-    int       m_nSlipErrCnt;        ///< slipped error count leaky bucket
+    int         m_nPriority;          ///< thread OS scheduling priority
+    double      m_fHz;                ///< thread cycle run rate (Hertz)
+    double      m_fTExec;             ///< task execution cycle period (seconds)
+    time::Time  m_tExecPeriod;        ///< task execution period (converted)
+    time::Time  m_tSched;             ///< working scheduler time
+    time::Time  m_tExecLastTimeStamp; ///< start of last execution time stamp
+    time::Time  m_tExecThisTimeStamp; ///< start of this execution time stamp
+    int         m_nSlipErrCnt;        ///< slipped error count leaky bucket
 
     /*!
      * \brief Lock the \h_i2c bus.

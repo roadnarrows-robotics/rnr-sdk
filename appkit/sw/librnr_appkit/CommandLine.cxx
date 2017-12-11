@@ -71,6 +71,7 @@
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
 
+#include "rnr/appkit/LogStream.h"
 #include "rnr/appkit/StringTheory.h"
 #include "rnr/appkit/IOManip.h"
 #include "rnr/appkit/RegEx.h"
@@ -418,7 +419,7 @@ int CommandLine::addCommand(const CmdDesc &desc)
   if( desc.syntax.empty() )
   {
     m_log << "No syntax forms specified." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     return NoUid;
   }
 
@@ -487,7 +488,7 @@ int CommandLine::addCommand(const string strSyntax)
   if( syntaxForms.size() == 0 || syntaxForms[0].empty() )
   {
     m_log << "No syntax forms specified." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     return NoUid;
   }
 
@@ -602,7 +603,7 @@ int CommandLine::removeCommand(const int uid)
   if( rc != AOk )
   {
     m_log << "No command with uid " << uid << " found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
   }
 
   return rc;
@@ -641,7 +642,7 @@ int CommandLine::compile()
   if( m_nUidCnt == 0 )
   {
     m_log << labelFail << "No commands added." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     rc = EError;
   }
 
@@ -728,7 +729,7 @@ int CommandLine::compile(CmdDef &cmddef)
       m_log << labelFail
             << "cmddef " << cmddef.m_nUid << ", "
             << "form " << form.getIndex() << ": No syntax specified." << eoe;
-      LOGERROR("%s", getErrorStr().c_str());
+      LOGERROR_STREAM(getErrorStr());
       rc = EBadSyntax;
     }
 
@@ -772,7 +773,7 @@ int CommandLine::finalize()
         m_log << labelSyntax << "Duplicate command names found at uid's "
               << cmddef_i.getUid() << " and " << cmddef_j.getUid() << "."
               << eoe;
-        LOGERROR("%s", getErrorStr().c_str());
+        LOGERROR_STREAM(getErrorStr());
         return EAmbigCmd;
       }
     }
@@ -800,7 +801,7 @@ int CommandLine::addDataSection(const string          &ns,
   }
   else
   {
-    LOGERROR("Data section '%s' already exist - cannot add.", ns.c_str());
+    LOGERROR_STREAM("Data section '" << ns << "' already exist - cannot add.");
     return EBadVal;
   }
 }
@@ -811,12 +812,12 @@ int CommandLine::removeDataSection(const string &ns)
 
   if( pos != m_dataSects.end() )
   {
-    LOGERROR("No data section '%s' exist - cannot remove.", ns.c_str());
+    LOGERROR_STREAM("No data section '" << ns << "' exist - cannot remove.");
     return EBadVal;
   }
   else if( isReservedDataSection(pos->first) )
   {
-    LOGERROR("Reserved data section '%s' cannot be removed.", ns.c_str());
+    LOGERROR_STREAM("Reserved data section '" << ns << "' cannot be removed.");
     return ENoExec;
   }
   else
@@ -881,13 +882,13 @@ int CommandLine::readCommand(FILE *fp, CmdExtArgVec &argv)
   if( numOfCmds() == 0 )
   {
     m_log << labelNoExec << "No commands added to interface." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     return ENoExec;
   }
   else if( !isDefined() )
   {
     m_log << labelNoExec << "Commands not fully compiled." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     return ENoExec;
   }
 
@@ -915,8 +916,10 @@ int CommandLine::readCommand(FILE *fp, CmdExtArgVec &argv)
 
     if( argv.size() > 0 )
     {
-      LOGDIAG3("Command %s(%d), form %d matched.",
-        m_cmdDefs[argv[0].uid()].getName(), argv[0].uid(), argv[0].formIndex());
+      LOGDIAG3_STREAM("Command "
+        << m_cmdDefs[argv[0].uid()].getName()
+        << "(" << argv[0].uid() << "), form "
+        << argv[0].formIndex() << " matched.");
     }
   }
   else
@@ -2124,7 +2127,7 @@ ssize_t CommandLine::lexSyntaxWord(const string &strSyntax,
   {
     logLexToken(strSyntax, start, cursor, tokens);
     m_log << labelSyntax << "No <word> found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     cursor = EBadSyntax;
   }
 
@@ -2162,7 +2165,7 @@ ssize_t CommandLine::lexSyntaxParenExpr(const string &strSyntax,
   {
     logLexToken(strSyntax, start, cursor, tokens);
     m_log << labelSyntax << "No starting '(' found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     return EBadSyntax;
   }
 
@@ -2216,7 +2219,7 @@ ssize_t CommandLine::lexSyntaxParenExpr(const string &strSyntax,
   {
     logLexToken(strSyntax, start, cursor, tokens);
     m_log << labelSyntax << "No ending ')' found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     return EBadSyntax;
   }
 }
@@ -2443,16 +2446,19 @@ int CommandLine::parseSyntax(CmdDef         &cmddef,
   if( bOk )
   {
     m_log << labelParse << "Ok" << eoe;
-    LOGDIAG2("Command(uid=%d, name=%s, form=%d, argc=%d) successfully parsed.",
-        cmddef.getUid(), cmddef.getName().c_str(),
-        form.getIndex(), form.numOfArgs());
+    LOGDIAG2_STREAM("Command("
+        << "uid=" << cmddef.getUid() << ", "
+        << "name=" << cmddef.getName() << ", "
+        << "form=" << form.getIndex() << ", "
+        << "argc=" << form.numOfArgs() << ") "
+        << "successfully parsed.");
     rc = AOk;
   }
 
   // not so good - log error
   else
   {
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     rc = EBadSyntax;
   }
 
@@ -2487,7 +2493,7 @@ bool CommandLine::parseArgv0(CmdDef         &cmddef,
     m_log << labelSyntax << "Command argument not found in form "
           << form.getIndex() << "."
           << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -2521,7 +2527,7 @@ bool CommandLine::parseArgv0(CmdDef         &cmddef,
             << "', but found '" << strName << "' in form " << form.getIndex()
             << "."
             << eoe;
-      LOGERROR("%s", getErrorStr().c_str());
+      LOGERROR_STREAM(getErrorStr());
       bOk = false;
     }
   }
@@ -2623,7 +2629,7 @@ bool CommandLine::parseArg(CmdDef         &cmddef,
   else
   {
     m_log << labelSyntax << "Command argument not found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -2769,7 +2775,7 @@ bool CommandLine::parseXorList(CmdDef         &cmddef,
     if( peekEq("}", tokens[pos]) )
     {
       m_log << labelSyntax << "Expected literal value but found '}'." << eoe;
-      LOGERROR("%s", getErrorStr().c_str());
+      LOGERROR_STREAM(getErrorStr());
       bOk = false;
     }
 
@@ -2792,7 +2798,7 @@ bool CommandLine::parseXorList(CmdDef         &cmddef,
   if( more && bOk )
   {
     m_log << labelSyntax << "No literal value found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -2821,7 +2827,7 @@ bool CommandLine::parseIdentifier(CmdDef         &cmddef,
   else
   {
     m_log << labelSyntax << "No identifier found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -2867,7 +2873,7 @@ bool CommandLine::parseVarMod(CmdDef              &cmddef,
                 << "Unexpected '(' token found for argument type "
                 << "'" << CmdArgDef::lookupArgSymbol(eType) << "'."
                 << eoe;
-          LOGERROR("%s", getErrorStr().c_str());
+          LOGERROR_STREAM(getErrorStr());
           bOk = false;
       }
     }
@@ -2903,7 +2909,7 @@ bool CommandLine::parseVarType(CmdDef             &cmddef,
     {
       m_log << labelSyntax << "Unknown variable type '" << tokens[pos].value()
             << "'." << eoe;
-      LOGERROR("%s", getErrorStr().c_str());
+      LOGERROR_STREAM(getErrorStr());
       bOk = false;
     }
   }
@@ -2911,7 +2917,7 @@ bool CommandLine::parseVarType(CmdDef             &cmddef,
   else
   {
     m_log << labelSyntax << "No variable type found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -3014,7 +3020,7 @@ bool CommandLine::parseVarRangeExpr(CmdDef              &cmddef,
   }
   else
   {
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
   }
 
   CL_DBG_CALL_OUT_IL(okstr(bOk) << ", numranges=" << ranges.size()
@@ -3052,7 +3058,7 @@ bool CommandLine::parseVarRegExpr(CmdDef         &cmddef,
             << "'" << re.getRegEx() << "': "
             << re.getErrorStr() << "."
             << eoe;
-      LOGERROR("%s", getErrorStr().c_str());
+      LOGERROR_STREAM(getErrorStr());
       bOk = false;
     }
   }
@@ -3060,7 +3066,7 @@ bool CommandLine::parseVarRegExpr(CmdDef         &cmddef,
   else
   {
     m_log << labelSyntax << "Regular expression not found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -3090,7 +3096,7 @@ bool CommandLine::parseLiteralValue(CmdDef         &cmddef,
   else
   {
     m_log << labelSyntax << "Literal value not found." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -3113,7 +3119,7 @@ bool CommandLine::tokEq(const string   strCmp,
   {
     m_log << labelSyntax << "Token " << pos << " '" << strCmp
           << "' does not exist." << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -3122,7 +3128,7 @@ bool CommandLine::tokEq(const string   strCmp,
     m_log << labelSyntax << "Expected token '" << strCmp << "'"
           << ", but found " << tokens[pos]
           << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
     bOk = false;
   }
 
@@ -3152,7 +3158,7 @@ bool CommandLine::tokIdentifier(const TokenVec &tokens, size_t &pos)
   else
   {
     m_log << labelSyntax << "Invalid identifier " << tokens[pos] << eoe;
-    LOGERROR("%s", getErrorStr().c_str());
+    LOGERROR_STREAM(getErrorStr());
   }
 
   CL_DBG_CALL_OUT_IL(okstr(bOk) << ", pos=" << pos);

@@ -56,6 +56,7 @@
 
 using namespace std;
 using namespace rnr;
+using namespace rnr::time;
 using namespace rnr::cmd;
 
 /*!
@@ -1994,10 +1995,9 @@ static int loadCommands(CommandLine &cli)
   if( (rc = cli.compile()) != OK )
   {
     PERROR("Compile failed.");
+    cerr << "(backtrace)" << endl;
+    cli.backtrace(cerr, true);
   }
-
-  // see the results of the compile
-  cli.backtrace(cerr, true);
 
   return rc;
 }

@@ -75,6 +75,8 @@
 
 using namespace std;
 using namespace rnr;
+using namespace rnr::time;
+//using rnr::time::operator<<;
 
 static timespec       notime = {0, 0};
 static LogBook::Entry noentry;
@@ -91,7 +93,7 @@ LogBook::Entry::Entry() : m_timestamp(notime)
 LogBook::Entry::Entry(const string &strMark, const string &strText) :
     m_strMark(strMark), m_strText(strText)
 {
-  Time::now(m_timestamp);
+  now(m_timestamp);
 }
 
 LogBook::Entry::Entry(const LogBook::Entry &src)
@@ -114,7 +116,7 @@ LogBook::Entry::~Entry()
 
 bool LogBook::Entry::empty()
 {
-  return m_strMark.empty() && m_strText.empty() && !Time::isSet(m_timestamp);
+  return m_strMark.empty() && m_strText.empty() && !isSet(m_timestamp);
 }
 
 
