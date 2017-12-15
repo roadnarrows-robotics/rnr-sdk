@@ -68,6 +68,9 @@
 
 #include <gst/gst.h>
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   //---------------------------------------------------------------------------

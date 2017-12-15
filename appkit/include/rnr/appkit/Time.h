@@ -52,9 +52,15 @@
  */
 extern std::ostream &operator<<(std::ostream &os, const timespec &obj);
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
-  namespace time
+  /*!
+   * \brief Chronos - God of Time
+   */
+  namespace chronos
   {
     const long      MILLION = 1000000;      ///< 1,000,000
     const long long BILLION = 1000000000;   ///< 1,000,000,000
@@ -247,7 +253,7 @@ namespace rnr
        */
       bool isSet()
       {
-        return time::isSet(m_tsTime);
+        return chronos::isSet(m_tsTime);
       }
   
       /*!
@@ -622,7 +628,7 @@ namespace rnr
      */
     extern std::ostream &operator<<(std::ostream &os, const Time &obj);
   
-  } // namespace time
+  } // namespace chronos
 } // namespace rnr
 
 

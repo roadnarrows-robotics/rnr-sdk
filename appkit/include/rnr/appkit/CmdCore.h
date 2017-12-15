@@ -71,6 +71,9 @@
  */
 namespace rnr
 {
+  /*!
+   * \brief Commands
+   */
   namespace cmd
   {
     /*!

@@ -74,6 +74,9 @@
 
 #include "opencv/cv.h"
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   /*!

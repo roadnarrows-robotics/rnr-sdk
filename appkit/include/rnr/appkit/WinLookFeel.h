@@ -60,6 +60,9 @@
 #include "opencv/cv.h"
 #include "opencv/highgui.h"
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   // ...........................................................................

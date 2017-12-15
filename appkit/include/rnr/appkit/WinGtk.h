@@ -71,9 +71,9 @@
 #include "rnr/appkit/WinLookFeel.h"
 #include "rnr/appkit/Win.h"
 
-//
-// Windowing Declarations
-//
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   //...........................................................................

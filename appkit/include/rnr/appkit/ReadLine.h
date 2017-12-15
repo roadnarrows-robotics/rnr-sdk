@@ -82,10 +82,13 @@
 #include "rnr/appkit/StringTheory.h"
 
 /*!
- * \brief RoadNarrows Robotics Command Namespace
+ * \brief RoadNarrows Robotics
  */
 namespace rnr
 {
+  /*!
+   * \brief Commands
+   */
   namespace cmd
   {
     static const char *RlTabEnd = ""; ///< no more matches value (empty string)

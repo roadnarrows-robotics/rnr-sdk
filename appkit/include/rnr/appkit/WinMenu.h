@@ -64,9 +64,9 @@
 
 #include "rnr/appkit/Win.h"
 
-//
-// RoadNarrows Robotics Windowing Interface
-//
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
 #if defined(ARCH_overo)

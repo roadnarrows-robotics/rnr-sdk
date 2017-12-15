@@ -43,6 +43,9 @@
 
 #include "rnr/appkit/Time.h"
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
 
@@ -180,14 +183,14 @@ namespace rnr
     pthread_t       m_thread;         ///< pthread identifier 
 
     // scheduler
-    int         m_nPriority;          ///< thread OS scheduling priority
-    double      m_fHz;                ///< thread cycle run rate (Hertz)
-    double      m_fTExec;             ///< task execution cycle period (seconds)
-    time::Time  m_tExecPeriod;        ///< task execution period (converted)
-    time::Time  m_tSched;             ///< working scheduler time
-    time::Time  m_tExecLastTimeStamp; ///< start of last execution time stamp
-    time::Time  m_tExecThisTimeStamp; ///< start of this execution time stamp
-    int         m_nSlipErrCnt;        ///< slipped error count leaky bucket
+    int           m_nPriority;          ///< thread OS scheduling priority
+    double        m_fHz;                ///< thread cycle run rate (Hertz)
+    double        m_fTExec;             ///< task execution cycle period (sec)
+    chronos::Time m_tExecPeriod;        ///< task execution period (converted)
+    chronos::Time m_tSched;             ///< working scheduler time
+    chronos::Time m_tExecLastTimeStamp; ///< start of last execution time stamp
+    chronos::Time m_tExecThisTimeStamp; ///< start of this execution time stamp
+    int           m_nSlipErrCnt;        ///< slipped error count leaky bucket
 
     /*!
      * \brief Lock the \h_i2c bus.

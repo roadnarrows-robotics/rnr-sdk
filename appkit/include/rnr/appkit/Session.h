@@ -66,6 +66,9 @@
 #include "rnr/appkit/State.h"
 #include "rnr/appkit/StateMach.h"
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   //----------------------------------------------------------------------------

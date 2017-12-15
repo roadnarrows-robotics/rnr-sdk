@@ -75,8 +75,8 @@
 
 using namespace std;
 using namespace rnr;
-using namespace rnr::time;
-//using rnr::time::operator<<;
+using namespace rnr::chronos;
+//using rnr::chronos::operator<<;
 
 static timespec       notime = {0, 0};
 static LogBook::Entry noentry;

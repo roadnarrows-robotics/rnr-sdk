@@ -66,8 +66,14 @@
 #include <sstream>
 #include <string>
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
+  /*!
+   * \brief Input/Output
+   */
   namespace io
   {
     /*!

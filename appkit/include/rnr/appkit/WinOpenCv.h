@@ -64,9 +64,9 @@
 
 #include "opencv2/core/core.hpp"
 
-//
-// Windowing Declarations
-//
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   /*

@@ -63,9 +63,9 @@
 
 #include "rnr/appkit/Win.h"
 
-//
-// RoadNarrows Robotics Windowing Declarations
-//
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   //...........................................................................

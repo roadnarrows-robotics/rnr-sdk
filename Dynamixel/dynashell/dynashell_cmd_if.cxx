@@ -886,7 +886,7 @@ public:
 
       if( pComm == NULL )
       {
-        return;
+        continue;
       }
 
       for(nServoId=DYNA_ID_MIN, cnt=0; nServoId<DYNA_ID_NUMOF; ++nServoId)

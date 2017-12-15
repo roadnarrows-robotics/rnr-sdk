@@ -72,7 +72,7 @@
 #include "rnr/log.h"
 
 /*!
- * \brief RoadNarrows Robotics Namespace
+ * \brief RoadNarrows Robotics
  */
 namespace rnr
 {

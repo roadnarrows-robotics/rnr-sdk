@@ -401,7 +401,7 @@ namespace laelaps
     bool      m_bAuxPort5vEn;       ///< 5 volt auxilliary port enable
     
     // uptimes
-    rnr::Time m_timeMotorCtlrs;     ///< motor controller up time
+    rnr::chronos::Time  m_timeMotorCtlrs; ///< motor controller up time
 
     // mutual exclusion
     pthread_mutex_t m_mutex;  ///< mutex

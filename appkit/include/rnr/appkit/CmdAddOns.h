@@ -75,8 +75,14 @@
  */
 namespace rnr
 {
+  /*!
+   * \brief Commands
+   */
   namespace cmd
   {
+    /*!
+     * \brief Add-Ons
+     */
     namespace addons
     {
       //------------------------------------------------------------------------

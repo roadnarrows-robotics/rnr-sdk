@@ -1,0 +1,95 @@
+A. LaeRobot::connect()
+======================
+ 1. check description
+ 2. sync db
+ 3. load laelaps_tune.xml
+ 4. m_i2cBus.open(/dev/i2c-3) [/dev/i2c-sensors --> /dev/i2c-3]
+ 5. connect to sensors
+    a. m_imu.open(/dev/imu) (/dev/imu --> /dev/bus/usb/...) {E}
+    b. m_imu.readIdentity()
+    c. m_range.getInterfaceVersion()
+ 5. connect to watchdog sub-processor
+    a. m_watchdog.cmdGetFwVersion(vernum)
+    b. m_watchdog.sync() {C}
+ 6. connect to motor controllers sub-processors
+    a. m_kin.open(/dev/ttySAC0) [/dev/motorctlrs --> /dev/ttySAC0] {D}
+ 7. config for operation
+    a. m_watchdog.configure(desc) NOOP
+    a. m_watchdog.configure(tunes) {K}
+    b. m_kin.configure(desc) {G}
+    c. m_kin.configure(tunes) {H}
+    d. m_imu.configure(desc) NOOP
+    d. m_imu.configure(tunes) NOOP
+    e. m_range.configure(desc) {F}
+    e. m_range.configure(tunes) {I}
+ 8. create and start core threads
+    a. watchdog thread {J}
+    b. range thread {J}
+    c. imu thread {J}
+    d. kinodynamics thread {J}
+
+B. LaeRobot::reload()
+=====================
+1. load laelaps_tune.xml
+2. m_threadKin.reload(tunes)
+    a. retune hz
+    b. hwif.reload(tunes)
+3. m_threadImu.reload(tunes)
+    a. retune hz
+    b. hwif.reload(tunes)
+3. m_threadRange.reload(tunes)
+    a. retune hz
+    b. hwif.reload(tunes)
+4. m_threadWatchDog.reload(tunes)
+    a. retune hz
+    b. hwif.reload(tunes)
+
+C. LaeWd::sync()
+================
+ 1. get fw version
+ 2. disable motor controllers
+ 3. enable 5V aux port
+ 4. enable battery aux port
+ 5. read jack-in and battery-out voltages
+ 6. set battery soc to 100%
+ 7. clear alarms
+ 8. reset user rgb led control
+ 9. configure watchdog timeout to default
+10. pet the dog
+
+D. LaeKinematics::open()
+========================
+1. enable motor controllers (via watchdog)
+2. open serial connection to motor controllers
+3. create roboclaw objects
+
+E. LaeImu::open()
+=================
+1. open usb serial
+2. zero imu data m_imu.zeroData()
+
+F. LaeRangeMux::configure(desc)
+===============================
+1. get fw version
+2. populate tof's from desc
+3. get tof tune registers
+
+G. LaeKinematics::configure(desc)
+=================================
+1. configure power trains m_kinPowertrains[]
+2. m_kinPlatform.configure(desc)
+
+H. LaeKinematics::configure(tunes)
+==================================
+1. configureMotorControllers(tunes)
+2. m_kinPlatform.configure(tunes)
+
+I. LaeRangeMux::configure(tunes)
+================================
+1. if diff, tune tof
+2. if diff, tune als
+
+J. LaeRobot::startThread(pThread)
+==========================
+1.  pthread->createThread(dft_prio)
+2.  pthread->runThread(tune_hz)

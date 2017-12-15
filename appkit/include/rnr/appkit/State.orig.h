@@ -63,6 +63,9 @@
 #include "rnr/win.h"
 #include "rnr/Session.h"
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   // class StateMach

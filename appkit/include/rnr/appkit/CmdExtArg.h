@@ -67,10 +67,13 @@
 #include "rnr/appkit/LogBook.h"
 
 /*!
- * \brief RoadNarrows Robotics Command
+ * \brief RoadNarrows Robotics
  */
 namespace rnr
-{
+{ 
+  /*!
+   * \brief Commands
+   */
   namespace cmd
   {
 

@@ -64,6 +64,9 @@
 #include "rnr/rnrconfig.h"
 
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   /*! XML declaration fixed string */

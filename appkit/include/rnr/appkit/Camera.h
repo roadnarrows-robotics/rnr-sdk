@@ -68,6 +68,9 @@
 #include "econ/econ32.h"
 #endif // CAM_USE_ECAM_IMPL
 
+/*!
+ * \brief RoadNarrows Robotics
+ */
 namespace rnr
 {
   /*!

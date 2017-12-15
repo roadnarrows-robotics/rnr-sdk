@@ -48,7 +48,7 @@
 
 using namespace std;
 using namespace rnr;
-using namespace rnr::time;
+using namespace rnr::chronos;
 
 
 ostream &operator<<(ostream &os, const timespec &obj)
@@ -65,7 +65,7 @@ ostream &operator<<(ostream &os, const timespec &obj)
 
 namespace rnr
 {
-  namespace time
+  namespace chronos
   {
     timespec now()
     {
@@ -120,7 +120,7 @@ namespace rnr
       ts.tv_sec  = a.tv_sec  + b.tv_sec;
       ts.tv_nsec = a.tv_nsec + b.tv_nsec;
     
-      return rnr::time::normalize(ts);
+      return rnr::chronos::normalize(ts);
     }
     
     timespec sub(const timespec &a, const timespec &b)
@@ -130,7 +130,7 @@ namespace rnr
       ts.tv_sec  = a.tv_sec  - b.tv_sec;
       ts.tv_nsec = a.tv_nsec - b.tv_nsec;
     
-      return rnr::time::normalize(ts);
+      return rnr::chronos::normalize(ts);
     }
     
     timespec normalize(const timespec &a)
@@ -151,7 +151,7 @@ namespace rnr
     
       return ts;
     }
-  } // namespace time
+  } // namespace chronos
 } // namesapce rnr
 
 
@@ -167,13 +167,13 @@ Time::Time()
 Time::Time(const timespec &ts)
 {
   m_tsTime  = ts;
-  m_fpTime  = time::toFp(m_tsTime);
+  m_fpTime  = chronos::toFp(m_tsTime);
 }
 
 Time::Time(const double &t)
 {
   m_fpTime  = t;
-  m_tsTime  = time::toTs(m_fpTime);
+  m_tsTime  = chronos::toTs(m_fpTime);
 }
 
 Time::Time(const Time &src)
@@ -184,7 +184,7 @@ Time::Time(const Time &src)
 
 void Time::clear()
 {
-  time::clear(m_tsTime);
+  chronos::clear(m_tsTime);
   m_fpTime = 0.0;
 }
 
@@ -199,23 +199,23 @@ double Time::getResolution()
 
   if( clock_getres(CLOCK_REALTIME, &res) < 0 )
   {
-    time::clear(res);
+    chronos::clear(res);
   }
 
-  return time::toFp(res);
+  return chronos::toFp(res);
 }
 
 double Time::now()
 {
-  timespec  ts = time::now();
+  timespec  ts = chronos::now();
 
-  return time::toFp(ts);
+  return chronos::toFp(ts);
 }
 
 double Time::markNow()
 {
-  time::now(m_tsTime);
-  m_fpTime = time::toFp(m_tsTime);
+  chronos::now(m_tsTime);
+  m_fpTime = chronos::toFp(m_tsTime);
   return m_fpTime;
 }
 
@@ -234,28 +234,28 @@ Time &Time::operator=(const Time &b)
 Time &Time::operator=(const timespec &b)
 {
   m_tsTime = b;
-  m_fpTime = time::toFp(m_tsTime);
+  m_fpTime = chronos::toFp(m_tsTime);
   return *this;
 }
 
 Time &Time::operator=(const double &b)
 {
   m_fpTime = b;
-  m_tsTime = time::toTs(m_fpTime);
+  m_tsTime = chronos::toTs(m_fpTime);
   return *this;
 }
 
 Time &Time::operator+=(const Time &b)
 {
-  m_tsTime = time::add(m_tsTime, b.m_tsTime);
-  m_fpTime = time::toFp(m_tsTime);
+  m_tsTime = chronos::add(m_tsTime, b.m_tsTime);
+  m_fpTime = chronos::toFp(m_tsTime);
   return *this;
 }
 
 Time &Time::operator+=(const timespec &b)
 {
-  m_tsTime = time::add(m_tsTime, b);
-  m_fpTime = time::toFp(m_tsTime);
+  m_tsTime = chronos::add(m_tsTime, b);
+  m_fpTime = chronos::toFp(m_tsTime);
   return *this;
 }
 
@@ -268,29 +268,29 @@ Time &Time::operator+=(const double &b)
 
 Time &Time::operator-=(const Time &b)
 {
-  m_tsTime = time::sub(m_tsTime, b.m_tsTime);
-  m_fpTime = time::toFp(m_tsTime);
+  m_tsTime = chronos::sub(m_tsTime, b.m_tsTime);
+  m_fpTime = chronos::toFp(m_tsTime);
   return *this;
 }
 
 Time &Time::operator-=(const timespec &b)
 {
-  m_tsTime = time::sub(m_tsTime, b);
-  m_fpTime = time::toFp(m_tsTime);
+  m_tsTime = chronos::sub(m_tsTime, b);
+  m_fpTime = chronos::toFp(m_tsTime);
   return *this;
 }
 
 Time &Time::operator-=(const double &b)
 {
   m_fpTime -= b;
-  m_tsTime  = time::toTs(m_fpTime);
+  m_tsTime  = chronos::toTs(m_fpTime);
   return *this;
 }
 
 Time &Time::operator*=(const double &b)
 {
   m_fpTime *= b;
-  m_tsTime  = time::toTs(m_fpTime);
+  m_tsTime  = chronos::toTs(m_fpTime);
   return *this;
 }
 
@@ -378,7 +378,7 @@ std::string Time::calendarTime(const int resSec) const
   }
 }
 
-ostream &rnr::time::operator<<(ostream &os, const Time &obj)
+ostream &rnr::chronos::operator<<(ostream &os, const Time &obj)
 {
   os << obj.m_tsTime;
   return os;

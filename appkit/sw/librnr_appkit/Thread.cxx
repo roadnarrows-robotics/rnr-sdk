@@ -41,7 +41,7 @@
 
 using namespace std;
 using namespace rnr;
-using namespace rnr::time;
+using namespace rnr::chronos;
 
 
 // ---------------------------------------------------------------------------
