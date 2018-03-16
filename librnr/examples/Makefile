@@ -18,7 +18,7 @@ RN Make System Specific Makefile
 \author: Robin Knight (robin.knight@roadnarrows.com)
 
  * \copyright
- *   \h_copy 2005-2017. RoadNarrows LLC.\n
+ *   \h_copy 2005-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
 
@@ -56,7 +56,7 @@ endif
 # Required
 
 # Package Root Directory
-pkgroot		= ..
+RNMAKE_PKG_ROOT	= ..
 
 #------------------------------------------------------------------------------
 # Programs
@@ -123,15 +123,26 @@ example_shm.SRC.C = example_shm.c
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"logexample\"" -DLOGMOD_COLOR=LOG_COLOR_BLUE
 
 #------------------------------------------------------------------------------
-# Make Includes
+# Include rnmake rules
 
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
+# 'make rnmake=<path> ...' or RNMAKE_ROOT
+rnmake ?= $(RNMAKE_ROOT)
+
+# must be defined and non-empty
+ifeq ($(rnmake),)
+  $(error 'RNMAKE_ROOT' environment variable not specified)
 endif
 
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
+# make absolute filename (empty string returned if file does not exist)
+RNMAKE_RULES := $(realpath $(rnmake)/Rules.mk)
+
+# file required
+ifeq ($(RNMAKE_RULES),)
+  $(error 'RNMAKE_ROOT=$(rnmake)/Rules.mk': No such file)
+endif
+
+# include rnmake top-level rules makefile
+include $(RNMAKE_RULES)
 
 
 ifdef RNMAKE_DOXY

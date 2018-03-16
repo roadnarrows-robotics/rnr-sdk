@@ -16,7 +16,7 @@ ifdef RNMAKE_DOXY
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2005-2017. RoadNarrows LLC.\n
+ *   \h_copy 2005-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  *

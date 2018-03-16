@@ -16,7 +16,7 @@ ifdef RNMAKE_DOXY
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2005-2017. RoadNarrows LLC.\n
+ *   \h_copy 2005-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  *
@@ -58,7 +58,7 @@ endif
 # Required
 
 # Package Root Directory
-pkgroot		= .
+RNMAKE_PKG_ROOT		= .
 
 
 #------------------------------------------------------------------------------
@@ -110,9 +110,6 @@ DIST_HDRS	= rnr
 #
 # Format: <tag>.HDRS.H = [<subdirs>/]<hdr>.h ...
 #
-# Note: Any header file that requires distribution is expected to be in 
-# 			$(pkgroot)/include. Otherwise, is it really a deliverable header?
-#
 rnr.HDRS.H =	rnr/assoc.h \
 							rnr/char.h \
 							rnr/checksum.h \
@@ -143,7 +140,7 @@ rnr.HDRS.H =	rnr/assoc.h \
 DOC_SUBDIR				=
 
 # Sub[Package] Doxygen Configuration File
-DOXY_CONF_FILE		= $(pkgroot)/make/doxy.conf
+DOXY_CONF_FILE		= $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
 #------------------------------------------------------------------------------
 # Optional Variables 
@@ -158,32 +155,27 @@ EXTRA_TGT_ALL_POST = all-post
 
 
 #------------------------------------------------------------------------------
-# Include RN Make Rules
+# Include rnmake rules
 
-# RDK NEW FORM
-# make rnmake=dir ... command-line override
-#ifdef rnmake
-#	RNMAKE=$(rnmake)
-#endif
-#
-# environment 
-#ifndef RNMAKE
-#  $(error Error: RNMAKE environment variable not specified.)
-#endif
-#
-#export RNMAKE := $(realpath $(RNMAKE))
-#
-# Include Top-Level Rules Makefile
-#include $(RNMAKE)/Rules.mk
+# 'make rnmake=<path> ...' or RNMAKE_ROOT
+rnmake ?= $(RNMAKE_ROOT)
 
-# RDK OLD FORM
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
+# must be defined and non-empty
+ifeq ($(rnmake),)
+  $(error 'RNMAKE_ROOT' environment variable not specified)
 endif
 
-# Include Top-Level Rules Makefile
-include $(rnmake)/Rules.mk
+# make absolute filename (empty string returned if file does not exist)
+RNMAKE_RULES := $(realpath $(rnmake)/Rules.mk)
+
+# file required
+ifeq ($(RNMAKE_RULES),)
+  $(error 'RNMAKE_ROOT=$(rnmake)/Rules.mk': No such file)
+endif
+
+# include rnmake top-level rules makefile
+include $(RNMAKE_RULES)
+
 
 #------------------------------------------------------------------------------
 # Extras
@@ -194,7 +186,7 @@ ETC_FILES	=	share/etc/*.xml \
 
 LIB_FILES = share/lib/cmake/rnr/rnr-sdk-config.cmake
 
-PKGDIR_SHARE := $(pkgroot)/share
+PKGDIR_SHARE := $(RNMAKE_PKG_ROOT)/share
 
 #
 # Template to copy files from source to destination directory.
@@ -205,7 +197,7 @@ define copyfiles_template
 	@if [ "$(1)" != "" ]; \
 	then \
 		b=$(notdir $(2)); \
-		flist="$(wildcard $(addprefix $(pkgroot)/,$(1)))"; \
+		flist="$(wildcard $(addprefix $(RNMAKE_PKG_ROOT)/,$(1)))"; \
 		for f in $${flist}; \
 		do \
 			tgt=$(2)$${f##*$$b}; \

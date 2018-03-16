@@ -54,13 +54,10 @@ The rnmake system inclusion order:
 \todo
 1. Add make check target
 
-$LastChangedDate: 2016-02-03 12:51:32 -0700 (Wed, 03 Feb 2016) $
-$Rev: 4301 $
-
 \author Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-(C) 2005-2016.  RoadNarrows LLC.
+(C) 2005-2018.  RoadNarrows LLC.
 (http://www.roadnarrows.com)
 \n All Rights Reserved
 
@@ -96,38 +93,45 @@ endif
 
 #------------------------------------------------------------------------------
 # Prelims
-ifeq "$(MAKECMDGOALS)" ""
-	GOAL	= all
-else
-	GOAL = $(firstword $(MAKECMDGOALS))
+
+# this makefile is last in the list (must call before any includes in this)
+RNMAKE_ROOT = $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+
+.DEFAULT_GOAL := all
+#ifeq "$(MAKECMDGOALS)" ""
+#	GOAL	= all
+#else
+#	GOAL = $(firstword $(MAKECMDGOALS))
+#endif
+
+#------------------------------------------------------------------------------
+# Print Help and exit.
+#
+# Test if any of the make goals contain a "help" substring. If true, 'make' the
+# help makefile and exit.
+ifeq "$(findstring help,$(MAKECMDGOALS))" "help"
+	include $(RNMAKE_ROOT)/Help.mk
 endif
 
 #------------------------------------------------------------------------------
-# Print Help and Quit
-# Note: First make goal is tested for the substring 'help*'. If matched, then
-# include the help make file which should catch the help[-<subhelp>] target.
-ifeq "$(findstring help,$(GOAL))" "help"
-ifndef rnmake
-rnmake = $(dir $(lastword $(MAKEFILE_LIST)))
-endif
-include $(rnmake)/Help.mk
-endif
+# Environment
+#
+# Parse rnmake specific command-line and environment variables and validate.
+include $(RNMAKE_ROOT)/Env.mk
 
-# Default command-line architecture, if not specified
-ifndef arch
-ifdef RNMAKE_ARCH_DFT
-	  arch=$(RNMAKE_ARCH_DFT)
-else
-    arch = x86_64
-endif
-endif
+#ifndef arch
+#ifdef RNMAKE_ARCH_DFT
+#	  arch = $(RNMAKE_ARCH_DFT)
+#else
+#    arch = x86_64
+#endif
+#endif
 
 #------------------------------------------------------------------------------
 # Compile and run unit tests.
 # Note: First make goal is tested for the substring 'test*'. If matched, then
 # include the test make file which should catch the test[-<subtest>] target.
 include $(rnmake)/Test.mk
-
 
 
 #------------------------------------------------------------------------------
@@ -140,9 +144,11 @@ include $(rnmake)/Test.mk
 #
 # Including Makefile must define package root prior to including Rules.mk
 #
-ifndef pkgroot
-$(error Error: pkgroot: not defined in including Makefile)
+ifndef RNMAKE_PKG_ROOT
+$(error Error: RNMAKE_PKG_ROOT: not defined in including Makefile)
 endif
+
+pkgroot = $(RNMAKE_PKG_ROOT)
 
 # topdir 		- specifies the product/project top directory.
 #
@@ -204,28 +210,19 @@ endif
 # -------------------------------------------------------------------------
 # Architecture Dependent Definitions
 
-# Standard rules does not support the following targets.
+# Standard rules do not support the following targets.
 ifneq "$(findstring $(arch),atmega16)" ""
 $(error Error: Rules.mk does not support $(arch) rules)
 endif
 
-# architecture make file name
+# Architecture make file name
 ARCH_MKFILE = $(rnmake)/Arch/Arch.$(arch).mk
 
-# check to see if architecture file exists
+# Check to see if architecture file exists
 hasArch := $(shell if [ -f $(ARCH_MKFILE) ]; then echo "true"; fi)
 ifndef hasArch
 $(error Error: Unknown architecture: $(arch). See $(rnmake)/Arch/Arch.<arch>.mk)
 endif
-
-# supported architectures - default is all architectures
-# RDK No way to exit submake without aborting calling make 
-#ifdef ARCH_SUPPORTED
-#supArch := $(findstring $(arch),$(ARCH_SUPPORTED))
-#ifndef supArch
-#$(shell $(MAKE) -f $(rnmake)/null.mk --stop arch=$(arch) null 1>&2)
-#endif
-#endif
 
 # include the architecture make file
 include $(ARCH_MKFILE)

@@ -59,7 +59,7 @@ help: help-usage help-arch help-targets help-install help-tarballs \
 			help-dpkg help-other help-help
 
 help-usage:
-	@echo ""
+	@echo " + Synopsis ($@)"
 	@echo "usage: make [arch=<arch>] [color=<scheme>] [MAKEARGS] [target]"
 	@echo "        <arch>   - <rnmake>/arch/Arch.<arch>.mk architecture make file."
 	@echo "        <scheme> - Color scheme. Default: default, off=no color, ..."
@@ -67,12 +67,12 @@ help-usage:
 
 help-arch:
 	@echo ""
-	@echo " Supported Target Platform Architectures:"
-	@echo $(archlist)
+	@echo " + Supported Target Platform Architectures ($@)"
+	@echo $(sort $(archlist))
 
 help-targets:
 	@echo ""
-	@echo " Standard Targets:"
+	@echo " + Standard Targets ($@)"
 	@echo "all            - (default) makes the distribution [sub]package(s)"
 	@echo "subdirs        - makes all subdirectories from current directory"
 	@echo "<subdir>       - makes subdirectory <subdir> from current directory"
@@ -89,7 +89,7 @@ help-targets:
 
 help-install:
 	@echo ""
-	@echo " Install Specific Targets:"
+	@echo " + Install Specific Targets ($@)"
 	@echo "install          - installs package distribution files"
 	@echo "install-bin      - installs package distribution executables"
 	@echo "install-lib      - installs package distribution libraries"
@@ -100,7 +100,7 @@ help-install:
 
 help-tarballs:
 	@echo ""
-	@echo " Tarball Specific Targets:"
+	@echo " + Tarball Specific Targets ($@)"
 	@echo "tarballs       - makes package binary, source, and documentation tarballs"
 	@echo "tarball-bin    - makes package executables tarball"
 	@echo "tarball-doc    - makes documentation tarball"
@@ -108,7 +108,7 @@ help-tarballs:
 
 help-dpkg:
 	@echo ""
-	@echo " Debian Package Specific Targets:"
+	@echo " + Debian Package Specific Targets ($@)"
 	@echo "deb-pkgs       - makes all debian packages for an architecture"
 	@echo "deb-pkg-dev    - makes debian development package"
 	@echo "deb-pkg-src    - makes debian source package"
@@ -116,13 +116,13 @@ help-dpkg:
 
 help-other:
 	@echo ""
-	@echo " Other Targets:"
+	@echo " + Other Targets ($@)"
 	@echo "<src>.o        - makes object from <src>.{c|cxx}"
 	@echo "<src>.ii       - makes post CPP processed source from <src>.{c|cxx}"
 
 help-help:
 	@echo ""
-	@echo " Help Targets:"
+	@echo " + Help Targets ($@)"
 	@echo "help           - prints full rnmake help"
 	@echo "help-usage     - prints rnmake usage"
 	@echo "help-arch      - prints list of rnmake supported architectures"
