@@ -8,51 +8,9 @@ ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief Master file for defining rules for make targets, variables,
-       and macros.
+\brief Master file for defining rules for make targets, variables, and macros.
 
-Include this file into each local make file (usually at the bottom).\n
-
-The rnmake system inclusion order:
-\termblock
-\term 1.
-  \termdata Makefile \termdata \h_leftdblarrow
-  \termdata \$(rnmake)/Rules.mk
-  \termdata Local make file includes toplevel rnmake rules file.
-\endterm
-\term 2.
-  \termdata Rules.mk \termdata \h_leftdblarrow
-  \termdata \$(pkgroot)/../make/Prod.mk
-  \termdata Optional local product make file.\n
-            Override location by defining <em>prod_mk</em>.
-\endterm
-\term 3.
-  \termdata Rules.mk \termdata \h_leftdblarrow
-  \termdata \$(pkgroot)/make/Pkg.mk
-  \termdata Required local package make file.\n
-            Override location by defining <em>pkg_mk</em>.
-\endterm
-\term 4.
-  \termdata Rules.mk \termdata \h_leftdblarrow
-  \termdata \$(rnmake)/Arch/Arch.<em>arch</em>.mk
-  \termdata Appropriate architecture make file defining target
-            native/cross-compile tools chains and libraries.\n
-						Defined on the command-line as arch=<em>arch</em>\n
-            Default: <b>RNMAKE_ARCH_DFT</b> if defined, else "x86_64"
-\endterm
-\term 5.
-  \termdata Rules.mk \termdata \h_leftdblarrow
-  \termdata \ref Cmds.mk "\$(rnmake)/Cmds.mk"
-  \termdata Build host basic support commands.
-\endterm
-\endtermblock
-
-\par Usage:
-	make [arch=<em>arch</em>] [color=scheme] [<em>target</em> ...]\n
-  See 'make help' for more details.
-          
-\todo
-1. Add make check target
+Include this file into each local make file (usually at the bottom).
 
 \author Robin Knight (robin.knight@roadnarrows.com)
 
@@ -91,230 +49,193 @@ endif
 #
 ################################################################################
 
+export _RULES_MK = 1
+
 #------------------------------------------------------------------------------
 # Prelims
 
-# this makefile is last in the list (must call before any includes in this)
+# this makefile is last in the list (must call before any includes from this)
 RNMAKE_ROOT = $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
+# default goal
 .DEFAULT_GOAL := all
-#ifeq "$(MAKECMDGOALS)" ""
-#	GOAL	= all
-#else
-#	GOAL = $(firstword $(MAKECMDGOALS))
-#endif
 
-#------------------------------------------------------------------------------
-# Print Help and exit.
-#
-# Test if any of the make goals contain a "help" substring. If true, 'make' the
-# help makefile and exit.
-ifeq "$(findstring help,$(MAKECMDGOALS))" "help"
-	include $(RNMAKE_ROOT)/Help.mk
+# list of command-line goals
+GOAL_LIST = $(MAKECMDGOALS)
+
+# add default if empty
+ifeq "$(GOAL_LIST)" ""
+  GOAL_LIST = $(.DEFAULT_GOAL)
 endif
 
-#------------------------------------------------------------------------------
-# Environment
+# set first, last, and major goals
+FIRST_GOAL	= $(firstword $(GOAL_LIST))
+LAST_GOAL 	= $(lastword $(GOAL_LIST))
+
+# list of goals with subdirectory traversals
+GOALS_WITH_SUBDIRS = 
+
+# Find goal patterns in command-line goal list. Returns whitespace separated
+# matched goals or empty string.
 #
-# Parse rnmake specific command-line and environment variables and validate.
+# Usage: $(call fnFindGoals,goalpattern...)
+define fnFindGoals
+$(filter $(1),$(GOAL_LIST))
+endef
+
+# Conditionally include makefile if one of the goal patterns matches the
+# command-line goal list.
+#
+# Usage: $(call fnGoalInclude,goalpattern...,makefile)
+define fnGoalInclude
+$(if $(call fnFindGoals,$(1)),$(eval include $(2)))
+endef
+
+
+#------------------------------------------------------------------------------
+# Environment (Env.mk)
+#
+# Parse rnmake specific command-line and environment variables.
+
 include $(RNMAKE_ROOT)/Env.mk
 
-#ifndef arch
-#ifdef RNMAKE_ARCH_DFT
-#	  arch = $(RNMAKE_ARCH_DFT)
-#else
-#    arch = x86_64
-#endif
-#endif
 
 #------------------------------------------------------------------------------
-# Compile and run unit tests.
-# Note: First make goal is tested for the substring 'test*'. If matched, then
-# include the test make file which should catch the test[-<subtest>] target.
-include $(rnmake)/Test.mk
+# Print help (Help.mk)
+#
+# Check if any of the make goals contain help goals. If true, include the
+# help makefile, which defines the help[-<subhelp>] rules.
+
+$(call fnGoalInclude,help help-%,$(RNMAKE_ROOT)/Help.mk)
 
 
 #------------------------------------------------------------------------------
-# Tweaks
-# 
-# See also the standard prefix, ... parameters
+# Compile and run unit tests (Rules.test.mk)
+#
+# Check if any of the make goals contain test goals. If true, include the
+# test makefile, which defines the [run-]test rules.
 
-#
-# pkgroot		- specifies package root directory
-#
-# Including Makefile must define package root prior to including Rules.mk
-#
-ifndef RNMAKE_PKG_ROOT
-$(error Error: RNMAKE_PKG_ROOT: not defined in including Makefile)
-endif
+$(call fnGoalInclude,test run-test,$(RNMAKE_ROOT)/Rules.test.mk)
 
-pkgroot = $(RNMAKE_PKG_ROOT)
 
-# topdir 		- specifies the product/project top directory.
+#------------------------------------------------------------------------------
+# Debian package builds (Ruls.dpkg.mk)
 #
-# For RoadNarrows developers, the default translates to /prj
-#
-ifndef topdir
-	topdir = $(realpath $(pkgroot)/../..)
-endif
+# Check if any of the make goals contain a debian package goals. If true,
+# include debian package makefile, which defines the deb-pkgs and deb-pkg-<type>
+# rules.
 
-# rnmake 		- specifies the	RN make system base directory
-#
-ifndef rnmake
-	rnmake = $(realpath $(pkgroot)/../rnmake)
-endif
-
-# distroot 	- specifies the root directory for the intermediary distribution
-# 						files
-#
-ifndef distroot
-	distroot = $(pkgroot)/dist
-endif
+$(call fnGoalInclude,deb-pkgs deb-pkg-%,$(RNMAKE_ROOT)/Rules.dpkg.mk)
 
 
 #------------------------------------------------------------------------------
 # Product Makefile (Optional)
-#
-ifdef prod_mk
-PROD_MKFILE = $(prod_mk)
-else
-PROD_MKFILE = $(pkgroot)/../make/Prod.mk
+
+ifdef RNMAKE_PROD_MKFILE
+  # optionally include (no error if not found)
+  -include $(RNMAKE_PROD_MKFILE)
 endif
-
-# optionally include
--include $(PROD_MKFILE)
-
 
 
 #------------------------------------------------------------------------------
-# Package Makefile
+# Package Makefile (required)
 #
-ifdef pkg_mk
-PKG_MKFILE = $(pkg_mk)
-else
-PKG_MKFILE = $(pkgroot)/make/Pkg.mk
+
+ifeq ($(RNMAKE_PKG_ROOT),)
+  $(error 'RNMAKE_PKG_ROOT': Not defined in including Makefile)
 endif
 
-include $(PKG_MKFILE)
+_x := $(realpath $(RNMAKE_PKG_ROOT))
 
-ifndef PKG
-$(error Error: PKG: not defined: specify in Pkg.mk)
+ifeq ($(_x),)
+	$(error 'RNMAKE_PKG_ROOT=$(RNMAKE_PKG_MKFILE)': Not a directory)
 endif
 
-# Package root absolute path name
-ifndef PKG_ROOT
-export PKG_ROOT := $(realpath $(CURDIR)/$(pkgroot))
+RNMAKE_PKG_ROOT := $(_x)
+
+RNMAKE_PKG_MKFILE = $(realpath $(RNMAKE_PKG_ROOT)/make/Pkg.mk)
+
+ifeq ($(RNMAKE_PKG_MKFILE),)
+	$(error 'RNMAKE_PKG_MKFILE=$(RNMAKE_PKG_ROOT)/make/Pkg.mk': No such file)
 endif
+
+# required
+include $(RNMAKE_PKG_MKFILE)
 
 
 # -------------------------------------------------------------------------
 # Architecture Dependent Definitions
 
-# Standard rules do not support the following targets.
-ifneq "$(findstring $(arch),atmega16)" ""
-$(error Error: Rules.mk does not support $(arch) rules)
+# Standard rnmake rules do not support the following targets.
+ifneq "$(findstring $(RNMAKE_ARCH_TAG),atmega16)" ""
+  $(error Rules.mk does not support $(arch) rules)
 endif
 
 # Architecture make file name
-ARCH_MKFILE = $(rnmake)/Arch/Arch.$(arch).mk
+RNMAKE_ARCH_MKFILE = $(RNMAKE_ROOT)/Arch/Arch.$(RNMAKE_ARCH_TAG).mk
 
-# Check to see if architecture file exists
-hasArch := $(shell if [ -f $(ARCH_MKFILE) ]; then echo "true"; fi)
-ifndef hasArch
-$(error Error: Unknown architecture: $(arch). See $(rnmake)/Arch/Arch.<arch>.mk)
+# Test if file exist (empty string returned if not).
+ifeq ($(realpath $(RNMAKE_ARCH_MKFILE)),)
+	$(error 'RNMAKE_ARCH_MKFILE=$(RNMAKE_ARCH_MKFILE)': Unknown architecture: See $(RNMAKE_ROOT)/Arch)
 endif
 
-# include the architecture make file
-include $(ARCH_MKFILE)
+# Include the architecture make file.
+include $(RNMAKE_ARCH_MKFILE)
 
-# Included architecture makefile must define ARCH which "overrides" the
-# command-line arch in the rules targets.
+# Included architecture makefile must define RNMAKE_ARCH which defines the
+# real architecture.
 #
-ifndef ARCH
-$(error Error: ARCH: not defined in including Makefile)
+ifeq ($(RNMAKE_ARCH),)
+  $(error 'RNMAKE_ARCH': not defined in including arhitecture makefile)
 endif
 
 
 #------------------------------------------------------------------------------
-# Include helper make files
-# Can conditionally define macros by architecuture definitions included
-# above.
+# Include helper make files (Cmds.mk, Colors.mk)
+#
+# Can conditionally define macros by architecuture definitions included above.
 #
 
 # basic host commands
-include $(rnmake)/Cmds.mk
+include $(RNMAKE_ROOT)/Cmds.mk
 
 # color schemes
 ifneq "$(color)" "off"
-include $(rnmake)/Colors.mk
+include $(RNMAKE_ROOT)/Colors.mk
 endif
 
 
 #------------------------------------------------------------------------------
 # Install Directories - Override as necessary in including Makefile.
-# See Also: Arch.<arch>.mk.
-# Note: These are traditional configuration names - keep the naming convention.
 #
-ifndef prefix
-prefix					= /usr/local
+# Note: These are traditional configuration names - keep the naming convention.
+
+prefix := $(RNMAKE_INSTALL_PREFIX)
+ifeq ($(prefix),)
+  prefix := $(RNMAKE_INSTALL_XPREFIX)/$(RNMAKE_ARCH)
 endif
 
-ifndef exec_prefix
-exec_prefix     = $(prefix)
-endif
-
-ifndef bindir
-bindir          = $(exec_prefix)/bin
-endif
-
-ifndef sbindir
-sbindir         = $(exec_prefix)/sbin
-endif
-
-ifndef libexecdir
-libexecdir      = $(exec_prefix)/libexec
-endif
-
-ifndef sysconfdir
-sysconfdir      = $(prefix)/etc
-endif
-
-ifndef localstatedir
-localstatedir   = $(prefix)/var
-endif
-
-ifndef libdir
-libdir          = $(exec_prefix)/lib
-endif
-
-ifndef includedir
-includedir      = $(prefix)/include
-endif
-
-ifndef sharedir
-sharedir        = $(prefix)/share
-endif
-
-ifndef infodir
-infodir         = $(prefix)/info
-endif
-
-ifndef docdir
-docdir          = $(prefix)/share/doc
-endif
-
-ifndef mandir
-mandir          = $(prefix)/man
-endif
+exec_prefix 	?= $(prefix)
+bindir     		?= $(exec_prefix)/bin
+sbindir 			?= $(exec_prefix)/sbin
+libexecdir 		?= $(exec_prefix)/libexec
+sysconfdir 		?= $(prefix)/etc
+localstatedir ?= $(prefix)/var
+libdir 				?= $(exec_prefix)/lib
+includedir 		?= $(prefix)/include
+sharedir 			?= $(prefix)/share
+infodir 			?= $(prefix)/info
+docdir 				?= $(prefix)/share/doc
+mandir 				?= $(prefix)/man
 
 
 #------------------------------------------------------------------------------
 # Distribution Directories (Architecture Dependent)
 # Notes:
 # 	Documents are architecture independent
-#
-DIST_ROOT				= $(distroot)
-DIST_ARCH       = $(DIST_ROOT)/dist.$(ARCH)
+
+DIST_ROOT				= $(RNMAKE_PKG_ROOT)/dist
+DIST_ARCH       = $(DIST_ROOT)/dist.$(RNMAKE_ARCH)
 
 # Product overrides - some tarballs contain files from all packages
 ifdef PROD_FULL_NAME
@@ -343,7 +264,8 @@ DISTDIR_MAN     = $(DIST_ARCH)/man
 DISTDIR_SHARE   = $(DIST_ARCH)/share/$(PKG_FULL_NAME)
 DISTDIR_DOC     = $(DIST_ARCH)/doc/$(PKG_FULL_NAME)-doc
 DISTDIR_SRC     = $(DIST_ARCH)/src/$(PKG_FULL_NAME)
-DISTDIR_TMP     = $(DIST_ARCH)/tmp/$(DIST_NAME_BIN)-$(ARCH)
+DISTDIR_REPO    = $(DIST_ARCH)/repo
+DISTDIR_TMP     = $(DIST_ARCH)/tmp/$(DIST_NAME_BIN)-$(RNMAKE_ARCH)
 DISTDIR_TMP_DEB	= $(DIST_ARCH)/tmp/deb
 DISTDIR_LIST    = $(DISTDIR_BIN) \
                   $(DISTDIR_INCLUDE) \
@@ -352,6 +274,7 @@ DISTDIR_LIST    = $(DISTDIR_BIN) \
                   $(DISTDIR_SHARE) \
                   $(DISTDIR_DOC) \
                   $(DISTDIR_SRC) \
+                  $(DISTDIR_REPO) \
                   $(DISTDIR_TMP) \
                   $(DISTDIR_TMP_DEB) \
                   $(DISTDIR_MAN)
@@ -364,18 +287,18 @@ DISTDIR_DOC_SRC_IMG	= $(DISTDIR_DOC_SRC)/images
 # tar ball files - source, documentation, binary
 DIST_TARBALL_SRC		= $(PKG_FULL_NAME)-src.tar.gz
 DIST_TARBALL_DOC		= $(PKG_FULL_NAME)-doc.tar.gz
-DIST_TARBALL_BIN		= $(DIST_NAME_BIN)-$(ARCH).tar.gz
+DIST_TARBALL_BIN		= $(DIST_NAME_BIN)-$(RNMAKE_ARCH).tar.gz
 
 
 #------------------------------------------------------------------------------
 # Local Directories (Architecture Dependent)
 #
 ifndef LOCDIR_ROOT
-LOCDIR_ROOT			= $(pkgroot)/loc
+LOCDIR_ROOT			= $(RNMAKE_PKG_ROOT)/loc
 endif
-LOCDIR_BIN			= $(LOCDIR_ROOT)/bin.$(ARCH)
-LOCDIR_LIB			= $(LOCDIR_ROOT)/lib.$(ARCH)
-LOCDIR_INCLUDE	= $(pkgroot)/include
+LOCDIR_BIN			= $(LOCDIR_ROOT)/bin.$(RNMAKE_ARCH)
+LOCDIR_LIB			= $(LOCDIR_ROOT)/lib.$(RNMAKE_ARCH)
+LOCDIR_INCLUDE	= $(RNMAKE_PKG_ROOT)/include
 LOCDIR_LIST			= $(LOCDIR_BIN) \
 									$(LOCDIR_LIB)
 
@@ -384,16 +307,16 @@ LOC_LD_LIBDIRS 	= $(LOCDIR_LIB)
 
 # Architecture dependent local include directory 
 # Note: Since developers can add files to this directory, never delete it.
-ARCH_INCDIR			= $(LOCDIR_INCLUDE)/arch/arch.$(ARCH)
+ARCH_INCDIR			= $(LOCDIR_INCLUDE)/arch/arch.$(RNMAKE_ARCH)
 
 # Object Directory
-OBJDIR					= obj/obj.$(ARCH)
+OBJDIR					= obj/obj.$(RNMAKE_ARCH)
 
 # Dependencies Directory
 DEPSDIR			= .deps
 
 # Dependencies File
-DEPSFILE				= $(DEPSDIR)/deps.$(ARCH)
+DEPSFILE				= $(DEPSDIR)/deps.$(RNMAKE_ARCH)
 
 
 #------------------------------------------------------------------------------
@@ -430,8 +353,8 @@ INCLUDES					= -I. \
 override CPPFLAGS		:= $(EXTRA_CPPFLAGS) \
 											$(PKG_CPPFLAGS) \
 											$(ARCH_CPPFLAGS) \
-											-DARCH_$(ARCH) \
-											-DARCH="\"$(ARCH)\"" \
+											-DARCH_$(RNMAKE_ARCH) \
+											-DARCH="\"$(RNMAKE_ARCH)\"" \
 											$(CPPFLAGS)
 
 # C Flags
@@ -484,7 +407,7 @@ SHLIBS					= $(DIST_SHLIBS)
 DLLIBS					= $(DIST_DLLIBS)
 
 # Add test targets
-ifeq "$(TEST)" "true"
+ifeq "$(RNMAKE_TEST)" "true"
 LOC_PGMS += $(TEST_PGMS)
 endif
 
@@ -546,19 +469,11 @@ FQ_REL_FILES 		= $(addprefix $(DISTDIR_DOC)/,$(REL_FILES))
 # Auto-Generated Header Files
 AUTOHDRS				= $(addprefix $(LOCDIR_INCLUDE)/,version.h)
 
-# deprecated		$(addprefix $(ARCH_INCDIR)/,install.h)
+# DEPRECATED		$(addprefix $(ARCH_INCDIR)/,install.h)
 
 #------------------------------------------------------------------------------
 # Target Specific Variables
 #
-
-CURGOAL 	= $(GOAL)
-all: 				CURGOAL := all
-deps: 			CURGOAL := deps
-install: 		CURGOAL := install
-clean: 			CURGOAL := clean
-distclean: 	CURGOAL := distclean
-clobber: 		CURGOAL := clobber
 
 # Shared library compiled objects need special CFLAGS (e.g. -fPIC)
 $(FQ_SHLIBS): CFLAGS += $(SHLIB_CFLAGS)
@@ -598,7 +513,7 @@ objs_from_src = $(addprefix $(OBJDIR)/,$(subst .c,.o,$($(1).SRC.C))) \
  								$(addprefix $(OBJDIR)/,$(subst .cpp,.o,$($(1).SRC.CPP))) \
  								$(addprefix $(OBJDIR)/,$(subst .cu,.o,$($(1).SRC.CU)))
 
-# Make obj/obj-<ARCH> in current directory
+# Make obj/obj-<RNMAKE_ARCH> in current directory
 mkobjdir = \
 	@test -d "$(OBJDIR)" || $(MKDIR) $(OBJDIR); \
 	test -d "$(dir $(1))" || test -z "$(dir $(1))" || $(MKDIR) "$(dir $(1))"
@@ -608,28 +523,29 @@ mkobjdir = \
 
 # -------------------------------------------------------------------------
 # Target:	all (default)
-# Desc: 	Front end to making the [sub]package(s) (libraries, programs, tools,
+# Desc: 	Front end for making the [sub]package(s) (libraries, programs, tools,
 # 				documents, etc).
 # Notes: 	There are two version:
 # 					1) only done once on the first invocation and 
 # 					2) for all other invocations.
-.PHONY: all onceall
-ifndef ONCE
-export ONCE = 1
-all: onceall $(EXTRA_TGT_ALL) pkg $(EXTRA_TGT_ALL_POST) footer
+.PHONY: all
+ifeq ($(MAKELEVEL),0)
+all: pkgbanner once-all $(EXTRA_TGT_ALL) pkg subdirs-all $(EXTRA_TGT_ALL_POST)
+	$(footer)
 else
-all: $(EXTRA_TGT_ALL) pkg $(EXTRA_TGT_ALL_POST)
+all: $(EXTRA_TGT_ALL) pkg subdirs-all $(EXTRA_TGT_ALL_POST)
 endif
 
-onceall: mkdistdirs mklocdirs pkgbanner autohdrs 
+.PHONY: once-all
+once-all: mkdistdirs mklocdirs autohdrs 
+
 
 # -------------------------------------------------------------------------
 # Target:	pkg
 # Desc: 	Makes the distribution [sub]package(s) (libraries, programs, tools, 
 # 				documents, etc).
 .PHONY: pkg
-pkg: libs pgms rel share subdirs
-# RDK pkg: libs pgms hdrs rel share subdirs
+pkg: libs pgms rel share
 
 
 # -------------------------------------------------------------------------
@@ -654,19 +570,19 @@ dllibs: $(FQ_DLLIBS)
 
 # Make specific distribution static librarary
 .PHONY: $(DIST_STLIBS)
-$(DIST_STLIBS): $(call fq_stlib_names,$(DISTDIR_LIB),$(MAKECMDGOALS))
+$(DIST_STLIBS): $(call fq_stlib_names,$(DISTDIR_LIB),$(GOAL_LIST))
 
 # Make specific distribution shared librarary
 .PHONY: $(DIST_SHLIBS)
-$(DIST_SHLIBS): $(call fq_shlib_names,$(DISTDIR_LIB),$(MAKECMDGOALS))
+$(DIST_SHLIBS): $(call fq_shlib_names,$(DISTDIR_LIB),$(GOAL_LIST))
 
 # Make specific distribution dll librarary
 .PHONY: $(DIST_DLLIBS)
-$(DIST_DLLIBS): $(call fq_dllib_names,$(DISTDIR_LIB),$(MAKECMDGOALS))
+$(DIST_DLLIBS): $(call fq_dllib_names,$(DISTDIR_LIB),$(GOAL_LIST))
 
 # Make specific local static librarary
 .PHONY: $(LOC_STLIBS)
-$(LOC_STLIBS): $(call fq_stlib_names,$(LOCDIR_LIB),$(MAKECMDGOALS))
+$(LOC_STLIBS): $(call fq_stlib_names,$(LOCDIR_LIB),$(GOAL_LIST))
 
 # Template to build a static library including all necessary prerequisites
 define STLIBtemplate
@@ -724,16 +640,16 @@ pgms: $(FQ_PGMS)
 
 # Make specific local program
 .PHONY: $(LOC_PGMS)
-$(LOC_PGMS): $(call fq_pgm_names,$(LOCDIR_BIN),$(MAKECMDGOALS))
+$(LOC_PGMS): $(call fq_pgm_names,$(LOCDIR_BIN),$(GOAL_LIST))
 
 # Make specific distribution program
 .PHONY: $(DIST_PGMS)
-$(DIST_PGMS): $(call fq_pgm_names,$(DISTDIR_BIN),$(MAKECMDGOALS))
+$(DIST_PGMS): $(call fq_pgm_names,$(DISTDIR_BIN),$(GOAL_LIST))
 
 # Template to build a program including all necessary prerequisites
 define PGMtemplate
  $(1).OBJS  = $(call objs_from_src,$(1))
- $(1).LIBDEPS  = $(shell $(rnmake)/utils/libdeps.sh $(LIBS_VPATH) $($(1).LIBDEPS))
+ $(1).LIBDEPS  = $(shell $(RNMAKE_ROOT)/utils/libdeps.sh $(LIBS_VPATH) $($(1).LIBDEPS))
  $(1).LIBS := $(addprefix -l, $($(1).LIBS))
  $(1).FQ_PGM = $(call fq_pgm_names,$(2),$(1))
  $$($(1).FQ_PGM): $$($(1).OBJS) $$($(1).LIBDEPS)
@@ -758,29 +674,30 @@ $(foreach prog,$(DIST_PGMS),$(eval $(call PGMtemplate,$(prog),$(DISTDIR_BIN))))
 #  	      May make a shell script to do this.
 autohdrs: $(AUTOHDRS)
 
-$(LOCDIR_INCLUDE)/version.h: $(PKG_MKFILE)
+# verion.h auto-generated header
+$(LOCDIR_INCLUDE)/version.h: $(RNMAKE_PKG_MKFILE)
+	$(printgoal)
 	@test -d $(LOCDIR_INCLUDE) || $(MKDIR) $(LOCDIR_INCLUDE)
-	@$(MAKE) -f $(rnmake)/version_h.mk -s pkgroot=$(pkgroot) version_h=$@ \
-								pkg_mk=$(PKG_MKFILE)
+	@$(MAKE) -f $(RNMAKE_ROOT)/version_h.mk -s \
+		RNMAKE_PKG_ROOT=$(RNMAKE_PKG_ROOT) \
+		version_h=$@ \
+		pkg_mk=$(RNMAKE_PKG_MKFILE)
 
-# deprecated
-$(ARCH_INCDIR)/install.h: $(ARCH_MKFILE)
+# install.h auto-generated header DEPRECATED
+$(ARCH_INCDIR)/install.h: $(RNMAKE_ARCH_MKFILE)
 	@test -d $(ARCH_INCDIR) || $(MKDIR) $(ARCH_INCDIR)
-	@$(MAKE) -f $(rnmake)/install_h.mk -s pkgroot=$(pkgroot) install_h=$@ \
-								arch=$(ARCH) \
-								bindir=$(bindir) \
-								sbindir=$(sbindir) \
-								libdir=$(libdir) \
-								includedir=$(includedir) \
-								sysconfdir=$(sysconfdir) \
-								docdir=$(docdir) \
-								mandir=$(mandir) \
-								infodir=$(infodir)
+	@$(MAKE) -f $(RNMAKE_ROOT)/install_h.mk -s \
+	 	RNMAKE_PKG_ROOT=$(RNMAKE_PKG_ROOT) install_h=$@ \
+		arch=$(RNMAKE_ARCH) \
+		bindir=$(bindir) \
+		sbindir=$(sbindir) \
+		libdir=$(libdir) \
+		includedir=$(includedir) \
+		sysconfdir=$(sysconfdir) \
+		docdir=$(docdir) \
+		mandir=$(mandir) \
+		infodir=$(infodir)
 
-# Dummies
-$(PROD_MKFILE):
-$(PKG_MKFILE):
-$(ARCH_MKFILE):
 
 # -------------------------------------------------------------------------
 # Target:	hdrs
@@ -788,26 +705,29 @@ $(ARCH_MKFILE):
 
 # List of all header tags
 HDR_TAG_LIST = $(addsuffix .HDRS.H,$(DIST_HDRS))
-#$(warning HDR_TAG_LIST: $(HDR_TAG_LIST))
+#$(info HDR_TAG_LIST: $(HDR_TAG_LIST))
 
 # Complete list of headers
 PREREQ_HDRS = $(foreach tag,$(HDR_TAG_LIST),$($(tag)))
-#$(warning PREREQ_HDRS: $(PREREQ_HDRS))
+#$(info PREREQ_HDRS: $(PREREQ_HDRS))
 
 # Make all distribution headers
 .PHONY: hdrs
-hdrs: $(PREREQ_HDRS)
+hdrs: echo-hdrs $(PREREQ_HDRS)
+
+.PHONY: echo-hdrs
+echo-hdrs:
+	$(call fnGoalDesc,$(DISTDIR_INCLUDE),Copying tagged interfaces headers from $(RNMAKE_PKG_ROOT)/include.)
 
 # Copy newer headers to distribution include [sub]directory
 $(PREREQ_HDRS):
 	@for h in $(@); \
 		do\
-			src=$(pkgroot)/include/$$h; \
+			src=$(RNMAKE_PKG_ROOT)/include/$$h; \
 			dst=$(DISTDIR_INCLUDE)/$$h; \
 			hdir=$$(dirname $$dst); \
 			if [ ! -f $$dst -o $$src -nt $$dst ]; \
 			then \
-				echo "     $$dst"; \
 				test -d $$hdir || $(MKDIR) $$hdir; \
 				$(CP) $$src $$dst; \
 			fi; \
@@ -818,7 +738,7 @@ $(PREREQ_HDRS):
 # Desc: 	Makes all release files
 # Notes:	Release files are only made at top level
 .PHONY: rel
-ifeq "$(pkgroot)" "."
+ifeq "$(RNMAKE_PKG_ROOT)" "."
 rel: $(FQ_REL_FILES)
 else
 rel:
@@ -853,7 +773,7 @@ $(DISTDIR_DOC)/README.xml: README.xml
 # Desc: 	Makes all share files
 # Notes:	Share files are only made at top level
 .PHONY: share
-ifeq "$(pkgroot)" "."
+ifeq "$(RNMAKE_PKG_ROOT)" "."
 share: $(SHARE_TGT)
 else
 share:
@@ -864,7 +784,7 @@ endif
 # Desc: 	Makes all system configuration files
 # Notes:	Etc files are only made at top level
 .PHONY: etc
-ifeq "$(pkgroot)" "."
+ifeq "$(RNMAKE_PKG_ROOT)" "."
 etc: $(ETC_TGT)
 else
 etc:
@@ -874,41 +794,48 @@ endif
 # Target: documents
 # Desc:   Recursively make subdirectories.
 .PHONY: documents
-documents: docs-clean docs-src-gen docs-pub-gen $(EXTRA_TGT_DOC)
+documents: pkgbanner echo-documents docs-clean docs-src-gen docs-pub-gen \
+						$(EXTRA_TGT_DOC)
+	$(footer)
+
+.PHONY: echo-documents
+echo-documents:
+	$(call fnEchoGoalDesc,Making documentation)
 
 DOXY_VER=1.8.11
 
 # documentation generator from source files
 ifndef HTML_HEADER
-HTML_HEADER     = $(rnmake)/doxy/$(DOXY_VER)/rn_doxy_header.html
+HTML_HEADER     = $(RNMAKE_ROOT)/doxy/$(DOXY_VER)/rn_doxy_header.html
 endif
 
 ifndef HTML_FOOTER
-HTML_FOOTER     = $(rnmake)/doxy/$(DOXY_VER)/rn_doxy_footer.html
+HTML_FOOTER     = $(RNMAKE_ROOT)/doxy/$(DOXY_VER)/rn_doxy_footer.html
 endif
 
 ifndef HTML_STYLESHEET
-HTML_STYLESHEET = $(rnmake)/doxy/$(DOXY_VER)/rn_doxy.css
+HTML_STYLESHEET = $(RNMAKE_ROOT)/doxy/$(DOXY_VER)/rn_doxy.css
 endif
 
 ifndef DOXY_IMAGES
-DOXY_IMAGES = $(rnmake)/doxy/rn_images
+DOXY_IMAGES = $(RNMAKE_ROOT)/doxy/rn_images
 endif
 
 ifndef RN_DOXY_CONF_FILE
-RN_DOXY_CONF_PATH = $(rnmake)/doxy
+RN_DOXY_CONF_PATH = $(RNMAKE_ROOT)/doxy
 RN_DOXY_CONF_FILE = $(RN_DOXY_CONF_PATH)/rn_doxy.conf
 endif
 
 docs-clean:
-	@$(RM) $(DISTDIR_DOC)
+	$(printgoal)
+	$(RM) $(DISTDIR_DOC)
 
 # generate doxygen source documetiona
 docs-src-gen:
+	$(printgoal)
 	@if [ "$(DOXY_CONF_FILE)" ]; \
 	then \
-		echo ""; \
-		echo "Making source documentation"; \
+		echo "Making doxygen source documentation"; \
 		test -d $(DISTDIR_DOC) || $(MKDIR) $(DISTDIR_DOC); \
 		test -d $(DISTDIR_DOC_SRC_IMG) || $(MKDIR) $(DISTDIR_DOC_SRC_IMG); \
 		$(CP) -r $(DOXY_IMAGES)/* $(DISTDIR_DOC_SRC_IMG)/.; \
@@ -922,19 +849,21 @@ docs-src-gen:
 		 echo "PROJECT_LOGO=$(DISTDIR_DOC_SRC_IMG)/RNLogo.png"; \
 		 echo "@INCLUDE_PATH=$(RN_DOXY_CONF_PATH)"; \
 		 echo "@INCLUDE=$(RN_DOXY_CONF_FILE)"; \
-		) | doxygen - >$(pkgroot)/doxy.out.log 2>$(pkgroot)/doxy.err.log; \
+		) | doxygen - >$(RNMAKE_PKG_ROOT)/doxy.out.log 2>$(RNMAKE_PKG_ROOT)/doxy.err.log; \
 	fi
+	$(footer)
 
-# This utility scrip is no longer used after doxygen 1.7
-#		$(rnmake)/utils/doxyindex.sh \
+# This utility scrip is no longer used after doxygen 1.7. DEPRECATED
+#		$(RNMAKE_ROOT)/utils/doxyindex.sh \
 #							-t "$(PKG) v$(PKG_VERSION_DOTTED)" \
 #							-h $(HTML_HEADER) \
 #							>$(DISTDIR_DOC)/$(DIST_SRCDOC)/index.html; \
 
 # generate published documentation
 docs-pub-gen:
+	$(printgoal)
 	@pubdstdir="$(DISTDIR_DOC)/papers"; \
-	pubsrcdir="$(pkgroot)/docs/published"; \
+	pubsrcdir="$(RNMAKE_PKG_ROOT)/docs/published"; \
 	unset flist; \
 	test -d $${pubsrcdir} && flist=$$(ls $${pubsrcdir}); \
 	if [ "$${flist}" != "" ]; \
@@ -942,7 +871,7 @@ docs-pub-gen:
 		test -d $${pubdstdir} || $(MKDIR) $${pubdstdir}; \
 		$(CP) -r $${pubsrcdir}/* $${pubdstdir}/. 2>/dev/null; \
 	fi; \
-	pubsrcdir="$(pkgroot)/3rdparty/published"; \
+	pubsrcdir="$(RNMAKE_PKG_ROOT)/3rdparty/published"; \
 	unset flist; \
 	test -d $${pubsrcdir} && flist=$$(ls $${pubsrcdir}); \
 	if [ "$${flist}" != "" ]; \
@@ -950,34 +879,57 @@ docs-pub-gen:
 		test -d $${pubdstdir} || $(MKDIR) $${pubdstdir}; \
 		$(CP) -r $${pubsrcdir}/* $${pubdstdir}/. 2>/dev/null; \
 	fi
+	$(footer)
 
 
 # -------------------------------------------------------------------------
 # Target:	mkdistdirs
 # Desc: 	Make Distribution Directories 
 .PHONY: mkdistdirs $(DISTDIR_LIST)
-mkdistdirs: $(DISTDIR_LIST)
+mkdistdirs: echomkdistdirs $(DISTDIR_LIST)
+
+.PHONY: echomkdistdirs
+echomkdistdirs:
+ifeq ($(realpath $(DIST_ARCH)),)
+	$(call fnGoalDesc,\
+		$(patsubst $(RNMAKE_PKG_ROOT)/%,%,$(DIST_ARCH)),Making distribution directories.)
+endif
 
 $(DISTDIR_LIST):
-	@$(MKDIR) $@;
+	@test -d ${@} || $(MKDIR) ${@}
+
 
 # -------------------------------------------------------------------------
 # Target:	mklocdirs
 # Desc: 	Make Local Directories 
 .PHONY: mklocdirs $(LOCDIR_LIST) $(PKGDIR_INCLUDE)
-mklocdirs: $(LOCDIR_LIST) $(PKGDIR_INCLUDE)
+mklocdirs: echolocdirs $(LOCDIR_LIST) $(PKGDIR_INCLUDE)
+
+.PHONY: echolocdirs
+echolocdirs:
+ifeq ($(realpath $(LOCDIR_BIN)),)
+	$(call fnGoalDesc,\
+		$(patsubst $(RNMAKE_PKG_ROOT)/%,%,$(LOCDIR_ROOT)),Making local directories.)
+endif
 
 $(LOCDIR_LIST) $(PKGDIR_INCLUDE):
-	@$(MKDIR) $@;
+	@test -d ${@} || $(MKDIR) ${@}
+
 
 # -------------------------------------------------------------------------
 # Target:	install
 # Desc: 	Install the distribution
 .PHONY: install
-install: 	pkgbanner all $(EXTRA_TGT_INSTALL) install-bin install-lib \
-					install-includes install-docs install-share install-etc \
-					$(EXTRA_TGT_INSTALL_POST) footer
+install: pkgbanner all echo-install $(EXTRA_TGT_INSTALL) install-bin \
+					install-lib install-includes install-docs install-share install-etc \
+					$(EXTRA_TGT_INSTALL_POST)
+	$(footer)
 
+.PHONY: echo-install
+echo-install:
+	$(call fnEchoGoalDesc,Installing package $(PKG_FULL_NAME))
+
+# DEPRECATED
 instest:
 	@if [ ! -f $(DISTDIR_DOC)/VERSION.txt ]; \
 	then \
@@ -988,40 +940,35 @@ instest:
 
 # install bin
 install-bin:
-	@printf "\n"
-	@printf "$(color_tgt_file)Installing executables to $(bindir)$(color_end)"
-	@printf "\n"
-	@$(rnmake)/utils/doinstall.sh 755 $(DISTDIR_BIN) $(bindir)
+	$(printgoal)
+	@printf "Installing executables to $(bindir)\n"
+	@$(RNMAKE_ROOT)/utils/doinstall.sh 755 $(DISTDIR_BIN) $(bindir)
 	$(call POSTINStemplate,$(STRIP_EXE),$(DISTDIR_BIN),$(bindir))
 
 # install lib
 install-lib:
-	@printf "\n"
-	@printf "$(color_tgt_file)Installing libraries to $(libdir)$(color_end)"
-	@printf "\n"
-	@$(rnmake)/utils/doinstall.sh 755 $(DISTROOT_LIB) $(libdir)
+	$(printgoal)
+	@printf "Installing libraries to $(libdir)\n"
+	@$(RNMAKE_ROOT)/utils/doinstall.sh 755 $(DISTROOT_LIB) $(libdir)
 	$(call POSTINStemplate,$(STRIP_LIB),$(DISTROOT_LIB),$(libdir))
 
 # install includes
 install-includes: hdrs
-	@printf "\n"
-	@printf "$(color_tgt_file)Installing includes to $(includedir)$(color_end)"
-	@printf "\n"
-	@$(rnmake)/utils/doinstall.sh 664 $(DISTDIR_INCLUDE) $(includedir)
+	$(printgoal)
+	@printf "Installing includes to $(includedir)\n"
+	@$(RNMAKE_ROOT)/utils/doinstall.sh 664 $(DISTDIR_INCLUDE) $(includedir)
 
 # install documentation
 install-docs: documents
-	@printf "\n"
-	@printf "$(color_tgt_file)Installing documents to $(docdir)/$(PKG_FULL_NAME)$(color_end)"
-	@printf "\n"
-	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_DOC) $(docdir)/$(PKG_FULL_NAME)
+	$(printgoal)
+	@printf "Installing documents to $(docdir)/$(PKG_FULL_NAME)\n"
+	@$(RNMAKE_ROOT)/utils/doinstall.sh -s 664 $(DISTDIR_DOC) $(docdir)/$(PKG_FULL_NAME)
 
 # install share files
 install-share:
-	@printf "\n"
-	@printf "$(color_tgt_file)Installing system share files to $(sharedir)$(color_end)"
-	@printf "\n"
-	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_SHARE) $(sharedir)/$(PKG_FULL_NAME)
+	$(printgoal)
+	@printf "Installing system share files to $(sharedir)\n"
+	@$(RNMAKE_ROOT)/utils/doinstall.sh -s 664 $(DISTDIR_SHARE) $(sharedir)/$(PKG_FULL_NAME)
 	@if [ ! -e $(sharedir)/$(PKG) ]; \
 	then \
 		$(SYMLINK) $(sharedir)/$(PKG_FULL_NAME) $(sharedir)/$(PKG); \
@@ -1033,10 +980,10 @@ install-share:
 
 # install etc
 install-etc:
+	$(printgoal)
+	@printf "Installing system configuration to $(sysconfdir)\n"
 	@printf "\n"
-	@printf "$(color_tgt_file)Installing system configuration to $(sysconfdir)$(color_end)"
-	@printf "\n"
-	@$(rnmake)/utils/doinstall.sh 664 $(DISTDIR_ETC) $(sysconfdir)
+	@$(RNMAKE_ROOT)/utils/doinstall.sh 664 $(DISTDIR_ETC) $(sysconfdir)
 
 # Post-Install directory component template
 # Usage: POSTINStemplate postprocess source_dir dest_dir
@@ -1057,28 +1004,34 @@ endef
 # -------------------------------------------------------------------------
 .PHONY: tarballs
 tarballs: pkgbanner tarball-bin tarball-doc tarball-src
+	$(footer)
 
 .PHONY: tarball-doc
 tarball-doc: 
+	$(printgoal)
 	$(if $(call isdir,$(DISTDIR_DOC)),,\
 			    					$(error No documentation - Try 'make documents' first.))
 	@cd $(DIST_ARCH)/doc; \
-	$(TAR) ../../$(DIST_TARBALL_DOC) $(PKG_FULL_NAME)-doc
+	$(TAR) $(DISTDIR_REPO)/$(DIST_TARBALL_DOC) $(PKG_FULL_NAME)-doc
+	$(footer)
 
 .PHONY: tarball-src
 tarball-src: 
+	$(printgoal)
 	@$(RM) $(DISTDIR_SRC)
 	@test -d $(DISTDIR_SRC) || $(MKDIR) $(DISTDIR_SRC)
-	@$(rnmake)/utils/tarball-src-filter.sh $(pkgroot) | \
+	@$(RNMAKE_ROOT)/utils/tarball-src-filter.sh $(RNMAKE_PKG_ROOT) | \
 	while read src; \
 	do \
-		$(rnmake)/utils/cppath.sh $$src $(DISTDIR_SRC); \
+		$(RNMAKE_ROOT)/utils/cppath.sh $$src $(DISTDIR_SRC); \
 	done;
 	@cd $(DIST_ARCH)/src; \
-	$(TAR) ../../$(DIST_TARBALL_SRC) $(PKG_FULL_NAME)
+	$(TAR) $(DISTDIR_REPO)/$(DIST_TARBALL_SRC) $(PKG_FULL_NAME)
+	$(footer)
 
 .PHONY: tarball-bin
 tarball-bin:
+	$(printgoal)
 	$(if $(call isdir,$(DIST_ARCH)),,$(error Nothing made - Try 'make' first.))
 	@test -d $(DISTDIR_TMP) || $(MKDIR) $(DISTDIR_TMP)
 	@cd $(DIST_ARCH); \
@@ -1087,26 +1040,34 @@ tarball-bin:
 	do \
 		if [ -f $$src ]; \
 		then \
-			$(rnmake)/utils/cppath.sh $$src tmp/$(DIST_NAME_BIN)-$(ARCH); \
+			$(RNMAKE_ROOT)/utils/cppath.sh $$src tmp/$(DIST_NAME_BIN)-$(RNMAKE_ARCH); \
 		fi; \
 	done;
 	@cd $(DIST_ARCH)/tmp; \
-	$(TAR) ../../$(DIST_TARBALL_BIN) $(DIST_NAME_BIN)-$(ARCH)
+	$(TAR) $(DISTDIR_REPO)/$(DIST_TARBALL_BIN) $(DIST_NAME_BIN)-$(RNMAKE_ARCH)
+	$(footer)
+
 
 # -------------------------------------------------------------------------
 # Target:	deps
 # Desc: 	Makes dependencies
 # -------------------------------------------------------------------------
 .PHONY: deps
-deps: pkgbanner autohdrs mkdepsdir $(EXTRA_TGT_DEPS) hdrdeps libdeps subdirs
+deps: pkgbanner echo-deps autohdrs mkdepsdir $(EXTRA_TGT_DEPS) hdrdeps libdeps \
+			subdirs-deps
+	$(footer)
+
+.PHONY: echo-deps
+echo-deps:
+	$(call fnEchoGoalDesc,Making dependencies for $(CURDIR))
 
 .PHONY: hdrdeps
 hdrdeps: 
-	@echo "Making dependencies for $(CURDIR)"
+	@$(call fnGoalDesc,$(@),Making C/C++ dependencies)
 	@echo $(call hdrdeps_sh,$(STLIBS) $(SHLIBS) $(DLLIBS) $(PGMS))
 
 hdrdeps_sh = \
-	$(shell $(rnmake)/utils/hdrdeps.sh \
+	$(shell $(RNMAKE_ROOT)/utils/hdrdeps.sh \
 		-c "$(MAKEDEPS)" \
 		-f $(DEPSFILE) \
 		-o $(OBJDIR) \
@@ -1124,17 +1085,25 @@ libdeps:
 mkdepsdir:
 	@test -d $(DEPSDIR) || $(MKDIR) $(DEPSDIR)
 
+
 # -------------------------------------------------------------------------
 # Target:	clean
 # Desc: 	Deletes generated intermediate files
 # -------------------------------------------------------------------------
-.PHONY: clean do-clean
-clean: pkgbanner do-clean $(EXTRA_TGT_CLEAN) subdirs 
+.PHONY: clean
+clean: pkgbanner echo-clean do-clean $(EXTRA_TGT_CLEAN) subdirs-clean
+	$(footer)
 
+.PHONY: echo-clean
+echo-clean:
+	$(call fnEchoGoalDesc,)
+
+.PHONY: do-clean
 do-clean:
 	@echo "Cleaning $(CURDIR)"
 	$(RM) *.o *.ii *.c~ *.cxx~ .h~ *.pyc *.pyo $(LOC_PGMS) $(DIST_PGMS) a.out doxy.*.log
 	$(RM) $(OBJDIR)
+
 
 # -------------------------------------------------------------------------
 # Target:	distclean (clobber)
@@ -1142,94 +1111,182 @@ do-clean:
 # -------------------------------------------------------------------------
 .PHONY: distclean clobber
 distclean clobber: pkgbanner clean $(EXTRA_TGT_DISTCLEAN)
-	@echo "\nClobbering distribution $(CURDIR)"
+	$(call fnGoalDesc,$(@),Clobbering distribution $(CURDIR))
 	$(RM) $(DIST_ARCH)
-	$(RM) $(DIST_ROOT)/$(PKG_FULL_NAME)-$(ARCH).tar.gz
+	$(RM) $(DIST_ROOT)/$(PKG_FULL_NAME)-$(RNMAKE_ARCH).tar.gz
 	$(RM) $(DIST_ROOT)/$(PKG_FULL_NAME)-doc.tar.gz
 	$(RM) $(DIST_ROOT)/$(PKG_FULL_NAME)-src.tar.gz
 	$(RM) $(LOCDIR_LIST)
 	$(RM) $(AUTOHDRS)
 	$(RM) $(DEPSFILE)
+	$(footer)
+
 
 # -------------------------------------------------------------------------
 # Target:	subdirs
 # Desc: 	Recursively make subdirectories.
+# Notes:	Any two or more goals that traverse the subdirectory tree need
+# 				separate subdirectory targets. Otherwise, only the first goal
+# 				will traverse.
 # -------------------------------------------------------------------------
-.PHONY: subdirs $(SUBDIRS)
 
+# Subdirectory call
+.PHONY: subdirs $(SUBDIRS)
 subdirs: $(SUBDIRS)
 
+# Make all sub-directories with all command-line goals
 $(SUBDIRS):
-	$(call dirbanner,$(@))
-	@$(MAKE) $(EXTRA_MAKE_FLAGS) -C $(@) $(CURGOAL)
-	@echo 
+	$(call fnDirBanner,$(@),$(GOAL_LIST))
+	@$(MAKE) $(EXTRA_MAKE_FLAGS) -C $(@) $(GOAL_LIST)
+	@printf "    $(color_dir_banner)~~$(color_end)\n"
+
+#
+# Template to build subdirectories by goal rules. Since rnmake traverses the
+# command-line goals depth first, and GNU make will only execute a rule once,
+# this template builds unique subdirectory rules.
+#
+# Built Rules:
+#   subdirs-<goal>: $(SUBDIRS.<goal>)
+#   $(SUBDIRS.<goal>:
+#   	<recipe>
+#
+# Usage: $(call SUBDIRtemplate,goal)
+#
+define SUBDIRtemplate
+SUBDIRS.$(1) = $(addsuffix .$(1),$(SUBDIRS))
+
+subdirs-$(1): $$(SUBDIRS.$(1))
+
+$$(SUBDIRS.$(1)):
+	$$(call fnDirBanner,$$(basename $$(@)),$(1))
+	@$$(MAKE) $$(EXTRA_MAKE_FLAGS) -C $$(basename $$(@)) $(1)
+	@printf "    $(color_dir_banner)~~$(color_end)\n"
+endef
+
+# all goals with subdirectory traversal prerequisite
+GOALS_WITH_SUBDIRS += deps all clean
+
+# build make rules for goal-specific subdirectories
+$(foreach goal,$(GOALS_WITH_SUBDIRS),$(eval $(call SUBDIRtemplate,$(goal))))
+
 
 # -------------------------------------------------------------------------
-# Pretty Print Support "Targets"
+# Pretty Print Support.
+#
+# Defines canned sequences, goal recipes, and goal prerequisite targets.
 # -------------------------------------------------------------------------
 
-# Directory Banner Template
-define dirbanner
+# Print directory banner canned sequence.
+#
+# Usage: $(call fnDirBanner,dir,goal)
+#
+define fnDirBanner =
 	@if [ "$(1)" != "" ]; then \
-	subdirnam="$(patsubst $(dir $(PKG_ROOT))%,%,$(CURDIR)/$(1))";\
+		subdirname="$(patsubst $(dir $(RNMAKE_PKG_ROOT))%,%,$(CURDIR)/$(1))";\
+	else \
+		subdirname=$(notdir $(RNMAKE_PKG_ROOT));\
+	fi; \
 	printf "\n";\
-	printf "$(color_dir_banner)$(dashline)\n";\
-	printf "Directory: $$subdirnam\n";\
-	printf "Target:    $(CURGOAL)\n";\
-	printf "$(dashline)$(color_end)\n";\
+	printf "$(color_dir_banner)$(normline)\n";\
+	printf "Directory: $$subdirname\n";\
+	printf "Goal:      $(2)\n";\
+	printf "$(normline)$(color_end)\n";\
 	fi
 endef
 
-# Pretty Print Major Banner
+# Print goal banner canned sequence.
+#
+# Usage: $(call fnGoalBanner,goal)
+#
+define fnGoalBanner =
+	@if [ "$(1)" != "" ]; then \
+		printf "\n     $(color_tgt_file)$(1)$(color_end)\n";\
+	fi
+endef
+
+# Print goal with description canned sequence.
+#
+# Usage: $(call fnGoalDesc,goal,desc)
+#
+define fnGoalDesc =
+	$(call fnGoalBanner,$(1));
+	$(if $(2),@printf "$(2)\n",)
+endef
+
+# Silly print goal with description canned sequence.
+# The goal is determined by stripping off the 'echo-' prefix from the current
+# target $(@).
+#
+# Usage: $(call fnEchoGoalDesc,desc)
+#
+define fnEchoGoalDesc =
+	$(call fnGoalDesc,$(patsubst echo-%,%,$(@)),$(1))
+endef
+
+# Print footer canned sequence.
+#
+# Usage: $(call fnFooter,goal)
+#
+define fnFooter =
+	@if [ "$(MAKELEVEL)" = "0" -a "$(1)" = "$(LAST_GOAL)" ]; then \
+	printf "\n";\
+	printf "$(color_pkg_banner)              ###\n";\
+	printf "Finished: `date`\n";\
+	printf "              ###$(color_end)\n";\
+	fi
+endef
+
+# Recipe pretty prints for current goal.
+printgoal				= $(call fnGoalBanner,$(@))
+footer 					= $(call fnFooter,$(@))
+
+# Pretty print make banner.
 .PHONY: pkgbanner
 pkgbanner:
-	@if [ "$(MAKELEVEL)" = "0" -a "$(CURGOAL)" = "$(GOAL)" ]; then \
+	@if [ "$(MAKELEVEL)" = "0" ]; then \
 	printf "$(color_pkg_banner)$(boldline)\n";\
 	printf "Package:       $(PKG_FULL_NAME)\n";\
-	printf "Package Root:  $(PKG_ROOT)\n";\
-	printf "Architecture:  $(ARCH)\n";\
+	printf "Package Root:  $(RNMAKE_PKG_ROOT)\n";\
+	printf "Architecture:  $(RNMAKE_ARCH)\n";\
 	printf "Directory:     $(CURDIR)\n";\
-	printf "Target:        $(CURGOAL)\n";\
+	printf "Goal(s):       $(GOAL_LIST)\n";\
 	printf "Start:         `date`\n";\
 	printf "$(boldline)$(color_end)\n";\
 	fi
 
-# Pretty Print Footer
-.PHONY: footer
-footer:
-	@if [ "$(MAKELEVEL)" = "0" -a "$(CURGOAL)" = "$(GOAL)" ]; then \
-	echo "";\
-	echo "            ###";\
-	echo "Finished: `date`";\
-	echo "            ###";\
-	fi
-
-dashline := \
+eqline := \
+================================================================================
+dotline := \
+................................................................................
+tildeline := \
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+underline := \
 ________________________________________________________________________________
 
-boldline := $(dashline)\n$(dashline)
+boldline := $(eqline)
+normline := $(tildeline)
 
 # -------------------------------------------------------------------------
-# Include any dependency file only for the given CURGOAL targets
-# \todo dependency file should only be included if not nodeps
+# Conditionally include any dependency file only specific targets
 #
-ifneq "$(findstring $(CURGOAL),all test)" ""
+# File: .deps/deps.$(RNMAKE_ARCH)
 
-# check if dependencies have been made unless nodeps is defined
-chkdeps = $(if $(or $(nodeps),$(call isfile,$(1))),,\
-		$(error No dependencies file - Try 'make deps' first.))
+# Include dependency file or error canned sequence.
+# If the override variable 'nodeps' is not empty, then no action is performed.
+define fnDepsInclude
+	$(if $(nodeps),,\
+		$(if $(call isfile,$(DEPSFILE)),\
+			$(eval include $(DEPSFILE)),\
+			$(error No dependencies file - Try 'make deps' first)))
+endef
 
-$(call chkdeps,$(DEPSFILE))
-
-include $(DEPSFILE)
-endif
+# Include dependency file for specific targets only.
+$(if $(call fnFindGoals,all test),$(call fnDepsInclude),)
 
 
+# -------------------------------------------------------------------------
 # force some targets to always make
 force: ;
-
-# dpkg make rules
-include $(rnmake)/Rules.dpkg.mk
 
 
 ########################### Pattern Rules #####################################

@@ -15,7 +15,7 @@
 #
 # Author: Robin Knight (robin.knight@roadnarrows.com)
 #
-# Copyright (C) 2013-2017.  RoadNarrows LLC.
+# Copyright (C) 2013-2018.  RoadNarrows LLC.
 # All Rights Reserved
 #
 # Permission is hereby granted, without written agreement and without
@@ -51,8 +51,21 @@ import fnmatch
 import re
 import getopt
 
+RNMakeEnv = { }
+
+def initRNMakeEnv():
+  RNMakeEnv['rnmake'] = os.getenv('RNMAKE_ROOT', 'UNDEF')
+  RNMakeEnv['arch_dft'] = os.getenv('RNMAKE_ARCH_DFT', 'x86_64')
+  RNMakeEnv['xprefix'] = os.getenv('RNMAKE_INSTALL_XPREFIX')
+  RNMakeEnv['prefix'] = os.getenv('RNMAKE_INSTALL_PREFIX')
+  import __main__ as main
+  RNMakeEnv['argv0'] = os.path.realpath(main.__file__)
+  RNMakeEnv['tool_templates'] = os.path.dirname(RNMakeEnv['argv0']) \
+      + '/templates'
+
+
 ## EULA templates root directory
-EulaTemplatesRoot = '/prj/pkg/tools/templates/eula'
+EulaTemplatesRoot = None
 
 EulaTagBegin    = "EulaBegin"
 EulaTagEnd      = "EulaEnd"
@@ -677,8 +690,15 @@ The <license> is one of: {0}
 # Main
 #------------------------------------------------------------------------------
 
-# create utility application
-app = Application()
+if __name__ == '__main__':
+  initRNMakeEnv()
 
-# run application
-sys.exit( app.run() )
+  print RNMakeEnv
+
+  EulaTemplatesRoot = RNMakeEnv['tool_templates'] + '/eula'
+
+  # create utility application
+  app = Application()
+
+  # run application
+  sys.exit( app.run() )

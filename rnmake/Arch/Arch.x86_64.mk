@@ -21,7 +21,7 @@ $Rev: 2694 $
 \author Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
-(C) 2005-2011.  RoadNarrows LLC.
+(C) 2005-2018.  RoadNarrows LLC.
 (http://www.roadnarrows.com)
 \n All Rights Reserved
 
@@ -59,22 +59,8 @@ endif
 ARCH_MK							= 1
 
 # This architecture (required)
-ARCH         				= x86_64
-ARCH_FQNAME         = x86_64-linux-gnu
-
-# RoadNarrows Install Prefix (override as necessary)
-ifndef prefix
-	ifdef prefix_root
-		prefix          = $(prefix_root)/$(ARCH)
-	else
-		prefix					= $(topdir)/xinstall/$(ARCH)
-	endif
-endif
-
-# Install Directory Overrides
-ifndef libdir
-libdir              = ${prefix}/lib64
-endif
+RNMAKE_ARCH         = x86_64
+RNMAKE_ARCH_FQNAME  = x86_64-linux-gnu
 
 # Architecture Include Directories
 ARCH_INCDIRS       	=
@@ -177,7 +163,7 @@ SWIG_LDFLAGS 	=
 #
 
 SYS_PREFIX = /usr
-OPT_PREFIX = /opt/xinstall/$(ARCH)
+OPT_PREFIX = /opt/xinstall/$(RNMAKE_ARCH)
 
 # OpenCV
 OPENCV_COM_LIBS   = opencv_core opencv_imgproc opencv_highgui
@@ -188,7 +174,7 @@ PANGO_INCDIR      = $(SYS_PREFIX)/include/pango-1.0
 CAIRO_INCDIR      = $(SYS_PREFIX)/include/cairo
 ATK_INCDIR        = $(SYS_PREFIX)/include/atk-1.0
 GDK_PIXBUF_INCDIR = $(SYS_PREFIX)/include/gdk-pixbuf-2.0
-GTK_LIB_INCDIR		= $(SYS_PREFIX)/lib/$(ARCH)-linux-gnu/gtk-2.0/include
+GTK_LIB_INCDIR		= $(SYS_PREFIX)/lib/$(RNMAKE_ARCH)-linux-gnu/gtk-2.0/include
 GTK_LIB					  = gtk-x11-2.0
 GDK_LIB						= gdk-x11-2.0
 GDK_PIXBUF_LIB		= gdk_pixbuf-2.0
@@ -204,7 +190,7 @@ GST_LIB_IF				= gstinterfaces-0.10
 
 # GLib
 GLIB_INCDIR			  = $(SYS_PREFIX)/include/glib-2.0
-GLIB_LIB_INCDIR		=	$(SYS_PREFIX)/lib/$(ARCH)-linux-gnu/glib-2.0/include 
+GLIB_LIB_INCDIR		=	$(SYS_PREFIX)/lib/$(RNMAKE_ARCH)-linux-gnu/glib-2.0/include 
 GLIB_LIB					= glib-2.0
 
 # XML

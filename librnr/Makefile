@@ -1,4 +1,5 @@
-# //////////////////////////////////////////////////////////////////////////////
+################################################################################
+# ./Makefile
 #
 ifdef RNMAKE_DOXY
 /*!
@@ -52,7 +53,7 @@ ifdef RNMAKE_DOXY
  */
 endif
 # 
-# //////////////////////////////////////////////////////////////////////////////
+################################################################################
 
 #------------------------------------------------------------------------------
 # Required
@@ -64,13 +65,13 @@ RNMAKE_PKG_ROOT		= .
 #------------------------------------------------------------------------------
 # librnr
 
-SUBDIRS						= examples
+SUBDIRS	= examples
 
 # Distribution Static Libraries
-DIST_STLIBS 			= rnr
+DIST_STLIBS = rnr
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= rnr
+DIST_SHLIBS = rnr
 
 # Source Files
 rnr.SRC.C =	assoc.c \
@@ -92,7 +93,7 @@ rnr.SRC.C =	assoc.c \
 						uri.c \
 						win.c
 
-rnr.LIBS  = pthread rt
+rnr.LIBS = pthread rt
 
 
 #------------------------------------------------------------------------------
@@ -236,26 +237,23 @@ all-post: show-banner etc-cp-files lib-cp-files share-cp-files
 
 .PHONY: show-banner
 show-banner:
-	$(call dirbanner,.)
-	@printf "Copying Configuration Files\n"
+	$(call fnDirBanner,,all-post)
+	@printf "Pre-install Configuration\n"
 
 .PHONY: etc-cp-files
 etc-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying etc files to $(DISTDIR_ETC)$(color_end)\n"
+	$(call fnGoalDesc,$(DISTDIR_ETC),Copying etc files.)
 	$(call cp_template,$(ETC_PROF_D_LAE),$(DISTDIR_ETC)/profile.d/laelaps.sh)
 	$(call copyfiles_template,$(ETC_FILES),$(DISTDIR_ETC))
 
 .PHONY: lib-cp-files
 lib-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying lib files to $(DISTDIR_LIB)$(color_end)\n"
+	$(call fnGoalDesc,$(DISTDIR_LIB),Copying lib files.)
 	$(call copyfiles_template,$(LIB_FILES),$(DISTROOT_LIB))
 
 .PHONY: share-cp-files
 share-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying share directory to $(DISTDIR_SHARE)$(color_end)\n"
+	$(call fnGoalDesc,$(DISTDIR_SHARE),Copying share directory.)
 	@cp -rp $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
 	@find $(DISTDIR_SHARE) -name '*.svn' -print | xargs rm -fr
 

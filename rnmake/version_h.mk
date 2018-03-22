@@ -11,7 +11,7 @@ ifdef RNMAKE_DOXY
 \brief Auto-generate the version.h include file for the package.
 
 \par Usage:
-make pkgroot=\<dir\> version_h=\<file\> pkg_mk=\<file\>
+make RNMAKE_PKG_ROOT=\<dir\> version_h=\<file\> pkg_mk=\<file\>
 
 $LastChangedDate: 2009-07-09 15:53:24 -0600 (Thu, 09 Jul 2009) $
 $Rev: 98 $
@@ -60,8 +60,7 @@ include $(pkg_mk)
 timestamp := $(shell date "+%Y.%m.%d %T")
 
 $(version_h):
-	@echo ''
-	@echo '     $@'
+	@echo 'Auto-generating $@'
 	@echo '//' > $@
 	@echo '// File: $(notdir $@)' >> $@
 	@echo '//' >> $@

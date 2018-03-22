@@ -2,18 +2,16 @@
 #
 # Package: 	RN Make System 
 #
-# File:			Test.mk
+# File:			Rules.test.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief Provides "test" target for Rules.mk
-
-$LastChangedDate: 2013-01-28 09:38:13 -0700 (Mon, 28 Jan 2013) $
-$Rev: 2632 $
+\brief Provides "test" targets for Rules.mk
 
 \author Daniel Packard (daniel@roadnarrows.com)
+\author Robin Knight (robin.knight@roadnarrows.com)
 
 \par Copyright:
 (C) 2005-2018.  RoadNarrows LLC.
@@ -50,11 +48,11 @@ endif
 #
 ################################################################################
 
+export _RULES_TEST_MK = 1
+
 # include TEST_PGMS to LOC_PGMS
-ifneq "$(findstring $(GOAL),test run-test)" ""
-TEST = true
-export TEST
-endif
+export RNMAKE_TEST = true
+GOALS_WITH_SUBDIRS += run-test
 
 # colors
 color_test = $(color_pre)$(color_light_blue)
@@ -62,10 +60,16 @@ color_test = $(color_pre)$(color_light_blue)
 # Make specific test programs
 .PHONY: 	test
 test: pkgbanner all
+	$(footer)
 
 # Run test programs
 .PHONY: run-test
-run-test: pkgbanner do-test subdirs
+run-test: pkgbanner echo-run-test do-test subdirs-run-test
+	$(footer)
+
+.PHONY: echo-run-test
+echo-run-test:
+	$(call fnEchoGoalDesc,Run all tests)
 
 .PHONY: do-test
 do-test:
@@ -80,6 +84,7 @@ do-test:
 				break; \
 			fi; \
 	 done;
+	$(footer)
 
 
 ifdef RNMAKE_DOXY

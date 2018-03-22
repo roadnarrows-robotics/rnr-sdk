@@ -57,8 +57,8 @@ endif
 # Prevent mutliple inclusion
 PKG_MK						= 1
 
-ifndef pkgroot
-$(error Error: pkgroot not defined in including makefile)
+ifndef RNMAKE_PKG_ROOT
+  $(error 'RNMAKE_PKG_ROOT' Not defined in including makefile)
 endif
 
 # The Package Definition
@@ -85,7 +85,7 @@ PKG_FULL_NAME				= $(PKG)-$(PKG_VERSION_DOTTED)
 # Optional Variables and Tweaks
 
 # Package Include Directories
-PKG_INCDIRS 				= $(pkgroot)/include
+PKG_INCDIRS 				= $(RNMAKE_PKG_ROOT)/include
 
 # Package System Include Directories
 PKG_SYS_INCDIRS			=

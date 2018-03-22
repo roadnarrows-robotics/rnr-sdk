@@ -8,7 +8,7 @@ ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief Make debian packages for package.
+\brief Make Debian packages for package.
 
 Include this file into each local make file (usually at the bottom).
 Only one library or program target is supported per make file, unlike the
@@ -59,9 +59,9 @@ endif
 
 DEB_PREFIX   = /usr/local
 
-DEB_CONF_DEV = $(pkgroot)/make/deb-dev
-DEB_CONF_SRC = $(pkgroot)/make/deb-src
-DEB_CONF_DOC = $(pkgroot)/make/deb-doc
+DEB_CONF_DEV = $(RNMAKE_PKG_ROOT)/make/deb-dev
+DEB_CONF_SRC = $(RNMAKE_PKG_ROOT)/make/deb-src
+DEB_CONF_DOC = $(RNMAKE_PKG_ROOT)/make/deb-doc
 
 DEB_DEV_PKG_NAME = $(PKG)-dev-$(PKG_VERSION_DOTTED)
 DEB_SRC_PKG_NAME = $(PKG)-src-$(PKG_VERSION_DOTTED)
@@ -72,15 +72,18 @@ DEB_DISTDIR_TMP_SRC = $(DISTDIR_TMP_DEB)/$(DEB_SRC_PKG_NAME)
 DEB_DISTDIR_TMP_DOC = $(DISTDIR_TMP_DEB)/$(DEB_DOC_PKG_NAME)
 
 .PHONY: deb-pkgs
-deb-pkgs: deb-pkg-dev deb-pkg-src deb-pkg-doc
+deb-pkgs: pkgbanner echo-deb-pkgs deb-pkg-dev deb-pkg-src deb-pkg-doc
+	$(footer)
+
+.PHONY: echo-deb-pkgs
+echo-deb-pkgs:
+	$(call fnEchoGoalDesc,Make all Debian packages)
 
 .PHONY: deb-pkg-dev
-deb-pkg-dev: pkgbanner all
-	@printf "\n"
-	@printf "$(color_tgt_file)     $(@)$(color_end)\n"
+deb-pkg-dev: pkgbanner all echo-deb-pkg-dev
 	$(if $(call isdir, $(DEB_CONF_DEV)),\
-		$(shell $(rnmake)/utils/dpkg-helper.sh \
-			-a $(ARCH) \
+		$(shell $(RNMAKE_ROOT)/utils/dpkg-helper.sh \
+			-a $(RNMAKE_ARCH) \
 			-c $(DEB_CONF_DEV) \
 			-d $(DIST_ARCH) \
 			-t $(DEB_DISTDIR_TMP_DEV) \
@@ -91,15 +94,17 @@ deb-pkg-dev: pkgbanner all
 			1>&2 \
 	 	),\
 	$(info Debian conf directory not found: $(DEB_CONF_DEV). Skipping $(DEB_DEV_PKG_NAME)))
+	$(footer)
 	
+.PHONY: echo-deb-pkg-dev
+echo-deb-pkg-dev:
+	$(call fnEchoGoalDesc,Making Debian development package)
 
 .PHONY: deb-pkg-src
-deb-pkg-src: pkgbanner tarball-src
-	@printf "\n"
-	@printf "$(color_tgt_file)     $(@)$(color_end)\n"
+deb-pkg-src: pkgbanner tarball-src echo-deb-pkg-src
 	$(if $(call isdir, $(DEB_CONF_SRC)),\
-		$(shell $(rnmake)/utils/dpkg-helper.sh \
-			-a $(ARCH) \
+		$(shell $(RNMAKE_ROOT)/utils/dpkg-helper.sh \
+			-a $(RNMAKE_ARCH) \
 			-c $(DEB_CONF_SRC) \
 			-d $(DIST_ARCH) \
 			-t $(DEB_DISTDIR_TMP_SRC) \
@@ -110,14 +115,17 @@ deb-pkg-src: pkgbanner tarball-src
 			1>&2 \
 	 	),\
 	$(info Debian conf directory not found: $(DEB_CONF_SRC). Skipping $(DEB_SRC_PKG_NAME)))
-	
+	$(footer)
+
+.PHONY: echo-deb-pkg-src
+echo-deb-pkg-src:
+	$(call fnEchoGoalDesc,Making Debian source package)
+
 .PHONY: deb-pkg-doc
-deb-pkg-doc: pkgbanner documents
-	@printf "\n"
-	@printf "$(color_tgt_file)     $(@)$(color_end)\n"
+deb-pkg-doc: pkgbanner documents echo-deb-pkg-doc
 	$(if $(call isdir, $(DEB_CONF_DOC)),\
-		$(shell $(rnmake)/utils/dpkg-helper.sh \
-			-a $(ARCH) \
+		$(shell $(RNMAKE_ROOT)/utils/dpkg-helper.sh \
+			-a $(RNMAKE_ARCH) \
 			-c $(DEB_CONF_DOC) \
 			-d $(DIST_ARCH) \
 			-t $(DEB_DISTDIR_TMP_DOC) \
@@ -128,7 +136,12 @@ deb-pkg-doc: pkgbanner documents
 			1>&2 \
 	 	),\
 	$(info Debian conf directory not found: $(DEB_CONF_DOC). Skipping $(DEB_DOC_PKG_NAME)))
-	
+	$(footer)
+
+.PHONY: echo-deb-pkg-doc
+echo-deb-pkg-doc:
+	$(call fnEchoGoalDesc,Making Debian documentaion package)
+
 
 ifdef RNMAKE_DOXY
 /*! \endcond RNMAKE_DOXY */

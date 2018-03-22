@@ -42,6 +42,8 @@ do
   esac
 done
 
+repo_dir=${dist_dir}/repo
+
 # because dpkg-deb uses amd64 instead of x86_64
 #if [ $deb_arch = "x86_64" ]
 #then
@@ -68,11 +70,17 @@ echo "   Creating package" ${deb_name}".deb"
 echo "   arch =" ${deb_arch}
 echo "   vers =" ${deb_version}
 echo "   install prefix =" ${deb_prefix}
+echo
 
 if [ ! -e $deb_tmpdir ]
 then
   mkdir -p $deb_tmpdir/DEBIAN
   mkdir -p $deb_tmpdir/$deb_prefix
+fi
+
+if [ ! -e $repo_dir ]
+then
+  mkdir -p $repo_dir
 fi
 
 cp -r $deb_confdir/* ${deb_tmpdir}/DEBIAN/.
@@ -84,27 +92,26 @@ sed -e $sed_version -e $sed_arch --in-place $deb_tmpdir/DEBIAN/postinst
 
 # copying files from dist
 case $pkg_type in
-  pkgtype-dev) echo "creating dev package"; \
+  pkgtype-dev) echo "Creating dev package."; \
                cp -r ${dist_dir}/bin ${deb_tmpdir}/${deb_prefix}/.;
                cp -r ${dist_dir}/lib ${deb_tmpdir}/${deb_prefix}/.;
                cp -r ${dist_dir}/include ${deb_tmpdir}/${deb_prefix}/.;
                cp -r ${dist_dir}/share ${deb_tmpdir}/${deb_prefix}/.;
                cp -r ${dist_dir}/etc ${deb_tmpdir}/.;;
   
-  pkgtype-src) echo "creating src package"; \
+  pkgtype-src) echo "Creating src package."; \
                cp -r ${dist_dir}/src ${deb_tmpdir}/${deb_prefix}/.;;
 
-  pkgtype-doc) echo "creating doc package"; \
+  pkgtype-doc) echo "Creating doc package."; \
                cp -r ${dist_dir}/doc ${deb_tmpdir}/${deb_prefix}/.;;
 
   *)           echo "rnmake does not support the requested debian package type";
                echo "   * " $deb_type
-               echo
 esac
 
 fakeroot -- dpkg-deb --build $deb_tmpdir 1>/dev/null
-mv $dist_dir/tmp/deb/$deb_name-$deb_arch.deb $dist_dir/.
+mv $dist_dir/tmp/deb/$deb_name-$deb_arch.deb $repo_dir/.
 
-echo
+echo "  Done."
 
 #/*! \endcond RNMAKE_DOXY */

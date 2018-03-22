@@ -135,17 +135,12 @@ RNMAKE_INSTALL_XPREFIX := $(xprefix)
 # 													$(RNMAKE_INSTALL_PREFIX)/
 # 	Environment variable: RNMAKE_INSTALL_PREFIX
 # 	Make override:				make prefix=_path_ ...
-# 	Default:							/usr/local
+# 	Default:							
 # 	Required:							no
 # ------------------------------------------------------------------------------
 
 # 'make prefix=<path> ...' or RNMAKE_INSTALL_PREFIX
 prefix ?= $(RNMAKE_INSTALL_PREFIX)
-
-# default
-ifeq ($(prefix),)
-  prefix = /usr/local
-endif
 
 # make absolute path (does not have to exist)
 prefix := $(abspath $(prefix))
