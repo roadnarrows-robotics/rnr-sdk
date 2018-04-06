@@ -182,6 +182,7 @@ def MakeEnv(docRoot, modSetup):
   HtmlVars['MOD_LIST_ITER'] = AtAtCbModUrlListIter
   for varname,imgfile in PyDocInfo['images'].iteritems():
     HtmlVars[varname] = imgfile
+
 #--
 def MakeDirs():
   if not os.path.exists(DocRoot):
@@ -198,11 +199,11 @@ def CopyImages():
   dstdir = DocRoot+os.sep+'images'+os.sep
   for varname,imgfile in PyDocInfo['images'].iteritems():
     shutil.copy(srcdir+os.sep+imgfile, dstdir)
-  print "copied images"
+  print "  Copied images."
 
 #--
 def GetCbWalk(pyfilelist, dirname, fnames):
-  excludes = ['.svn', '.dops']
+  excludes = ['.svn', '.deps' 'obj']
   for sEx in excludes:
     if dirname.find(sEx) != -1:
       return
@@ -266,16 +267,17 @@ def MakeHtmlPkgDocs():
         srcfile = dname + os.sep + html
       else:
         srcfile = html
+      dstfile = DocRoot+os.sep+html
       try:
         os.rename(srcfile, DocRoot+os.sep+html)
       except OSError:
-        print >>sys.stderr, "%s: cannoy copy" % (srcfile)
+        print >>sys.stderr, "%s -> %s: cannot copy" % (srcfile, dstfile)
 
 #--
 def MakeHtmlIndex():
   postfile = AtAtReplace(PyDocInfo['index_template'], HtmlVars, False)
   os.rename(postfile, DocRoot+os.sep+'index.html')
-  print 'wrote index.html'
+  print '  Wrote index.html'
 
 #--
 def MakePyDoc(docRoot, modSetup):
@@ -317,6 +319,7 @@ usage: %s [OPTIONS] <setup_py_file>
   """  % (_Argv0, _Argv0)
   print """Options and arguments:
 -d, --docroot=<dir>      : Generated HTML documentation root directory
+    --vpath=<path>       : Library virtual path
 
 -h, --help               : Display this help and exit.
   """
@@ -332,12 +335,14 @@ def GetOptions(argv=None, **kwargs):
   _Argv0 = kwargs.get('argv0', __file__)
 
   # defaults
+  kwargs['vpath'] = None
   kwargs['debug'] = 0
 
   # parse command-line options
   try:
     try:
-      opts, args = getopt.getopt(argv[1:], "?hd:", ['help', 'docroot=', ''])
+      opts, args = getopt.getopt(argv[1:], "?hd:",
+                        ['help', 'docroot=', 'vpath=', ''])
     except getopt.error, msg:
       raise Usage(msg)
     for opt, optarg in opts:
@@ -346,6 +351,8 @@ def GetOptions(argv=None, **kwargs):
         sys.exit(0)
       elif opt in ('-d', '--docroot'):
         kwargs['docroot'] = optarg
+      elif opt in ('--vpath'):
+        kwargs['vpath'] = optarg
   except Usage, err:
     PrintUsageErr(err.msg)
     sys.exit(2)
@@ -363,6 +370,13 @@ def Main(argv=None, **kwargs):
   """ Main """
   global _Argv0
   kwargs = GetOptions(argv, **kwargs)
+  if kwargs['vpath'] is not None:
+    ldpath = os.getenv('LD_LIBRARY_PATH')
+    if ldpath:
+      ldpath = kwargs['vpath'] + ':' + ldpath
+    else:
+      ldpath = kwargs['vpath']
+    os.putenv('LD_LIBRARY_PATH', ldpath)
   MakePyDoc(kwargs['docroot'], kwargs['setup'])
 
 #--

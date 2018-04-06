@@ -1,87 +1,54 @@
 ################################################################################
 #
-# Package: RN Make System 
-# File:    Arch.atmega32uc3.mk
+# Arch/Arch.atmega32uc3.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief RoadNarrows Make System Architecture Makefile
+\brief RoadNarrows Make System architecture makefile.
+
+Make file for the Atmel 32-bit AVR UC3 MCU devices.
 
 \par Architecture:
 Atmel ATmega32uc3 Microcontroller
 
-Make file for the Atmel 32-bit AVR UC3 MCU devices.
+\par Build Host:
+Cross-Compiler
+
+\par Tool-Chain:
+avr32-*
 
 \par Usage:
 make arch=atmega32uc3 [mcu=device] \<rnmake-target\>\n
 	micro-contoller unit default (part number): uc3a1512
 
-Default device: 
+\pkgsynopsis
+RN Make System
 
-\par Build Host:
-Cross-Compile
+\pkgfile{Arch/Arch.atmega32uc3.mk}
 
-\par Tool-Chain:
-avr32-*
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
 
-$LastChangedDate: 2012-02-07 13:49:29 -0700 (Tue, 07 Feb 2012) $
-$Rev: 1783 $
+\pkgcopyright{2011-2018,RoadNarrows LLC,http://www.roadnarrows.com}
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\license{MIT}
 
-\par Copyright:
-(C) 2011.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
-# Description:
-#
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #
 ################################################################################
 
 # Prevent mutliple inclusion
-ARCH_MK							= 1
+_ARCH_ATMEGA32UC3_MK = 1
 
 # This architecture (required)
-ARCH         				= atmega32uc3
-ARCH_FQNAME         = atmega32uc3-mcu
-
-# RoadNarrows Install Prefix (override as necessary)
-ifndef prefix
-	ifdef prefix_root
-		prefix          = $(prefix_root)/$(ARCH)
-	else
-		prefix					= $(topdir)/xinstall/$(ARCH)
-	endif
-endif
+RNMAKE_ARCH         = atmega32uc3
+RNMAKE_ARCH_FQNAME	= atmega32uc3-mcu
 
 # Micro-Controller Unit
 mcu ?= uc3a1512
@@ -126,11 +93,10 @@ FUSE_HIGH ?= 0x99
 # CKSEL0   0 	 Select Clock source        0 (unprogrammed)
 FUSE_LOW ?= 0xE1
 
-# Architecture Include Directories
-ARCH_INCDIRS       	= /opt/avr32/include
 
-# Architecture CPP Flags
-ARCH_CPPFLAGS       = --sysroot=/opt/avr32
+#------------------------------------------------------------------------------
+# Tool Chain
+#------------------------------------------------------------------------------
 
 # Cross compiler tool chain prefix
 CROSS_COMPILE       = avr32-
@@ -147,7 +113,13 @@ NM 									= $(CROSS_COMPILE)nm
 
 
 #------------------------------------------------------------------------------
-# Assembler
+# C Preprocessor Options
+#------------------------------------------------------------------------------
+RNMAKE_ARCH_INCDIRS  = /opt/avr32/include
+RNMAKE_ARCH_CPPFLAGS =
+
+#------------------------------------------------------------------------------
+# Assembler and Options
 #------------------------------------------------------------------------------
 #AS                  = $(CROSS_COMPILE)as
 AS                  = $(CC)
@@ -179,8 +151,9 @@ ARCH_ASFLAGS = 	$(ASFLAGS_MCU) \
 								$(ASFLAGS_PASS) \
 								$(ASFLAGS_LISTING)
 
+
 #------------------------------------------------------------------------------
-# C Compiler
+# C Compiler and Options
 #------------------------------------------------------------------------------
 CC                  = $(CROSS_COMPILE)gcc
 
@@ -236,7 +209,8 @@ CFLAGS_LISTING 		= -Wa,-adhlns=$(<:.c=.lst)
 
 CFLAGS_CPP_ONLY     = -E
 CFLAGS_DEPS_ONLY    = -M
-ARCH_CFLAGS         = $(CFLAGS_MCU) \
+
+RNMAKE_ARCH_CFLAGS = 	$(CFLAGS_MCU) \
 											$(CFLAGS_DEBUG) \
 											$(CFLAGS_OPTIMIZE_LEVEL) \
                       $(CFLAGS_OPTIMIZES) \
@@ -245,23 +219,27 @@ ARCH_CFLAGS         = $(CFLAGS_MCU) \
 											$(CFLAGS_CSTANDARD) \
 											$(CFLAGS_GENDEPFLAGS)
 
+# Make AS/C/CXX Dependencies Command
+RNMAKE_MAKEDEPS	= $(CC) $(CFLAGS_DEPS_ONLY)
+
 
 #------------------------------------------------------------------------------
-# C++ Compiler
+# C++ Compiler and Options
 #------------------------------------------------------------------------------
 CXX                 = $(CROSS_COMPILE)g++
 CXXFLAGS_CPP_ONLY   = -E
 CXXFLAGS_DEPS_ONLY  = -M
-CXXFLAGS            = $(CFLAGS_DEBUG) \
-											$(CFLAGS_OPTIMIZE_LEVEL) \
-                      $(CFLAGS_OPTIMIZES) \
-                      $(CFLAGS_WARNING) \
-                      $(CFLAGS_OTHER) \
-											$(CFLAGS_CSTANDARD)
+
+RNMAKE_ARCH_CXXFLAGS =	$(CFLAGS_DEBUG) \
+												$(CFLAGS_OPTIMIZE_LEVEL) \
+                      	$(CFLAGS_OPTIMIZES) \
+                      	$(CFLAGS_WARNING) \
+                      	$(CFLAGS_OTHER) \
+												$(CFLAGS_CSTANDARD)
 
 
 #------------------------------------------------------------------------------
-# LD (linker)
+# Linker and Options
 #------------------------------------------------------------------------------
 LD									= $(CROSS_COMPILE)ld
 LD_CC             	= $(LD)
@@ -290,8 +268,9 @@ ARCH_LDFLAGS			= $(ARCH_LDFLAGS_LD) \
 ARCH_LD_LIBPATHS  = -L/opt/avr32/lib
 ARCH_LD_LIBS      = 
 
+
 #------------------------------------------------------------------------------
-# Static Library Archive
+# Static Library Archiver and Options
 #------------------------------------------------------------------------------
 STLIB_LD            = ${AR} cr
 STLIB_PREFIX        = lib
@@ -318,9 +297,6 @@ SCANF_LIB_FLOAT = -Wl,-u,vfscanf -lscanf_flt
 SCANF_LIB = 
 
 MATH_LIB = -lm
-
-# Make AS/C/CXX Dependencies Command
-MAKEDEPS				= $(CC) $(CFLAGS_DEPS_ONLY)
 
 
 ifdef RNMAKE_DOXY

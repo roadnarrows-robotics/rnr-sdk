@@ -4,4 +4,4 @@ Section: devel
 Priority: optional
 Architecture: @ARCH@
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
-Description: RoadNarrows odroid source package.
+Description: RoadNarrows odroid source.

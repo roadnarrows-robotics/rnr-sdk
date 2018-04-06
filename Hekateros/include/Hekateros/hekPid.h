@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2014-2017. RoadNarrows LLC.\n
+ *   \h_copy 2014-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -72,7 +72,7 @@ namespace hekateros
     //
     // Good default PID values for all Hekateros joints.
     //
-    static const double WI_DFT = 0.25;  ///< integral sum of errors weight const
+    static const double WI_DFT;   ///< integral sum of errors weight const
   
     /*!
      * \brief Default constructor.

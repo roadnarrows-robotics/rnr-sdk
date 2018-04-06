@@ -1,69 +1,56 @@
 ################################################################################
 #
-# ./dxl_sdk/Makefile
-
+# ./dxl_sdk-1.01/Makefile
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2014-09-26 11:43:33 -0600 (Fri, 26 Sep 2014) $
-$Rev: 3757 $
-
-\brief Make Robotis dynamixel SDK library libdxl.
+\brief Robotis dynamixel SDK library libdxl makefile.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_dynamixel Package
 
-##! \copyright
-##!   \h_copy 2011-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{dxl_sdk-1.01/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2011-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
+# 
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ..
+RNMAKE_PKG_ROOT	= ..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS 			= rnr_dxl
+RNMAKE_DIST_STLIBS = rnr_dxl
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= rnr_dxl
+RNMAKE_DIST_SHLIBS = rnr_dxl
+
+# Target library subdirectory
+rnr_dxl.SUBDIR = rnr
 
 # Source Files
 dxl.SRC.C 	=	dxl_hal.c dynamixel.c
@@ -73,39 +60,31 @@ dxl.SRC.C 	=	dxl_hal.c dynamixel.c
 # put the source virtually here (cwd)
 VPATH = src
 
-EXTRA_TGT_ALL_POST	= cp-hdrs
-
-#------------------------------------------------------------------------------
-# Make Includes
-#
-
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
 
 #------------------------------------------------------------------------------
 # Extras
 
-PKGDIR_DXL_INC	:= include
-DISTDIR_DXL_INC	:= $(DISTDIR_INCLUDE)/Dynamixel/dxl
-PKG_DXL_HDRS		:= $(wildcard $(PKGDIR_DXL_INC)/*.h)
-DIST_DXL_HDRS 	:= $(patsubst $(PKGDIR_DXL_INC)%,$(DISTDIR_DXL_INC)%,\
-										$(PKG_DXL_HDRS))
+EXTRA_TGT_ALL_POST = cp-dxl-hdrs
 
-.PHONY: cp-hdrs
-cp-hdrs: dxl-mkdir $(DIST_DXL_HDRS)
+H_FILES = include/*.h
 
-.PHONY: dxl-mkdir
-dxl-mkdir:
-		@test -d $(DISTDIR_DXL_INC) || $(MKDIR) $(DISTDIR_DXL_INC)
+DISTDIR_DXL_INC = $(DISTDIR_INCLUDE)/Dynamixel/dxl
 
-$(DISTDIR_DXL_INC)/%.h : $(PKGDIR_DXL_INC)/%.h
-	@printf "$(color_tgt_file)    $(<)$(color_end)\n"
-	@$(CP) $(<) $(@)
+.PHONY: cp-dxl-hdrs
+cp-dxl-hdrs:
+	$(call printGoalDesc,$(@),Copying dxl library headers to $(DISTDIR_DXL_INC))
+	$(call copySrcDirRel,$(H_FILES),$(DISTDIR_DXL_INC))
+
+
+#------------------------------------------------------------------------------
+# Include RNMAKE rules makefile(s)
+
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include extras
+include $(RNMAKE_ROOT)/Extras.mk
+
 
 ifdef RNMAKE_DOXY
 /*! \endcond RNMAKE_DOXY */

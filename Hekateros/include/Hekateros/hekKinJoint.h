@@ -15,7 +15,7 @@
  * interface.
  *
  * \copyright
- *   \h_copy 2014-2017. RoadNarrows LLC.\n
+ *   \h_copy 2014-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -405,8 +405,10 @@ namespace hekateros
      */
     static const size_t VEL_WIN_SIZE = 6;
 
-    // stop delta v as a fraction of max_delta_v tune parameter
-    static const double SLOW_DERATE_DELTA_V = 1.0;
+    /*!
+     * \brief Stop delta v as a fraction of max_delta_v tune parameter
+     */
+    static const double SLOW_DERATE_DELTA_V;
 
     /*!
      * \brief Torque sliding window size for low-pass band filtering of input

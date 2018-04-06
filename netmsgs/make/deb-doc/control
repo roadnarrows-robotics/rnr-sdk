@@ -4,4 +4,4 @@ Section: devel
 Priority: optional
 Architecture: @ARCH@
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
-Description: RoadNarrows network messaging packing/unpacking library docs.
+Description: RoadNarrows network messaging packing/unpacking library documentation.

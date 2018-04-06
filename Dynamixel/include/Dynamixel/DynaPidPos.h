@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -74,8 +74,8 @@ using namespace std;
 class DynaPidPos : public DynaPid
 {
 public:
-  static const double TuneMaxSpeedDelta = 1000.0; ///< max speed change deltas
-  static const double TuneAbsMinSpeed   =  0.0;   ///< absolute minimum speed
+  static const double TuneMaxSpeedDelta;  ///< max speed change deltas
+  static const double TuneAbsMinSpeed;    ///< absolute minimum speed
 
   /*!
    * \brief Default constructor.

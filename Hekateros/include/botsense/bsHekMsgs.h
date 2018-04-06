@@ -7,13 +7,13 @@
  *
  * \brief \h_botsense Server/Client Hekateros NetMsgs XML Definitions.
  *
- * \warning This file was auto-generated on 2012.11.10 09:12:10 from the NetMsgs
+ * \warning This file was auto-generated on 2018.04.05 21:55:29 from the NetMsgs
  * XML specification bsHekMsgs.xml.
  *
- * \copyright
- *   \h_copy 2012-2017. RoadNarrows LLC.\n
- *   http://www.roadnarrows.com\n
- *   All Rights Reserved
+ * \par Copyright:
+ * (C) 2018. RoadNarrows LLC
+ * (http://www.roadnarrows.com)
+ * All Rights Reserved
  */
 ///////////////////////////////////////////////////////////////////////////////
 

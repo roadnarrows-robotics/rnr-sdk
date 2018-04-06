@@ -1,71 +1,71 @@
 ################################################################################
 #
-# ./sw/libWMSuite/tests/Makefile
-
+# ./sw/libRS160D/tests/Makefile
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2011-10-27 14:47:17 -0600 (Thu, 27 Oct 2011) $
-$Rev: 1438 $
-
-\brief
-Library libQik unit tests.
+\brief Library libRS160D unit tests makefile.
 
 RN Make System Specific Makefile
 
-\author: Rob Shiely 	(rob@roadnarrows.com) 
+\pkgsynopsis
+RoadNarrows Robotics \h_kuon Large Mobile Robot Package
 
-\par Copyright:
-  (C) 2012.  University of Northern Colorado
-  All Rights Reserved
+\pkgfile{sw/libRS160D/tests/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Rob Shiely,rob@roadnarrows.com} 
+
+\pkgcopyright{2012-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-#################################################################################
+# 
+################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../../..
+RNMAKE_PKG_ROOT	= ../../..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
 # Programs
 
 # Distribution Programs
-LOC_PGMS = QikMove
+RNMAKE_TEST_PGMS = QikMove
 
 # Linked Libraries 
-LOC_PGMS_LIBS				=  rnr  qik serial
+TEST_PGMS_LIBS	=  rnr qik serial
 										
-QikMove.LIBS		= $(LOC_PGMS_LIBS)
-
-#------------------------------------------------------------------------------
-# Sources
+QikMove.LIBS	= $(TEST_PGMS_LIBS)
 
 # C++ Source Files
 QikMove.SRC.C	= QikMove.c
 
+
 #------------------------------------------------------------------------------
-# Optional Variables 
-#
+# Extras
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libQik\""
 
+
 #------------------------------------------------------------------------------
-# Make Includes
+# Include RNMAKE top-level rules makefile
 
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
+include $(RNMAKE_ROOT)/Rules.mk
 
 
 ifdef RNMAKE_DOXY

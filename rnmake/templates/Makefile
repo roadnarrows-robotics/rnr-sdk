@@ -1,52 +1,42 @@
 ################################################################################
 #
-# Package: 	RN Make System 
+# templates/Makefile
 #
-# File:			Makefile
-#
-# Version: 2.0
-#
-# $(topdir)[/subdirs]/Makefile
-#
-# Description:
-# 	Specific [Sub]Pacakge Makefile Template.
-#
-# 	Copy this file to the package [sub]directory and redefine.
-# 	Any define that is not required can be left blank or deleted.
-#
-# 	Typically there are 3 distinct flavors used under a package:
-# 		Subdirectory makefile to simply redirect to subdirectories
-# 		Library subdirectory to make libraries
-# 		Program subdirectory to make programs
-#
-# Author(s): Robin Knight (robin.knight@roadnarrows.com)
-#
-# Copyright (C) 2005-2007.  RoadNarrows LLC.
-# All Rights Reserved
-#
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+ifdef RNMAKE_DOXY
+/*! 
+\file 
+
+\brief General [Sub]Pacakge Makefile Template.
+
+Version 3.0
+
+$(RNMAKE_PKG_ROOT)[/subdirs]/Makefile
+
+Copy this file to the package [sub]directory and redefine.
+Any define that is not required can be left blank or deleted.
+
+Typically there are 3 distinct flavors used under a package:
+- Subdirectory makefile to simply redirect to subdirectories
+- Library subdirectory to make libraries
+- Program subdirectory to make applications
+
+\pkgsynopsis
+RN Make System
+
+\pkgfile{templates/Makefile}
+
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2005-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+\cond RNMAKE_DOXY
+ */
+endif
 #
 ################################################################################
 
@@ -89,9 +79,9 @@ rnmake		= $(topdir)/rnmake
 # The order is important. For example, if subdir1 builds an local executable
 # needed by subdir3, then subdir1 must appear before subdir3 in the list. 
 #
-SUBDIRS 					= subdir1 \
-										subdir2 \
-										subdir3
+RNMAKE_SUBDIRS = 	subdir1 \
+									subdir2 \
+									subdir3
 
 
 #------------------------------------------------------------------------------
@@ -110,7 +100,7 @@ SUBDIRS 					= subdir1 \
 # Note: A library tag can be listed in both the static and shared library tag
 # 			list. In this case, both versions are built.
 #
-DIST_STLIBS 			= mylib1 mylib2
+RNMAKE_DIST_STLIBS = mylib1 mylib2
 
 #
 # Distribution Shared Libraries
@@ -125,7 +115,7 @@ DIST_STLIBS 			= mylib1 mylib2
 # Note: A library tag can be listed in both the static and shared library tag
 # 			list. In this case, both versions are built.
 #
-DIST_SHLIBS 			= mylib1 
+RNMAKE_DIST_SHLIBS 			= mylib1 
 
 #
 # Local Static Libraries (i.e. not in distribution)
@@ -145,13 +135,13 @@ DIST_SHLIBS 			= mylib1
 # Note: Local Shared Libraries are not allowed since installed package 
 # 			commponents would require the shared library.
 #
-LOC_STLIBS 				= myloclib1
+RNMAKE_LOC_STLIBS 				= myloclib1
 
 
 #------------------------------------------------------------------------------
 # Programs
 
-DIST_PGMS         = pgm1
+RNMAKE_DIST_PGMS = pgm1
 
 #
 # Local Program Executables (i.e. not in distribution)
@@ -167,7 +157,7 @@ DIST_PGMS         = pgm1
 # 	A tool hoehoehoe is used by other package components to complete the 
 # 	install process.
 #
-LOC_PGMS         	= hoehoeheo
+RNMAKE_LOC_PGMS = hoehoehoe
 
 # Libraries to Link With
 pgm1.LIBS       = pthread rnr
@@ -280,14 +270,14 @@ EXTRA_TGT_INSTALL = yourthing
 # Optional document subdirectory where [sub]package documentation will be
 # placed.
 #
-# Installed location: $(docdir)/$(PKG_FULL_NAME)/$(DOC_SUBDIR)
+# Installed location: $(docdir)/$(RNMAKE_PKG_FULL_NAME)/$(DOC_SUBDIR)
 #
 # Example: /usr/share/doc/pkg-1.3.0/mydocdir/
 #
 DOC_SUBDIR				=
 
 # Sub[Package] Doxygen Configuration File
-DOXY_CONF_FILE		= $(topdir)/make/doxy-mypgm.conf
+RNMAKE_DOXY_CONF_FILE		= $(topdir)/make/doxy-mypgm.conf
 
 #------------------------------------------------------------------------------
 # The RNMake Rules

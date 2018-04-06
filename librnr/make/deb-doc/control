@@ -4,4 +4,4 @@ Section: devel
 Priority: optional
 Architecture: @ARCH@
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
-Description: Basic RoadNarrows utilities and configuration documentation
+Description: RoadNarrows Robotics Common C Library 1 documentation.

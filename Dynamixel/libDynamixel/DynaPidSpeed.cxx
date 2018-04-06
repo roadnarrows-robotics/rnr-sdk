@@ -18,7 +18,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -88,6 +88,10 @@ using namespace std;
     m_nOdModulo = m_pServo->GetOdometerModulo();
   }
 #endif // 0
+ 
+const double DynaPidSpeed::SpeedPidKpDft  = 0.5;  ///< default Kp constant
+const double DynaPidSpeed::SpeedPidKiDft  = 1.0;  ///< default Ki constant
+const double DynaPidSpeed::SpeedPidKdDft  = 0.1;  ///< default Kd constant
 
 void DynaPidSpeed::SpecifySetPoint(double fDpDt, bool bUnwind)
 {

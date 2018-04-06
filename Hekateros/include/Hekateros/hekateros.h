@@ -15,7 +15,7 @@
  * \author Daniel Packard (daniel@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */

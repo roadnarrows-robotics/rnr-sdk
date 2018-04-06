@@ -1,54 +1,29 @@
 ################################################################################
+#
 # ./Makefile
 #
 ifdef RNMAKE_DOXY
 /*!
- * \file
- *
- * \brief Top-level \h_librnr makefile.
- *
- * An rnmake system package specific makefile.
- *
- * \pkgsynopsis
- * RoadNarrows Robotics Common Library 1
- *
- * \pkgfile{Makefile}
- *
- * \author Robin Knight (robin.knight@roadnarrows.com)
- *
- * \copyright
- *   \h_copy 2005-2018. RoadNarrows LLC.\n
- *   http://www.roadnarrows.com\n
- *   All Rights Reserved
- *
- * \license{MIT}
- *
- * \EulaBegin
- * Permission is hereby granted, without written agreement and without
- * license or royalty fees, to use, copy, modify, and distribute this
- * software and its documentation for any purpose, provided that
- * (1) The above copyright notice and the following two paragraphs
- * appear in all copies of the source code and (2) redistributions
- * including binaries reproduces these notices in the supporting
- * documentation.   Substantial modifications to this software may be
- * copyrighted by their authors and need not follow the licensing terms
- * described here, provided that the new terms are clearly indicated in
- * all files where they apply.
- * \n\n
- * IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
- * OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
- * PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
- * DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
- * EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- * \n\n
- * THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
- * FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
- * "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
- * PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
- * \EulaEnd
- * 
+\file
+
+\brief Top-level \h_librnr makefile.
+
+An rnmake system package specific makefile.
+
+\pkgsynopsis
+RoadNarrows Robotics Common Library 1
+
+\pkgfile{Makefile}
+
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2005-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
  * \cond RNMAKE_DOXY
  */
 endif
@@ -59,19 +34,25 @@ endif
 # Required
 
 # Package Root Directory
-RNMAKE_PKG_ROOT		= .
+RNMAKE_PKG_ROOT	= .
 
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
+
+#------------------------------------------------------------------------------
+# Subdirectories
+
+RNMAKE_SUBDIRS	= examples
 
 #------------------------------------------------------------------------------
 # librnr
 
-SUBDIRS	= examples
-
 # Distribution Static Libraries
-DIST_STLIBS = rnr
+RNMAKE_DIST_STLIBS = rnr
 
 # Distribution Shared Libraries
-DIST_SHLIBS = rnr
+RNMAKE_DIST_SHLIBS = rnr
 
 # Source Files
 rnr.SRC.C =	assoc.c \
@@ -93,6 +74,10 @@ rnr.SRC.C =	assoc.c \
 						uri.c \
 						win.c
 
+# library target subdirectory
+rnr.SUBDIR = rnr
+
+# library dependencies
 rnr.LIBS = pthread rt
 
 
@@ -104,7 +89,7 @@ rnr.LIBS = pthread rt
 #
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= rnr
+RNMAKE_DIST_HDRS	= rnr
 
 #
 # Distribution Headers
@@ -137,14 +122,11 @@ rnr.HDRS.H =	rnr/assoc.h \
 #------------------------------------------------------------------------------
 # Documentation
 
-# Document SubPackage Name
-DOC_SUBDIR				=
-
-# Sub[Package] Doxygen Configuration File
-DOXY_CONF_FILE		= $(RNMAKE_PKG_ROOT)/make/doxy.conf
+# Doxygen Configuration File
+RNMAKE_DOXY_CONF_FILE		= $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
 #------------------------------------------------------------------------------
-# Optional Variables 
+# Extras
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr\""
@@ -154,33 +136,6 @@ EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr\""
 
 EXTRA_TGT_ALL_POST = all-post 
 
-
-#------------------------------------------------------------------------------
-# Include rnmake rules
-
-# 'make rnmake=<path> ...' or RNMAKE_ROOT
-rnmake ?= $(RNMAKE_ROOT)
-
-# must be defined and non-empty
-ifeq ($(rnmake),)
-  $(error 'RNMAKE_ROOT' environment variable not specified)
-endif
-
-# make absolute filename (empty string returned if file does not exist)
-RNMAKE_RULES := $(realpath $(rnmake)/Rules.mk)
-
-# file required
-ifeq ($(RNMAKE_RULES),)
-  $(error 'RNMAKE_ROOT=$(rnmake)/Rules.mk': No such file)
-endif
-
-# include rnmake top-level rules makefile
-include $(RNMAKE_RULES)
-
-
-#------------------------------------------------------------------------------
-# Extras
-
 ETC_FILES	=	share/etc/*.xml \
 						share/etc/ld.so.conf.d/*.conf \
 						etc/udev/rules.d/*
@@ -189,74 +144,40 @@ LIB_FILES = share/lib/cmake/rnr/rnr-sdk-config.cmake
 
 PKGDIR_SHARE := $(RNMAKE_PKG_ROOT)/share
 
-#
-# Template to copy files from source to destination directory.
-#
-# Usage: copyfiles_template src_files dst_dir
-#
-define copyfiles_template
-	@if [ "$(1)" != "" ]; \
-	then \
-		b=$(notdir $(2)); \
-		flist="$(wildcard $(addprefix $(RNMAKE_PKG_ROOT)/,$(1)))"; \
-		for f in $${flist}; \
-		do \
-			tgt=$(2)$${f##*$$b}; \
-			if [ ! -f "$${tgt}" -o "$${f}" -nt "$${tgt}" ]; \
-			then \
-				d=$$(dirname $${tgt}); \
-				test -d $$d || $(MKDIR) $$d; \
-				printf "$(color_tgt_file) $${tgt}$(color_end)\n"; \
-				$(CP) $$f $${tgt}; \
-			fi; \
-		done; \
-	fi
-endef
-
-#
-# Template to copy file from source to destination.
-#
-# Usage: cp_template src_file dst_file
-#
-define cp_template
-	@if [ "$(1)" != "" ]; \
-	then \
-		if [ ! -f "$(2)" -o "$(1)" -nt "$(2)" ]; \
-		then \
-			d=$$(dirname $(2)); \
-			test -d $$d || $(MKDIR) $$d; \
-			printf "$(color_tgt_file) $(2)$(color_end)\n"; \
-			$(CP) $(1) $(2); \
-		fi; \
-	fi
-endef
-
 # post 'all' make target
 .PHONY: all-post
-all-post: show-banner etc-cp-files lib-cp-files share-cp-files
+all-post: show-banner cp-etc-files cp-lib-files cp-share-files
 
 .PHONY: show-banner
 show-banner:
-	$(call fnDirBanner,,all-post)
+	$(call printDirBanner,,all-post)
 	@printf "Pre-install Configuration\n"
 
-.PHONY: etc-cp-files
-etc-cp-files:
-	$(call fnGoalDesc,$(DISTDIR_ETC),Copying etc files.)
-	$(call cp_template,$(ETC_PROF_D_LAE),$(DISTDIR_ETC)/profile.d/laelaps.sh)
-	$(call copyfiles_template,$(ETC_FILES),$(DISTDIR_ETC))
+.PHONY: cp-etc-files
+cp-etc-files:
+	$(call printGoalDesc,$(@),Copying etc files to $(DISTDIR_ETC))
+	$(call copySrcDirRel,$(ETC_FILES),$(DISTDIR_ETC))
 
-.PHONY: lib-cp-files
-lib-cp-files:
-	$(call fnGoalDesc,$(DISTDIR_LIB),Copying lib files.)
-	$(call copyfiles_template,$(LIB_FILES),$(DISTROOT_LIB))
+.PHONY: cp-lib-files
+cp-lib-files:
+	$(call printGoalDesc,$(@),Copying extra lib files to $(DISTDIR_LIB))
+	$(call copySrcDirRel,$(LIB_FILES),$(DISTDIR_LIB))
 
-.PHONY: share-cp-files
-share-cp-files:
-	$(call fnGoalDesc,$(DISTDIR_SHARE),Copying share directory.)
-	@cp -rp $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
+.PHONY: cp-share-files
+cp-share-files:
+	$(call printGoalDesc,$(@),Copying share directory to $(DISTDIR_SHARE))
+	@$(CP_R) $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
 	@find $(DISTDIR_SHARE) -name '*.svn' -print | xargs rm -fr
 
+
+#------------------------------------------------------------------------------
+# Include RNMAKE rules makefile(s)
+
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include extras (must include after top-level)
+include $(RNMAKE_ROOT)/Extras.mk
 
 
 ifdef RNMAKE_DOXY

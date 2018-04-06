@@ -1,79 +1,47 @@
 ################################################################################
 #
-# Package: RN Make System 
-# File:    Arch.atmega168.mk
+# Arch/Arch.atmega168.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief RoadNarrows Make System Architecture Makefile
+\brief RoadNarrows Make System architecture makefile.
 
 \par Architecture:
 Atmel ATmega168 Microcontroller
 
 \par Build Host:
-Cross-Compile
+Cross-Compiler
 
 \par Tool-Chain:
 avr-*
 
-$LastChangedDate: 2011-09-12 16:07:43 -0600 (Mon, 12 Sep 2011) $
-$Rev: 1278 $
+\pkgsynopsis
+RN Make System
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{Arch/Arch.atmega168.mk}
 
-\par Copyright:
-(C) 2009-2011.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2009-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
-# Description:
-#
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #
 ################################################################################
 
-# Prevent mutliple inclusion
-ARCH_MK							= 1
+_ARCH_ATMEGA168_MK = 1
 
 # This architecture (required)
-ARCH         				= atmega168
-ARCH_FQNAME         = atmega168-mcu
-
-# RoadNarrows Install Prefix (override as necessary)
-ifndef prefix
-	ifdef prefix_root
-		prefix          = $(prefix_root)/$(ARCH)
-	else
-		prefix					= $(topdir)/xinstall/$(ARCH)
-	endif
-endif
+RNMAKE_ARCH         = atmega168
+RNMAKE_ARCH_FQNAME	= atmega168-mcu
 
 # Micro-Controller Unit
 MCU = atmega168
@@ -117,30 +85,39 @@ FUSE_HIGH ?= 0x99
 # CKSEL0   0 	 Select Clock source        0 (unprogrammed)
 FUSE_LOW ?= 0xE1
 
-# Architecture Include Directories
-ARCH_INCDIRS       	=
 
-# Architecture CPP Flags
-ARCH_CPPFLAGS       = 
+#------------------------------------------------------------------------------
+# Tool Chain
+#------------------------------------------------------------------------------
 
 # Cross compiler tool chain prefix
-CROSS_COMPILE       = avr-
+CROSS_COMPILE = avr-
 
 # Build Support Commands
-AR                  = $(CROSS_COMPILE)ar
-RANLIB              = $(CROSS_COMPILE)ranlib
-STRIP_LIB						= $(CROSS_COMPILE)strip --strip-debug
-STRIP_EXE						= $(CROSS_COMPILE)strip --strip-all
-OBJCOPY 						= $(CROSS_COMPILE)objcopy
-OBJDUMP 						= $(CROSS_COMPILE)objdump
-SIZE 								= $(CROSS_COMPILE)size
-NM 									= $(CROSS_COMPILE)nm
+AR        = $(CROSS_COMPILE)ar
+RANLIB    = $(CROSS_COMPILE)ranlib
+STRIP_LIB	= $(CROSS_COMPILE)strip --strip-debug
+STRIP_EXE = $(CROSS_COMPILE)strip --strip-all
+OBJCOPY 	= $(CROSS_COMPILE)objcopy
+OBJDUMP 	= $(CROSS_COMPILE)objdump
+SIZE 			= $(CROSS_COMPILE)size
+NM 				= $(CROSS_COMPILE)nm
 
 
 #------------------------------------------------------------------------------
-# Assembler
+# C Preprocessor Options
 #------------------------------------------------------------------------------
-AS                  = $(CROSS_COMPILE)as
+# Architecture specific include directories
+RNMAKE_ARCH_INCDIRS =
+
+# Architecture specific cpp flags
+RNMAKE_ARCH_CPPFLAGS =
+
+
+#------------------------------------------------------------------------------
+# Assembler and Options
+#------------------------------------------------------------------------------
+AS = $(CROSS_COMPILE)as
 
 # Atmel device
 ASFLAGS_MCU	= -mmcu=$(MCU)
@@ -170,7 +147,7 @@ ARCH_ASFLAGS = 	$(ASFLAGS_MCU) \
 								$(ASFLAGS_LISTING)
 
 #------------------------------------------------------------------------------
-# C Compiler
+# C Compiler and Options
 #------------------------------------------------------------------------------
 CC                  = $(CROSS_COMPILE)gcc
 
@@ -226,7 +203,8 @@ CFLAGS_LISTING 		= -Wa,-adhlns=$(<:.c=.lst)
 
 CFLAGS_CPP_ONLY     = -E
 CFLAGS_DEPS_ONLY    = -M
-ARCH_CFLAGS         = $(CFLAGS_MCU) \
+
+RNMAKE_ARCH_CFLAGS = 	$(CFLAGS_MCU) \
 											$(CFLAGS_DEBUG) \
 											$(CFLAGS_OPTIMIZE_LEVEL) \
                       $(CFLAGS_OPTIMIZES) \
@@ -235,23 +213,27 @@ ARCH_CFLAGS         = $(CFLAGS_MCU) \
 											$(CFLAGS_CSTANDARD) \
 											$(CFLAGS_GENDEPFLAGS)
 
+# Make AS/C/CXX Dependencies Command
+RNMAKE_MAKEDEPS	= $(CC) $(CFLAGS_DEPS_ONLY)
+
 
 #------------------------------------------------------------------------------
-# C++ Compiler
+# C++ Compiler and Options
 #------------------------------------------------------------------------------
 CXX                 = $(CROSS_COMPILE)g++
 CXXFLAGS_CPP_ONLY   = -E
 CXXFLAGS_DEPS_ONLY  = -M
-CXXFLAGS            = $(CFLAGS_DEBUG) \
-											$(CFLAGS_OPTIMIZE_LEVEL) \
-                      $(CFLAGS_OPTIMIZES) \
-                      $(CFLAGS_WARNING) \
-                      $(CFLAGS_OTHER) \
-											$(CFLAGS_CSTANDARD)
+
+RNMAKE_ARCH_CXXFLAGS = 	$(CFLAGS_DEBUG) \
+												$(CFLAGS_OPTIMIZE_LEVEL) \
+                      	$(CFLAGS_OPTIMIZES) \
+                      	$(CFLAGS_WARNING) \
+                      	$(CFLAGS_OTHER) \
+												$(CFLAGS_CSTANDARD)
 
 
 #------------------------------------------------------------------------------
-# LD (linker)
+# Linker and Options
 #------------------------------------------------------------------------------
 LD_CC             	= $(CC)
 LD_CXX              = $(CXX)
@@ -280,8 +262,9 @@ ARCH_LDFLAGS			= $(ARCH_LDFLAGS_LD) \
 ARCH_LD_LIBPATHS  =
 ARCH_LD_LIBS      =
 
+
 #------------------------------------------------------------------------------
-# Static Library Archive
+# Static Library Archiver and Options
 #------------------------------------------------------------------------------
 STLIB_LD            = ${AR} cr
 STLIB_PREFIX        = lib
@@ -308,9 +291,6 @@ SCANF_LIB_FLOAT = -Wl,-u,vfscanf -lscanf_flt
 SCANF_LIB = 
 
 MATH_LIB = -lm
-
-# Make AS/C/CXX Dependencies Command
-MAKEDEPS				= $(CC) $(CFLAGS_DEPS_ONLY)
 
 
 ifdef RNMAKE_DOXY

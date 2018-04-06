@@ -41,7 +41,7 @@
 ################################################################################
 
 # Prevent mutliple inclusion
-PKG_MK						= 1
+_PKG_MK	= 1
 
 ifndef pkgroot
 $(error Error: pkgroot not defined in including makefile)
@@ -50,25 +50,25 @@ endif
 #
 # The Package Definition
 #
-PKG 								= packagename
-PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 0
-PKG_VERSION_RELEASE = 0
-PKG_VERSION_DATE    = 2007
-PKG_AUTHORS					= "Robin Knight & Kim Wheeler-Smith"
-PKG_OWNERS					= "RoadNarrows LLC"
-PKG_DISCLAIMER			= \
+RNMAKE_PKG 					       = packagename
+RNMAKE_PKG_VERSION_MAJOR   = 1
+RNMAKE_PKG_VERSION_MINOR   = 0
+RNMAKE_PKG_VERSION_RELEASE = 0
+RNMAKE_PKG_VERSION_DATE    = 2007
+RNMAKE_PKG_AUTHORS				 = "Robin Knight & Kim Wheeler-Smith"
+RNMAKE_PKG_OWNERS					 = "RoadNarrows LLC"
+RNMAKE_PKG_DISCLAIMER			 = \
 "This is free software; see the source for copying conditions.  There is NO\n" \
 "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
 
 # Dotted full version number
-PKG_VERSION_DOTTED	= $(PKG_VERSION_MAJOR).$(PKG_VERSION_MINOR).$(PKG_VERSION_RELEASE)
+RNMAKE_PKG_VERSION_DOTTED	= $(RNMAKE_PKG_VERSION_MAJOR).$(RNMAKE_PKG_VERSION_MINOR).$(RNMAKE_PKG_VERSION_RELEASE)
 
 # Concatenated full version number
-PKG_VERSION_CAT    	= $(PKG_VERSION_MAJOR)$(PKG_VERSION_MINOR)$(PKG_VERSION_RELEASE)
+RNMAKE_PKG_VERSION_CAT = $(RNMAKE_PKG_VERSION_MAJOR)$(RNMAKE_PKG_VERSION_MINOR)$(RNMAKE_PKG_VERSION_RELEASE)
 
 # Package full name
-PKG_FULL_NAME				= $(PKG)-$(PKG_VERSION_DOTTED)
+RNMAKE_PKG_FULL_NAME	= $(RNMAKE_PKG)-$(RNMAKE_PKG_VERSION_DOTTED)
 
 #------------------------------------------------------------------------------
 # Optional Variables and Tweaks
@@ -86,25 +86,25 @@ PKG_FULL_NAME				= $(PKG)-$(PKG_VERSION_DOTTED)
 #LOCDIR_ROOT				=
 
 # Package Include Directories
-PKG_INCDIRS 				= $(pkgroot)/include
+RNMAKE_PKG_INCDIRS 				= $(pkgroot)/include
 
 # Package System Include Directories
-PKG_SYS_INCDIRS			=
+RNMAKE_PKG_SYS_INCDIRS			=
 
 # Link Library Extra Library Directories (exluding local library)
-PKG_LD_LIBDIRS 			= 
+RNMAKE_PKG_LD_LIBDIRS 			= 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION README
+RNMAKE_PKG_REL_FILES				= VERSION README
 
 # CPP flags
-PKG_CPPFLAGS				=
+RNMAKE_PKG_CPPFLAGS				=
 
 # C flags
-PKG_CFLAGS					=
+RNMAKE_PKG_CFLAGS					=
 
 # CXX flags
-PKG_CXXFLAGS				=
+RNMAKE_PKG_CXXFLAGS				=
 
 # Link flags
-PKG_LDFLAGS					=
+RNMAKE_PKG_LDFLAGS					=

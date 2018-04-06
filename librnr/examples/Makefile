@@ -2,54 +2,32 @@
 #
 # ./examples/Makefile
 #
-
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2013-02-08 12:20:58 -0700 (Fri, 08 Feb 2013) $
-$Rev: 2676 $
+\brief Make librnr example applications.
 
-\brief
-Make librnr example applications.
+An rnmake system package specific makefile.
 
-RN Make System Specific Makefile
+\pkgsynopsis
+RoadNarrows Robotics Common Library 1
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{examples/Makefile}
 
- * \copyright
- *   \h_copy 2005-2018. RoadNarrows LLC.\n
- *   http://www.roadnarrows.com\n
- *   All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
 
-\cond RNMAKE_DOXY
+\pkgcopyright{2005-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
+# 
 ################################################################################
 
 #------------------------------------------------------------------------------
@@ -58,18 +36,22 @@ endif
 # Package Root Directory
 RNMAKE_PKG_ROOT	= ..
 
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
+
 #------------------------------------------------------------------------------
 # Programs
 
-LOC_PGMS         = example_assoc \
-									 example_checksum \
-									 example_config \
-									 example_dlist \
-									 example_hash \
-									 example_log \
-                   example_cpp \
-                   example_uri \
-                   example_shm 
+RNMAKE_LOC_PGMS =	example_assoc \
+									example_checksum \
+									example_config \
+									example_dlist \
+									example_hash \
+									example_log \
+                  example_cpp \
+                  example_uri \
+                  example_shm 
 
 # Libraries to Link With
 example_assoc.LIBS      = rnr
@@ -116,33 +98,16 @@ example_uri.SRC.C = example_uri.c
 example_shm.SRC.C = example_shm.c
 
 #------------------------------------------------------------------------------
-# Optional Variables 
+# Extras
 #
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"logexample\"" -DLOGMOD_COLOR=LOG_COLOR_BLUE
 
 #------------------------------------------------------------------------------
-# Include rnmake rules
+# Include rnmake top-level rules makefile
 
-# 'make rnmake=<path> ...' or RNMAKE_ROOT
-rnmake ?= $(RNMAKE_ROOT)
-
-# must be defined and non-empty
-ifeq ($(rnmake),)
-  $(error 'RNMAKE_ROOT' environment variable not specified)
-endif
-
-# make absolute filename (empty string returned if file does not exist)
-RNMAKE_RULES := $(realpath $(rnmake)/Rules.mk)
-
-# file required
-ifeq ($(RNMAKE_RULES),)
-  $(error 'RNMAKE_ROOT=$(rnmake)/Rules.mk': No such file)
-endif
-
-# include rnmake top-level rules makefile
-include $(RNMAKE_RULES)
+include $(RNMAKE_ROOT)/Rules.mk
 
 
 ifdef RNMAKE_DOXY

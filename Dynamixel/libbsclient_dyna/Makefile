@@ -1,71 +1,58 @@
 ################################################################################
 #
 # ./libbsclient_dyna/Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2015-01-12 10:56:06 -0700 (Mon, 12 Jan 2015) $
-$Rev: 3845 $
+\brief The libbsclient_dyna library makefile.
 
-\brief Make bsProxy botsense client library for the Dynamixel library.
+The BotSense client interface between the Dynamixels and the bsProxy.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_dynamixel Package
 
-##! \copyright
-##!   \h_copy 2011-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{libbsclient_dyna/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2011-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# @EulaBegin@
 # 
-# Unless otherwise stated explicitly, all materials contained are copyrighted
-# and may not be used without RoadNarrows LLC's written consent,
-# except as provided in these terms and conditions or in the copyright
-# notice (documents and software) or other proprietary notice provided with
-# the relevant materials.
-# 
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
-# MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
-# BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
-# CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
-# DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# THE AUTHORS AND  ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# @EulaEnd@
-#
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ..
+RNMAKE_PKG_ROOT	= ..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
 # Libraries
 
-# botsense modules are located in a sub-directory of lib
-LIB_SUBDIR = $(PKG_LIB_PLUGIN_SUBDIR)
-
 # Distribution Static Libraries
-DIST_STLIBS 			= bsclient_dyna
+RNMAKE_DIST_STLIBS = bsclient_dyna
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= bsclient_dyna
+RNMAKE_DIST_SHLIBS = bsclient_dyna
+
+# Target library subdirectory
+bsclient_dyna.SUBDIR = botsense
 
 # Libraries to link dll with
 bsclient_dyna.LIBS	= rnr_netmsgs rnr pthread stdc++
@@ -74,30 +61,19 @@ bsclient_dyna.LIBS	= rnr_netmsgs rnr pthread stdc++
 bsclient_dyna.SRC.C 	=	bsDynaMsgs.c
 bsclient_dyna.SRC.CXX =	bsDynaClient.cxx
 
-#------------------------------------------------------------------------------
-# Interface Headers
 
 #------------------------------------------------------------------------------
-# Optional Variables 
-#
-
-# Link Library Extra Library Directories (exluding local library)
-EXTRA_LD_LIBDIRS = $(DISTROOT_LIB)/rnr
+# Extras
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libbsclient_dyna\""
 
+
 #------------------------------------------------------------------------------
-# Make Includes
-#
+# Include RNMAKE rules makefile(s)
 
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
 
 
 ifdef RNMAKE_DOXY

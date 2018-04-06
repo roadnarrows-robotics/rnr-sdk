@@ -1,8 +1,6 @@
 ################################################################################
 #
-# Package: 	RN Make System 
-#
-# File:			intall_h.mk
+# install_h.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
@@ -11,50 +9,35 @@ ifdef RNMAKE_DOXY
 \brief Auto-generate the install.h include file for the specific package
        architecture.
 
+DEPRECATED.
+
 \par Usage:
 make pkgroot=\<dir\> install_h=\<file\> arch=\<arch\>
      bindir=\<bindir\> sbindir=\<sbindir\> libdir=\<libdir\>
      includedir=\<includedir\> sysconfdir=\<sysconfdir\> docdir=\<docdir\>
      mandir=\<mandir\> infodir=\<infodir\>
 
-$LastChangedDate: 2009-07-09 15:53:24 -0600 (Thu, 09 Jul 2009) $
-$Rev: 98 $
+\pkgsynopsis
+RN Make System
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{install_h.mk}
 
-\par Copyright:
-(C) 2005-2009.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2005-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #
 ################################################################################
+
+_INSTALL_H_MK = 1
 
 $(install_h):
 	@echo ''

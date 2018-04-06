@@ -4,4 +4,4 @@ Section: devel
 Priority: optional
 Architecture: @ARCH@
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
-Description: Libraries for writing applications quickly and consistently.
+Description: C++ libraries for writing applications quickly and consistently source.

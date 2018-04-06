@@ -1,8 +1,6 @@
 ################################################################################
 #
-# Package: 	RN Make System
-#
-# File:			Rules.AtmelMcu.mk
+# Rules.AtmelMcu.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
@@ -10,51 +8,33 @@ ifdef RNMAKE_DOXY
 
 \brief Alternative rules file to support Atmel16 Microcontroller Units.
 
-Include this file into each local make file (usually at the bottom).
+Include this file in each appropriate local make file (usually near the bottom).
 Only one library or program target is supported per make file, unlike the
-standard Rules.mk file.\n
+standard Rules.mk file.
 
-$LastChangedDate: 2012-02-09 14:24:37 -0700 (Thu, 09 Feb 2012) $
-$Rev: 1791 $
+\sa Rules.mk for more details on standard make targets.
 
-\sa Rules.mk for more details of standard make targets.
+\pkgsynopsis
+RN Make System
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{Rules.AtmelMcu.mk}
 
-\par Copyright:
-(C) 2009-2016.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2009-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
 #
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
 ################################################################################
+
+_RULES_ATMEL_MCU_MK = 1
 
 #------------------------------------------------------------------------------
 # Prelims
@@ -115,34 +95,31 @@ endif
 #------------------------------------------------------------------------------
 # Product Makefile (Optional)
 #
-ifdef prod_mk
-PROD_MKFILE = $(prod_mk)
-else
-PROD_MKFILE = $(pkgroot)/../make/Prod.mk
+#
+ifdef RNMAKE_PROD_MKFILE
+  # optionally include (no error if not found)
+  -include $(RNMAKE_PROD_MKFILE)
 endif
-
-# optionally include
--include $(PROD_MKFILE)
 
 
 #------------------------------------------------------------------------------
 # Package Makefile
 #
 ifdef pkg_mk
-PKG_MKFILE = $(pkg_mk)
+RNMAKE_PKG_MKFILE = $(pkg_mk)
 else
-PKG_MKFILE = $(pkgroot)/make/Pkg.mk
+RNMAKE_PKG_MKFILE = $(pkgroot)/make/Pkg.mk
 endif
 
-include $(PKG_MKFILE)
+include $(RNMAKE_PKG_MKFILE)
 
-ifndef PKG
-$(error Error: PKG: not defined: specify in Pkg.mk)
+ifndef RNMAKE_PKG
+$(error Error: RNMAKE_PKG: not defined: specify in Pkg.mk)
 endif
 
 # Package root absolute path name
-ifndef PKG_ROOT
-export PKG_ROOT := $(realpath $(CURDIR)/$(pkgroot))
+ifndef RNMAKE_PKG_ROOT
+export RNMAKE_PKG_ROOT := $(realpath $(CURDIR)/$(pkgroot))
 endif
 
 
@@ -260,7 +237,7 @@ DIST_ARCH       = $(DIST_ROOT)/dist.$(ARCH)
 ifdef PROD_FULL_NAME
 DIST_NAME_BIN	      = $(PROD_FULL_NAME)
 else
-DIST_NAME_BIN	      = $(PKG_FULL_NAME)
+DIST_NAME_BIN	      = $(RNMAKE_PKG_FULL_NAME)
 endif
 
 # Distributions Directories
@@ -269,9 +246,9 @@ DISTDIR_LIB     = $(DIST_ARCH)/lib
 DISTDIR_INCLUDE = $(DIST_ARCH)/include
 DISTDIR_ETC     = $(DIST_ARCH)/etc
 DISTDIR_MAN     = $(DIST_ARCH)/man
-DISTDIR_SHARE   = $(DIST_ARCH)/share/$(PKG_FULL_NAME)
-DISTDIR_DOC     = $(DIST_ARCH)/doc/$(PKG_FULL_NAME)-doc
-DISTDIR_SRC     = $(DIST_ARCH)/src/$(PKG_FULL_NAME)
+DISTDIR_SHARE   = $(DIST_ARCH)/share/$(RNMAKE_PKG_FULL_NAME)
+DISTDIR_DOC     = $(DIST_ARCH)/doc/$(RNMAKE_PKG_FULL_NAME)-doc
+DISTDIR_SRC     = $(DIST_ARCH)/src/$(RNMAKE_PKG_FULL_NAME)
 DISTDIR_TMP     = $(DIST_ARCH)/tmp/$(DIST_NAME_BIN)-$(ARCH)
 DISTDIR_LIST    = $(DISTDIR_BIN) \
                   $(DISTDIR_INCLUDE) \
@@ -289,8 +266,8 @@ DISTDIR_DOC_SRC			= $(DISTDIR_DOC)/$(DIST_SRCDOC)
 DISTDIR_DOC_SRC_IMG	= $(DISTDIR_DOC_SRC)/images
 
 # tar ball files - source, documentation, binary
-DIST_TARBALL_SRC		= $(PKG_FULL_NAME)-src.tar.gz
-DIST_TARBALL_DOC		= $(PKG_FULL_NAME)-doc.tar.gz
+DIST_TARBALL_SRC		= $(RNMAKE_PKG_FULL_NAME)-src.tar.gz
+DIST_TARBALL_DOC		= $(RNMAKE_PKG_FULL_NAME)-doc.tar.gz
 DIST_TARBALL_BIN		= $(DIST_NAME_BIN)-$(ARCH).tar.gz
 
 # Object Directory
@@ -311,51 +288,51 @@ DEPSFILE				= $(DEPSDIR)/deps.$(ARCH)
 # Include Flags
 EXTRA_INCLUDES		= $(addprefix -I,$(EXTRA_INCDIRS))
 EXTRA_SYS_INCLUDES= $(addprefix -I,$(EXTRA_SYS_INCDIRS))
-PKG_INCLUDES			= $(addprefix -I,$(PKG_INCDIRS))
-PROD_INCLUDES			= $(addprefix -I,$(PROD_INCDIRS))
-ARCH_INCLUDES			= $(addprefix -I,$(ARCH_INCDIRS))
-PKG_SYS_INCLUDES	= $(addprefix -I,$(PKG_SYS_INCDIRS))
+PKG_INCLUDES			= $(addprefix -I,$(RNMAKE_PKG_INCDIRS))
+PROD_INCLUDES			= $(addprefix -I,$(RNMAKE_PROD_INCDIRS))
+ARCH_INCLUDES			= $(addprefix -I,$(RNMAKE_ARCH_INCDIRS))
+PKG_SYS_INCLUDES	= $(addprefix -I,$(RNMAKE_PKG_SYS_INCDIRS))
 DIST_INCLUDES			= -I$(DISTDIR_INCLUDE)
 INCLUDES					= -I. \
 										$(EXTRA_INCLUDES) \
-										$(PKG_INCLUDES) \
+										$(RNMAKE_PKG_INCLUDES) \
 										$(PROD_INCLUDES) \
 										$(ARCH_INCLUDES) \
 										$(DIST_INCLUDES) \
 										-I$(includedir) \
 										$(EXTRA_SYS_INCLUDES) \
-										$(PKG_SYS_INCLUDES)
+										$(RNMAKE_PKG_SYS_INCLUDES)
 
 # CPP Flags
 CPPFLAGS					= $(EXTRA_CPPFLAGS) \
-										$(PKG_CPPFLAGS) \
-										$(ARCH_CPPFLAGS) \
+										$(RNMAKE_PKG_CPPFLAGS) \
+										$(RNMAKE_ARCH_CPPFLAGS) \
 										-DARCH_$(ARCH) \
 										-DARCH=\"$(ARCH)\"
 
 # Assembler Flags
-ASFLAGS						= $(EXTRA_ASFLAGS) $(PKG_ASFLAGS) $(ARCH_ASFLAGS)
+ASFLAGS						= $(EXTRA_ASFLAGS) $(RNMAKE_PKG_ASFLAGS) $(ARCH_ASFLAGS)
 
 # C Flags
-CFLAGS						= $(EXTRA_CFLAGS) $(PKG_CFLAGS) $(ARCH_CFLAGS)
+CFLAGS						= $(EXTRA_CFLAGS) $(RNMAKE_PKG_CFLAGS) $(RNMAKE_ARCH_CFLAGS)
 
 # CXX Flags
-CXXFLAGS					= $(EXTRA_CXXFLAGS) $(PKG_CXXFLAGS) $(ARCH_CXXFLAGS)
+CXXFLAGS					= $(EXTRA_CXXFLAGS) $(RNMAKE_PKG_CXXFLAGS) $(RNMAKE_ARCH_CXXFLAGS)
 
 # Library Path Flags
 EXTRA_LD_LIBPATHS	= $(addprefix -L,$(EXTRA_LD_LIBDIRS))
-PKG_LD_LIBPATHS		= $(addprefix -L,$(PKG_LD_LIBDIRS))
+PKG_LD_LIBPATHS		= $(addprefix -L,$(RNMAKE_PKG_LD_LIBDIRS))
 DIST_LD_LIBPATHS	= -L$(DISTDIR_LIB)
 LD_LIBPATHS			  = $(EXTRA_LD_LIBPATHS) \
-									 	 $(PKG_LD_LIBPATHS) \
+									 	 $(RNMAKE_PKG_LD_LIBPATHS) \
 										 $(DIST_LD_LIBPATHS) \
 										-L$(libdir) \
 										 $(ARCH_LD_LIBPATHS)
 
 # External Libraries
-LD_LIBS						= $(EXTRA_LD_LIBS) $(PKG_LD_LIBS) $(ARCH_LD_LIBS)
+LD_LIBS						= $(EXTRA_LD_LIBS) $(RNMAKE_PKG_LD_LIBS) $(ARCH_LD_LIBS)
 
-LDFLAGS     			= $(EXTRA_LDFLAGS) $(PKG_LDFLAGS) $(ARCH_LDFLAGS)
+LDFLAGS     			= $(EXTRA_LDFLAGS) $(RNMAKE_PKG_LDFLAGS) $(ARCH_LDFLAGS)
 
 # default link-loader is c compiler - override if using C++
 ifeq "$(LANG)" "C++"
@@ -384,7 +361,7 @@ OBJS = $(addprefix $(OBJDIR)/,$($(TARGET).SRC.C:.c=.o) \
 LSTS = $($(TARGET).SRC.C:.c=.lst) $($(TARGET).SRC.S:.S=.lst)
 
 # Release files
-REL_FILES				= $(PKG_REL_FILES) $(EXTRA_REL_FILES)
+REL_FILES				= $(RNMAKE_PKG_REL_FILES) $(EXTRA_REL_FILES)
 
 # Release Files
 FQ_REL_FILES 		= $(addprefix $(DISTDIR_DOC)/,$(REL_FILES))
@@ -414,8 +391,8 @@ neq = $(filter-out $(1),$(2))
 eq  = $(if $(call neq,$(1),$(2)),,1)
 
 # Returns "1" if given entity exists.
-isfile 	= $(shell  if [ -f $(1) ]; then echo 1; fi)
-isdir 	= $(shell  if [ -d $(1) ]; then echo 1; fi)
+isFile 	= $(shell  if [ -f $(1) ]; then echo 1; fi)
+isDir 	= $(shell  if [ -d $(1) ]; then echo 1; fi)
 
 
 # Make obj/obj-<ARCH> in current directory
@@ -601,7 +578,7 @@ avrdude:
 # Desc: 	Makes interface header files
 
 # List of all header tags
-HDR_TAG_LIST = $(addsuffix .HDRS.H,$(DIST_HDRS))
+HDR_TAG_LIST = $(addsuffix .HDRS.H,$(RNMAKE_DIST_HDRS))
 
 # Complete list of headers
 PREREQ_HDRS = $(foreach tag,$(HDR_TAG_LIST),$($(tag)))
@@ -640,8 +617,8 @@ endif
 $(DISTDIR_DOC)/VERSION.txt:
 	@echo ""
 	@echo "     $@"
-	@echo "$(PKG) v$(PKG_VERSION_DOTTED)"  > $@
-	@echo "Copyright (C) $(PKG_VERSION_DATE) RoadNarrows LLC" >> $@
+	@echo "$(RNMAKE_PKG) v$(RNMAKE_PKG_VERSION_DOTTED)"  > $@
+	@echo "Copyright (C) $(RNMAKE_PKG_VERSION_DATE) RoadNarrows LLC" >> $@
 	@echo "" >> $@
 	@echo "Compiled: `date`" >> $@
 
@@ -685,15 +662,15 @@ DOXY_IMAGES = $(rnmake)/doxy/rnr_images
 endif
 
 docs-src-gen:
-	@if [ "$(DOXY_CONF_FILE)" ]; \
+	@if [ "$(RNMAKE_DOXY_CONF_FILE)" ]; \
 	then \
 		echo ""; \
 		echo "Making source documentation"; \
 		test -d $(DISTDIR_DOC) || $(MKDIR) $(DISTDIR_DOC); \
 		test -d $(DISTDIR_DOC_SRC_IMG) || $(MKDIR) $(DISTDIR_DOC_SRC_IMG); \
 		$(CP) -p $(DOXY_IMAGES)/* $(DISTDIR_DOC_SRC_IMG)/.; \
-		(cat $(DOXY_CONF_FILE); \
-		 echo "PROJECT_NUMBER=$(PKG_VERSION_DOTTED)"; \
+		(cat $(RNMAKE_DOXY_CONF_FILE); \
+		 echo "PROJECT_NUMBER=$(RNMAKE_PKG_VERSION_DOTTED)"; \
 		 echo "HTML_HEADER=$(HTML_HEADER)"; \
 		 echo "HTML_FOOTER=$(HTML_FOOTER)"; \
 		 echo "HTML_STYLESHEET=$(HTML_STYLESHEET)"; \
@@ -702,7 +679,7 @@ docs-src-gen:
 		 echo "HTML_OUTPUT=$(DIST_SRCDOC)"; \
 		) | doxygen - >$(pkgroot)/doxy.out.log 2>$(pkgroot)/doxy.err.log; \
 		$(rnmake)/utils/doxyindex.sh \
-							-t "$(PKG) v$(PKG_VERSION_DOTTED)" \
+							-t "$(RNMAKE_PKG) v$(RNMAKE_PKG_VERSION_DOTTED)" \
 							-h $(HTML_HEADER) \
 							>$(DISTDIR_DOC)/$(DIST_SRCDOC)/index.html; \
 	fi
@@ -748,14 +725,14 @@ install-includes:
 # install documentation
 install-docs: documents
 	@echo ""
-	@echo "Installing documents to $(docdir)/$(PKG_FULL_NAME)"
-	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_DOC) $(docdir)/$(PKG_FULL_NAME)
+	@echo "Installing documents to $(docdir)/$(RNMAKE_PKG_FULL_NAME)"
+	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_DOC) $(docdir)/$(RNMAKE_PKG_FULL_NAME)
 
 # install share
 install-share:
 	@echo ""
 	@echo "Installing system share files to $(sharedir)"
-	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_SHARE) $(sharedir)/$(PKG_FULL_NAME)
+	@$(rnmake)/utils/doinstall.sh -s 664 $(DISTDIR_SHARE) $(sharedir)/$(RNMAKE_PKG_FULL_NAME)
 
 # install etc
 install-etc:
@@ -786,10 +763,10 @@ tarballs: pkgbanner tarball-bin tarball-doc tarball-src
 
 .PHONY: tarball-doc
 tarball-doc: 
-	$(if $(call isdir,$(DISTDIR_DOC)),,\
+	$(if $(call isDir,$(DISTDIR_DOC)),,\
 			    					$(error No documentation - Try 'make documents' first))
 	@cd $(DIST_ARCH)/doc; \
-	$(TAR) ../../$(DIST_TARBALL_DOC) $(PKG_FULL_NAME)-doc
+	$(TAR) ../../$(DIST_TARBALL_DOC) $(RNMAKE_PKG_FULL_NAME)-doc
 
 .PHONY: tarball-src
 tarball-src: 
@@ -808,11 +785,11 @@ tarball-src:
 		$(rnmake)/utils/cppath.sh $$src $(DISTDIR_SRC); \
 	done;
 	@cd $(DIST_ARCH)/src; \
-	$(TAR) ../../$(DIST_TARBALL_SRC) $(PKG_FULL_NAME)
+	$(TAR) ../../$(DIST_TARBALL_SRC) $(RNMAKE_PKG_FULL_NAME)
 
 .PHONY: tarball-bin
 tarball-bin:
-	$(if $(call isdir,$(DIST_ARCH)),,$(error Nothing made - Try 'make' first))
+	$(if $(call isDir,$(DIST_ARCH)),,$(error Nothing made - Try 'make' first))
 	@test -d $(DISTDIR_TMP) || $(MKDIR) $(DISTDIR_TMP)
 	@cd $(DIST_ARCH); \
 	$(FIND) bin lib include etc share -print | \
@@ -840,7 +817,7 @@ hdrdeps:
 
 hdrdeps_sh = \
 	$(shell $(rnmake)/utils/hdrdeps.sh \
-		-c "$(MAKEDEPS)" \
+		-c "$(RNMAKE_MAKEDEPS)" \
 		-f $(DEPSFILE) \
 		-o $(OBJDIR) \
 		-d "$(CPPFLAGS)" \
@@ -863,7 +840,7 @@ clean: pkgbanner do-clean $(EXTRA_TGT_CLEAN) subdirs
 
 do-clean:
 	@echo "Cleaning $(CURDIR)"
-	$(RM) *.o *.ii *.c~ *.cxx~ .h~ $(DIST_PGMS) a.out doxy.*.log
+	$(RM) *.o *.ii *.c~ *.cxx~ .h~ $(RNMAKE_DIST_PGMS) a.out doxy.*.log
 	$(RM) *.hex *.eep *.cof *.elf *map *.a90 *.sym *.lnk *.lss
 	$(RM) $(LSTS)
 	$(RM) $(OBJDIR)
@@ -876,19 +853,19 @@ do-clean:
 distclean clobber distclean-fw: pkgbanner clean $(EXTRA_TGT_DISTCLEAN)
 	@echo "\nClobbering distribution $(CURDIR)"
 	$(RM) $(DIST_ARCH)
-	$(RM) $(DIST_ROOT)/$(PKG_FULL_NAME)-$(ARCH).tar.gz
-	$(RM) $(DIST_ROOT)/$(PKG_FULL_NAME)-doc.tar.gz
-	$(RM) $(DIST_ROOT)/$(PKG_FULL_NAME)-src.tar.gz
+	$(RM) $(DIST_ROOT)/$(RNMAKE_PKG_FULL_NAME)-$(ARCH).tar.gz
+	$(RM) $(DIST_ROOT)/$(RNMAKE_PKG_FULL_NAME)-doc.tar.gz
+	$(RM) $(DIST_ROOT)/$(RNMAKE_PKG_FULL_NAME)-src.tar.gz
 	$(RM) $(DEPSFILE)
 
 # -------------------------------------------------------------------------
 # Target:	subdirs
 # Desc: 	Recursively make subdirectories.
 # -------------------------------------------------------------------------
-.PHONY: subdirs $(SUBDIRS)
-subdirs: $(SUBDIRS)
+.PHONY: subdirs $(RNMAKE_SUBDIRS)
+subdirs: $(RNMAKE_SUBDIRS)
 
-$(SUBDIRS):
+$(RNMAKE_SUBDIRS):
 	$(call dirbanner,$(@))
 	@$(MAKE) $(EXTRA_MAKE_FLAGS) -C $(@) $(CURGOAL)
 
@@ -899,7 +876,7 @@ $(SUBDIRS):
 # Directory Banner Template
 define dirbanner
 	@if [ "$(1)" != "" ]; then \
-	subdirnam="$(patsubst $(dir $(PKG_ROOT))%,%,$(CURDIR)/$(1))";\
+	subdirnam="$(patsubst $(dir $(RNMAKE_PKG_ROOT))%,%,$(CURDIR)/$(1))";\
 	echo ""; \
 	echo "$(dashline)";\
 	echo "Directory: $$subdirnam";\
@@ -913,8 +890,8 @@ endef
 pkgbanner:
 	@if [ "$(MAKELEVEL)" = "0" -a "$(CURGOAL)" = "$(GOAL)" ]; then \
 	echo "$(boldline)";\
-	echo "Package:       $(PKG_FULL_NAME)";\
-	echo "Package Root:  $(PKG_ROOT)";\
+	echo "Package:       $(RNMAKE_PKG_FULL_NAME)";\
+	echo "Package Root:  $(RNMAKE_PKG_ROOT)";\
 	echo "Architecture:  $(ARCH)";\
 	echo "Directory:     $(CURDIR)";\
 	echo "Target:        $(CURGOAL)";\
@@ -969,7 +946,7 @@ endif
 
 # check if dependencies have been made unless nodeps is defined
 chkdeps:
-	$(if $(or $(nodeps),$(call isfile,$(DEPSFILE))),,\
+	$(if $(or $(nodeps),$(call isFile,$(DEPSFILE))),,\
 			    					$(error No dependencies file - Try 'make deps' first))
 
 

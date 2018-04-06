@@ -1,76 +1,62 @@
 ################################################################################
 #
-# ./bsModules/bsHek/Makefile
-
+# ./sw/bsModules/bsHek/Makefile
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2016-03-18 12:24:39 -0600 (Fri, 18 Mar 2016) $
-$Rev: 4360 $
+\brief The BotSense bsHek modules makefile.
 
-\brief
-Make bsProxy server dll and bs client library for the Hekateros robot.
+The BotSense bsProxy server dll and bs client library for the Hekateros robot.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_hek Robotic Arm Package
 
-##! \copyright
-##!   \h_copy 2012-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{sw/bsModules/bsHek/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2012-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-#
-# @EulaBegin@
 # 
-# Unless otherwise stated explicitly, all materials contained are copyrighted
-# and may not be used without RoadNarrows LLC's written consent,
-# except as provided in these terms and conditions or in the copyright
-# notice (documents and software) or other proprietary notice provided with
-# the relevant materials.
-# 
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
-# MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
-# BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
-# CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
-# DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# THE AUTHORS AND  ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# @EulaEnd@
-#
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../../..
+RNMAKE_PKG_ROOT	= ../../..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
 # Libraries
 
-# botsense modules are located in a sub-directory of lib
-LIB_SUBDIR = botsense
-
 # Distribution Static Libraries
-DIST_STLIBS 			= bsclient_hek
+RNMAKE_DIST_STLIBS = bsclient_hek
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= bsclient_hek
+RNMAKE_DIST_SHLIBS = bsclient_hek
 
 # Dynamically Linked Libraries
-DIST_DLLIBS 			= bsserver_hek 
+RNMAKE_DIST_DLLIBS = bsserver_hek 
+
+# Target library subdirectory
+bsclient_hek.SUBDIR = botsense
+bsserver_hek.SUBDIR = botsense
 
 # Libraries to link dll with
 bsclient_hek.LIBS	= rnr_dynamixel botsense rnr_netmsgs rnr pthread stdc++
@@ -83,6 +69,7 @@ bsclient_hek.SRC.CXX =	bsHekClient.cxx
 bsserver_hek.SRC.C 	 =	bsHekMsgs.c
 bsserver_hek.SRC.CXX =	bsHekServer.cxx
 
+
 #------------------------------------------------------------------------------
 # Interface Headers
 
@@ -91,7 +78,7 @@ bsserver_hek.SRC.CXX =	bsHekServer.cxx
 #
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= bsModHek
+RNMAKE_DIST_HDRS	= bsModHek
 
 #
 # Distribution Headers
@@ -105,9 +92,12 @@ bsModHek.HDRS.H=	\
 	botsense/bsHek.h \
 	botsense/bsHekMsgs.h
 
+
 #------------------------------------------------------------------------------
-# Optional Variables 
-#
+# Extras
+
+# install botsense library directory
+EXTRA_LD_LIBDIRS = $(libdir)/botsense
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"bsHek\""
@@ -117,37 +107,17 @@ EXTRA_TGT_ALL_POST	= extra-make-post
 EXTRA_TGT_DEPS 			= extra-deps
 EXTRA_TGT_CLEAN 		= extra-clean
 
-#------------------------------------------------------------------------------
-# Make Includes
-#
-
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
-
-#------------------------------------------------------------------------------
-# Extra make targets (place after Rules.mk)
-
 # NetMsgs Variables
 NETMSGS_XML_FILES	= bsHekMsgs.xml
-NETMSGS_H_DIR     = $(pkgroot)/include/botsense
+NETMSGS_H_DIR     = $(RNMAKE_PKG_ROOT)/include/botsense
 NETMSGS_CFLAGS		= --incprefix=botsense
-NETMSGS_PY_DIR		= $(pkgroot)/sw/pyModules/modules/Hekateros
-NETMSGS_SHARE_DIR	= $(pkgroot)/share/msgs
+NETMSGS_PY_DIR		= $(RNMAKE_PKG_ROOT)/sw/pyModules/modules/Hekateros
+NETMSGS_SHARE_DIR	= $(RNMAKE_PKG_ROOT)/share/msgs
 
-# Include NetMsgs Rules Makefile
-include $(rnmake)/Rules.netmsgs.mk
-
+# Swig Variables
 SWIG_FILES 				= bsHekCore.i
-SWIG_EXTMOD_DIR 	= $(pkgroot)/sw/pyModules/modules/Hekateros
+SWIG_EXTMOD_DIR 	= $(RNMAKE_PKG_ROOT)/sw/pyModules/modules/Hekateros
 SWIG_EXTMOD_LIBS 	= -lbsclient_hek -lbotsense -lrnr_netmsgs -lrnr_i2c -lrnr
-
-# Include Swig Rules Makefile
-include $(rnmake)/Rules.swig.mk
 
 .PHONY: extra-make
 extra-make: netmsgs-all
@@ -160,6 +130,18 @@ extra-deps: netmsgs-all
 
 .PHONY: extra-clean
 extra-clean: netmsgs-clean swig-clean
+	
+
+#------------------------------------------------------------------------------
+# Include RNMAKE top-level rules makefile
+
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include netmsgs rules
+include $(RNMAKE_ROOT)/Rules.netmsgs.mk
+
+# include swig rules
+include $(RNMAKE_ROOT)/Rules.swig.mk
 
 
 ifdef RNMAKE_DOXY

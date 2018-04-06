@@ -1,86 +1,71 @@
 ################################################################################
 #
-# ./bsModules/bsKuon/Makefile
-
+# ./sw/bsModules/bsKuon/Makefile
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2011-01-13 11:05:37 -0700 (Thu, 13 Jan 2011) $
-$Rev: 657 $
-
-\brief Make bsProxy server dll and bs client library for the Kuon robot.
+\brief BotSense \h_kuon bsProxy server dll and bs client library makefile.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight   (robin.knight@roadnarrows.com)
-\author: Rob Shiely     (rob@roadnarrows.com)
-\author: Daniel Packard (daniel@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_kuon Large Mobile Robot Package
 
-##! \copyright
-##!   \h_copy 2010-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{sw/bsModules/bsKuon/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Rob Shiely,rob@roadnarrows.com} 
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+\pkgauthor{Daniel Packard,daniel@roadnarrows.com} 
+
+\pkgcopyright{2012-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# @EulaBegin@
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# @EulaEnd@
-#
+# 
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../../../
+RNMAKE_PKG_ROOT	= ../../..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
 # Libraries
 
-LIB_SUBDIR = $(PKG_LIB_PLUGIN_SUBDIR)
-
 # Distribution Static Libraries
-DIST_STLIBS 			= bsclient_kuon
+RNMAKE_DIST_STLIBS = bsclient_kuon
 
 # Distribution Shared Libraries
-DIST_SHLIBS 			= bsclient_kuon
+RNMAKE_DIST_SHLIBS = bsclient_kuon
 
 # Dynamically Linked Libraries
-DIST_DLLIBS 			= bsserver_kuon 
+RNMAKE_DIST_DLLIBS = bsserver_kuon 
+
+# Target libraries subdirectory
+bsclient_kuon.SUBDIR = botsense
+bsserver_kuon.SUBDIR = botsense
 
 # Libraries to link dll with
-bsserver_kuon.LIBS	= RS160D MPU imu rnr_i2c rnr_serial rnr pthread
+bsserver_kuon.LIBS = RS160D MPU imu rnr_i2c rnr_serial rnr pthread
 
 # Source Files
 bsclient_kuon.SRC.C     =	bsKuonClient.c bsKuonMsgs.c
 bsserver_kuon.SRC.CXX   =	bsKuonServer.cxx
 bsserver_kuon.SRC.C   	=	bsKuonBgThread.c bsKuonMsgs.c
+
 
 #------------------------------------------------------------------------------
 # Interface Headers
@@ -103,8 +88,9 @@ DIST_HDRS	= bsModKuon
 bsModKuon.HDRS.H	=	botsense/bsKuon.h \
        			        botsense/bsKuonMsgs.h
 
+
 #------------------------------------------------------------------------------
-# Optional Variables 
+# Extras
 #
 
 # Subpackage C PreProcessor Flags
@@ -115,37 +101,17 @@ EXTRA_TGT_ALL_POST  = extra-make-post
 EXTRA_TGT_DEPS 			= extra-deps
 EXTRA_TGT_CLEAN 		= extra-clean
 
-#------------------------------------------------------------------------------
-# Make Includes
-#
-
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
-
-#------------------------------------------------------------------------------
-# Extra make targets (place after Rules.mk)
-
 # NetMsgs Variables
 NETMSGS_XML_FILES	= bsKuonMsgs.xml
-NETMSGS_H_DIR     = $(pkgroot)/include/botsense
+NETMSGS_H_DIR     = $(RNMAKE_PKG_ROOT)/include/botsense
 NETMSGS_CFLAGS		= --incprefix=botsense
-#NETMSGS_PY_DIR		= $(pkgroot)/bsPython/modules/BotSense/khepera3
-NETMSGS_SHARE_DIR	= $(pkgroot)/share/msgs
+NETMSGS_PY_DIR		= $(RNMAKE_PKG_ROOT)/pyModules/modules/BotSense/Kuon
+NETMSGS_SHARE_DIR	= $(RNMAKE_PKG_ROOT)/share/msgs
 
-# Include NetMsgs Rules Makefile
-include $(rnmake)/Rules.netmsgs.mk
-
-#SWIG_FILES 				= bsKuonCore.i
-#SWIG_EXTMOD_DIR 	= $(pkgroot)/bsPython/modules/BotSense/khepera3
-#SWIG_EXTMOD_LIBS 	= -lbsclient_kuon -lbotsense -lnetmsgs -li2c -lrnr
-
-# Include Swig Rules Makefile
-#include $(rnmake)/Rules.swig.mk
+# Swig Variables
+SWIG_FILES 				= bsKuonCore.i
+SWIG_EXTMOD_DIR 	= $(RNMAKE_PKG_ROOT)/pyModules/modules/BotSense/Kuon
+SWIG_EXTMOD_LIBS 	= -lbsclient_kuon -lbotsense -lnetmsgs -li2c -lrnr
 
 .PHONY: extra-make
 extra-make: netmsgs-all
@@ -159,6 +125,18 @@ extra-deps: netmsgs-all
 .PHONY: extra-clean
 extra-clean: netmsgs-clean 
 #swig-clean
+
+
+#------------------------------------------------------------------------------
+# Include RNMAKE top-level rules makefile
+
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include netmsgs rules
+include $(RNMAKE_ROOT)/Rules.netmsgs.mk
+
+# include swig rules
+include $(RNMAKE_ROOT)/Rules.swig.mk
 
 
 ifdef RNMAKE_DOXY

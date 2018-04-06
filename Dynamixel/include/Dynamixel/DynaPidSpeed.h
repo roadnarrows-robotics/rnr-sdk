@@ -18,7 +18,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -76,9 +76,9 @@ using namespace std;
 class DynaPidSpeed : public DynaPid
 {
 public:
-  static const double SpeedPidKpDft     = 0.5;  ///< default Kp constant
-  static const double SpeedPidKiDft     = 1.0;  ///< default Ki constant
-  static const double SpeedPidKdDft     = 0.1;  ///< default Kd constant
+  static const double SpeedPidKpDft;  ///< default Kp constant
+  static const double SpeedPidKiDft;  ///< default Ki constant
+  static const double SpeedPidKdDft;  ///< default Kd constant
 
   /*!
    * \brief Default constructor.

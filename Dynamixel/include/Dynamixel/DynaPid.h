@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -104,10 +104,10 @@ using namespace std;
 class DynaPid
 {
 public:
-  static const double PidKpDft    = 0.5;  ///< default Kp constant
-  static const double PidKiDft    = 1.0;  ///< default Ki constant
-  static const double PidKdDft    = 0.1;  ///< default Kd constant
-  static const double WiSumErrDft = 0.1;  ///< default sum error weight
+  static const double PidKpDft;     ///< default Kp constant
+  static const double PidKiDft;     ///< default Ki constant
+  static const double PidKdDft;     ///< default Kd constant
+  static const double WiSumErrDft;  ///< default sum error weight
 
   /*!
    * \brief Default constructor.

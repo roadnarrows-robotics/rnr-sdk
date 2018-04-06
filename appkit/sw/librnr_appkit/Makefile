@@ -1,79 +1,62 @@
 ################################################################################
 #
 # ./sw/librnr_appkit/Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2015-11-09 17:38:34 -0700 (Mon, 09 Nov 2015) $
-$Rev: 4195 $
-
-\brief Make the librnr_appkit library.
+\brief The librnr_appkit library makefile.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics Application Kit
 
-##! \par Copyright
-##!   \h_copy 2012-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{sw/librnr_appkit/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2012-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-#
-# @EulaBegin@
 # 
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-# 
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# @EulaEnd@
-#
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../..
+RNMAKE_PKG_ROOT	= ../..
 
-SUBDIRS =  ut
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
+
+#------------------------------------------------------------------------------
+# Subdirectories
+
+RNMAKE_SUBDIRS = ut
+
 
 #------------------------------------------------------------------------------
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS = rnr_appkit
+RNMAKE_DIST_STLIBS = rnr_appkit
 
 # Distribution Shared Libraries
-DIST_SHLIBS = rnr_appkit
+RNMAKE_DIST_SHLIBS = rnr_appkit
 
-# library subdir
-LIB_SUBDIR = rnr
+# Target library subdirectory
+rnr_appkit.SUBDIR = rnr
 
 # Source Files
 rnr_appkit.SRC.CXX = \
@@ -102,23 +85,19 @@ rnr_appkit.SRC.CXX = \
 rnr_appkit.LIBS    = rnr_tinyxml rnr readline
 rnr_appkit.LIBDEPS = rnr_tinyxml rnr readline
 
+
 #------------------------------------------------------------------------------
-# Optional Variables 
-#
+# Extras
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_appkit\""
 
+
 #------------------------------------------------------------------------------
-# Make Includes
+# Include RNMAKE rules makefile(s)
 
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
 
 
 ifdef RNMAKE_DOXY

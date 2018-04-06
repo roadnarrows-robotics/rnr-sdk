@@ -44,7 +44,7 @@ PyDocInfo = {
 #
 PkgInfo = {
   'name':           'NetMsgs',
-  'version':        '1.1.0',
+  'version':        '1.2.2',
   'description':    'RoadNarrows NetMsgs Python Package',
   'long_description':"""
 The NetMsgs python package provides the set of tools to generate
@@ -64,7 +64,7 @@ o Python <name>.py
   'license':"""
 This is free software; see the source for copying conditions. There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-Copyright (C) 2009-2010 RoadNarrows LLC
+Copyright (C) 2009-2018 RoadNarrows LLC
 """,
   'packages':     ['NetMsgs'],
   'package_dir':  {'NetMsgs':'modules/NetMsgs'},

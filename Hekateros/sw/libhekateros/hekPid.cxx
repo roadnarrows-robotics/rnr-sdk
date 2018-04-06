@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2014-2017. RoadNarrows LLC.\n
+ *   \h_copy 2014-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -65,6 +65,8 @@ using namespace hekateros;
 // -----------------------------------------------------------------------------
 // HekPid Class
 // -----------------------------------------------------------------------------
+
+const double HekPid::WI_DFT = 0.25;   ///< integral sum of errors weight const
 
 void HekPid::specifySetPoint(double fJointGoalPos, double fJointGoalVel)
 { 

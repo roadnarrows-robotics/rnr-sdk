@@ -1,97 +1,58 @@
 ################################################################################
 #
-# ./bsModules/Makefile
-
+# ./sw/bsModules/Makefile
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2010-09-20 09:40:05 -0600 (Mon, 20 Sep 2010) $
-$Rev: 589 $
-
-\brief Make all of the KOUN server and client plug-in modules and BotSense
+\brief BotSense \h_kuon server and client plug-in modules and BotSense
 python modules.
 
 RN Make System Specific Makefile
 
-\par Usage:
-make [RNMAKE_OPTS] [has_botsense={yes|no}] target
+\pkgsynopsis
+RoadNarrows Robotics \h_kuon Large Mobile Robot Package
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
-\author: Rob Shiely (rob@roadnarrows.com)
-\author: Daniel Packard (daniel@roadnarrows.com)
-         
-##! \copyright
-##!   \h_copy 2010-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{sw/bsModules/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Rob Shiely,rob@roadnarrows.com} 
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+\pkgauthor{Daniel Packard,daniel@roadnarrows.com} 
+
+\pkgcopyright{2010-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# @EulaBegin@
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# @EulaEnd@
-#
+# 
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../..
+RNMAKE_PKG_ROOT	= ../..
 
-#------------------------------------------------------------------------------
-# Optional variables
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
 
-# do [not] include botsense subpackage in package
-ifeq "$(findstring $(has_botsense),n no 0 false)" ""
-	has_botsense := yes
-else
-	has_botsense := no
-endif
 
 #------------------------------------------------------------------------------
 # Subdirectories
 
-# Subdirectories to Build
-ifeq "$(has_botsense)" "yes"
-SUBDIRS = bsKuon bsMouseBot
-endif
+RNMAKE_SUBDIRS = bsKuon bsMouseBot
+
 
 #------------------------------------------------------------------------------
-# Make Includes
+# Include RNMAKE top-level rules makefile
 
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
+include $(RNMAKE_ROOT)/Rules.mk
 
 
 ifdef RNMAKE_DOXY

@@ -25,7 +25,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -93,6 +93,8 @@ public:
    */
   static const size_t TORQUE_WIN_SIZE = 10;
 
+  static const int GOAL_SPEED_DFT = 100;  ///< default virutal goal speed
+
   /*!
    * \brief Servo dynamics position control state.
    */
@@ -102,8 +104,6 @@ public:
     StateBegin,     ///< start position control 
     StateControl    ///< in poistion control
   };
-
-  static const int GOAL_SPEED_DFT = 100;  ///< default virutal goal speed
 
   /*
    * Virtual servo control variables.
@@ -240,10 +240,10 @@ protected:
 class DynaBgThread
 {
 public:
-  static const double HZ_EXEC_MIN   =  1.0; ///< minimum exec hertz
-  static const double HZ_EXEC_DFT   = 50.0; ///< default exec hertz
-  static const long   T_EXEC_MIN    = 100;  ///< task exec period min (100usec)
-  static const double TOLERANCE_DFT =  1.0; ///< default pos. tolerance (deg)
+  static const double HZ_EXEC_MIN;    ///< minimum exec hertz
+  static const double HZ_EXEC_DFT;    ///< default exec hertz
+  static const long   T_EXEC_MIN;     ///< task exec period min (100usec)
+  static const double TOLERANCE_DFT;  ///< default pos. tolerance (deg)
 
   /*!
    * \brief Background thread states.

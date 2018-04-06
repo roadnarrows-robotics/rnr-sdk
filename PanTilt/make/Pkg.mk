@@ -1,101 +1,90 @@
 ################################################################################
 #
-# Pkg.mk
-
+# make/Pkg.mk
+#
 ifdef RNMAKE_DOXY
-/*!
-\file
+/*! 
+\file 
 
-$LastChangedDate: 2015-06-01 09:43:21 -0600 (Mon, 01 Jun 2015) $
-$Rev: 4005 $
+\brief RoadNarrows Robotics \h_pan_tilt package master makefile.
 
-\brief RoadNarrows Robotics PanTilt Package Makefile.
+An rnmake system package specific makefile.
 
-RN Make System Specific Makefile
+\pkgsynopsis
+RoadNarrows Robotics \h_pan_tilt Robotic Platform Package
 
-\author Robin Knight (robin.knight@roadnarrows.com)
-	
-##! \copyright
-##!   \h_copy 2015-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{make/Pkg.mk}
+
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2015-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
-
-# 
-# @EulaBegin@
-# 
-# @EulaEnd@
 #
 ################################################################################
 
-# Prevent mutliple inclusion
-PKG_MK						= 1
+_PKG_MK = 1
 
-ifndef pkgroot
-$(error Error: pkgroot not defined in including makefile)
+ifndef RNMAKE_PKG_ROOT
+  $(error 'RNMAKE_PKG_ROOT' Not defined in including makefile)
 endif
 
 # The Package Definition
-PKG 								= PanTilt
-PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 3
-PKG_VERSION_RELEASE = 1
-PKG_VERSION_DATE    = 2017
-PKG_AUTHORS					= "RoadNarrows"
-PKG_OWNERS					= "RoadNarrows LLC"
-PKG_DISCLAIMER			= "(C) 2015 RoadNarrows LLC. All rights reserved."
-
+RNMAKE_PKG 								 = PanTilt
+RNMAKE_PKG_VERSION_MAJOR   = 1
+RNMAKE_PKG_VERSION_MINOR   = 3
+RNMAKE_PKG_VERSION_RELEASE = 2
+RNMAKE_PKG_VERSION_DATE    = 2018
+RNMAKE_PKG_AUTHORS				 = "Robin Knight"
+RNMAKE_PKG_OWNERS					 = "RoadNarrows LLC"
+RNMAKE_PKG_DISCLAIMER			 = \
+"See the README and EULA files for any copyright and licensing information."
 
 # Dotted full version number
-PKG_VERSION_DOTTED	= $(PKG_VERSION_MAJOR).$(PKG_VERSION_MINOR).$(PKG_VERSION_RELEASE)
+RNMAKE_PKG_VERSION_DOTTED	= $(RNMAKE_PKG_VERSION_MAJOR).$(RNMAKE_PKG_VERSION_MINOR).$(RNMAKE_PKG_VERSION_RELEASE)
 
 # Concatenated full version number
-PKG_VERSION_CAT    	= $(PKG_VERSION_MAJOR)$(PKG_VERSION_MINOR)$(PKG_VERSION_RELEASE)
+RNMAKE_PKG_VERSION_CAT    	= $(RNMAKE_PKG_VERSION_MAJOR)$(RNMAKE_PKG_VERSION_MINOR)$(RNMAKE_PKG_VERSION_RELEASE)
 
 # Package full name
-PKG_FULL_NAME				= $(PKG)-$(PKG_VERSION_DOTTED)
+RNMAKE_PKG_FULL_NAME				= $(RNMAKE_PKG)-$(RNMAKE_PKG_VERSION_DOTTED)
 
 #------------------------------------------------------------------------------
 # Optional Variables and Tweaks
 
-prefix_root = /prj/xinstall
-
 # Package Include Directories
-PKG_INCDIRS 		= $(pkgroot)/include
+RNMAKE_PKG_INCDIRS = $(RNMAKE_PKG_ROOT)/include
 
 # Package System Include Directories
-PKG_SYS_INCDIRS			+= $(OPT_PREFIX)/include
+RNMAKE_PKG_SYS_INCDIRS = $(RNMAKE_OPT_PREFIX)/include
+
+# Package Library Subdirectories
+RNMAKE_PKG_LIB_SUBDIRS = rnr botsense
 
 # Link Library Extra Library Directories (exluding local library)
-PKG_LD_LIBDIRS 			+= $(OPT_PREFIX)/lib $(libdir)/botsense
-
-# subdirectory under prefix/lib for server modules
-PKG_LIB_PLUGIN_SUBDIR = 
-
-#------------------------------------------------------------------------------
-# Release Files 
+RNMAKE_PKG_LD_LIBDIRS = 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.md
+RNMAKE_PKG_REL_FILES = VERSION.txt README.md
 
-
-#------------------------------------------------------------------------------
-# Flags
-#
 # CPP flags
-PKG_CPPFLAGS				=
+RNMAKE_PKG_CPPFLAGS	=
 
 # C flags
-PKG_CFLAGS					=
+RNMAKE_PKG_CFLAGS	=
 
 # CXX flags
-PKG_CXXFLAGS				=
+RNMAKE_PKG_CXXFLAGS	=
 
 # Link flags
-PKG_LDFLAGS					=
+RNMAKE_PKG_LDFLAGS=
 
 
 ifdef RNMAKE_DOXY

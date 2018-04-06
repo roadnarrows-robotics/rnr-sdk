@@ -1,55 +1,61 @@
 ################################################################################
 #
 # ./Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2015-05-31 17:31:11 -0600 (Sun, 31 May 2015) $
-$Rev: 4004 $
-
-\brief Make Kuon package.
+\brief Top-level \h_kuon package makefile.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
-\author: Rob Shiely (rob@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_kuon Large Mobile Robot Package
 
-##! \copyright
-##!   \h_copy 2010-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Rob Shiely,rob@roadnarrows.com} 
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+\pkgauthor{Daniel Packard,daniel@roadnarrows.com} 
+
+\pkgcopyright{2010-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# @EulaBegin@
-# @EulaEnd@
-#
+# 
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= .
+RNMAKE_PKG_ROOT	= .
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
 # Subdirectories
 
-#SUBDIRS		= fw sw
-SUBDIRS		= sw 
+RNMAKE_SUBDIRS = sw 
 
 # examples  
+
 
 #------------------------------------------------------------------------------
 # Distribution Header List Tags
 
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= kuon
+RNMAKE_DIST_HDRS = kuon
 
 #
 # Distribution Headers
@@ -74,147 +80,71 @@ kuon.HDRS.H	=	\
 	Kuon/kuonXmlCfg.h \
   Kuon/RS160DControl.h
 
+
 #------------------------------------------------------------------------------
 # Documentation 
 
-# Document SubPackage Name
-DOC_SUBDIR				=
-
-# Sub[Package] Doxygen Configuration File
-DOXY_CONF_FILE		= $(pkgroot)/make/doxy.conf
+# Doxygen Configuration File
+RNMAKE_DOXY_CONF_FILE	= $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
 #------------------------------------------------------------------------------
-# Optional Variables 
+# Extras
 #
 
 EXTRA_TGT_ALL_POST = all-post 
 
-#------------------------------------------------------------------------------
-# Make Includes
-
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
-
-#
 # Overo Linaro versions of Kuon
-#
-ifeq "$(arch)" "linaro"
-	ETC_PROF_D_KUON = share/etc/profile.d/kuon_linaro.sh 
+ETC_FILES.linaro = 	share/etc/profile.d/kuon_linaro.sh \
+										share/etc/profile.d/linary.hs \
+										share/etc/init.d/*
 
-	ETC_FILES	=	share/etc/profile.d/linaro.sh \
-							share/etc/kuon/kuon.conf \
-							share/etc/kuon/*.xml \
-							share/etc/init.d/* \
-							share/etc/ld.so.conf.d/*.conf \
-							etc/udev/rules.d/*
-
-	LIB_FILES =	share/lib/cmake/rnr/rnr-kuon-config.cmake
-else
-
-#
 # Odroid Ubuntu versions of Kuon
-# 
-ifeq "$(arch)" "odroid"
-	ETC_PROF_D_KUON = share/etc/profile.d/kuon_odroid.sh 
+ETC_FILES.odroid = 	share/etc/profile.d/kuon_odroid.sh \
+										share/etc/init.d/*
 
-	ETC_FILES	=	share/etc/kuon/kuon.conf \
-							share/etc/kuon/*.xml \
-							share/etc/init.d/* \
-							share/etc/ld.so.conf.d/*.conf \
-							etc/udev/rules.d/*
+# On-target Kuon and off-target host computers
+ETC_FILES	=	share/etc/kuon/kuon.conf \
+						share/etc/kuon/*.xml \
+						share/etc/ld.so.conf.d/*.conf \
+						etc/udev/rules.d/*
 
-	LIB_FILES = share/lib/cmake/rnr/rnr-kuon-config.cmake
+LIB_FILES = share/lib/cmake/rnr/rnr-kuon-config.cmake
 
-#
-# Off-target host computers
-#
-else
-	ETC_FILES	=	share/etc/kuon/*.xml \
-							share/etc/ld.so.conf.d/*.conf \
-							etc/udev/rules.d/*
+PKGDIR_SHARE = $(RNMAKE_PKG_ROOT)/share
 
-	LIB_FILES = share/lib/cmake/rnr/rnr-kuon-config.cmake
-
-endif
-endif
-
-PKGDIR_SHARE					:= $(pkgroot)/share
-
-#
-# Template to copy files from source to destination directory.
-#
-# Usage: copyfiles_template src_files dst_dir
-#
-define copyfiles_template
-	@if [ "$(1)" != "" ]; \
-	then \
-		b=$(notdir $(2)); \
-		flist="$(wildcard $(addprefix $(pkgroot)/,$(1)))"; \
-		for f in $${flist}; \
-		do \
-			tgt=$(2)$${f##*$$b}; \
-			if [ ! -f "$${tgt}" -o "$${f}" -nt "$${tgt}" ]; \
-			then \
-				d=$$(dirname $${tgt}); \
-				test -d $$d || $(MKDIR) $$d; \
-				printf "$(color_tgt_file) $${tgt}$(color_end)\n"; \
-				$(CP) $$f $${tgt}; \
-			fi; \
-		done; \
-	fi
-endef
-
-#
-# Template to copy file from source to destination.
-#
-# Usage: cp_template src_file dst_file
-#
-define cp_template
-	@if [ "$(1)" != "" ]; \
-	then \
-		if [ ! -f "$(2)" -o "$(1)" -nt "$(2)" ]; \
-		then \
-			d=$$(dirname $(2)); \
-			test -d $$d || $(MKDIR) $$d; \
-			printf "$(color_tgt_file) $(2)$(color_end)\n"; \
-			$(CP) $(1) $(2); \
-		fi; \
-	fi
-endef
-
-# post 'all' make target
 .PHONY: all-post
-all-post: show-banner etc-cp-files lib-cp-files share-cp-files
+all-post: show-banner cp-etc-files cp-lib-files cp-share-files
 
 .PHONY: show-banner
 show-banner:
-	$(call dirbanner,.)
-	@printf "Copying Configuration Files\n"
+	$(call printDirBanner,,all-post)
+	@printf "Pre-install Configuration\n"
 
-.PHONY: etc-cp-files
-etc-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying etc files to $(DISTDIR_ETC)$(color_end)\n"
-	$(call cp_template,$(ETC_PROF_D_KUON),$(DISTDIR_ETC)/profile.d/kuon.sh)
-	$(call copyfiles_template,$(ETC_FILES),$(DISTDIR_ETC))
+.PHONY: cp-etc-files
+cp-etc-files:
+	$(call printGoalDesc,$(@),Copying etc files to $(DISTDIR_ETC))
+	$(call copySrcDirRel,$(ETC_FILES) $(ETC_FILES.$(RNMAKE_ARCH)),$(DISTDIR_ETC))
 
-.PHONY: lib-cp-files
-lib-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying lib files to $(DISTDIR_LIB)$(color_end)\n"
-	$(call copyfiles_template,$(LIB_FILES),$(DISTDIR_LIB))
+.PHONY: cp-lib-files
+cp-lib-files:
+	$(call printGoalDesc,$(@),Copying extra lib files to $(DISTDIR_LIB))
+	$(call copySrcDirRel,$(LIB_FILES),$(DISTDIR_LIB))
 
-.PHONY: share-cp-files
-share-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying share directory to $(DISTDIR_SHARE)$(color_end)\n"
-	@cp -rp $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
+.PHONY: cp-share-files
+cp-share-files:
+	$(call printGoalDesc,$(@),Copying share directory to $(DISTDIR_SHARE))
+	@$(CP_R) $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
 	@find $(DISTDIR_SHARE) -name '*.svn' -print | xargs rm -fr
+
+
+#------------------------------------------------------------------------------
+# Include RNMAKE rules makefile(s)
+
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include extras (must include after top-level)
+include $(RNMAKE_ROOT)/Extras.mk
 
 
 ifdef RNMAKE_DOXY

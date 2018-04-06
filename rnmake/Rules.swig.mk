@@ -1,8 +1,6 @@
 ################################################################################
 #
-# Package: 	RN Make System 
-#
-# File:			Rules.swig.mk
+# Rules.swig.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
@@ -10,54 +8,36 @@ ifdef RNMAKE_DOXY
 
 \brief Special rules file for swigging C into python.
 
-Include this file into each local make file (usually at the bottom).\n
+Include this file in each appropriate local make file (usually near the bottom).
 
-\par Key Variables:
+\par Key RNMAKE Variables:
 	\li SWIG_FILES 				- list of swig *.i interface files.
 	\li SWIG_EXTMOD_DIR		- output *.py and shared libraries directory.
 	\li SWIG_EXTMOD_LIBS	- list of -l<lib> libraries to link in.
 
-$LastChangedDate: 2012-11-05 11:05:42 -0700 (Mon, 05 Nov 2012) $
-$Rev: 2507 $
+\pkgsynopsis
+RN Make System
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{Rules.swig.mk}
 
-\par Copyright:
-(C) 2010.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2010-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
 #
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
 ################################################################################
 
-ifeq "$(SWIG_ENABLED)" "y"
+_RULES_SWIG_MK = 1
+
+ifeq ($(strip $(RNMAKE_SWIG_ENABLED)),y)
 
 # Simplified Wrapper and Interface Generator command
 SWIG = /usr/bin/swig
@@ -75,7 +55,7 @@ SWIG_EXTMODS 	= $(addprefix $(SWIG_EXTMOD_DIR)/_,\
 # 	Python 2.7.11+
 PYTHON_VER	= $(shell python --version 2>&1 | sed -e 's/Python //' -e's/\.[0-9]*[\+]*$$//'  )
 
-ifeq "$(ARCH)" "cygwin"
+ifeq "$(RNMAKE_ARCH)" "cygwin"
 SWIG_PYLIB	= -lpython$(PYTHON_VER).dll
 else
 SWIG_PYLIB	= -lpython$(PYTHON_VER)
@@ -88,24 +68,30 @@ endif
 
 SWIG_LIBS			= $(SWIG_EXTMOD_LIBS) $(SWIG_PYLIB)
 
-SWIG_DONE			= $(ARCH).done
+SWIG_DONE			= $(RNMAKE_ARCH).done
 
 # C and link loader flags
-CFLAGS 	:= $(EXTRA_CFLAGS) $(PKG_CFLAGS) $(SWIG_CFLAGS)
-LDFLAGS	:= $(EXTRA_LDFLAGS) $(PKG_LDFLAGS) $(SWIG_LDFLAGS)
+CFLAGS 	:= $(EXTRA_CFLAGS) $(RNMAKE_PKG_CFLAGS) $(SWIG_CFLAGS)
+LDFLAGS	:= $(EXTRA_LDFLAGS) $(RNMAKE_PKG_LDFLAGS) $(SWIG_LDFLAGS)
 
 define cond-clean
 endef
 
 # Target:	swig-all (default)
-swig-all: swig-pre swig-mods
+.PHONY: swig-all
+swig-all: echo-swig-all swig-pre swig-mods
 	@$(TOUCH) $(SWIG_DONE)
+
+.PHONY: echo-swig-all
+echo-swig-all:
+	$(call printEchoTgtGoalDesc,Creating python wrappers from C/C++ source)
 
 # Target: swig-pre
 # If targets were made for another architecture, then clean up so that targets
 # will be remade for the target architecture. The file done.<arch> determines
 # the last made target architecture.
 #
+.PHONY: swig-pre
 swig-pre:
 	@if [ ! -f $(SWIG_DONE) ]; \
 	then \
@@ -137,7 +123,7 @@ swig-clean:
 # so the <name>.<arch>.done file is used as an artificial end file to force
 # compliling.
 #
-%.$(ARCH).done: $(SWIG_EXTMOD_DIR)/_%$(SHLIB_SUFFIX)
+%.$(RNMAKE_ARCH).done: $(SWIG_EXTMOD_DIR)/_%$(SHLIB_SUFFIX)
 	$(RM) *.done
 	$(TOUCH) $(@)
 

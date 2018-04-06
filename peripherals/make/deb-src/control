@@ -4,4 +4,4 @@ Section: devel
 Priority: optional
 Architecture: @ARCH@
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
-Description: Libraries for communicating with various hardware devices.
+Description: Libraries for communicating with hardware devices source.

@@ -1,8 +1,6 @@
 ################################################################################
 #
-# Package: 	RN Make System 
-#
-# File:			Rules.netmsgs.mk
+# Rules.netmsgs.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
@@ -10,9 +8,9 @@ ifdef RNMAKE_DOXY
 
 \brief Special rules file to make RoadNarrows NetMsgs generated file(s).
 
-Include this file into each local make file (usually at the bottom).\n
+Include this file in each local make file (usually near the bottom).
 
-\par Key Variables:
+\par Key RNMAKE Variables:
 	\li NETMSGS_XML_FILES	- list of RN NetMsgs XML specification files.
 	\li NETMSGS_H_DIR			- generated .h files output directory.
 													default: . (current directory)
@@ -25,45 +23,27 @@ Include this file into each local make file (usually at the bottom).\n
 	\li NETMSGS_SHARE_DIR	- share directory to copy XML files.
 													default: $(pkgroot)/share
 
-$LastChangedDate: 2012-11-05 11:05:42 -0700 (Mon, 05 Nov 2012) $
-$Rev: 2507 $
+\pkgsynopsis
+RN Make System
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{Rules.netmsgs.mk}
 
-\par Copyright:
-(C) 2010.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2010-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
 #
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
 ################################################################################
+
+_RULES_NETMSGS_MK = 1
 
 # NetMsgs source generator command
 NETMSGSGEN					= netmsgsgen

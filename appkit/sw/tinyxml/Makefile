@@ -1,70 +1,56 @@
 ################################################################################
 #
 # ./sw/tinyxml/Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2013-02-18 12:42:09 -0700 (Mon, 18 Feb 2013) $
-$Rev: 2691 $
-
-\brief
-Make tinyxml in RoadNarrows rnmake system.
+\brief The librnr_tinyxml library makefile.
 
 RN Make System Specific Makefile
 
-\author: @AUTHOR@ <@EMAIL@>
+\pkgsynopsis
+RoadNarrows Robotics Application Kit
 
-\par Copyright:
-  (C) @DATE@ @OWNER@
-  (@WEBSITE@)
-  All Rights Reserved
+\pkgfile{sw/tinyxml/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2013-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, @OWNER@, OR ANY MEMBERS/EMPLOYEES
-# OF @OWNER@ OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND @OWNER@ SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
+# 
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../..
+RNMAKE_PKG_ROOT	= ../..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
 # Libraries
 
 # Distribution Static Libraries
-DIST_STLIBS       = rnr_tinyxml
+RNMAKE_DIST_STLIBS = rnr_tinyxml
 
 # Distribution Shared Libraries
-DIST_SHLIBS       = rnr_tinyxml
+RNMAKE_DIST_SHLIBS = rnr_tinyxml
+
+# Target library subdirectory
+rnr_tinyxml.SUBDIR = rnr
 
 # Source Files
 rnr_tinyxml.SRC.CPP = tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp
@@ -72,20 +58,21 @@ rnr_tinyxml.SRC.CPP = tinyxml.cpp tinyxmlparser.cpp tinyxmlerror.cpp tinystr.cpp
 # Linked Libraries 
 rnr_tinyxml.LIBS	= stdc++
 
+
 #------------------------------------------------------------------------------
 # Test Programs
 
 # uncomment to build test program
-# LOC_PGMS =xmltest
+# RNMAKE_TEST_PGMS = xmltest
 
-rnr_xmltest.LIBS		= tinyxml
+rnr_xmltest.LIBS = tinyxml
 
 # C++ Source Files
 xmltest.SRC.CPP	= xmltest.cpp
 
+
 #------------------------------------------------------------------------------
-# Optional Variables 
-#
+# Extras
 
 TINYXML_DEBUG          := NO
 
@@ -123,31 +110,24 @@ EXTRA_CXXFLAGS += ${DEFS}
 
 EXTRA_TGT_ALL_POST  = extra-make-post
 
+.PHONY: extra-make-post
+extra-make-post: 	$(RNMAKE_PKG_ROOT)/include/rnr/tinyxml/tinyxml.h \
+									$(RNMAKE_PKG_ROOT)/include/rnr/tinyxml/tinystr.h
+
+$(RNMAKE_PKG_ROOT)/include/rnr/tinyxml/tinyxml.h: tinyxml.h
+	$(CP) $(<) $(@)
+ 
+$(RNMAKE_PKG_ROOT)/include/rnr/tinyxml/tinystr.h: tinystr.h
+	$(CP) $(<) $(@)
+
+
 #------------------------------------------------------------------------------
-# Make Includes
-#
+# Include RNMAKE rules makefile(s)
 
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
 
 
 ifdef RNMAKE_DOXY
 /*! \endcond RNMAKE_DOXY */
 endif
-
-#------------------------------------------------------------------------------
-# Extra make targets (place after Rules.mk)
-
-.PHONY: extra-make-post
-extra-make-post: $(pkgroot)/include/rnr/tinyxml/tinyxml.h $(pkgroot)/include/rnr/tinyxml/tinystr.h
-
-$(pkgroot)/include/rnr/tinyxml/tinyxml.h: tinyxml.h
-	$(CP) $(<) $(@)
- 
-$(pkgroot)/include/rnr/tinyxml/tinystr.h: tinystr.h
-	$(CP) $(<) $(@)

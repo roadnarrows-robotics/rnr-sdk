@@ -1,67 +1,48 @@
 ################################################################################
 #
-# Package: 	RN Make System 
-#
-# File:			Rules.python.mk
+# Rules.python.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief Special rules file for make python modules using python's standard 
-setup.py file.
+\brief Special rules file to make python modules using standard setup.py
+python file.
 
-Include this file into each local make file (usually at the bottom).\n
+Include this file in each appropriate local make file (usually near the bottom).
 
-\par Key Variables:
-	\li PYTHON_MOD_DIR 	  - python module's directory (default: ./modules)
+\par Key RNMAKE Variables:
+	\li RNMAKE_PYTHON_ENABLED 	  - python is [not] enabled for this architecture.
+	\li PYTHON_MOD_DIR 	  - python module directory (default: ./modules)
 
-$LastChangedDate: 2012-11-05 11:05:42 -0700 (Mon, 05 Nov 2012) $
-$Rev: 2507 $
+\pkgsynopsis
+RN Make System
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{Rules.python.mk}
 
-\par Copyright:
-(C) 2010.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2010-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
 #
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
 ################################################################################
 
-ifeq "$(PYTHON_ENABLED)" "y"
+_RULES_PYTHON_MK = 1
+
+ifeq ($(strip $(RNMAKE_PYTHON_ENABLED)),y)
 
 PYTHON_MOD_DIR 	 ?= ./modules
 
 SETUP_BUILD_DIR		= ./build
-PYTHON_BUILD_DIR	= $(SETUP_BUILD_DIR).$(ARCH)
+PYTHON_BUILD_DIR	= $(SETUP_BUILD_DIR).$(RNMAKE_ARCH)
 
 define unlink_build
 	@if [ -e $(SETUP_BUILD_DIR) ]; \
@@ -73,7 +54,7 @@ endef
 # Target:	python-all (default)
 #
 # Use python's standard distutils to build and install python modules. The 
-# "build - install" sequence is equivalent to the rnmake "all" target with
+# "build - install" sequence is equivalent to the RNMAKE "all" target with
 # the "install" installing into the package dist/dist.<arch> directory.
 #
 # Note that the distutils supports where to build the intermediates but does
@@ -83,8 +64,7 @@ endef
 #
 .PHONY: python-all
 python-all:
-	@printf "\n"
-	@printf "$(color_tgt_file)     $(PYTHON) setup.py $(color_end)\n"
+	$(call printGoalDesc,$(PYTHON) setup.py)
 	$(call unlink_build)
 	$(PYTHON) setup.py build --build-base=$(PYTHON_BUILD_DIR)
 	$(SYMLINK) $(PYTHON_BUILD_DIR) $(SETUP_BUILD_DIR)
@@ -93,13 +73,17 @@ python-all:
 # Target: make python source documentation
 .PHONY: python-doc
 python-doc:
-	@printf "Making python source documentation\n"
-	@$(PYTHON) $(rnmake)/utils/pydocmk.py -d $(DISTDIR_DOC)/pydoc setup
+	$(call printGoalDesc,$(@),Making python source documentation)
+	@test -d "$(DISTDIR_DOC)/pydoc" || $(MKDIR) $(DISTDIR_DOC)/pydoc
+	@$(PYTHON) $(RNMAKE_ROOT)/utils/pydocmk.py \
+		--docroot=$(DISTDIR_DOC)/pydoc \
+		--vpath=$(DIST_VPATH_LIB) \
+		setup
 
 # Target:	python-clean
 .PHONY: python-clean
 python-clean:
-	@printf "Removing byte-compiled python files\n"
+	$(call printGoalDesc,$(@),Removing byte-compiled python files)
 	@$(FIND) $(PYTHON_MOD_DIR) \( \
 		-name '*.svn*' -or -wholename '.svn' -or \
 		-wholename '*.deps*' -or -wholename '.deps' -or \
@@ -111,8 +95,9 @@ python-clean:
 
 .PHONY: python-distclean
 python-distclean:
+	$(call printGoalDesc,$(@),Removing intermediate $(PYTHON_BUILD_DIR) directory)
 	$(call unlink_build)
-	$(RM) $(PYTHON_BUILD_DIR)
+	@$(RM) $(PYTHON_BUILD_DIR)
 
 else
 

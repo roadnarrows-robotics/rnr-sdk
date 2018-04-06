@@ -64,6 +64,8 @@ static void prts(string what, const struct timespec &ts)
 // Thread Class
 // ---------------------------------------------------------------------------
 
+const double Thread::ThreadMinHz = 0.001;  ///< once every 1000 seconds
+
 Thread::Thread(const string &strThreadName) :
     m_strThreadName(strThreadName)
 {

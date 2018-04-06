@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  * 
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -281,6 +281,11 @@ double DynaVServo::filterTorques(int nServoLoad)
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // Public Interface
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+
+const double DynaBgThread::HZ_EXEC_MIN    =  1.0;
+const double DynaBgThread::HZ_EXEC_DFT    = 50.0;
+const long   DynaBgThread::T_EXEC_MIN     = 100;
+const double DynaBgThread::TOLERANCE_DFT  =  1.0;
 
 DynaBgThread::DynaBgThread(double fHz, double fTolerance)
 {

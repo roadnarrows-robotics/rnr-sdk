@@ -1,85 +1,60 @@
 ################################################################################
 #
-# Package: RN Make System 
-# File:    Arch.armpxa.mk
+# Arch/Arch.armpxa.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief RoadNarrows Make System Architecture Makefile
+\brief RoadNarrows Make System architecture makefile.
 
 \par Architecture:
 Familiar (Posix) Linux XScale PXA 255+ 32-bit Arm.
 
 \par Build Host:
-Cross-Compile
+Cross-Compiler
 
 \par Tool-Chain:
 arm-xscale-linux-gnu-*
 
-$LastChangedDate: 2011-07-07 12:52:03 -0600 (Thu, 07 Jul 2011) $
-$Rev: 1125 $
+\pkgsynopsis
+RN Make System
 
-\author Robin Knight (robin.knight@roadnarrows.com)
+\pkgfile{Arch/Arch.armpxa.mk}
 
-\par Copyright:
-(C) 2005-2011.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2005-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
-# Description:
-#
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #
 ################################################################################
 
-# Prevent mutliple inclusion
-ARCH_MK							= 1
+_ARCH_ARM_PXA_MK = 1
 
 # This architecture (required)
-ARCH         				= armpxa
-ARCH_FQNAME         = arm-pxa-familiar-linux-gnu
+RNMAKE_ARCH         = armpxa
+RNMAKE_ARCH_FQNAME	= arm-pxa-familiar-linux-gnu
 
-# RoadNarrows Install Prefix (override as necessary)
-ifndef prefix
-	ifdef prefix_root
-		prefix          = $(prefix_root)/$(ARCH)
-	else
-		prefix					= $(topdir)/xinstall/$(ARCH)
-	endif
-endif
 
-# Architecture Include Directories
-ARCH_INCDIRS       	=
+#------------------------------------------------------------------------------
+# Tool Chain
+#------------------------------------------------------------------------------
 
-# Architecture CPP Flags
-ARCH_CPPFLAGS       = 
+# Architecture specific include directories
+RNMAKE_ARCH_INCDIRS =
+
+# Architecture specific CPP, C, and C++ Flags
+RNMAKE_ARCH_CPPFLAGS =
+RNMAKE_ARCH_CFLAGS   =
+RNMAKE_ARCH_CXXFLAGS =
 
 # Cross compiler tool chain prefix
 CROSS_COMPILE       = arm-xscale-linux-gnu-
@@ -90,7 +65,9 @@ RANLIB              = $(CROSS_COMPILE)ranlib
 STRIP_LIB						= $(CROSS_COMPILE)strip --strip-debug
 STRIP_EXE						= $(CROSS_COMPILE)strip --strip-all
 
-# C
+#------------------------------------------------------------------------------
+# C Compiler and Options
+#------------------------------------------------------------------------------
 CC                  = $(CROSS_COMPILE)gcc
 CFLAGS_CODEGEN			= -fPIC
 CFLAGS_DEBUG        = -g
@@ -103,7 +80,13 @@ CFLAGS              = $(CFLAGS_CODEGEN) \
                       $(CFLAGS_OPTIMIZE) \
                       $(CFLAGS_WARNING)
 
-# C++
+# Make C/CXX Dependencies Command
+RNMAKE_MAKEDEPS	= $(CC) $(CFLAGS_DEPS_ONLY)
+
+
+#------------------------------------------------------------------------------
+# C++ Compiler and Options
+#------------------------------------------------------------------------------
 CXX                 = $(CROSS_COMPILE)c++
 CXXFLAGS_DEBUG      = -g
 CXXFLAGS_OPTIMIZE   = -O2
@@ -112,13 +95,21 @@ CXXFLAGS            = $(CXXFLAGS_DEBUG) \
                       $(CXXFLAGS_OPTIMIZE) \
                       $(CXXFLAGS_WARNING)
 
-# LD (linker)
+
+#------------------------------------------------------------------------------
+# Linker and Options
+#------------------------------------------------------------------------------
 LD_CC             	= $(CC)
 LD_CXX              = $(CXX)
 LD									= $(LD_CC)
 LDFLAGS             = # -Wl,--export-dynamic
 LD_LIBPATHS         =
 LD_LIBS             =
+
+
+#------------------------------------------------------------------------------
+# Library Archiver/Linker and Options
+#------------------------------------------------------------------------------
 
 # Static Libs
 STLIB_LD            = ${AR} cr
@@ -146,11 +137,16 @@ DLLIB_CFLAGS        = -fPIC
 DLLIB_APP_CFLAGS    = -rdynamic -fPIC
 DLLIB               = dl
 
-# Make C/CXX Dependencies Command
-MAKEDEPS						= $(CC) $(CFLAGS_DEPS_ONLY)
+
+#------------------------------------------------------------------------------
+# System and Optional Packages
+#------------------------------------------------------------------------------
 
 # Python
-PYTHON_ENABLED	=	n
+RNMAKE_PYTHON_ENABLED	=	n
+
+# SWIG - Simplified Wrapper and Interface Generator command
+RNMAKE_SWIG_ENABLED	=	n
 
 # Posix Thread Library:
 PTHREADLIB          = -lpthread 

@@ -1,119 +1,101 @@
 ################################################################################
 #
-# Pkg.mk
-
+# make/Pkg.mk
+#
 ifdef RNMAKE_DOXY
-/*!
-\file
+/*! 
+\file 
 
-$LastChangedDate: 2015-06-01 09:50:14 -0600 (Mon, 01 Jun 2015) $
-$Rev: 4007 $
+\brief RoadNarrows Robotics \h_kuon Large Mobile Robot package master makefile.
 
-\brief RoadNarrows Robotics Kuon Package Makefile.
+An rnmake system package specific makefile.
 
-RN Make System Specific Makefile
+\pkgsynopsis
+RoadNarrows Robotics \h_kuon Large Mobile Robot Package
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
-\author Daniel Packard (daniel@roadnarrows.com)
-	
+\pkgfile{make/Pkg.mk}
 
-##! \copyright
-##!   \h_copy 2010-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+\pkgauthor{Daniel Packard,daniel@roadnarrows.com}
+
+\pkgcopyright{2010-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
-
-#
-# @EulaBegin@
-# @EulaEnd@
 #
 ################################################################################
 
-# Prevent mutliple inclusion
-PKG_MK						= 1
+_PKG_MK = 1
 
-ifndef pkgroot
-$(error Error: pkgroot not defined in including makefile)
+ifndef RNMAKE_PKG_ROOT
+  $(error 'RNMAKE_PKG_ROOT' Not defined in including makefile)
 endif
 
 # The Package Definition
-PKG 								= Kuon
-PKG_VERSION_MAJOR   = 1
-PKG_VERSION_MINOR   = 1
-PKG_VERSION_RELEASE = 2
-PKG_VERSION_DATE    = 2017
-PKG_AUTHORS					= "Robin Knight, Rob Shiely, and Daniel Packard"
-PKG_OWNERS					= "RoadNarrows LLC"
-PKG_DISCLAIMER			= \
-"This is copyrighted software; see the source for copying conditions. There is NO\
-warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
+RNMAKE_PKG 								 = Kuon
+RNMAKE_PKG_VERSION_MAJOR   = 1
+RNMAKE_PKG_VERSION_MINOR   = 1
+RNMAKE_PKG_VERSION_RELEASE = 3
+RNMAKE_PKG_VERSION_DATE    = 2018
+RNMAKE_PKG_AUTHORS				 = "Robin Knight, Rob Shiely, and Daniel Packard"
+RNMAKE_PKG_OWNERS					 = "RoadNarrows LLC"
+RNMAKE_PKG_DISCLAIMER			 = \
+"See the README and EULA files for any copyright and licensing information."
 
 # Dotted full version number
-PKG_VERSION_DOTTED	= $(PKG_VERSION_MAJOR).$(PKG_VERSION_MINOR).$(PKG_VERSION_RELEASE)
+RNMAKE_PKG_VERSION_DOTTED	= $(RNMAKE_PKG_VERSION_MAJOR).$(RNMAKE_PKG_VERSION_MINOR).$(RNMAKE_PKG_VERSION_RELEASE)
 
 # Concatenated full version number
-PKG_VERSION_CAT    	= $(PKG_VERSION_MAJOR)$(PKG_VERSION_MINOR)$(PKG_VERSION_RELEASE)
+RNMAKE_PKG_VERSION_CAT = $(RNMAKE_PKG_VERSION_MAJOR)$(RNMAKE_PKG_VERSION_MINOR)$(RNMAKE_PKG_VERSION_RELEASE)
 
 # Package full name
-PKG_FULL_NAME				= $(PKG)-$(PKG_VERSION_DOTTED)
+RNMAKE_PKG_FULL_NAME = $(RNMAKE_PKG)-$(RNMAKE_PKG_VERSION_DOTTED)
 
 #------------------------------------------------------------------------------
 # Optional Variables and Tweaks
 
 # Package Include Directories
-PKG_INCDIRS 				= $(pkgroot)/include
-
-prefix_root = /prj/xinstall
+RNMAKE_PKG_INCDIRS = $(RNMAKE_PKG_ROOT)/include
 
 # Package Include Directories
-PKG_SYS_INCDIRS 		= $(pkgroot)/include
+RNMAKE_PKG_SYS_INCDIRS = $(RNMAKE_PKG_ROOT)/include
 
-ifeq "$(arch)" "overo"
-# Package System Include Directories
-PKG_SYS_INCDIRS			+= /opt/xinstall/overo/include
-
-# Link Library Extra Library Directories (exluding local library)
-PKG_LD_LIBDIRS 			+= /opt/xinstall/overo/lib
-
-else
+# Package Library Subdirectories
+RNMAKE_PKG_LIB_SUBDIRS = botsense
 
 # Package System Include Directories
-PKG_SYS_INCDIRS			+= /opt/include
+RNMAKE_PKG_SYS_INCDIRS += $(RNMAKE_OPT_PREFIX)/include
 
 # Link Library Extra Library Directories (exluding local library)
-PKG_LD_LIBDIRS 			+= /opt/lib
-
-endif
-
-# subdirectory under prefix/lib for server modules
-PKG_LIB_PLUGIN_SUBDIR = botsense
-
-
+RNMAKE_PKG_LD_LIBDIRS += $(RNMAKE_OPT_PREFIX)/lib
 
 #------------------------------------------------------------------------------
 # Release Files 
 
 # Release Files (docs)
-PKG_REL_FILES				= VERSION.txt README.md
+RNMAKE_PKG_REL_FILES = VERSION.txt README.md
 
 
 #------------------------------------------------------------------------------
 # Flags
 #
 # CPP flags
-PKG_CPPFLAGS				=
+RNMAKE_PKG_CPPFLAGS =
 
 # C flags
-PKG_CFLAGS					=
+RNMAKE_PKG_CFLAGS	=
 
 # CXX flags
-PKG_CXXFLAGS				=
+RNMAKE_PKG_CXXFLAGS =
 
 # Link flags
-PKG_LDFLAGS					=
+RNMAKE_PKG_LDFLAGS =
 
 ifdef RNMAKE_DOXY
 /*! \endcond RNMAKE_DOXY */

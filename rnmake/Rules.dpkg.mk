@@ -1,75 +1,67 @@
 ################################################################################
 #
-# Package: 	RN Make System
-#
-# File:			Rules.dpkg.mk
+# Rules.dpkg.mk
 #
 ifdef RNMAKE_DOXY
 /*! 
 \file 
 
-\brief Make Debian packages for package.
+\brief Make Debian repo packages for a package.
 
-Include this file into each local make file (usually at the bottom).
-Only one library or program target is supported per make file, unlike the
-standard Rules.mk file.\n
+This file is automatically included by \ref Rules.mk when one or more of the
+Debian make goals are specified.
 
-$LastChangedDate: 2014-07-18 10:10:13 -0600 (Fri, 18 Jul 2014) $
-$Rev: 3726 $
+\pkgsynopsis
+RN Make System
 
-\sa Rules.mk for more details of standard make targets.
+\pkgfile{Rules.dpkg.mk}
 
-\author Robin Knight 		(robin.knight@roadnarrows.com)
-\author Daniel Packard 	(daniel@roadnarrows.com)
+\pkgauthor{Daniel Packard,daniel@roadnarrows.com}
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
 
-\par Copyright:
-(C) 2009-2014.  RoadNarrows LLC.
-(http://www.roadnarrows.com)
-\n All Rights Reserved
+\pkgcopyright{2009-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
 
 \cond RNMAKE_DOXY
  */
 endif
 #
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
 ################################################################################
 
-DEB_PREFIX   = /usr/local
+_RULES_DPKG_MK = 1
 
+# Debian package install prefix
+RNMAKE_DEB_PREFIX ?= /usr/local
+
+# Debian configuration directories for development, source, and documentation
 DEB_CONF_DEV = $(RNMAKE_PKG_ROOT)/make/deb-dev
 DEB_CONF_SRC = $(RNMAKE_PKG_ROOT)/make/deb-src
 DEB_CONF_DOC = $(RNMAKE_PKG_ROOT)/make/deb-doc
 
-DEB_DEV_PKG_NAME = $(PKG)-dev-$(PKG_VERSION_DOTTED)
-DEB_SRC_PKG_NAME = $(PKG)-src-$(PKG_VERSION_DOTTED)
-DEB_DOC_PKG_NAME = $(PKG)-doc-$(PKG_VERSION_DOTTED)
+# Debian package file basenames for development, source, and documentation
+DEB_PKG_DEV_NAME = $(RNMAKE_PKG)-dev-$(RNMAKE_PKG_VERSION_DOTTED)
+DEB_PKG_SRC_NAME = $(RNMAKE_PKG)-src-$(RNMAKE_PKG_VERSION_DOTTED)
+DEB_PKG_DOC_NAME = $(RNMAKE_PKG)-doc-$(RNMAKE_PKG_VERSION_DOTTED)
 
-DEB_DISTDIR_TMP_DEV = $(DISTDIR_TMP_DEB)/$(DEB_DEV_PKG_NAME)
-DEB_DISTDIR_TMP_SRC = $(DISTDIR_TMP_DEB)/$(DEB_SRC_PKG_NAME)
-DEB_DISTDIR_TMP_DOC = $(DISTDIR_TMP_DEB)/$(DEB_DOC_PKG_NAME)
+# temporary staging directories
+DISTDIR_TMP_DEB	    = $(DIST_ARCH)/tmp/deb
+DISTDIR_TMP_DEB_DEV = $(DISTDIR_TMP_DEB)/$(DEB_PKG_DEV_NAME)
+DISTDIR_TMP_DEB_SRC = $(DISTDIR_TMP_DEB)/$(DEB_PKG_SRC_NAME)
+DISTDIR_TMP_DEB_DOC = $(DISTDIR_TMP_DEB)/$(DEB_PKG_DOC_NAME)
+
+# include tarball rules if not already included
+ifeq ($(_RULES_TARBALL_MK),)
+  $(eval include $(RNMAKE_ROOT)/Rules.tarball.mk)
+endif
+
+# include document rules if not already included
+ifeq ($(_RULES_DOC_MK),)
+  $(eval include $(RNMAKE_ROOT)/Rules.doc.mk)
+endif
 
 .PHONY: deb-pkgs
 deb-pkgs: pkgbanner echo-deb-pkgs deb-pkg-dev deb-pkg-src deb-pkg-doc
@@ -77,71 +69,70 @@ deb-pkgs: pkgbanner echo-deb-pkgs deb-pkg-dev deb-pkg-src deb-pkg-doc
 
 .PHONY: echo-deb-pkgs
 echo-deb-pkgs:
-	$(call fnEchoGoalDesc,Make all Debian packages)
+	$(call printEchoTgtGoalDesc,Make all Debian packages)
 
 .PHONY: deb-pkg-dev
 deb-pkg-dev: pkgbanner all echo-deb-pkg-dev
-	$(if $(call isdir, $(DEB_CONF_DEV)),\
+	$(if $(call isDir, $(DEB_CONF_DEV)),\
 		$(shell $(RNMAKE_ROOT)/utils/dpkg-helper.sh \
 			-a $(RNMAKE_ARCH) \
 			-c $(DEB_CONF_DEV) \
 			-d $(DIST_ARCH) \
-			-t $(DEB_DISTDIR_TMP_DEV) \
-			-n $(DEB_DEV_PKG_NAME) \
-			-p $(DEB_PREFIX) \
-			-v $(PKG_VERSION_DOTTED) \
+			-t $(DISTDIR_TMP_DEB_DEV) \
+			-n $(DEB_PKG_DEV_NAME) \
+			-p $(RNMAKE_DEB_PREFIX) \
+			-v $(RNMAKE_PKG_VERSION_DOTTED) \
 			-y pkgtype-dev \
 			1>&2 \
 	 	),\
-	$(info Debian conf directory not found: $(DEB_CONF_DEV). Skipping $(DEB_DEV_PKG_NAME)))
+	$(info Debian conf directory not found: $(DEB_CONF_DEV). Skipping $(DEB_PKG_DEV_NAME)))
 	$(footer)
 	
 .PHONY: echo-deb-pkg-dev
 echo-deb-pkg-dev:
-	$(call fnEchoGoalDesc,Making Debian development package)
+	$(call printEchoTgtGoalDesc,Making Debian development package)
 
 .PHONY: deb-pkg-src
 deb-pkg-src: pkgbanner tarball-src echo-deb-pkg-src
-	$(if $(call isdir, $(DEB_CONF_SRC)),\
+	$(if $(call isDir, $(DEB_CONF_SRC)),\
 		$(shell $(RNMAKE_ROOT)/utils/dpkg-helper.sh \
 			-a $(RNMAKE_ARCH) \
 			-c $(DEB_CONF_SRC) \
 			-d $(DIST_ARCH) \
-			-t $(DEB_DISTDIR_TMP_SRC) \
-			-n $(DEB_SRC_PKG_NAME) \
-			-p $(DEB_PREFIX) \
-			-v $(PKG_VERSION_DOTTED) \
+			-t $(DISTDIR_TMP_DEB_SRC) \
+			-n $(DEB_PKG_SRC_NAME) \
+			-p $(RNMAKE_DEB_PREFIX) \
+			-v $(RNMAKE_PKG_VERSION_DOTTED) \
 			-y pkgtype-src \
 			1>&2 \
 	 	),\
-	$(info Debian conf directory not found: $(DEB_CONF_SRC). Skipping $(DEB_SRC_PKG_NAME)))
+	$(info Debian conf directory not found: $(DEB_CONF_SRC). Skipping $(DEB_PKG_SRC_NAME)))
 	$(footer)
 
 .PHONY: echo-deb-pkg-src
 echo-deb-pkg-src:
-	$(call fnEchoGoalDesc,Making Debian source package)
+	$(call printEchoTgtGoalDesc,Making Debian source package)
 
 .PHONY: deb-pkg-doc
 deb-pkg-doc: pkgbanner documents echo-deb-pkg-doc
-	$(if $(call isdir, $(DEB_CONF_DOC)),\
+	$(if $(call isDir, $(DEB_CONF_DOC)),\
 		$(shell $(RNMAKE_ROOT)/utils/dpkg-helper.sh \
 			-a $(RNMAKE_ARCH) \
 			-c $(DEB_CONF_DOC) \
 			-d $(DIST_ARCH) \
-			-t $(DEB_DISTDIR_TMP_DOC) \
-			-n $(DEB_DOC_PKG_NAME) \
-			-p $(DEB_PREFIX) \
-			-v $(PKG_VERSION_DOTTED) \
+			-t $(DISTDIR_TMP_DEB_DOC) \
+			-n $(DEB_PKG_DOC_NAME) \
+			-p $(RNMAKE_DEB_PREFIX) \
+			-v $(RNMAKE_PKG_VERSION_DOTTED) \
 			-y pkgtype-doc \
 			1>&2 \
 	 	),\
-	$(info Debian conf directory not found: $(DEB_CONF_DOC). Skipping $(DEB_DOC_PKG_NAME)))
+	$(info Debian conf directory not found: $(DEB_CONF_DOC). Skipping $(DEB_PKG_DOC_NAME)))
 	$(footer)
 
 .PHONY: echo-deb-pkg-doc
 echo-deb-pkg-doc:
-	$(call fnEchoGoalDesc,Making Debian documentaion package)
-
+	$(call printEchoTgtGoalDesc,Making Debian documentaion package)
 
 ifdef RNMAKE_DOXY
 /*! \endcond RNMAKE_DOXY */

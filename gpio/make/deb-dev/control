@@ -5,4 +5,4 @@ Priority: optional
 Architecture: @ARCH@
 Depends: rnr-librnr-dev (>=1.14.0)
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
-Description: Utilities for communicating over GPIO interface.
+Description: Utilities for communicating over GPIO interfaces.

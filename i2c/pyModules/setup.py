@@ -14,7 +14,7 @@ i2c python setup.py script.
 ## \author Robin Knight (robin.knight@roadnarrows.com)
 ##  
 ## \copyright
-##   \h_copy 2016-2017. RoadNarrows LLC.\n
+##   \h_copy 2016-2018. RoadNarrows LLC.\n
 ##   http://www.roadnarrows.com\n
 ##   All Rights Reserved
 ##
@@ -51,15 +51,15 @@ import sys
 from distutils.core import setup, Extension
 
 ## RN Package Root Directory (not python package)
-pkgroot = '../..'
+RNMAKE_PKG_ROOT = '../..'
 
 #
 ## Package pydoc additional information (required by rnmake utilities)
 #
 PyDocInfo = {
   'org_initials':   'RNR',
-  'index_template': pkgroot+"/docs/pydoc.html.tpl",
-  'images_dir':     pkgroot+"/docs/images",
+  'index_template': RNMAKE_PKG_ROOT+"/docs/pydoc.html.tpl",
+  'images_dir':     RNMAKE_PKG_ROOT+"/docs/images",
   'images': {
     'ORG_LOGO': 'Logo.png',
     'FAVICON':  'favicon.png',
@@ -71,7 +71,7 @@ PyDocInfo = {
 #
 PkgInfo = {
   'name':           'I2C',
-  'version':        '1.3.0',
+  'version':        '1.4.2',
   'description':    'RoadNarrows I2C Python Package',
   'long_description':"""
 The I2C python package provides the i2c modules.
@@ -82,7 +82,7 @@ The I2C python package provides the i2c modules.
   'url':          'http://www.roadnarrows.com/',
   'platforms':    "any",
   'license':"""
-(C) 2016 RoadNarrows LLC. All rights reserved.
+(C) 2018 RoadNarrows LLC. All rights reserved.
 """,
   'packages':     ['rnr'],
   'package_dir':  {'rnr':'modules/rnr'},

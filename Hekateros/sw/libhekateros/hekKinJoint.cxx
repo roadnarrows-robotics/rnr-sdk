@@ -15,7 +15,7 @@
  * implemenation.
  *
  * \copyright
- *   \h_copy 2014-2017. RoadNarrows LLC.\n
+ *   \h_copy 2014-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -391,6 +391,8 @@ void VelSpeedLookupTbl::dumpTable(const std::string &strId)
 // ---------------------------------------------------------------------------
 // HekKinJoint Class
 // ---------------------------------------------------------------------------
+
+const double HekKinJoint::SLOW_DERATE_DELTA_V = 1.0;
 
 HekKinJoint::HekKinJoint() :
     m_pJoint(NULL), m_pServo(NULL),

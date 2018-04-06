@@ -1,104 +1,71 @@
 ################################################################################
 #
 # ./cmds/gpiobitbang/Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2015-03-17 09:44:55 -0600 (Tue, 17 Mar 2015) $  
-$Rev: 3893 $ 
-
-\brief Make gpiobitbang application.
+\brief The gpiobitbang command makefile.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_gpio Package
 
-##! \copyright
-##!   \h_copy 2015-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{cmds/gpiobitbang/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2015-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-#
-# @EulaBegin@
 # 
-# Unless otherwise stated explicitly, all materials contained are copyrighted
-# and may not be used without RoadNarrows LLC's written consent,
-# except as provided in these terms and conditions or in the copyright
-# notice (documents and software) or other proprietary notice provided with
-# the relevant materials.
-# 
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
-# MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
-# BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
-# CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
-# DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# THE AUTHORS AND  ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# @EulaEnd@
-#
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../..
+RNMAKE_PKG_ROOT	= ../..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
 
 
 #------------------------------------------------------------------------------
 # Programs
 
-DIST_PGMS = gpiobitbang 
+RNMAKE_DIST_PGMS = gpiobitbang 
 
 # Libraries to Link With
-gpiobitbang.LIBS = \
-	rnr_gpio \
-	rnr \
-	stdc++
+gpiobitbang.LIBS = rnr_gpio rnr stdc++
 
-gpiobitbang.LIBDEPS  = rnr_gpio
+gpiobitbang.LIBDEPS = rnr_gpio
 
-
-#------------------------------------------------------------------------------
-# Sources
-
-#
 # C Source Files
-#
-gpiobitbang.SRC.CXX = \
-	gpiobitbang.cxx
+gpiobitbang.SRC.CXX = gpiobitbang.cxx
+
 
 #------------------------------------------------------------------------------
-# Optional Variables 
-#
+# Extras
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"gpiobitbang\""
 
 
 #------------------------------------------------------------------------------
-# Make Includes
-#
+# Include RNMAKE rules makefile(s)
 
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
 
 
 ifdef RNMAKE_DOXY

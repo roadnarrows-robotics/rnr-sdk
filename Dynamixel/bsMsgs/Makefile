@@ -1,109 +1,66 @@
 ################################################################################
 #
 # ./bsMsgs/Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2015-01-12 10:56:06 -0700 (Mon, 12 Jan 2015) $
-$Rev: 3845 $
-
-\brief Make Dynamixel botsense messages.
+\brief Dynamixel BotSense messages makefile.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_dynamixel Package
 
-##! \copyright
-##!   \h_copy 2011-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{bsMsgs/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2011-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-# @EulaBegin@
 # 
-# Unless otherwise stated explicitly, all materials contained are copyrighted
-# and may not be used without RoadNarrows LLC's written consent,
-# except as provided in these terms and conditions or in the copyright
-# notice (documents and software) or other proprietary notice provided with
-# the relevant materials.
-# 
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
-# MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
-# BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
-# CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
-# DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# THE AUTHORS AND  ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# @EulaEnd@
-#
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ..
+RNMAKE_PKG_ROOT	= ..
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
 
 #------------------------------------------------------------------------------
-# Libraries
+# Extras
 
-# botsense modules are located in a sub-directory of lib
-LIB_SUBDIR = $(PKG_LIB_PLUGIN_SUBDIR)
-
-#------------------------------------------------------------------------------
-# Interface Headers
-
-#------------------------------------------------------------------------------
-# Optional Variables 
-#
+# install botsense library directory
+EXTRA_LD_LIBDIRS = $(libdir)/botsense
 
 EXTRA_TGT_ALL 			= extra-make
 EXTRA_TGT_ALL_POST	= extra-make-post
 EXTRA_TGT_DEPS 			= extra-deps
 EXTRA_TGT_CLEAN 		= extra-clean
 
-#------------------------------------------------------------------------------
-# Make Includes
-#
-
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
-
-#------------------------------------------------------------------------------
-# Extra make targets (place after Rules.mk)
-
 # NetMsgs Variables
 NETMSGS_XML_FILES	= bsDynaMsgs.xml
-NETMSGS_H_DIR     = $(pkgroot)/include/botsense
+NETMSGS_H_DIR     = $(RNMAKE_PKG_ROOT)/include/botsense
 NETMSGS_CFLAGS		= --incprefix=botsense
-NETMSGS_PY_DIR		= $(pkgroot)/bsPython/modules/BotSense/Dynamixel
-NETMSGS_SHARE_DIR	= $(pkgroot)/share/msgs
-
-# Include NetMsgs Rules Makefile
-include $(rnmake)/Rules.netmsgs.mk
+NETMSGS_PY_DIR		= $(RNMAKE_PKG_ROOT)/bsPython/modules/BotSense/Dynamixel
+NETMSGS_SHARE_DIR	= $(RNMAKE_PKG_ROOT)/share/msgs
 
 SWIG_FILES 				= bsDynaCore.i
-SWIG_EXTMOD_DIR 	= $(pkgroot)/bsPython/modules/BotSense/Dynamixel
+SWIG_EXTMOD_DIR 	= $(RNMAKE_PKG_ROOT)/bsPython/modules/BotSense/Dynamixel
 SWIG_EXTMOD_LIBS 	= -lbotsense -lrnr_netmsgs -lrnr
-
-# Include Swig Rules Makefile
-include $(rnmake)/Rules.swig.mk
 
 .PHONY: extra-make
 extra-make: netmsgs-all
@@ -117,6 +74,19 @@ extra-deps: netmsgs-all
 
 .PHONY: extra-clean
 extra-clean: netmsgs-clean swig-clean
+
+
+#------------------------------------------------------------------------------
+# Include RNMAKE rules makefile(s)
+
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include netmsgs rules
+include $(RNMAKE_ROOT)/Rules.netmsgs.mk
+
+# include swig rules
+include $(RNMAKE_ROOT)/Rules.swig.mk
 
 
 ifdef RNMAKE_DOXY

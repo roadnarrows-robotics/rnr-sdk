@@ -5,4 +5,4 @@ Priority: optional
 Architecture: @ARCH@
 Depends: rnr-librnr-dev (>=1.14.0)
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
-Description: Libraries for writing applications quickly and consistently.
+Description: C++ libraries for writing applications quickly and consistently.

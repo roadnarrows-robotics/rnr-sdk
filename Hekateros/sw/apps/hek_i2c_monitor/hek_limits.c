@@ -16,7 +16,7 @@
  * \author Brent Wilkins (brent@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2012-2017. RoadNarrows LLC.\n
+ *   \h_copy 2012-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -190,7 +190,7 @@ int main( int argc, char **argv )
 
     GPIO_Event_t    gpioEvent;
 
-    if (( numBytes = fread( &gpioEvent, 1, sizeof( gpioEvent ), fs )) == sizeof( gpioEvent ))
+    if (( numBytes = (ssize_t)fread( &gpioEvent, 1, sizeof( gpioEvent ), fs )) == sizeof( gpioEvent ))
     {
       snprintf( argStr, sizeof( argStr ), "%2d %c %ld.%06ld",
                 gpioEvent.gpio,
@@ -214,7 +214,7 @@ int main( int argc, char **argv )
     {
       if ( numBytes > 0 )
       {
-        fprintf( stderr, "Read unexpected number of bytes: %d, expecting %d\n",
+        fprintf( stderr, "Read unexpected number of bytes: %zd, expecting %zu\n",
         numBytes, sizeof( gpioEvent ));
       }
     }

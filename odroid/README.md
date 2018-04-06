@@ -1,5 +1,5 @@
 # odroid
-RoadNarrows Robotics Odroid Processor Project.
+RoadNarrows Robotics Odroid Processor Package.
 
 ## Description
 The Odroid package provides utilities for the ENYOX family

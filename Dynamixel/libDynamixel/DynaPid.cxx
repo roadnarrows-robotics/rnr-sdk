@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -63,8 +63,12 @@ using namespace std;
 // DynaPid Class
 // -----------------------------------------------------------------------------
 
-void DynaPid::SpecifySetPoint(double  fSP,
-                              bool    bUnwind)
+const double DynaPid::PidKpDft    = 0.5;  ///< default Kp constant
+const double DynaPid::PidKiDft    = 1.0;  ///< default Ki constant
+const double DynaPid::PidKdDft    = 0.1;  ///< default Kd constant
+const double DynaPid::WiSumErrDft = 0.1;  ///< default sum error weight
+
+void DynaPid::SpecifySetPoint(double fSP, bool bUnwind)
 {
   m_fSP = fSP;
 

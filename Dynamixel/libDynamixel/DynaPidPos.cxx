@@ -16,7 +16,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -64,6 +64,9 @@ using namespace std;
 // -----------------------------------------------------------------------------
 // DynaPidPos Class
 // -----------------------------------------------------------------------------
+
+const double DynaPidPos::TuneMaxSpeedDelta = 1000.0; ///< max speed chg deltas
+const double DynaPidPos::TuneAbsMinSpeed   =  0.0;   ///< absolute minimum speed
 
 void DynaPidPos::SpecifySetPoint(int    nOdPosStart,
                                  int    nOdPosGoal,

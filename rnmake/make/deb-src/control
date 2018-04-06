@@ -1,0 +1,7 @@
+Package:rnr-rnmake-src
+Version: @VERSION@
+Section: devel
+Priority: optional
+Architecture: @ARCH@
+Maintainer: Robin Knight <robin.knight@roadnarrows.com>
+Description: RoadNarrows Make System.
