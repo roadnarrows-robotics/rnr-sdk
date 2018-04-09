@@ -1,72 +1,56 @@
 ################################################################################
 #
 # ./Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2016-03-10 14:19:39 -0700 (Thu, 10 Mar 2016) $
-$Rev: 4348 $
-
-\brief Make Hekateros package.
+\brief The \h_hek package top-level makefile.
 
 RN Make System Specific Makefile
 
-\author: RoadNarrows LLC (support@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_hek Robotic Arm Package
 
-##! \copyright
-##!   \h_copy 2010-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2010-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-#
-# @EulaBegin@
 # 
-# Unless otherwise stated explicitly, all materials contained are copyrighted
-# and may not be used without RoadNarrows LLC's written consent,
-# except as provided in these terms and conditions or in the copyright
-# notice (documents and software) or other proprietary notice provided with
-# the relevant materials.
-# 
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
-# MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
-# BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
-# CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
-# DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# THE AUTHORS AND  ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# @EulaEnd@
-#
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= .
+RNMAKE_PKG_ROOT	= .
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
 
 #------------------------------------------------------------------------------
 # Subdirectories
 
-SUBDIRS		= sw examples
+RNMAKE_SUBDIRS = sw examples
+
 
 #------------------------------------------------------------------------------
 # Distribution Header List Tags
 
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= hekateros
+RNMAKE_DIST_HDRS = hekateros
 
 #
 # Distribution Headers
@@ -82,147 +66,73 @@ hekateros.HDRS.H	=	 $(shell cd include; ls Hekateros/*.h)
 #------------------------------------------------------------------------------
 # Documentation 
 
-# Document SubPackage Name
-DOC_SUBDIR				=
+# Doxygen Configuration File
+RNMAKE_DOXY_CONF_FILE		= $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
-# Sub[Package] Doxygen Configuration File
-DOXY_CONF_FILE		= $(pkgroot)/make/doxy.conf
-
-#------------------------------------------------------------------------------
-# Optional Variables 
-#
-
-EXTRA_TGT_ALL_POST = all-post
-
-#------------------------------------------------------------------------------
-# Make Includes
-
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
 
 #------------------------------------------------------------------------------
 # Extras
 
-#
+EXTRA_TGT_ALL_POST = all-post
+
 # Overo Linaro versions of Hekateros
-#
-ifeq "$(arch)" "linaro"
-	ETC_PROF_D_HEK = share/etc/profile.d/hekateros_linaro.sh 
+ETC_PROF_D_HEK.linaro = share/etc/profile.d/hekateros_linaro.sh 
+ETC_FILES.linaro 			=	share/etc/profile.d/linaro.sh \
+												share/etc/init.d/*
 
-	ETC_FILES	=	share/etc/profile.d/linaro.sh \
-							share/etc/hekateros/hek_tune.conf \
-							share/etc/hekateros/*.xml \
-							share/etc/init.d/* \
-							share/etc/ld.so.conf.d/*.conf \
-							etc/udev/rules.d/*
-
-	LIB_FILES =	share/lib/cmake/rnr/rnr-hekateros-config.cmake
-else
-
-#
 # Odroid Ubuntu versions of Hekateros
-# 
-ifeq "$(arch)" "odroid"
-	ETC_PROF_D_HEK = share/etc/profile.d/hekateros_odroid.sh 
+ETC_PROF_D_HEK.odroid = share/etc/profile.d/hekateros_odroid.sh 
+ETC_FILES.odroid 			=	share/etc/init.d/*
 
-	ETC_FILES	=	share/etc/hekateros/hek_tune.conf \
-							share/etc/hekateros/*.xml \
-							share/etc/init.d/* \
-							share/etc/ld.so.conf.d/*.conf \
-							etc/udev/rules.d/*
+# profile.d source and destination shell script
+ETC_PROF_D_HEK_SRC = $(ETC_PROF_D_HEK.$(RNMAKE_ARCH))
+ETC_PROF_D_HEK_DST = $(DISTDIR_ETC)/profile.d/hekateros.sh
 
-	LIB_FILES = share/lib/cmake/rnr/rnr-hekateros-config.cmake
+# On-target and off-target common etc files
+ETC_FILES	=	share/etc/hekateros/*.conf \
+						share/etc/hekateros/*.xml \
+						share/etc/ld.so.conf.d/*.conf \
+						etc/udev/rules.d/*.rules
 
-#
-# Off-target host computers
-#
-else
-	ETC_FILES	=	share/etc/hekateros/*.xml \
-							share/etc/ld.so.conf.d/*.conf \
-							etc/udev/rules.d/*
+LIB_FILES = share/lib/cmake/rnr/rnr-hekateros-config.cmake
 
-	LIB_FILES = share/lib/cmake/rnr/rnr-hekateros-config.cmake
+PKGDIR_SHARE = $(RNMAKE_PKG_ROOT)/share
 
-endif
-endif
-
-PKGDIR_SHARE					:= $(pkgroot)/share
-
-#
-# Template to copy files from source to destination directory.
-#
-# Usage: copyfiles_template src_files dst_dir
-#
-define copyfiles_template
-	@if [ "$(1)" != "" ]; \
-	then \
-		b=$(notdir $(2)); \
-		flist="$(wildcard $(addprefix $(pkgroot)/,$(1)))"; \
-		for f in $${flist}; \
-		do \
-			tgt=$(2)$${f##*$$b}; \
-			if [ ! -f "$${tgt}" -o "$${f}" -nt "$${tgt}" ]; \
-			then \
-				d=$$(dirname $${tgt}); \
-				test -d $$d || $(MKDIR) $$d; \
-				printf "$(color_tgt_file) $${tgt}$(color_end)\n"; \
-				$(CP) $$f $${tgt}; \
-			fi; \
-		done; \
-	fi
-endef
-
-#
-# Template to copy file from source to destination.
-#
-# Usage: cp_template src_file dst_file
-#
-define cp_template
-	@if [ "$(1)" != "" ]; \
-	then \
-		if [ ! -f "$(2)" -o "$(1)" -nt "$(2)" ]; \
-		then \
-			d=$$(dirname $(2)); \
-			test -d $$d || $(MKDIR) $$d; \
-			printf "$(color_tgt_file) $(2)$(color_end)\n"; \
-			$(CP) $(1) $(2); \
-		fi; \
-	fi
-endef
-
-# post 'all' make target
 .PHONY: all-post
-all-post: show-banner etc-cp-files lib-cp-files share-cp-files
+all-post: show-banner cp-etc-files cp-lib-files cp-share-files
 
 .PHONY: show-banner
 show-banner:
-	$(call dirbanner,.)
-	@printf "Copying Configuration Files\n"
+	$(call printDirBanner,,all-post)
+	@printf "Pre-install Configuration\n"
 
-.PHONY: etc-cp-files
-etc-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying etc files to $(DISTDIR_ETC)$(color_end)\n"
-	$(call cp_template,$(ETC_PROF_D_HEK),$(DISTDIR_ETC)/profile.d/hekateros.sh)
-	$(call copyfiles_template,$(ETC_FILES),$(DISTDIR_ETC))
+.PHONY: cp-etc-files
+cp-etc-files:
+	$(call printGoalDesc,$(@),Copying etc files to $(DISTDIR_ETC))
+	$(call copySrcDirRel,$(ETC_FILES) $(ETC_FILES.$(RNMAKE_ARCH)),$(DISTDIR_ETC))
+	$(if $(ETC_PROF_D_HEK_SRC),\
+		$(call copySrcDst,$(ETC_PROF_D_HEK_SRC),$(ETC_PROF_D_HEK_DST)),)
 
-.PHONY: lib-cp-files
-lib-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying lib files to $(DISTDIR_LIB)$(color_end)\n"
-	$(call copyfiles_template,$(LIB_FILES),$(DISTDIR_LIB))
+.PHONY: cp-lib-files
+cp-lib-files:
+	$(call printGoalDesc,$(@),Copying extra lib files to $(DISTDIR_LIB))
+	$(call copySrcDirRel,$(LIB_FILES),$(DISTDIR_LIB))
 
-.PHONY: share-cp-files
-share-cp-files:
-	@printf "\n"
-	@printf "$(color_tgt_lib)Copying share directory to $(DISTDIR_SHARE)$(color_end)\n"
-	@cp -rp $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
+.PHONY: cp-share-files
+cp-share-files:
+	$(call printGoalDesc,$(@),Copying share directory to $(DISTDIR_SHARE))
+	@$(CP_R) $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
 	@find $(DISTDIR_SHARE) -name '*.svn' -print | xargs rm -fr
+
+
+#------------------------------------------------------------------------------
+# Include RNMAKE rules makefile(s)
+
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include extras
+include $(RNMAKE_ROOT)/Extras.mk
 
 
 ifdef RNMAKE_DOXY

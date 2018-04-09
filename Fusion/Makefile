@@ -69,7 +69,7 @@ clean-python: python-clean
 
 .PHONY: distclean-python
 distclean-python: python-distclean
-	$(RM) $(pkgroot)/build
+	$(RM) $(RNMAKE_PKG_ROOT)/build
 
 
 #------------------------------------------------------------------------------

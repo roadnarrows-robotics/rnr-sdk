@@ -2,7 +2,7 @@
  *
  * Package:   BotSense
  *
- * File:      bsDynaCore.i
+ * File:      bsHekCore.i
  *
  * $LastChangedDate$
  * $Rev$
@@ -11,7 +11,7 @@
 /*!
  * \file
  *
- * \brief BotSense Dynamixel python swig interface core definitions file.
+ * \brief BotSense Hekateros python swig interface core definitions file.
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  * 
@@ -48,10 +48,10 @@
  *
  ******************************************************************************/
 
-%module bsDynaCore
+%module bsHekCore
 %{
 #include "botsense/BotSense.h"
-#include "botsense/bsDyna.h"
+#include "botsense/bsHek.h"
 %}
 
 %begin
@@ -78,7 +78,7 @@ typedef struct _bsClientStruct *BsClient_P;
 typedef int BsVConnHnd_T;
 
 /*
- * Dynamixel Simple Types
+ * Hekateros Simple Types
  */
 typedef int units_t;
 
@@ -86,8 +86,8 @@ typedef int units_t;
 %include "cpointer.i"
 
 /* the swigged interface */
-%include "Dynamixel/Dynamixel.h"
-%include "botsense/bsDyna.h"
+%include "Hekateros/hekateros.h"
+%include "botsense/bsHek.h"
 
 %array_functions(uint_t, uintArray);
 %array_functions(bool_t, boolArray);
@@ -95,24 +95,24 @@ typedef int units_t;
 %pointer_functions(uint_t, uintp);
 
 /*
- * Higher-level python interface to the BotSense Dynamixel robot C library.
+ * Higher-level python interface to the BotSense Hekateros robot C library.
  */
 %pythoncode
 %{
 
 """
-BotSense Dynamixel Python Core Interface.
+BotSense Hekateros Python Core Interface.
 """
 
 ## \file 
-## \package BotSense.Dynamixel.bsDynaCore
+## \package BotSense.Hekateros.bsHekCore
 ##
-## \brief BotSense swigged Dynamixel Python core interface module.
+## \brief BotSense swigged Hekateros Python core interface module.
 ##
 ## \author Robin Knight (robin.knight@roadnarrows.com)
 ##  
 ## \par Copyright:
-##   (C) 2012.  RoadNarrows LLC.\n
+##   (C) 2012-2018.  RoadNarrows LLC.\n
 ##   (http://www.roadnarrows.com)\n
 ##   All Rights Reserved
 ##

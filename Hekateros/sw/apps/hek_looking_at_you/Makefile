@@ -1,6 +1,6 @@
 ################################################################################
 #
-# ./apps/hek_looking_at_you/Makefile
+# ./sw/apps/hek_looking_at_you/Makefile
 #
 ifdef RNMAKE_DOXY
 /*!
@@ -13,7 +13,7 @@ RN Make System Specific Makefile
 \pkgsynopsis
 RoadNarrows Robotics \h_hek Robotic Arm Package
 
-\pkgfile{apps/hek_looking_at_you/Makefile}
+\pkgfile{sw/apps/hek_looking_at_you/Makefile}
 
 \pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
 

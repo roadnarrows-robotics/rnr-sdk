@@ -50,14 +50,14 @@ endif
 #
 # Examples: .  .. ../..
 #
-pkgroot		= .
+RNMAKE_PKG_ROOT		= .
 
 #
 # Top Build Directory
 #
 # Required in each Makefile
 #
-topdir 		= $(realpath $(pkgroot)/..)
+topdir 		= $(realpath $(RNMAKE_PKG_ROOT)/..)
 
 # Path to RoadNarrows Make System
 #

@@ -17,7 +17,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -89,8 +89,8 @@ namespace laelaps
   class LaeThreadWd : public LaeThread
   {
   public:
-    static const double ThreadWdPrioDft = 50;   ///< default priority
-    static const double ThreadWdHzDft   = 1.0;  ///< default run rate
+    static const double ThreadWdPrioDft;  ///< default priority
+    static const double ThreadWdHzDft;    ///< default run rate
 
     /*!
      * \brief Optimize thread hertz rate given the watchdog timeout value.

@@ -72,7 +72,6 @@ bsMouseBotControl.SRC.C = bsMouseBotControl.c
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"bsMouseBotControl\""
-EXTRA_LD_LIBDIRS = $(DISTDIR_LIB)/$(PKG_LIB_PLUGIN_SUBDIR)
 
 
 #------------------------------------------------------------------------------

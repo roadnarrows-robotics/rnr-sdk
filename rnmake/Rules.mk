@@ -144,15 +144,6 @@ ifeq ($(RNMAKE_ARCH),)
   $(error 'RNMAKE_ARCH': Not defined in including arhitecture makefile)
 endif
 
-#------------------------------------------------------------------------------
-# Product Makefile (Optional)
-
-ifdef RNMAKE_PROD_MKFILE
-  ifeq ($(_PROD_MK),)
-    # optionally include (no error if not found)
-    -include $(RNMAKE_PROD_MKFILE)
-  endif
-endif
 
 #------------------------------------------------------------------------------
 # Package Master Makefile (required)
@@ -178,6 +169,17 @@ endif
 # package name.
 ifeq ($(RNMAKE_PKG),)
   $(error 'RNMAKE_PKG': Not defined in including arhitecture makefile)
+endif
+
+
+#------------------------------------------------------------------------------
+# Product Makefile (Optional)
+
+ifdef RNMAKE_PROD_MKFILE
+  ifeq ($(_PROD_MK),)
+    # optionally include (no error if not found)
+    -include $(RNMAKE_PROD_MKFILE)
+  endif
 endif
 
 
@@ -344,24 +346,24 @@ override CXXFLAGS	:=	$(EXTRA_CXXFLAGS) \
 											$(RNMAKE_ARCH_CXXFLAGS) \
 											$(CXXFLAGS)
 
-# Library Path Flags
+# Library Search Paths
+PKG_LD_LIBPATHS		=	$(addprefix -L,$(LOC_LD_LIBDIRS)) \
+										$(addprefix -L,$(DIST_LD_LIBDIRS))
+INS_LD_LIBPATHS 	= -L$(libdir) \
+										$(addprefix -L$(libdir)/,$(RNMAKE_PKG_LIB_INS_SUBDIRS)) \
+										$(addprefix -L$(libdir)/,$(EXTRA_LIB_INS_SUBDIRS)) 
 EXTRA_LD_LIBPATHS	= $(addprefix -L,$(EXTRA_LD_LIBDIRS))
-PKG_LD_LIBPATHS		= $(addprefix -L,$(RNMAKE_PKG_LD_LIBDIRS))
-LOC_LD_LIBPATHS		=	$(addprefix -L,$(LOC_LD_LIBDIRS))
-DIST_LD_LIBPATHS	= $(addprefix -L,$(DIST_LD_LIBDIRS))
-LD_LIBPATHS			 := $(EXTRA_LD_LIBPATHS) \
-									 	 $(RNMAKE_PKG_LD_LIBPATHS) \
-									 	 $(LOC_LD_LIBPATHS) \
-										 $(DIST_LD_LIBPATHS) \
-										-L$(libdir) \
-										-L$(libdir)/rnr \
-										 $(LD_LIBPATHS)
+SYS_LD_LIBPATHS		= $(addprefix -L,$(RNMAKE_PKG_LD_SYS_LIBDIRS))
+LD_LIBPATHS			 := $(PKG_LD_LIBPATHS) \
+										$(INS_LD_LIBPATHS) \
+										$(EXTRA_LD_LIBPATHS) \
+										$(SYS_LD_LIBPATHS) \
+										$(LD_LIBPATHS)
 
-# DHP/RDK libdir/rnr doesn't really belong here :-( please fix.
+# Linked Libraries
+LD_LIBS						:= $(EXTRA_LD_LIBS) $(RNMAKE_PKG_LD_LIBS) $(LD_LIBS)
 
-# External Libraries
-LD_LIBS						:= $(EXTRA_LD_LIBS) $(PRNMAKE_KG_LD_LIBS) $(LD_LIBS)
-
+# Linker flags
 LDFLAGS     			:= $(EXTRA_LDFLAGS) $(RNMAKE_PKG_LDFLAGS) $(LDFLAGS)
 
 # default link-loader is c compiler - override if using C++

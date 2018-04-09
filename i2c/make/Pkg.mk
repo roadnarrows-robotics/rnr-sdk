@@ -62,14 +62,17 @@ RNMAKE_PKG_FULL_NAME				= $(RNMAKE_PKG)-$(RNMAKE_PKG_VERSION_DOTTED)
 # Package Include Directories
 RNMAKE_PKG_INCDIRS = $(RNMAKE_PKG_ROOT)/include
 
-# Package System Include Directories
+# System and Third Party Include Directories
 RNMAKE_PKG_SYS_INCDIRS =
 
 # Package Library Subdirectories
 RNMAKE_PKG_LIB_SUBDIRS = rnr
 
-# Link Library Extra Library Directories (exluding local library)
-RNMAKE_PKG_LD_LIBDIRS = 
+# Installed Packages Library Subdirectories
+RNMAKE_PKG_LIB_INS_SUBDIRS = rnr
+
+# External System and Third Party Library Directories
+RNMAKE_PKG_LD_SYS_LIBDIRS =
 
 # Release Files (docs)
 RNMAKE_PKG_REL_FILES = VERSION.txt README.md

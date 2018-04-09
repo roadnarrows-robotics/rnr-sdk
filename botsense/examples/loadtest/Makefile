@@ -73,8 +73,6 @@ bsLoadTest.SRC.C = bsLoadTest.c
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"bsLoadTest\""
 
-EXTRA_LD_LIBDIRS = $(DISTDIR_LIB)/$(PKG_LIB_PLUGIN_SUBDIR)
-
 
 #------------------------------------------------------------------------------
 # Include RNMAKE rules makefile(s)

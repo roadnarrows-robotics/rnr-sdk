@@ -16,7 +16,6 @@ RoadNarrows Robotics \h_laelaps Small Mobile Robot Package
 \pkgfile{make/Pkg.mk}
 
 \pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
-\pkgauthor{Daniel Packard,daniel@roadnarrows.com}
 
 \pkgcopyright{2013-2018,RoadNarrows LLC,http://www.roadnarrows.com}
 
@@ -63,14 +62,17 @@ RNMAKE_PKG_FULL_NAME				= $(RNMAKE_PKG)-$(RNMAKE_PKG_VERSION_DOTTED)
 # Package Include Directories
 RNMAKE_PKG_INCDIRS = $(RNMAKE_PKG_ROOT)/include
 
-# Package System Include Directories
+# System and Third Party Include Directories
 RNMAKE_PKG_SYS_INCDIRS += $(RNMAKE_OPT_PREFIX)/include
 
 # Package Library Subdirectories
-RNMAKE_PKG_LIB_SUBDIRS = rnr botsense
+RNMAKE_PKG_LIB_SUBDIRS = botsense
 
-# Link Library Extra Library Directories (exluding local library)
-RNMAKE_PKG_LD_LIBDIRS = 
+# Installed Packages Library Subdirectories
+RNMAKE_PKG_LIB_INS_SUBDIRS = rnr botsense
+
+# External System and Third Party Library Directories
+RNMAKE_PKG_LD_SYS_LIBDIRS = $(RNMAKE_OPT_PREFIX)/lib
 
 # Release Files (docs)
 RNMAKE_PKG_REL_FILES = VERSION.txt README.md
@@ -84,8 +86,8 @@ RNMAKE_PKG_CFLAGS	=
 # CXX flags
 RNMAKE_PKG_CXXFLAGS	=
 
-# Link flags
-RNMAKE_PKG_LDFLAGS=
+# Linker flags
+RNMAKE_PKG_LDFLAGS =
 
 
 ifdef RNMAKE_DOXY

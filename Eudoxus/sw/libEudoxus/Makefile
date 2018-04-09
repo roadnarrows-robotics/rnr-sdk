@@ -92,10 +92,10 @@ Eudoxus.LIBDEPS = #OpenNi
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"libEudoxus\""
 
-#PKG_SYS_INCDIRS += \
-#	$(PKG_SYS_PREFIX)/include/libxml2 \
-#	$(PKG_SYS_PREFIX)/include/eigen3 \
-#	$(PKG_SYS_PREFIX)/include/vtk-5.8
+#RNMAKE_PKG_SYS_INCDIRS += \
+#	$(RNMAKE_SYS_PREFIX)/include/libxml2 \
+#	$(RNMAKE_SYS_PREFIX)/include/eigen3 \
+#	$(RNMAKE_SYS_PREFIX)/include/vtk-5.8
 
 
 #------------------------------------------------------------------------------

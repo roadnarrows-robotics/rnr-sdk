@@ -21,7 +21,7 @@ Include this file in each local make file (usually near the bottom).
 													default: . (current directory)
 	\li NETMSGS_PYFLAGS		- additional netmsgs python flags.
 	\li NETMSGS_SHARE_DIR	- share directory to copy XML files.
-													default: $(pkgroot)/share
+													default: $(RNMAKE_PKG_ROOT)/share
 
 \pkgsynopsis
 RN Make System
@@ -65,7 +65,7 @@ NETMSGS_PY_DIR		 ?= .
 NETMSGS_PY_FILES 		= $(addprefix $(NETMSGS_PY_DIR)/,\
 											$(addsuffix .py,$(NETMSGS_BASES)))
 
-NETMSGS_SHARE_DIR	 ?= $(pkgroot)/share
+NETMSGS_SHARE_DIR	 ?= $(RNMAKE_PKG_ROOT)/share
 NETMSGS_SHARE_FILES	= $(addprefix $(NETMSGS_SHARE_DIR)/,$(NETMSGS_XML_FILES))
 
 define xml2c

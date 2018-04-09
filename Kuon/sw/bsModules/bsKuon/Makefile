@@ -75,7 +75,7 @@ bsserver_kuon.SRC.C   	=	bsKuonBgThread.c bsKuonMsgs.c
 #
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= bsModKuon
+RNMAKE_DIST_HDRS	= bsModKuon
 
 #
 # Distribution Headers

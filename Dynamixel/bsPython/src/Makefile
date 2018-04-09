@@ -41,7 +41,6 @@ include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
 
 #------------------------------------------------------------------------------
 # Extras
-#
 
 EXTRA_TGT_ALL 	= all-extmod
 EXTRA_TGT_CLEAN	= clean-extmod

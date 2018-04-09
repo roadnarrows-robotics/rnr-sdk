@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -113,7 +113,8 @@ void LaeAsyncJob::abort(int rc)
 // LaeThreadAsync Class
 //------------------------------------------------------------------------------
 
-/*! default name */
+const double       LaeThreadAsync::ThreadAsyncPrioDft = 25;
+const double       LaeThreadAsync::ThreadAsyncHzDft   = 1.0;
 const char* const  LaeThreadAsync::ThreadAsyncNameDft = "Async";
 
 LaeThreadAsync::LaeThreadAsync() : LaeThread(ThreadAsyncNameDft)

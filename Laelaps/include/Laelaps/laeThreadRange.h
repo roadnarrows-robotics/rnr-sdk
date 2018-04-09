@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -83,8 +83,8 @@ namespace laelaps
   class LaeThreadRange : public LaeThread
   {
   public:
-    static const double ThreadRangePrioDft = 75;    ///< default priority
-    static const double ThreadRangeHzDft   =  8.0;  ///< default run rate
+    static const double ThreadRangePrioDft; ///< default priority
+    static const double ThreadRangeHzDft;   ///< default run rate
 
     /*!
      * \brief Default constructor.

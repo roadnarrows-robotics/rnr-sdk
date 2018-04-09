@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -82,9 +82,9 @@ namespace laelaps
   class LaeThreadKin : public LaeThread
   {
   public:
-    static const double ThreadKinPrioDft    = 99;   ///< default priority
-    static const double ThreadKinHzDft      = 30.0; ///< default run rate
-    static const long   ThreadKinTHealthDft = 5;    ///< monitor health period
+    static const double ThreadKinPrioDft;     ///< default priority
+    static const double ThreadKinHzDft;       ///< default run rate
+    static const long   ThreadKinTHealthDft;  ///< monitor health period
 
     /*!
      * \brief Default constructor.

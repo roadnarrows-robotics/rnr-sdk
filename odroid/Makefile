@@ -70,7 +70,7 @@ $(RNMAKE_DIST_HDRS).HDRS.H = $(shell cd include; ls odroid/*.h)
 # Documentation 
 
 # Doxygen Configuration File
-RNMAKE_DOXY_CONF_FILE    = $(pkgroot)/make/doxy.conf
+RNMAKE_DOXY_CONF_FILE    = $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
 #------------------------------------------------------------------------------
 # Extras

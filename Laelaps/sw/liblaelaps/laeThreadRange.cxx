@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -72,6 +72,9 @@ using namespace sensor::vl6180;
 // LaeThreadRange Class
 //------------------------------------------------------------------------------
   
+const double LaeThreadRange::ThreadRangePrioDft = 75;   ///< default priority
+const double LaeThreadRange::ThreadRangeHzDft   =  8.0; ///< default run rate
+
 LaeThreadRange::LaeThreadRange(LaeRangeSensorGroup &hwif) :
    LaeThread("Range"), m_hwif(hwif)
 {

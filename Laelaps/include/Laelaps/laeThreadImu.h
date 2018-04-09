@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -81,8 +81,8 @@ namespace laelaps
   class LaeThreadImu : public LaeThread
   {
   public:
-    static const double ThreadImuPrioDft  = 80;     ///< default priority
-    static const double ThreadImuHzDft    = 30.0;   ///< default run rate
+    static const double ThreadImuPrioDft;   ///< default priority
+    static const double ThreadImuHzDft;     ///< default run rate
 
     /*!
      * \brief Default constructor.

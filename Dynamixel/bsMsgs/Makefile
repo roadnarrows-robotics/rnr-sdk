@@ -43,9 +43,6 @@ include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
 #------------------------------------------------------------------------------
 # Extras
 
-# install botsense library directory
-EXTRA_LD_LIBDIRS = $(libdir)/botsense
-
 EXTRA_TGT_ALL 			= extra-make
 EXTRA_TGT_ALL_POST	= extra-make-post
 EXTRA_TGT_DEPS 			= extra-deps

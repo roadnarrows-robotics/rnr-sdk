@@ -94,13 +94,17 @@ RNMAKE_DOXY_CONF_FILE	= $(RNMAKE_PKG_ROOT)/make/doxy.conf
 EXTRA_TGT_ALL_POST = all-post 
 
 # Overo Linaro versions of Kuon
-ETC_FILES.linaro = 	share/etc/profile.d/kuon_linaro.sh \
-										share/etc/profile.d/linary.hs \
-										share/etc/init.d/*
+ETC_PROF_D_KUON.linaro 	=	share/etc/profile.d/kuon_linaro.sh \
+ETC_FILES.linaro 				= share/etc/profile.d/linary.sh \
+													share/etc/init.d/*
 
 # Odroid Ubuntu versions of Kuon
-ETC_FILES.odroid = 	share/etc/profile.d/kuon_odroid.sh \
-										share/etc/init.d/*
+ETC_PROF_D_KUON.odroid 	=	share/etc/profile.d/kuon_odroid.sh \
+ETC_FILES.odroid 				= share/etc/init.d/*
+
+# profile.d source and destination shell script
+ETC_PROF_D_KUON_SRC = $(ETC_PROF_D_KUON.$(RNMAKE_ARCH))
+ETC_PROF_D_KUON_DST = $(DISTDIR_ETC)/profile.d/kuon.sh
 
 # On-target Kuon and off-target host computers
 ETC_FILES	=	share/etc/kuon/kuon.conf \
@@ -124,6 +128,8 @@ show-banner:
 cp-etc-files:
 	$(call printGoalDesc,$(@),Copying etc files to $(DISTDIR_ETC))
 	$(call copySrcDirRel,$(ETC_FILES) $(ETC_FILES.$(RNMAKE_ARCH)),$(DISTDIR_ETC))
+		$(if $(ETC_PROF_D_KUON_SRC),\
+		$(call copySrcDst,$(ETC_PROF_D_KUON_SRC),$(ETC_PROF_D_KUON_DST)),)
 
 .PHONY: cp-lib-files
 cp-lib-files:

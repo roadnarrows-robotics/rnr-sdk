@@ -35,7 +35,7 @@ endif
 # Required
 
 # Package Root Directory
-RNMAKE_PKG_ROOT	= ../..
+RNMAKE_PKG_ROOT	= ../../..
 
 # Bootstrap package within RN Make System
 include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk

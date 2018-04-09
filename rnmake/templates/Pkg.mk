@@ -43,8 +43,8 @@
 # Prevent mutliple inclusion
 _PKG_MK	= 1
 
-ifndef pkgroot
-$(error Error: pkgroot not defined in including makefile)
+ifndef RNMAKE_PKG_ROOT
+$(error Error: RNMAKE_PKG_ROOT not defined in including makefile)
 endif
 
 #
@@ -81,12 +81,12 @@ RNMAKE_PKG_FULL_NAME	= $(RNMAKE_PKG)-$(RNMAKE_PKG_VERSION_DOTTED)
 # are placed. This can be usefull if serveral packages use a global
 # local area rather than one local area per package.
 #
-# Default: $(pkgroot)/loc/
+# Default: $(RNMAKE_PKG_ROOT)/loc/
 #
 #LOCDIR_ROOT				=
 
 # Package Include Directories
-RNMAKE_PKG_INCDIRS 				= $(pkgroot)/include
+RNMAKE_PKG_INCDIRS 				= $(RNMAKE_PKG_ROOT)/include
 
 # Package System Include Directories
 RNMAKE_PKG_SYS_INCDIRS			=

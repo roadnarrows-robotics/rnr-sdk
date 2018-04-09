@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -70,6 +70,10 @@ using namespace laelaps;
 // LaeThreadKin Class
 //------------------------------------------------------------------------------
   
+const double LaeThreadKin::ThreadKinPrioDft    = 99;
+const double LaeThreadKin::ThreadKinHzDft      = 30.0;
+const long   LaeThreadKin::ThreadKinTHealthDft = 5;
+
 LaeThreadKin::LaeThreadKin(LaeKinematics &kin) :
     LaeThread("Kinodynamics"), m_kin(kin)
 {

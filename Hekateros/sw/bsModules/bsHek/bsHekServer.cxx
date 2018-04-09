@@ -17,7 +17,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \copyright
- *   \h_copy 2011-2017. RoadNarrows LLC.\n
+ *   \h_copy 2011-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -752,7 +752,8 @@ protected:
 
     int     rc;
 
-    strcpy(pRsp->m_version, pCtlBlk->m_pHekDesc->m_strVersion.c_str());
+    strcpy(pRsp->m_version,
+        pCtlBlk->m_pHekDesc->getArmDesc()->getProdHwVer().c_str());
     
     return BS_OK;
   }

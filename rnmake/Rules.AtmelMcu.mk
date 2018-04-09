@@ -38,133 +38,131 @@ _RULES_ATMEL_MCU_MK = 1
 
 #------------------------------------------------------------------------------
 # Prelims
-ifeq "$(MAKECMDGOALS)" ""
-	GOAL	= all
-else
-	GOAL = $(firstword $(MAKECMDGOALS))
+
+# this makefile is last in the list (must call before any includes from this)
+RNMAKE_ROOT = $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+
+# version of these makefile rules
+RNMAKE_RULES_VER_MAJOR := 3
+RNMAKE_RULES_VER_MINOR := 0
+
+# default goal
+.DEFAULT_GOAL := all
+
+# list of command-line goals
+GOAL_LIST = $(MAKECMDGOALS)
+
+# add default if empty
+ifeq "$(GOAL_LIST)" ""
+  GOAL_LIST = $(.DEFAULT_GOAL)
 endif
 
-#------------------------------------------------------------------------------
-# Print Help and Quit
-# Note: First make goal is tested for the substring 'help*'. If matched, then
-# include the help make file which should catch the help[-<subhelp>] target.
-ifeq "$(findstring help,$(GOAL))" "help"
-ifndef rnmake
-rnmake = $(dir $(lastword $(MAKEFILE_LIST)))
-endif
-include $(rnmake)/Help.mk
-endif
+# save first and last goals
+FIRST_GOAL	= $(firstword $(GOAL_LIST))
+LAST_GOAL 	= $(lastword $(GOAL_LIST))
 
-
-#------------------------------------------------------------------------------
-# Tweaks
-# 
-# See also the standard prefix, ... parameters
-
-#
-# pkgroot		- specifies package root directory
-#
-# Including Makefile must define package root prior to including Rules.mk
-#
-ifndef pkgroot
-$(error Error: pkgroot: not defined in including Makefile)
-endif
-
-# topdir 		- specifies the product/project top directory.
-#
-# For RoadNarrows developers, the default translates to /prj
-#
-ifndef topdir
-	topdir = $(realpath $(pkgroot)/../..)
-endif
-
-# rnmake 		- specifies the	RN make system base directory
-#
-ifndef rnmake
-	rnmake = $(realpath $(pkgroot)/../rnmake)
-endif
-
-# distroot 	- specifies the root directory for the intermediary distribution
-# 						files
-#
-ifndef distroot
-	distroot = $(pkgroot)/dist
-endif
+# list of goals with subdirectory traversals
+GOALS_WITH_SUBDIRS = 
 
 
 #------------------------------------------------------------------------------
-# Product Makefile (Optional)
+# Environment (Env.mk)
 #
-#
-ifdef RNMAKE_PROD_MKFILE
-  # optionally include (no error if not found)
-  -include $(RNMAKE_PROD_MKFILE)
-endif
+# Parse rnmake specific command-line and environment variables.
 
+ifeq ($(_ENV_MK),)
+include $(RNMAKE_ROOT)/Env.mk
+endif
 
 #------------------------------------------------------------------------------
-# Package Makefile
-#
-ifdef pkg_mk
-RNMAKE_PKG_MKFILE = $(pkg_mk)
-else
-RNMAKE_PKG_MKFILE = $(pkgroot)/make/Pkg.mk
-endif
+# Standard collection of RN Make System functions and varibbles (Std.mk)
 
-include $(RNMAKE_PKG_MKFILE)
-
-ifndef RNMAKE_PKG
-$(error Error: RNMAKE_PKG: not defined: specify in Pkg.mk)
-endif
-
-# Package root absolute path name
-ifndef RNMAKE_PKG_ROOT
-export RNMAKE_PKG_ROOT := $(realpath $(CURDIR)/$(pkgroot))
+ifeq ($(_STD_MK),)
+include $(RNMAKE_ROOT)/Std.mk
 endif
 
 
 # -------------------------------------------------------------------------
 # Architecture Dependent Definitions
 
-# For MCUs, architecture must be defined.
-ifndef arch
-	$(error Error: No Atmel MCU architecture defined)
+# Standard rnmake rules do not support the following targets.
+ifneq "$(findstring $(RNMAKE_ARCH_TAG),atmega16)" ""
+  $(error Rules.mk does not support $(arch) rules)
 endif
 
-# architecture make file name
-ARCH_MKFILE = $(rnmake)/Arch/Arch.$(arch).mk
+# architecture makefile name
+RNMAKE_ARCH_MKFILE = $(call findReqFile,\
+  $(RNMAKE_ROOT)/Arch/Arch.$(RNMAKE_ARCH_TAG).mk,\
+  See $(RNMAKE_ROOT)/Arch for available architectures)
 
-# check to see if architecture file exists
-hasArch := $(shell if [ -f $(ARCH_MKFILE) ]; then echo "true"; fi)
-ifndef hasArch
-$(error Error: Unknown architecture: $(arch). See $(rnmake)/Arch/Arch.<arch>.mk)
+# Include the architecture make file.
+ifeq ($(_ARCH_$(RNMAKE_ARCH_TAG)_MK),)
+  include $(RNMAKE_ARCH_MKFILE)
 endif
 
-# include the architecture make file
-include $(ARCH_MKFILE)
-
-# Checks
-
-# Included architecture makefile must define ARCH which "overrides" the
-# command-line arch in the rules targets.
-#
-ifndef ARCH
-$(error Error: ARCH: not defined in including Makefile)
+# Included architecture makefile must define RNMAKE_ARCH which defines the
+# real architecture.
+ifeq ($(RNMAKE_ARCH),)
+  $(error 'RNMAKE_ARCH': Not defined in including arhitecture makefile)
 endif
 
-# Atmel MCU must be defined
-ifndef MCU
-$(error Error: MCU: not defined in including Makefile)
-endif
 
 #------------------------------------------------------------------------------
-# Include helper make files
-# Can conditionally define macros by architecuture definitions included
-# above.
+# Package Master Makefile (required)
+#
+
+# must be defined in including makefile
+ifeq ($(RNMAKE_PKG_ROOT),)
+  $(error 'RNMAKE_PKG_ROOT': Not defined in including Makefile)
+endif
+
+# package makefile
+RNMAKE_PKG_MKFILE = $(call findReqFile,$(RNMAKE_PKG_ROOT)/make/Pkg.mk,)
+
+# package root absolute path
+RNMAKE_PKG_ROOT := $(realpath $(RNMAKE_PKG_ROOT))
+
+# required
+ifeq ($(_PKG_MK),)
+include $(RNMAKE_PKG_MKFILE)
+endif
+
+# Included package master makefile must define RNMAKE_PKG which defines the
+# package name.
+ifeq ($(RNMAKE_PKG),)
+  $(error 'RNMAKE_PKG': Not defined in including arhitecture makefile)
+endif
+
+
+#------------------------------------------------------------------------------
+# Product Makefile (Optional)
+
+ifdef RNMAKE_PROD_MKFILE
+  ifeq ($(_PROD_MK),)
+    # optionally include (no error if not found)
+    -include $(RNMAKE_PROD_MKFILE)
+  endif
+endif
+
+
+#------------------------------------------------------------------------------
+# Include helper make files (Cmds.mk, Colors.mk)
+#
+# Can conditionally define macros by architecuture definitions included above.
 #
 
 # basic host commands
-include $(rnmake)/Cmds.mk
+ifeq ($(_CMDS_MK),)
+include $(RNMAKE_ROOT)/Cmds.mk
+endif
+
+# color schemes
+ifeq ($(_COLORS_MK),)
+ifneq "$(color)" "off"
+include $(RNMAKE_ROOT)/Colors.mk
+endif
+endif
+
 
 
 #------------------------------------------------------------------------------
@@ -591,7 +589,7 @@ hdrs: $(PREREQ_HDRS)
 $(PREREQ_HDRS):
 	@for h in $(@); \
 		do\
-			src=$(pkgroot)/include/$$h; \
+			src=$(RNMAKE_PKG_ROOT)/include/$$h; \
 			dst=$(DISTDIR_INCLUDE)/$$h; \
 			hdir=$$(dirname $$dst); \
 			if [ ! -f $$dst -o $$src -nt $$dst ]; \
@@ -607,7 +605,7 @@ $(PREREQ_HDRS):
 # Desc: 	Makes all release files
 # Notes:	Release files are only made at top level
 .PHONY: rel
-ifeq "$(pkgroot)" "."
+ifeq "$(RNMAKE_PKG_ROOT)" "."
 rel: $(FQ_REL_FILES)
 else
 rel:
@@ -674,10 +672,10 @@ docs-src-gen:
 		 echo "HTML_HEADER=$(HTML_HEADER)"; \
 		 echo "HTML_FOOTER=$(HTML_FOOTER)"; \
 		 echo "HTML_STYLESHEET=$(HTML_STYLESHEET)"; \
-		 echo "EXAMPLE_PATH=$(pkgroot)/examples"; \
+		 echo "EXAMPLE_PATH=$(RNMAKE_PKG_ROOT)/examples"; \
 		 echo "OUTPUT_DIRECTORY=$(DISTDIR_DOC)"; \
 		 echo "HTML_OUTPUT=$(DIST_SRCDOC)"; \
-		) | doxygen - >$(pkgroot)/doxy.out.log 2>$(pkgroot)/doxy.err.log; \
+		) | doxygen - >$(RNMAKE_PKG_ROOT)/doxy.out.log 2>$(RNMAKE_PKG_ROOT)/doxy.err.log; \
 		$(rnmake)/utils/doxyindex.sh \
 							-t "$(RNMAKE_PKG) v$(RNMAKE_PKG_VERSION_DOTTED)" \
 							-h $(HTML_HEADER) \
@@ -771,9 +769,9 @@ tarball-doc:
 .PHONY: tarball-src
 tarball-src: 
 	@test -d $(DISTDIR_SRC) || $(MKDIR) $(DISTDIR_SRC)
-	@$(FIND) $(pkgroot) \( \
-		-wholename '$(pkgroot)/dist' -or -wholename dist -or \
-		-wholename '$(pkgroot)/loc' -or -wholename loc -or \
+	@$(FIND) $(RNMAKE_PKG_ROOT) \( \
+		-wholename '$(RNMAKE_PKG_ROOT)/dist' -or -wholename dist -or \
+		-wholename '$(RNMAKE_PKG_ROOT)/loc' -or -wholename loc -or \
 		-name '*.svn*' -or -wholename '.svn' -or \
 		-wholename '*.deps*' -or -wholename '.deps' -or \
 		-wholename '*obj*' -or -wholename 'obj' -or -wholename '*.o' -or \

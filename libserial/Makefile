@@ -67,7 +67,7 @@ rnr_serial.LIBS	= rnr
 #
 # List of tags to lists of header files slated to be distributed and installed.
 #
-DIST_HDRS	= rnr
+RNMAKE_DIST_HDRS	= rnr
 
 #
 # Distribution Headers

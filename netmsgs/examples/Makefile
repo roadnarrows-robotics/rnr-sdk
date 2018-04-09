@@ -85,7 +85,7 @@ EXTRA_TGT_DEPS 		= xml-make
 EXTRA_TGT_CLEAN 	= xml-clean
 
 # undef to use installed version
-NETMSGSGENPATH	= $(pkgroot)/nmPython/scripts/
+NETMSGSGENPATH	= $(RNMAKE_PKG_ROOT)/nmPython/scripts/
 
 # the command
 NETMSGSGEN			= netmsgsgen

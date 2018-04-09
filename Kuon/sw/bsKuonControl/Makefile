@@ -71,7 +71,6 @@ bsKuonControl.SRC.C = bsKuonControl.c
 
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"bsKuonControl\""
-EXTRA_LD_LIBDIRS = $(DISTDIR_LIB)/$(PKG_LIB_PLUGIN_SUBDIR)
 
 
 #------------------------------------------------------------------------------

@@ -93,9 +93,6 @@ rnr_dynamixel.LIBDEPS = rnr_dxl
 #------------------------------------------------------------------------------
 # Extras
 
-# install botsense library directory
-EXTRA_LD_LIBDIRS = $(libdir)/botsense
-
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"librnr_dynamixel\""
 

@@ -58,13 +58,13 @@ utEudoxus.SRC.CXX 	 	= utEudoxus.cxx
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"UTlibEudoxus\""
 
-#PKG_SYS_INCDIRS += \
-	$(PKG_SYS_PREFIX)/include/gstreamer-0.10 \
+#RNMAKE_PKG_SYS_INCDIRS += \
+	$(RNMAKE_SYS_PREFIX)/include/gstreamer-0.10 \
 	$(EXTRA_INCDIR_GLIBLIB) \
-	$(PKG_SYS_PREFIX)/include/glib-2.0 \
-	$(PKG_SYS_PREFIX)/include/libxml2 \
-	$(PKG_SYS_PREFIX)/include/eigen3 \
-	$(PKG_SYS_PREFIX)/include/vtk-5.8
+	$(RNMAKE_SYS_PREFIX)/include/glib-2.0 \
+	$(RNMAKE_SYS_PREFIX)/include/libxml2 \
+	$(RNMAKE_SYS_PREFIX)/include/eigen3 \
+	$(RNMAKE_SYS_PREFIX)/include/vtk-5.8
 
 
 #------------------------------------------------------------------------------

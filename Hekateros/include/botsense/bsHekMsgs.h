@@ -7,7 +7,7 @@
  *
  * \brief \h_botsense Server/Client Hekateros NetMsgs XML Definitions.
  *
- * \warning This file was auto-generated on 2018.04.05 21:55:29 from the NetMsgs
+ * \warning This file was auto-generated on 2018.04.06 10:24:24 from the NetMsgs
  * XML specification bsHekMsgs.xml.
  *
  * \par Copyright:

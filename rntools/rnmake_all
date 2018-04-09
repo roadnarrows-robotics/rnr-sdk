@@ -10,8 +10,29 @@
 #   Make clobber, deps, install for all active packages.
 #
 
-pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt Kuon Eudoxus'
+echo "rdk" ${0}
+bindir=$(dirname $(realpath ${0}))
+prefix=$(dirname ${bindir})
 
+echo ${bindir} ", " ${prefix}
+
+pkglist='librnr
+  libserial i2c gpio
+  netmsgs botsense 
+  peripherals appkit
+  odroid
+  Dynamixel
+  Hekateros Laelaps PanTilt Kuon Eudoxus'
+
+echo $pkglist
+
+declare -a pth
+
+pth=("${prefix}/share/rnmake" "./share" "/usr/local/share/rnmake")
+
+echo ${pth[*]}
+
+exit 0
 pkgroot='/prj/pkg'
 
 for pkgname in ${pkglist}

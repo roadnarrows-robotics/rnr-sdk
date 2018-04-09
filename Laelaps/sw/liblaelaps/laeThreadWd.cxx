@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -73,6 +73,9 @@ using namespace laelaps;
 // LaeThreadWd Class
 //------------------------------------------------------------------------------
   
+const double LaeThreadWd::ThreadWdPrioDft = 50;   ///< default priority
+const double LaeThreadWd::ThreadWdHzDft   = 1.0;  ///< default run rate
+
 double LaeThreadWd::optimizeHz(const double fWatchDogTimeout)
 {
   double  t;

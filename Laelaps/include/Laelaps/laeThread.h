@@ -14,7 +14,7 @@
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -85,7 +85,7 @@ namespace laelaps
     static const int ThreadPriorityMin =  1;  ///< minimum scheduling priority
     static const int ThreadPriorityMax = 99;  ///< maximum scheduling priority
 
-    static const double ThreadMinHz = 0.001;  ///< once every 1000 seconds
+    static const double ThreadMinHz;    ///< minimum thread Hertz
 
     /*!
      * \brief Kinematics thread states.

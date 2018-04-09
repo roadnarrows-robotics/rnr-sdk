@@ -1,104 +1,76 @@
 ################################################################################
 #
 # ./sw/scripts/Makefile
-
+#
 ifdef RNMAKE_DOXY
 /*!
 \file
 
-$LastChangedDate: 2016-03-17 12:14:21 -0600 (Thu, 17 Mar 2016) $  
-$Rev: 4350 $ 
-
-\brief Make Eudoxus executable scripts.
+\brief The \h_eudoxus executable scripts makefile.
 
 RN Make System Specific Makefile
 
-\author: Robin Knight (robin.knight@roadnarrows.com)
+\pkgsynopsis
+RoadNarrows Robotics \h_eudoxus 3D Scanner Package
 
-##! \copyright
-##!   \h_copy 2016-2017. RoadNarrows LLC.\n
-##!   http://www.roadnarrows.com\n
-##!   All Rights Reserved
+\pkgfile{sw/scripts/Makefile}
 
-\cond RNMAKE_DOXY
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com} 
+
+\pkgcopyright{2012-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
  */
 endif
-
-#
-# @EulaBegin@
 # 
-# Unless otherwise stated explicitly, all materials contained are copyrighted
-# and may not be used without RoadNarrows LLC's written consent,
-# except as provided in these terms and conditions or in the copyright
-# notice (documents and software) or other proprietary notice provided with
-# the relevant materials.
-# 
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY 
-# MEMBERS/EMPLOYEES/CONTRACTORS OF ROADNARROWS OR DISTRIBUTORS OF THIS SOFTWARE
-# BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR
-# CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
-# DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-# 
-# THE AUTHORS AND  ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# @EulaEnd@
-#
 ################################################################################
 
 #------------------------------------------------------------------------------
 # Required
 
 # Package Root Directory
-pkgroot		= ../..
+RNMAKE_PKG_ROOT	= ../..
 
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
 
-#------------------------------------------------------------------------------
-# Executable Scripts
-
-SCRIPTS = \
-	eudoxus_console.py \
-	eudoxus_shutter.sh \
-	eudoxus_svc_openni2 \
-
-#------------------------------------------------------------------------------
-# Sources
-
-#------------------------------------------------------------------------------
-# Optional Variables 
-#
-
-# Subpackage C PreProcessor Flags
-EXTRA_TGT_ALL = all-bin-scripts
-
-#------------------------------------------------------------------------------
-# Make Includes
-#
-
-# Default RoadNarrows make system base directory
-ifndef rnmake
-rnmake := $(realpath $(pkgroot)/../rnmake)
-endif
-
-# Include Rules Makefile
-include $(rnmake)/Rules.mk
 
 #------------------------------------------------------------------------------
 # Extras
 
-DISTDIR_BIN_SCRIPTS	:= $(addprefix $(DISTDIR_BIN)/,$(SCRIPTS))
+EXTRA_TGT_ALL = all-scripts
 
-.PHONY: all-bin-scripts
-all-bin-scripts: $(DISTDIR_BIN_SCRIPTS)
+SCRIPTS = \
+	eudoxus_console.py \
+	eudoxus_shutter.sh \
+	eudoxus_svc_openni2
 
-$(DISTDIR_BIN)/% : %
-	@printf "\n"
-	@printf "$(color_tgt_file)    cp $(<) $(@)$(color_end)\n"
-	@$(CP) $(<) $(@)
+.PHONY: all-scripts
+all-scripts: cp-script-files
+
+.PHONY: echo-all-scripts
+echo-all-scripts:
+	$(call printEchoTgtGoalDesc,Copying scripts to $(DISTDIR_BIN))
+
+.PHONY: cp-script-files
+cp-script-files:
+	$(call printGoalDesc,$(@),Copying script files to $(DISTDIR_BIN))
+	$(call copySrcDir,$(SCRIPTS),$(DISTDIR_BIN))
+
+
+#------------------------------------------------------------------------------
+# Include RNMAKE rules makefile(s)
+
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include extras (must include after top-level)
+include $(RNMAKE_ROOT)/Extras.mk
 
 
 ifdef RNMAKE_DOXY

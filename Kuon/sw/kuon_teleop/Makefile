@@ -72,8 +72,6 @@ kuon_teleop.SRC.CXX = kuon_teleop.cxx
 # Subpackage C PreProcessor Flags
 EXTRA_CPPFLAGS = -DLOG -DLOGMOD="\"kuon_teleop\""
 
-EXTRA_LD_LIBDIRS = $(DISTDIR_LIB)/$(PKG_LIB_PLUGIN_SUBDIR)
-
 
 #------------------------------------------------------------------------------
 # Include RNMAKE top-level rules makefile

@@ -14,7 +14,7 @@
  * \brief The Laelaps thread base class implementation.
  *
  * \par Copyright
- *   \h_copy 2015-2017. RoadNarrows LLC.\n
+ *   \h_copy 2015-2018. RoadNarrows LLC.\n
  *   http://www.roadnarrows.com\n
  *   All Rights Reserved
  */
@@ -83,6 +83,8 @@ static void prts(string what, struct timespec ts)
 // ---------------------------------------------------------------------------
 // LaeThread Class
 // ---------------------------------------------------------------------------
+
+const double LaeThread::ThreadMinHz = 0.001;  ///< once every 1000 seconds
 
 LaeThread::LaeThread(const string &strThreadName) :
     m_strThreadName(strThreadName)

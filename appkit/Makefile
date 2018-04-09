@@ -119,7 +119,7 @@ librnr_wingtk.HDRS.H = \
 # Documentation 
 
 # Sub[Package] Doxygen Configuration File
-RNMAKE_DOXY_CONF_FILE    = $(pkgroot)/make/doxy.conf
+RNMAKE_DOXY_CONF_FILE    = $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
 
 #------------------------------------------------------------------------------
@@ -127,9 +127,9 @@ RNMAKE_DOXY_CONF_FILE    = $(pkgroot)/make/doxy.conf
 
 EXTRA_TGT_ALL_POST = all-post 
 
-PKGDIR_SHARE					:= $(pkgroot)/share
-PKGDIR_SHARE_IMAGES		:= $(pkgroot)/share/images
-PKGDIR_SHARE_ICONS		:= $(pkgroot)/share/images/icons
+PKGDIR_SHARE					:= $(RNMAKE_PKG_ROOT)/share
+PKGDIR_SHARE_IMAGES		:= $(RNMAKE_PKG_ROOT)/share/images
+PKGDIR_SHARE_ICONS		:= $(RNMAKE_PKG_ROOT)/share/images/icons
 
 DISTDIR_SHARE_IMAGES	:= $(DISTDIR_SHARE)/images
 DISTDIR_SHARE_ICONS		:= $(DISTDIR_SHARE)/images/icons

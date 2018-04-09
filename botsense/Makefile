@@ -75,7 +75,7 @@ libbotsense.HDRS.H =	botsense/bsProxyMsgs.h
 # Documentation 
 
 # Doxygen Configuration File
-RNMAKE_DOXY_CONF_FILE	= $(pkgroot)/make/doxy.conf
+RNMAKE_DOXY_CONF_FILE	= $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
 
 #------------------------------------------------------------------------------
