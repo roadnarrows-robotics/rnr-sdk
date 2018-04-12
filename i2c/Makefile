@@ -74,7 +74,7 @@ i2c.HDRS.H = \
 # Documents
 #
 
-# Sub[Package] Doxygen Configuration File
+# Doxygen Configuration File
 RNMAKE_DOXY_CONF_FILE	= $(RNMAKE_PKG_ROOT)/make/doxy.conf
 
 

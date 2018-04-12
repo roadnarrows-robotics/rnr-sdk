@@ -67,7 +67,7 @@ RNMAKE_PKG_INCDIRS = $(RNMAKE_PKG_ROOT)/include
 RNMAKE_PKG_SYS_INCDIRS =
 
 # Package Library Subdirectories
-RNMAKE_PKG_LIB_SUBDIRS =
+RNMAKE_PKG_LIB_SUBDIRS = rnr
 
 # Installed Packages Library Subdirectories
 RNMAKE_PKG_LIB_INS_SUBDIRS = rnr

@@ -1,7 +1,161 @@
-#!/bin/sh
+#!/bin/bash
 #
-# Fast install of SDK package. Does not install documentation.
+# File:
+#   rnmake_fastinstall
+#
+# Usage:
+#   rnmake_fastinstall [OPTION]... [RNMAKEVAR]...
+#   rnmake_fastinstall --help
+
+#   Fast install of an package.
+# Description:
+#   Fast install package. Does not install documentation.
+#   
 #
 # Usage: rnmake_fastinstall
+#
 
-make install-bin; make install-lib; make install-includes
+argv0=$(basename $0)
+
+# callHelp
+callHelp()
+{
+  cat <<EOH
+Usage: ${argv0} [OPTION]... [RNMAKEVAR]...
+       ${argv0} --help
+Fast install package. Does not install documentation.
+
+Options:
+  --no-color        Disable color output. Default: colors are enabled.
+  --stop-on-errors  Stop on make errors. Default: warn and continue.
+
+  --help            Print this help and exit.
+
+Fast install the package from the current directory. No documentation is made.
+Equivalent to 'make install-bin install-lib install-includes'.
+
+Any command-line argument is considered an RNMAKEVAR argument. All RNMAKEVAR
+arguments are passed to the make command.
+
+The ${argv0} command is useful for fast turn-around run-time
+debugging.
+
+Sit usor cave.
+EOH
+  exit 0;
+}
+
+# ansi colors
+color_pre="\033["
+color_post="\033[0m"
+color_red="0;31m"
+color_yellow="0;33m"
+color_gray="1;30m"
+
+# colors used
+color_warn="${color_pre}${color_yellow}"
+color_error="${color_pre}${color_red}"
+color_banner="${color_pre}${color_gray}"
+color_end=${color_post}
+
+# showWarning wmsg [wmsg...]
+showWarning()
+{
+  printf "${argv0}: ${color_warn}${*}${color_end}\n" >&2
+}
+
+# showError emsg [emsg...]
+showError()
+{
+  printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
+}
+
+# fatal exitcode emsg
+fatal()
+{
+  printf "${argv0}: ${2}\n" >&2
+  exit ${1}
+}
+
+# long and short options
+longopts="no-color,stop-on-errors,help"
+shortopts=""
+
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
+then
+  fatal 2 "Try '${argv0} --help' for more information."
+fi
+
+#echo "${OPTS}"
+eval set -- "${OPTS}"
+
+# command line option and argument variables
+stop_on_errors=false
+rnmakevars=
+pkg=$(realpath .)
+
+# process command-line options
+while true
+do
+  case "$1" in
+    --no-color)
+        rnmakevars="color=off"
+        color_warn=
+        color_error=
+        color_banner=
+        color_end=
+        shift;;
+    --stop-on-errors) stop_on_errors=true; shift;;
+    --help) callHelp; shift;;
+
+    --) shift; break;;
+    *)  break;;
+  esac
+done
+
+# process command-line arguments
+rnmakevars="${rnmakevars} ${@}"
+
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+
+# showBanner pkg
+showBanner()
+{
+	printf "\n${color_banner}${bold_line}\n"
+  printf ":: ${1}\n"
+	printf "${bold_line}${color_end}\n\n"
+}
+
+# makeIt vars tgt
+makeIt()
+{
+  if ! make "${@}"
+  then
+    if ${stop_on_errors}
+    then
+      showError "'make ${@}' failed."
+      fatal 8 "make stopped."
+    else
+      showWarning "'make ${@}' failed - continuing."
+    fi
+  fi
+}
+
+# package checks
+if [[ ! -d ${pkg} ]]
+then
+    showWarning "'${pkg}' is not a directory - ignoring."
+    continue
+elif [[ ! -f ${pkg}/Makefile ]]
+then
+    showWarning "'${pkg}/Makefile' not found - ignoring."
+    continue
+fi
+
+showBanner ${pkg}
+
+# make
+makeIt ${rnmakevars} install-bin install-lib install-includes

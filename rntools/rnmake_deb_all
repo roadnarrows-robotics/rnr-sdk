@@ -4,12 +4,243 @@
 #   rnmake_deb_all
 #
 # Usage:
-#   rnmake_deb_all
+#   rnmake_deb_all [OPTION]... [RNMAKEVAR]... [PKG]...
+#   rnmake_deb_all --help
 #
 # Description:
-#   Make all debian development RoadNarrow SDK packages. Only packages that
-#   support debian builds will be made
+#   Make Debian packages for for all listed or discovered packages.
 #
+
+argv0=$(basename $0)
+
+# callHelp
+callHelp()
+{
+  cat <<EOH
+Usage: ${argv0} [OPTION]... [RNMAKEVAR]... [PKG]...
+       ${argv0} --help
+Make Debian packages for for all listed or discovered packages.
+
+Options:
+  --no-color        Disable color output. Default: colors are enabled.
+  --stop-on-errors  Stop on make errors. Default: warn and continue.
+  --workspace=DIR   RN package workspace directory. Default: '.'.
+
+  --help            Print this help and exit.
+
+Make Debian repo packages for all PKG packages listed on the command-line. If
+no packages are listed, then ${argv0} attempts to discover packages under
+the workspace DIR.
+
+Any command-line argument of the form name=value is considered an RNMAKEVAR 
+argument, not a PKG. All RNMAKEVAR arguments are passed to the make commands.
+EOH
+  exit 0;
+}
+
+# ansi colors
+color_pre="\033["
+color_post="\033[0m"
+color_red="0;31m"
+color_yellow="0;33m"
+color_gray="1;30m"
+
+# colors used
+color_warn="${color_pre}${color_yellow}"
+color_error="${color_pre}${color_red}"
+color_banner="${color_pre}${color_gray}"
+color_end=${color_post}
+
+# showWarning wmsg [wmsg...]
+showWarning()
+{
+  printf "${argv0}: ${color_warn}${*}${color_end}\n" >&2
+}
+
+# showError emsg [emsg...]
+showError()
+{
+  printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
+}
+
+# fatal exitcode emsg
+fatal()
+{
+  printf "${argv0}: ${2}\n" >&2
+  exit ${1}
+}
+
+# long and short options
+longopts="no-color,stop-on-errors,workspace:,help"
+shortopts=""
+
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
+then
+  fatal 2 "Try '${argv0} --help' for more information."
+fi
+
+#echo "${OPTS}"
+eval set -- "${OPTS}"
+
+# command line option and argument variables
+rnworkspace=${RNMAKE_WORKSPACE}
+stop_on_errors=false
+rnmakevars=
+pkgs=
+
+# process command-line options
+while true
+do
+  case "$1" in
+    --no-color)
+        rnmakevars="color=off"
+        color_warn=
+        color_error=
+        color_banner=
+        color_end=
+        shift;;
+    --stop-on-errors) stop_on_errors=true; shift;;
+    --workspace) rnworkspace="$2"; shift 2;;
+    --help) callHelp; shift;;
+
+    --) shift; break;;
+    *)  break;;
+  esac
+done
+
+# workspace default is current directory
+if [ -z "${rnworkspace}" ]
+then 
+  rnworkspace=.
+fi
+
+# process command-line arguments
+for arg in "${@}"
+do
+  # name=value
+  if [ "${arg%=*}" != "${arg}" ]
+  then
+    rnmakevars="${rnmakevars} ${arg}"
+   # package
+  else
+    pkgs="${pkgs} ${arg}"
+  fi
+done
+
+# no package list, so build package list from directories found under workspace
+if [ -z "${pkgs}" ]
+then
+  flist=$(ls -1 ${rnworkspace})
+  for pkg in ${flist}
+  do
+    if [ -d ${pkg} ]
+    then
+      b=$(basename ${pkg})
+      if [ "${b}" != "rntools" ]
+      then
+        pkglist="${pkglist} ${pkg}"
+      fi
+    fi
+  done
+
+  # if RNR SDK packages, sort by dependencies
+  rnrsdk=$(findShared ${0} rnrsdk.sh)
+  if [ ! -z "${rnrsdk}" ]
+  then
+    source "${rnrsdk}"
+    if rnrsdkIsGitRepo ${rnworkspace}
+    then
+      pkglist=$(rnrsdkSortByDep ${pkglist})
+    fi
+  fi
+
+# build package list from command-line packages
+else
+  for pkg in ${pkgs}
+  do
+    if [ ${pkg:0:1} = "/" ]
+    then
+      pkglist="${pkglist} ${pkg}"
+    else
+      pkglist="${pkglist} ${rnworkspace}/${pkg}"
+    fi
+  done
+fi
+
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+
+# showBanner pkg
+showBanner()
+{
+	printf "\n\n\n${color_banner}${bold_line}\n"
+  printf ":: ${1}\n"
+	printf "${bold_line}${color_end}\n\n"
+}
+
+# makeIt vars tgt
+makeIt()
+{
+  if ! make "${@}"
+  then
+    if ${stop_on_errors}
+    then
+      showError "'make ${@}' failed."
+      fatal 8 "make stopped."
+    else
+      showWarning "'make ${@}' failed - continuing."
+    fi
+  fi
+}
+
+# make all packages in list
+for pkg in ${pkglist}
+do
+  deb_dev_ctl=${pkg}/make/deb-dev/control
+  deb_src_ctl=${pkg}/make/deb-src/control
+  deb_doc_ctl=${pkg}/make/deb-doc/control
+
+  if [[ ! -d ${pkg} ]]
+  then
+    showWarning "'${pkg}' is not a directory - ignoring."
+    continue
+  elif [[ ! -f ${pkg}/Makefile ]]
+  then
+    showWarning "'${pkg}/Makefile' not found - ignoring."
+    continue
+  elif [[ ( ! -f "${deb_dev_ctl}" ) && \
+          ( ! -f "${deb_src_ctl}" ) && \
+          ( ! -f "${deb_doc_ctl}" ) ]]
+  then
+    showWarning "'${pkg}/make/deb-x/control' file(s) not found - ignoring."
+    continue
+  fi
+  cd ${pkg}
+  showBanner ${pkg}
+  makeIt ${rnmakevars} clobber
+  makeIt ${rnmakevars} deps
+  makeIt ${rnmakevars} install
+  makeIt ${rnmakevars} deb-pkgs
+  cd -
+done
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 pkglist='librnr libserial i2c gpio appkit peripherals netmsgs botsense Dynamixel odroid Hekateros Laelaps PanTilt Eudoxus'
 
