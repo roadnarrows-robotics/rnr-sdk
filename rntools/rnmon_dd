@@ -1,3 +1,64 @@
-#!/bin/sh
+#!/bin/bash
+#
+# File:
+#   rnmon_dd
+#
+# Usage:
+#   rnmon_dd
+#   rnmon_dd --help
+#
+# Description:
+#   Monitor the status of the currently running 'dd' command.
+#
+
+argv0=$(basename $0)
+
+# callHelp
+callHelp()
+{
+  cat <<EOH
+Usage: ${argv0}
+       ${argv0} --help
+Monitor the status of the currently running 'dd' command.
+
+The dd command converts and copies files. It can perform disk-to-disk byte
+copies, say from harddisk to flash. The ${argv0} command forces dd to
+issue copy status.
+EOH
+  exit 0;
+}
+
+# fatal exitcode emsg
+fatal()
+{
+  printf "${argv0}: ${2}\n" >&2
+  exit ${1}
+}
+
+# long and short options
+longopts="help"
+shortopts=""
+
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
+then
+  fatal 2 "Try '${argv0} --help' for more information."
+fi
+
+#echo "${OPTS}"
+eval set -- "${OPTS}"
+
+# process command-line options
+while true
+do
+  case "$1" in
+    --help) callHelp; shift;;
+
+    --) shift; break;;
+    *)  break;;
+  esac
+done
 
 sudo watch -n 10 kill -USR1 $(pgrep '^dd$')

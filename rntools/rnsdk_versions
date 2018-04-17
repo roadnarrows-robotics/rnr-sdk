@@ -1,0 +1,194 @@
+#!/bin/bash
+#
+# File:
+#   rnsdk_versions
+#
+# Usage:
+#   rnsdk_versions [OPTION]... [RNMAKEVAR]... [PKG]...
+#   rnsdk_versions --help
+#
+# Description:
+#   List all versions RoadNarrows SDK packages.
+#
+
+argv0=$(basename $0)
+
+# callHelp
+callHelp()
+{
+  cat <<EOH
+Usage: ${argv0} [OPTION]...
+       ${argv0} --help
+List all versions RoadNarrows SDK packages.
+
+Options:
+  --no-color        Disable color output. Default: colors are enabled.
+  --stop-on-errors  Stop on make errors. Default: warn and continue.
+  --workspace=DIR   RN package workspace directory. Default: '.'.
+
+  --help            Print this help and exit.
+
+For each discovered ROS package, a 'git pull' is requested.
+EOH
+  exit 0;
+}
+
+# ansi colors
+color_pre="\033["
+color_post="\033[0m"
+color_red="0;31m"
+color_bold_red="1;31m"
+color_bold_green="1;32m"
+color_yellow="0;33m"
+color_cyan="0;36m"
+
+# colors used
+color_warn="${color_pre}${color_yellow}"
+color_error="${color_pre}${color_red}"
+color_fatal="${color_pre}${color_bold_red}"
+color_banner="${color_pre}${color_bold_green}"
+color_end=${color_post}
+
+# showWarning wmsg [wmsg...]
+showWarning()
+{
+  printf "${argv0}: ${color_warn}${*}${color_end}\n" >&2
+}
+
+# showError emsg [emsg...]
+showError()
+{
+  printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
+}
+
+# fatal exitcode emsg
+fatal()
+{
+  printf "${argv0}: ${color_fatal}${2}${color_end}\n" >&2
+  exit ${1}
+}
+
+# long and short options
+longopts="no-color,ros-distro:,ros-ws:,stop-on-errors:,help"
+shortopts=""
+
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
+then
+  fatal 2 "Try '${argv0} --help' for more information."
+fi
+
+#echo "${OPTS}"
+eval set -- "${OPTS}"
+
+# command line option and argument variables
+stop_on_errors=false
+rnworkspace=${RNMAKE_WORKSPACE}
+
+# process command-line options
+while true
+do
+  case "$1" in
+    --no-color)
+        rnmakevars="color=off"
+        color_warn=
+        color_error=
+        color_fatal=
+        color_banner=
+        color_end=
+        shift;;
+    --stop-on-errors) stop_on_errors=true; shift;;
+    --workspace) rnworkspace="$2"; shift 2;;
+    --help) callHelp; shift;;
+
+    --) shift; break;;
+    *)  break;;
+  esac
+done
+
+# workspace default is current directory
+if [ -z "${rnworkspace}" ]
+then 
+  rnworkspace=.
+fi
+
+rnworkspace=$(realpath ${rnworkspace})
+
+
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+
+# showBanner ws
+showBanner()
+{
+	printf "${color_banner}"
+  printf "%25s\n" ${1}
+  printf "%-30s%-6s%-s\n" "package" "year" "version"
+  printf "%-30s%-6s%-s\n" "-------" "----" "-------"
+	printf "${color_end}"
+}
+
+declare -A modpkgs                # associative array
+
+# the old rnr sdk was located in individual git repositories - no longer so
+buildModList()
+{
+  cd ${rnworkspace}
+  mods=$(git status --porcelain -uno)
+  #echo "${mods}"
+  if [ -z "${mods}" ]
+  then
+    return
+  fi
+  while read code path rest
+  do
+    pkg=${path%%/*}
+    #echo "code=${code}, path=${path}, pkg=${pkg}"
+    modpkgs[${pkg}]=${code}
+    #echo ${modpkgs[@]}
+  done <<<"${mods}"
+
+  #echo ${!modpkgs[@]}
+  #echo ${modpkgs[@]}
+}
+
+#buildModList
+
+showBanner ${rnworkspace}
+
+for pkg in ${rnworkspace}/*
+do
+  if [ ! -d ${pkg} ]
+  then
+    continue
+  fi
+
+  cd ${pkg}
+
+  pkg_base=$(basename ${pkg})
+
+  printf "%-30s" ${pkg_base}
+
+  #if [ ! -z "${modpkgs[${pkg_base}]}" ]
+  #then
+  #  printf "M "
+  #else
+  #  printf "  "
+  #fi
+
+  if [ ! -f "make/Pkg.mk" ]
+  then
+    printf "\n"
+    continue
+  fi
+
+  cat make/Pkg.mk | \
+  gawk ' 
+    BEGIN { maj = 0; min = 0; rel = 0; year = 0 }
+    /^[ \t]*RNMAKE_PKG_VERSION_MAJOR[ \t]*=[ \t]*/ { maj = $3 }
+    /^[ \t]*RNMAKE_PKG_VERSION_MINOR[ \t]*=[ \t]*/ { min = $3 }
+    /^[ \t]*RNMAKE_PKG_VERSION_RELEASE[ \t]*=[ \t]*/ { rel = $3 }
+    /^[ \t]*RNMAKE_PKG_VERSION_DATE[ \t]*=[ \t]*/ { year = $3 }
+    END { print year "  " maj "." min "." rel } '
+done

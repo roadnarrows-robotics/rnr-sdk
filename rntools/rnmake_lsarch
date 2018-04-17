@@ -45,12 +45,15 @@ color_pre="\033["
 color_post="\033[0m"
 color_red="0;31m"
 color_yellow="0;33m"
+color_cyan="0;36m"
 color_gray="1;30m"
+color_bold_red="1;31m"
 
 # colors used
 color_warn="${color_pre}${color_yellow}"
 color_error="${color_pre}${color_red}"
-color_banner="${color_pre}${color_gray}"
+color_fatal="${color_pre}${color_bold_red}"
+color_banner="${color_pre}${color_cyan}"
 color_end=${color_post}
 
 # showWarning wmsg [wmsg...]
@@ -68,7 +71,7 @@ showError()
 # fatal exitcode emsg
 fatal()
 {
-  printf "${argv0}: ${2}\n" >&2
+  printf "${argv0}: ${color_fatal}${2}${color_end}\n" >&2
   exit ${1}
 }
 
@@ -101,6 +104,7 @@ do
         rnmakevars="color=off"
         color_warn=
         color_error=
+        color_fatal=
         color_banner=
         color_end=
         shift;;
@@ -130,7 +134,10 @@ done
 
 if [ ! -d ${rnmake_root} ]
 then
-  fatal 8 "'${rnmake_root}' cannot access directory"
+  fatal 8 "'${rnmake_root}' Cannot access directory"
+elif [ ! -d ${rnmake_root}/Arch ]
+then
+  fatal 8 "'${rnmake_root}/Arch' Cannot access directory"
 fi
 
 cd ${rnmake_root}/Arch
@@ -139,16 +146,26 @@ cd ${rnmake_root}/Arch
 showBanner()
 {
 	printf "${color_banner}"
-  printf "%-20s%-20s%-s\n" "tag" "arch" "fq_arch"
-  printf "%-20s%-20s%-s\n" "---" "----" "-------"
+  printf "%-20s%-20s%-s\n" "tag" "arch" "arch_fqname"
+  printf "%-20s%-20s%-s\n" "---" "----" "-----------"
 	printf "${color_end}"
 }
 
-# getRealArch arch_file
+# getRealArch arch_file arch_var
 getRealArch()
 {
-  eval ${1}[0]="first"
-  eval ${1}[1]="second"
+  arch=$(grep 'RNMAKE_ARCH\s*=\s*\S*' ${1})
+  arch_fqname=$(grep 'RNMAKE_ARCH_FQNAME\s*=\s*\S*' ${1})
+  if [ ! -z "${arch}" ]
+  then
+    arch=${arch#*=[ \t]*}
+  fi
+  if [ ! -z "${arch_fqname}" ]
+  then
+    arch_fqname=${arch_fqname#*=[ \t]*}
+  fi
+  eval ${2}[0]="${arch}"
+  eval ${2}[1]="${arch_fqname}"
 }
 
 if ${longformat}
@@ -158,13 +175,13 @@ fi
 
 declare -a arch_real
 
-for arch_file in Arch.*.mk
+for arch_file in Arch.*.mk 2>/dev/null
 do
   arch_tag="${arch_file%%.mk}"
   arch_tag="${arch_tag##Arch.}"
   if ${longformat}
   then
-    getRealArch arch_real
+    getRealArch ${arch_file} arch_real
     printf "%-20s%-20s%-s\n" ${arch_tag} "${arch_real[0]}" "${arch_real[1]}"
   else
     printf "${arch_tag} "
