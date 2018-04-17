@@ -92,18 +92,21 @@ netmsgs-clean:
 $(NETMSGS_H_DIR)/%.h : %.xml
 	@printf "\n"
 	@printf "$(color_tgt_file)     $(<)$(color_end)\n"
+	@test -d "$(NETMSGS_H_DIR)" || $(MKDIR) $(NETMSGS_H_DIR)
 	$(NETMSGSGEN) --lang=c --xml=$(<) $(NETMSGS_CFLAGS) $(@) $(call xml2c,$(<))
 
 # Generate NetMsgs Python .py files from XML
 $(NETMSGS_PY_DIR)/%.py : %.xml
 	@printf "\n"
 	@printf "$(color_tgt_file)     $(<)$(color_end)\n"
+	@test -d "$(NETMSGS_PY_DIR)" || $(MKDIR) $(NETMSGS_PY_DIR)
 	$(NETMSGSGEN) --lang=python --xml=$(<) $(NETMSGS_PYFLAGS) $(@)
 
 # Copy NetMsgs XML specification files to share
 $(NETMSGS_SHARE_DIR)/%.xml : %.xml
 	@printf "\n"
 	@printf "$(color_tgt_file)     $(<)$(color_end)\n"
+	@test -d "$(NETMSGS_SHARE_DIR)" || $(MKDIR) $(NETMSGS_SHARE_DIR)
 	$(CP) $(<) $(@)
 
 ifdef RNMAKE_DOXY

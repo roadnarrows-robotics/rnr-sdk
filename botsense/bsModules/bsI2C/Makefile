@@ -56,8 +56,8 @@ RNMAKE_DIST_SHLIBS = bsclient_i2c
 RNMAKE_DIST_DLLIBS = bsserver_i2c
 
 # Target library subdirectory
-bsclient_i2c.SUBDIR = botsense
-bsserver_i2c.SUBDIR = botsense
+bsclient_i2c.SUBDIR = botsense/plugins
+bsserver_i2c.SUBDIR = botsense/plugins
 
 # Source Files
 bsclient_i2c.SRC.C 	=	bsI2CClient.c bsI2CMsgs.c

@@ -56,8 +56,8 @@ RNMAKE_DIST_SHLIBS = bsclient_serial
 RNMAKE_DIST_DLLIBS = bsserver_serial 
 
 # Target library subdirectory
-bsclient_serial.SUBDIR = botsense
-bsserver_serial.SUBDIR = botsense
+bsclient_serial.SUBDIR = botsense/plugins
+bsserver_serial.SUBDIR = botsense/plugins
 
 # Source Files
 bsclient_serial.SRC.C	=	bsSerialClient.c bsSerialMsgs.c

@@ -1,139 +1,176 @@
-################################################################################
+#!/bin/bash
 #
-# Package:  RN Makefile System 
+# File:
+#   rnmake_laarch
 #
-# File:     rnmake_lsarch
-#
-# Version:
-#   $LastChangedDate: 2009-09-04 12:09:46 -0600 (Fri, 04 Sep 2009) $
-#   $Rev: 118 $
+# Usage:
+#   rnmake_laarch [OPTION]... [RNMAKEVAR]...
+#   rnmake_laarch --help
 #
 # Description:
-#   RN Make System Utility
+#   List all available RoadNarrows Make System architectures.
 #
-#   List to stdout supported architectures.
-#
-# Author: Robin Knight (robin.knight@roadnarrows.com)
-#
-# Copyright (C) 2007-2016.  RoadNarrows LLC.
-# All Rights Reserved
-#
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
-################################################################################
 
-_Cmd="rnmake_lsarch"
+argv0=$(basename $0)
 
-_Synopsis()
+# callHelp
+callHelp()
 {
+  cat <<EOH
+Usage: ${argv0} [OPTION]... [RNMAKEVAR]...
+       ${argv0} --help
+List all available RoadNarrows Make System architectures.
 
-  printf "Usage: ${_Cmd} [-r <rnmake_root>]\n"
-  printf "List RN Make System architectures."
+Options:
+  --no-color  Disable color output. Default: colors are enabled.
+  -l, --long  Use a long listing format.
+
+  --help      Print this help and exit.
+
+List all available RoadNarrows Make System architectures. By default,
+only the RNMAKE_ARCH_TAGs are printed. That is, for all architecture makefiles
+found of the form Arch.\${RNMAKE_ARCH_TAG}.mk, the tag will be printed.
+
+If the long format is specifed, then the real RNMAKE_ARCH and RNMAKE_FQARCH
+values are also printed.
+
+Any command-line argument is considered an RNMAKEVAR argument. All RNMAKEVAR
+arguments are passed to the make command.
+EOH
+  exit 0;
 }
 
-_Desc()
+# ansi colors
+color_pre="\033["
+color_post="\033[0m"
+color_red="0;31m"
+color_yellow="0;33m"
+color_gray="1;30m"
+
+# colors used
+color_warn="${color_pre}${color_yellow}"
+color_error="${color_pre}${color_red}"
+color_banner="${color_pre}${color_gray}"
+color_end=${color_post}
+
+# showWarning wmsg [wmsg...]
+showWarning()
 {
-cat <<EOF
-
-DESCRIPTION
-  List the supported RN Make System target platform architecures to stdout.
-
-OPTIONS
-  -r <rnmake_root>      RN Make System root directory.
-                        Default: /prj/rnmake
-
-  -?                    Display this help and exit.
-EOF
+  printf "${argv0}: ${color_warn}${*}${color_end}\n" >&2
 }
 
-# help
-_help()
+# showError emsg [emsg...]
+showError()
 {
-  _Synopsis
-  _Desc
-  exit 0
+  printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
 }
 
-# error [msg1 [msg2...]]
-_error()
+# fatal exitcode emsg
+fatal()
 {
-  if [ $# -gt 0 ]
-  then
-    printf "${_Cmd}: Error: $1"
-    shift
-    while [ $# -gt 0 ]
-    do
-      printf ": $1" 
-      shift
-    done
-    printf "\n"
-  fi
-  printf "Try '${_Cmd} -?' for more information.\n"
-  exit 2
+  printf "${argv0}: ${2}\n" >&2
+  exit ${1}
 }
 
-#defaults
-rnmake_root=/prj/pkg/rnmake
+# long and short options
+longopts="no-color,long,help"
+shortopts="l"
 
-# 
-# Get options. Note: first colon says that getopts will not print errors.
-#
-while getopts :r: opt
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
+then
+  fatal 2 "Try '${argv0} --help' for more information."
+fi
+
+#echo "${OPTS}"
+eval set -- "${OPTS}"
+
+# command line option and argument variables
+rnmake_root=${RNMAKE_ROOT}
+longformat=false
+rnmakevars=
+pkgs=
+
+# process command-line options
+while true
 do
-  case $opt in
-    r)  rnmake_root="$OPTARG"
-        ;;
+  case "$1" in
+    --no-color)
+        rnmakevars="color=off"
+        color_warn=
+        color_error=
+        color_banner=
+        color_end=
+        shift;;
+    -l|--long) longformat=true; shift;;
+    --help) callHelp; shift;;
 
-    # Usage option '-?' or bad option
-    \?) if [ "$OPTARG" = "?" ]
-        then
-          _help
-        else
-          _error "$OPTARG" "Unknown option."
-        fi
-        ;;
-
-    # Option requiring argument but none found
-    \:)  _error "$OPTARG" "Required argument not specified." ;;
+    --) shift; break;;
+    *)  break;;
   esac
 done
 
-shift $(($OPTIND - 1))
+# process command-line arguments
+for arg in "${@}"
+do
+  # name=value
+  name="${arg%=*}"
+  if [ ! -z "${name}" ]
+  then
+    value="${arg#${name}=}"
+    rnmakevars="${rnmakevars} ${arg}"
+    if [ ${name} = "rnmake" ]
+    then
+      rnmake_root=${value}
+    fi
+  fi
+done
 
 if [ ! -d ${rnmake_root} ]
 then
-  _error "${rnmake_root}" "cannot access directory"
+  fatal 8 "'${rnmake_root}' cannot access directory"
 fi
 
 cd ${rnmake_root}/Arch
 
-for arch in Arch.*.mk
+# showBanner
+showBanner()
+{
+	printf "${color_banner}"
+  printf "%-20s%-20s%-s\n" "tag" "arch" "fq_arch"
+  printf "%-20s%-20s%-s\n" "---" "----" "-------"
+	printf "${color_end}"
+}
+
+# getRealArch arch_file
+getRealArch()
+{
+  eval ${1}[0]="first"
+  eval ${1}[1]="second"
+}
+
+if ${longformat}
+then
+  showBanner
+fi
+
+declare -a arch_real
+
+for arch_file in Arch.*.mk
 do
-  arch="${arch%%.mk}"
-  printf "${arch##Arch.} "
+  arch_tag="${arch_file%%.mk}"
+  arch_tag="${arch_tag##Arch.}"
+  if ${longformat}
+  then
+    getRealArch arch_real
+    printf "%-20s%-20s%-s\n" ${arch_tag} "${arch_real[0]}" "${arch_real[1]}"
+  else
+    printf "${arch_tag} "
+  fi
 done
+
 printf "\n"
 
 exit 0

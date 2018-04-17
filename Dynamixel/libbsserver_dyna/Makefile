@@ -49,7 +49,7 @@ include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
 RNMAKE_DIST_DLLIBS 	= bsserver_dyna 
 
 # Target library subdirectory
-bsserver_dyna.SUBDIR = botsense
+bsserver_dyna.SUBDIR = botsense/plugins
 
 # Libraries to link dll with
 bsserver_dyna.LIBS	= \

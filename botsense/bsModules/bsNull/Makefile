@@ -55,8 +55,8 @@ RNMAKE_DIST_SHLIBS = bsclient_null
 RNMAKE_DIST_DLLIBS = bsserver_null 
 
 # Target library subdirectory
-bsclient_null.SUBDIR = botsense
-bsserver_null.SUBDIR = botsense
+bsclient_null.SUBDIR = botsense/plugins
+bsserver_null.SUBDIR = botsense/plugins
 
 # Source Files
 bsclient_null.SRC.C =	bsNullClient.c bsNullMsgs.c

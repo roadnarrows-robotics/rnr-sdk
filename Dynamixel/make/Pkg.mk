@@ -40,7 +40,7 @@ endif
 RNMAKE_PKG 								 = Dynamixel
 RNMAKE_PKG_VERSION_MAJOR   = 2
 RNMAKE_PKG_VERSION_MINOR   = 9
-RNMAKE_PKG_VERSION_RELEASE = 4
+RNMAKE_PKG_VERSION_RELEASE = 5
 RNMAKE_PKG_VERSION_DATE    = 2018
 RNMAKE_PKG_AUTHORS				 = "Robin Knight"
 RNMAKE_PKG_OWNERS					 = "RoadNarrows LLC"
@@ -66,10 +66,10 @@ RNMAKE_PKG_INCDIRS = $(RNMAKE_PKG_ROOT)/include
 RNMAKE_PKG_SYS_INCDIRS =
 
 # Package Library Subdirectories
-RNMAKE_PKG_LIB_SUBDIRS = rnr botsense
+RNMAKE_PKG_LIB_SUBDIRS = rnr botsense/plugins
 
 # Installed Packages Library Subdirectories
-RNMAKE_PKG_LIB_INS_SUBDIRS = rnr botsense
+RNMAKE_PKG_LIB_INS_SUBDIRS = rnr botsense botsense/plugins
 
 # External System and Third Party Library Directories
 RNMAKE_PKG_LD_SYS_LIBDIRS = $(RNMAKE_OPT_PREFIX)/lib

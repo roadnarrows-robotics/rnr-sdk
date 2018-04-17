@@ -52,7 +52,7 @@ RNMAKE_DIST_STLIBS = bsclient_dyna
 RNMAKE_DIST_SHLIBS = bsclient_dyna
 
 # Target library subdirectory
-bsclient_dyna.SUBDIR = botsense
+bsclient_dyna.SUBDIR = botsense/plugins
 
 # Libraries to link dll with
 bsclient_dyna.LIBS	= rnr_netmsgs rnr pthread stdc++
