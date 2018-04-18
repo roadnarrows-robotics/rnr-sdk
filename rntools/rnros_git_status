@@ -154,16 +154,27 @@ fi
 bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
 norm_line='~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~  ~'
 
-# showMajorBanner distro ws
-showMajorBanner()
+# showBanner distro ws
+showBanner()
 {
-	printf "\n\n${color_banner}${bold_line}\n"
+	printf "\n${color_banner}${bold_line}\n"
   printf ":: ROS distro:    ${1}\n"
   printf ":: ROS workspace: ${2}\n"
 	printf "${bold_line}${color_end}\n"
 }
 
-showMajorBanner ${ros_distro} ${ros_ws}
+# showTblBanner
+showTblHdr()
+{
+	printf "${color_banner}"
+  printf "%25s\n" ${1}
+  printf "%-30s%-5s%-s\n" "package" "M" "version"
+  printf "%-30s%-5s%-s\n" "-------" "-" "-------"
+	printf "${color_end}"
+}
+
+showBanner ${ros_distro} ${ros_ws}
+showTblHdr
 
 for pkg in ${ros_ws}/*
 do
@@ -176,15 +187,15 @@ do
 
   pkg_base=$(basename ${pkg})
 
-  printf "%-30s " ${pkg_base}
+  printf "%-30s" ${pkg_base}
 
   f=$(git status -s -uno 2>/dev/null)
 
   if [ -z "${f}" ]
   then
-    printf "  "
+    printf "%-5s" " "
   else
-    printf "M "
+    printf "%-5s" "M"
   fi
 
   if [ -f "${pkg_base}/package.xml" ]
@@ -196,6 +207,6 @@ do
   else
     version=""
   fi
-  printf "%-10s " ${version}
+  printf "%-s " ${version}
   printf "\n"
 done

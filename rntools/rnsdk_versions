@@ -69,7 +69,7 @@ fatal()
 }
 
 # long and short options
-longopts="no-color,ros-distro:,ros-ws:,stop-on-errors:,help"
+longopts="no-color,stop-on-errors:,workspace:,help"
 shortopts=""
 
 # get the options
@@ -122,6 +122,14 @@ bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-
 # showBanner ws
 showBanner()
 {
+	printf "\n${color_banner}${bold_line}\n"
+  printf ":: RNR workspace: ${1}\n"
+	printf "${bold_line}${color_end}\n"
+}
+
+# showTblHdr ws
+showTblHdr()
+{
 	printf "${color_banner}"
   printf "%25s\n" ${1}
   printf "%-30s%-6s%-s\n" "package" "year" "version"
@@ -129,9 +137,9 @@ showBanner()
 	printf "${color_end}"
 }
 
-declare -A modpkgs                # associative array
 
 # the old rnr sdk was located in individual git repositories - no longer so
+declare -A modpkgs                # associative array
 buildModList()
 {
   cd ${rnworkspace}
@@ -156,6 +164,7 @@ buildModList()
 #buildModList
 
 showBanner ${rnworkspace}
+showTblHdr
 
 for pkg in ${rnworkspace}/*
 do

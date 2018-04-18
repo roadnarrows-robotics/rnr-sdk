@@ -101,8 +101,9 @@ rnenvParseOpts()
   then
     rnmakeRealPrefix="${rnmakePrefix}"
   elif [ ! -z "${rnmakeXPrefix}" ]
-    rnmakeRealPrefix="${rnmakeXPrefix}/${rnmakerRch}"
+  then
+    rnmakeRealPrefix="${rnmakeXPrefix}/${rnmakeArch}"
   else
-    rnmakeRealPrefix="${HOME}/xinstall/${rnmakerRch}"
+    rnmakeRealPrefix="${HOME}/xinstall/${rnmakeArch}"
   fi
 }
