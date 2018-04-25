@@ -1,75 +1,125 @@
 ################################################################################
 #
-# Makefile
+# ./Makefile
 #
-# Version:
-# 	$LastChangedDate: 2016-02-23 14:42:44 -0700 (Tue, 23 Feb 2016) $
-# 	$Rev: 4330 $
-#
-# Description:
-#   Make RoadNarrows Tools to Manage Projects, Packages, and the Business.
-#
-# Author: Robin Knight (robin.knight@roadnarrows.com)
-#
-# Copyright:
-# (C) 2008-2017.  RoadNarrows LLC
-# All Rights Reserved
-#
-# @EulaBegin@
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
-#
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC , OR ANY
-# MEMBERS/EMPLOYEES OF ROADNARROW LLC OR DISTRIBUTORS OF THIS
-# SOFTWARE BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL,
-# OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS
-# DOCUMENTATION, EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN
-# ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY
-# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED
-# HEREUNDER IS ON AN "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO
-# OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR
-# MODIFICATIONS.
-# @EulaEnd@
-#
+ifdef RNMAKE_DOXY
+/*!
+\file
+
+\brief Top-level rntools makefile.
+
+An rnmake system package specific makefile.
+
+\pkgsynopsis
+RoadNarrows Robotics Tools to Manage Projects, Packages, and the Business.
+
+\pkgfile{Makefile}
+
+\pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+
+\pkgcopyright{2008-2018,RoadNarrows LLC,http://www.roadnarrows.com}
+
+\license{MIT}
+
+\EulaBegin
+\EulaEnd
+
+ * \cond RNMAKE_DOXY
+ */
+endif
+# 
 ################################################################################
 
-scripts = \
+#------------------------------------------------------------------------------
+# Required
+
+# Package Root Directory
+RNMAKE_PKG_ROOT	= .
+
+# Bootstrap package within RN Make System
+include $(RNMAKE_PKG_ROOT)/make/Bootstrap.mk
+
+nodeps = 1
+
+#------------------------------------------------------------------------------
+# Tools
+
+EXTRA_TGT_ALL_POST = all-post 
+
+SCRIPTS = \
 	cppstrings \
-	rncopyright_update.py \
 	rncp_to_repostaging \
-	rneula_update.py \
 	rnmake_all \
 	rnmake_deb_all \
 	rnmake_fastinstall \
 	rnmake_lsarch \
-	rnros_git_pull_all.sh \
-	rnros_git_status.sh \
-	rnsdk_git_status.sh \
-	rnsdk_ls_installed.sh \
+	rnmake_versions \
+	rnmon_dd \
+	rnros_git_pull_all \
+	rnros_git_status \
+	rnsdk_ls_installed \
+	rnupdate_copyright \
+	rnupdate_eula \
 	sgrep
 
+ETC_FILES	=	
 
-bindir = /prj/bin
+LIB_FILES = 
 
-all: install
+PKGDIR_SHARE := $(RNMAKE_PKG_ROOT)/share
 
-install:
-	@cp $(scripts) $(bindir)/.
+# post 'all' make target
+.PHONY: all-post
+all-post: show-banner cp-script-files cp-etc-files cp-lib-files cp-share-files
 
-clean:
-	@for s in $(scripts); \
+.PHONY: show-banner
+show-banner:
+	$(call printDirBanner,,all-post)
+	@printf "Pre-install Configuration\n"
+
+.PHONY: cp-script-files
+cp-script-files:
+	$(call printGoalDesc,$(@),Copying script files to $(DISTDIR_BIN))
+	$(call copySrcDir,$(SCRIPTS),$(DISTDIR_BIN))
+
+.PHONY: cp-etc-files
+cp-etc-files:
+	$(call printGoalDesc,$(@),Copying etc files to $(DISTDIR_ETC))
+	$(call copySrcDirRel,$(ETC_FILES),$(DISTDIR_ETC))
+
+.PHONY: cp-lib-files
+cp-lib-files:
+	$(call printGoalDesc,$(@),Copying extra lib files to $(DISTDIR_LIB))
+	$(call copySrcDirRel,$(LIB_FILES),$(DISTDIR_LIB))
+
+.PHONY: cp-share-files
+cp-share-files:
+	$(call printGoalDesc,$(@),Copying share directory to $(DISTDIR_SHARE))
+	@$(CP_R) $(PKGDIR_SHARE)/* $(DISTDIR_SHARE)
+	@find $(DISTDIR_SHARE) -name '*.svn' -print | xargs rm -fr
+
+.PHONY: uninstall
+uninstall:
+	@for s in $(SCRIPTS); \
 	do \
-		echo "rm $(bindir)/$$s"; \
-		rm $(bindir)/$$s; \
+		scr="$(bindir)/$${s}"; \
+		if [ -e "$${scr}" ]; \
+		then \
+			$(RM) "$${scr}"; \
+		fi; \
 	done
+
+
+#------------------------------------------------------------------------------
+# Include RNMAKE rules makefile(s)
+
+# include top-level rules
+include $(RNMAKE_ROOT)/Rules.mk
+
+# include extras (must include after top-level)
+include $(RNMAKE_ROOT)/Extras.mk
+
+
+ifdef RNMAKE_DOXY
+/*! \endcond RNMAKE_DOXY */
+endif

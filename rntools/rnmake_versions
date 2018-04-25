@@ -1,14 +1,14 @@
 #!/bin/bash
 #
 # File:
-#   rnsdk_versions
+#   rnmake_versions
 #
 # Usage:
-#   rnsdk_versions [OPTION]... [RNMAKEVAR]... [PKG]...
-#   rnsdk_versions --help
+#   rnmake_versions [OPTION]...
+#   rnmake_versions --help
 #
 # Description:
-#   List all versions RoadNarrows SDK packages.
+#   List all versions of RN Make System packages under workspace directory.
 #
 
 argv0=$(basename $0)
@@ -20,16 +20,17 @@ callHelp()
 Usage: ${argv0} [OPTION]...
        ${argv0} --help
 
-List all versions RoadNarrows SDK packages.
+List all versions of RN Make System packages under workspace directory.
 
 Options:
   --no-color        Disable color output. Default: colors are enabled.
   --stop-on-errors  Stop on make errors. Default: warn and continue.
-  --workspace=DIR   RN package workspace directory. Default: '.'.
+  --workspace=WSDIR RN package workspace directory. Default: RNMAKE_WORKSPACE
+                    if set. Else current working directory ('.').
 
   --help            Print this help and exit.
 
-For each discovered ROS package, a 'git pull' is requested.
+For each discovered RN Make package, the versioning information is printed.
 EOH
   exit 0;
 }

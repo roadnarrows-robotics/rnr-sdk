@@ -25,13 +25,14 @@ Make Debian packages for for all listed or discovered packages.
 Options:
   --no-color        Disable color output. Default: colors are enabled.
   --stop-on-errors  Stop on make errors. Default: warn and continue.
-  --workspace=DIR   RN package workspace directory. Default: '.'.
+  --workspace=WSDIR RN package workspace directory. Default: RNMAKE_WORKSPACE
+                    if set. Else current working directory ('.').
 
   --help            Print this help and exit.
 
 Make Debian repo packages for all PKG packages listed on the command-line. If
 no packages are listed, then ${argv0} attempts to discover packages under
-the workspace DIR.
+the workspace WSDIR.
 
 Any command-line argument of the form name=value is considered an RNMAKEVAR 
 argument, not a PKG. All RNMAKEVAR arguments are passed to the make commands.

@@ -27,6 +27,7 @@ Copy all Debian files to the repository staging area.
 Options:
   --no-color        Disable color output. Default: colors are enabled.
   -n, no-copy       Determine Debian files, but don't perform the actual copy.
+  --verbose         Print verbose information.
   --workspace=WSDIR RN package workspace directory. Default: RNMAKE_WORKSPACE
                     if set. Else current working directory ('.').
 
@@ -101,7 +102,7 @@ fatal()
 }
 
 # long and short options
-longopts="no-color,no-copy,workspace:,help"
+longopts="no-color,no-copy,verbose,workspace:,help"
 shortopts="n"
 
 # get the options
@@ -118,6 +119,7 @@ eval set -- "${OPTS}"
 # command line option and argument variables
 rnworkspace=${RNMAKE_WORKSPACE}
 docopy=true
+verbose=false
 
 # process command-line options
 while true
@@ -125,6 +127,7 @@ do
   case "$1" in
     --no-color) turnOffColor; shift;;
     -n|--no-copy) docopy=false; shift;;
+    --verbose) verbose=true; shift;;
     --workspace) rnworkspace="$2"; shift 2;;
     --help) callHelp; shift;;
 
@@ -147,8 +150,6 @@ else
   fatal 8 "No destination directory."
 fi
 
-debs=$(ls ${rnworkspace}/dist/dist.*/*.deb 2>/dev/null)
-
 userhost="${dst%:*}"
 
 if [ -z "${userhost}" ]
@@ -157,6 +158,8 @@ then
 else
   cmd=scp
 fi
+
+debs=$(find ${rnworkspace} -name '*.deb' 2>/dev/null)
 
 bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
 
@@ -173,7 +176,12 @@ showBanner  ${rnworkspace} ${dst}
 
 if [[ "${debs}" != "" ]]
 then
-  if docopy
+  if ${verbose}
+  then
+    showInfo "Debian Files:"
+    printf "${debs}\n"
+  fi
+  if ${docopy}
   then
     ${cmd} ${debs} ${dst}
     showInfo "$(wc -w <<<${debs}) files copied."
