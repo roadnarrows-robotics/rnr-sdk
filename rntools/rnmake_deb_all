@@ -19,6 +19,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]... [RNMAKEVAR]... [PKG]...
        ${argv0} --help
+
 Make Debian packages for for all listed or discovered packages.
 
 Options:

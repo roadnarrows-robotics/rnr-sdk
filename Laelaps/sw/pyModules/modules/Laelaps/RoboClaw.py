@@ -8,18 +8,20 @@
 # File:     RoboClaw.py
 #
 ## \file
-##
-## \brief Python RoboClaw motor controller class and data.
-##
-## This code is based on the freely available python source from Ion Motion
-## Control.
-##
-## \author: Robin Knight (robin.knight@roadnarrows.com)
-## 
-## \par Copyright
-##   \h_copy 2015-2017. RoadNarrows LLC.\n
-##   http://www.roadnarrows.com\n
-##   All Rights Reserved
+#
+# \brief Python RoboClaw motor controller class and data.
+#
+# This code is based on the freely available python source from Ion Motion
+# Control.
+#
+# \pkgsynopsis
+# RoadNarrows Robotics \h_laelaps Small Mobile Robot Package
+#
+# \pkgfile{sw/pyModules/modules/Laelaps}
+#
+# \pkgauthor{Robin Knight,robin.knight@roadnarrows.com}
+# 
+# \pkgcopyright{2015-2018,RoadNarrows LLC.,http://www.roadnarrows.com}
 #
 # @EulaBegin@
 # Permission is hereby granted, without written agreement and without

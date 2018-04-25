@@ -19,6 +19,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]...
        ${argv0} --help
+
 List all versions RoadNarrows SDK packages.
 
 Options:

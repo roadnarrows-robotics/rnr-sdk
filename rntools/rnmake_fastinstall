@@ -7,13 +7,9 @@
 #   rnmake_fastinstall [OPTION]... [RNMAKEVAR]...
 #   rnmake_fastinstall --help
 
-#   Fast install of an package.
 # Description:
 #   Fast install package. Does not install documentation.
 #   
-#
-# Usage: rnmake_fastinstall
-#
 
 argv0=$(basename $0)
 
@@ -23,6 +19,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]... [RNMAKEVAR]...
        ${argv0} --help
+
 Fast install package. Does not install documentation.
 
 Options:

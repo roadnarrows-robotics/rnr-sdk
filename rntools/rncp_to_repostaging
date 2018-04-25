@@ -1,33 +1,185 @@
 #!/bin/bash
 #
-# Copy all SDK debian packages to the repo staging area.
+# File:
+#   rncp_to_repostaging
 #
-# Usage: rncp_to_repostaging
+# Usage:
+#   rncp_to_repostaging [OPTION]... [USER@]HOST:DIR
+#   rncp_to_repostaging [OPTION]... DIR
+#   rncp_to_repostaging --help
+#
+# Description:
+#   Copy all Debian files to the repository staging area.
+#
 
-arch=${RNMAKE_ARCH_DFT:-x86_64}
-pkgdir=/prj/pkg
-host=$(hostname)
+argv0=$(basename $0)
 
-if [[ "${host}" == "sharetheroad" ]]
+# callHelp
+callHelp()
+{
+  cat <<EOH
+Usage: ${argv0} [OPTION]... [USER@]HOST:DIR
+       ${argv0} [OPTION]... DIR
+       ${argv0} --help
+
+Copy all Debian files to the repository staging area.
+
+Options:
+  --no-color        Disable color output. Default: colors are enabled.
+  -n, no-copy       Determine Debian files, but don't perform the actual copy.
+  --workspace=WSDIR RN package workspace directory. Default: RNMAKE_WORKSPACE
+                    if set. Else current working directory ('.').
+
+  --help            Print this help and exit.
+
+Any development, source, or documetation Debian files found under any of the 
+discovered RN Make System pacakges under workspace WSDIR are copied. If no
+workspace is specified, then ${argv0} attempts to discover packages
+under the current working directory ('.').
+
+If a HOST network node is specified, the command 'scp' is invoked to
+copy across the network. Otherwise a local machine copy is used. In either case,
+DIR must exits.
+
+See Also:
+  rnmake_deb_all
+EOH
+  exit 0;
+}
+
+# ansi colors
+color_pre="\033["
+color_post="\033[0m"
+color_red="0;31m"
+color_bold_red="1;31m"
+color_green="0;32m"
+color_yellow="0;33m"
+color_gray="1;30m"
+
+# colors used
+color_info="${color_pre}${color_green}"
+color_warn="${color_pre}${color_yellow}"
+color_error="${color_pre}${color_red}"
+color_fatal="${color_pre}${color_bold_red}"
+color_banner="${color_pre}${color_green}"
+color_end=${color_post}
+
+# turnOffColor
+turnOffColor()
+{
+  color_info=
+  color_warn=
+  color_error=
+  color_fatal=
+  color_banner=
+  color_end=
+}
+
+# showInfo msg [msg...]
+showInfo()
+{
+  printf "${color_info}${*}${color_end}\n"
+}
+
+# showWarning wmsg [wmsg...]
+showWarning()
+{
+  printf "${argv0}: ${color_warn}${*}${color_end}\n" >&2
+}
+
+# showError emsg [emsg...]
+showError()
+{
+  printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
+}
+
+# fatal exitcode emsg
+fatal()
+{
+  printf "${argv0}: ${2}\n" >&2
+  exit ${1}
+}
+
+# long and short options
+longopts="no-color,no-copy,workspace:,help"
+shortopts="n"
+
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
+then
+  fatal 2 "Try '${argv0} --help' for more information."
+fi
+
+#echo "${OPTS}"
+eval set -- "${OPTS}"
+
+# command line option and argument variables
+rnworkspace=${RNMAKE_WORKSPACE}
+docopy=true
+
+# process command-line options
+while true
+do
+  case "$1" in
+    --no-color) turnOffColor; shift;;
+    -n|--no-copy) docopy=false; shift;;
+    --workspace) rnworkspace="$2"; shift 2;;
+    --help) callHelp; shift;;
+
+    --) shift; break;;
+    *)  break;;
+  esac
+done
+
+# workspace default is current directory
+if [ -z "${rnworkspace}" ]
+then 
+  rnworkspace=.
+fi
+
+# process command-line arguments
+if [ $# -ge 1 ]
+then
+  dst=${1}
+else
+  fatal 8 "No destination directory."
+fi
+
+debs=$(ls ${rnworkspace}/dist/dist.*/*.deb 2>/dev/null)
+
+userhost="${dst%:*}"
+
+if [ -z "${userhost}" ]
 then
   cmd=cp
-  repodir=/public/repostaging
 else
   cmd=scp
-  repodir=rknight@sharetheroad:/public/repostaging
 fi
 
-if [[ ! -d ${pkgdir} ]]
-then
-  echo "No ${pkgdir} directory"
-  exit 1
-fi
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
 
-cd /prj/pkg
-debs=$(ls */dist/dist.${arch}/*.deb 2>/dev/null)
+# showBanner workspace dst
+showBanner()
+{
+	printf "\n${color_banner}${bold_line}\n"
+  printf ":: Source:      ${1}\n"
+  printf ":: Destination: ${2}\n"
+	printf "${bold_line}${color_end}\n\n"
+}
+
+showBanner  ${rnworkspace} ${dst}
 
 if [[ "${debs}" != "" ]]
 then
-  ${cmd} ${debs} ${repodir}/.
-  echo "$(wc -w <<<${debs}) files copied"
+  if docopy
+  then
+    ${cmd} ${debs} ${dst}
+    showInfo "$(wc -w <<<${debs}) files copied."
+  else
+    showInfo "$(wc -w <<<${debs}) Debian files found."
+  fi
+else
+  showInfo "No Debian files found."
 fi

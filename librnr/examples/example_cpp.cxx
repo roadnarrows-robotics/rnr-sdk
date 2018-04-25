@@ -14,10 +14,7 @@
  *
  * \author Robin Knight (robin.knight@roadnarrows.com)
  *
- * \copyright
- *   \h_copy 2010-2017. RoadNarrows LLC.\n
- *   http://www.roadnarrows.com\n
- *   All Rights Reserved
+ * \pkgcopyright{2010-2018,RoadNarrows LLC.,http://www.roadnarrows.com}
  * \n All Rights Reserved
  */
 // Permission is hereby granted, without written agreement and without

@@ -1,155 +1,272 @@
-###############################################################################
-_Cmd="sgrep"
+#!/bin/bash
+#
+# File:
+#   sgrep
+#
+# Usage:
+#   sgrep [OPTION]... PATTERN [-- [GREPOPTS]]
+#   sgrep --help
+#
+# Description:
+#   Greps source files in current directory for PATTERN.
+#
 
-_Synopsis="\
-	${_Cmd} [-s <srclist>] [-c] <pat>
-	${_Cmd} [-s <srclist>] -- [grepopts] <pat>
-	${_Cmd} -?
-"
+argv0=$(basename $0)
 
-_Desc="\
-Safely greps source files for <pat> in packages.
-  -p            Plain text output. No color.
-  -s <srclist>  List of source types to search. <srclist> consists of the
-                concatenated source types <srctype>[+<srctype[+...]] where
-                srctype is:
-                  c (default)       C and C++ files
-                  doxy              Doxygen files
-                  htm|html          HTML files
-                  j|java            Java files
-                  m|make|makefile   Makefiles
-                  pl|perl           Perl files
-                  py|python         Python files
-                  tcl               Tcl files
-                  tk                Tk files
-                  *                 Files ending with srctype
-"
-###############################################################################
-
-# The options string
-optstr="s:p"
-
-color="--color=always"
-
-# _usage [msg1 [msg2...]]
-_usage()
+# callHelp
+callHelp()
 {
-  if [ $# -gt 0 ]
-  then
-    echo -n "${_Cmd}: $1"
-    shift
-    while [ $# -gt 0 ]
-    do
-      echo -n ": $1" 
-      shift
-    done
-    echo "\n"
-  fi
-  echo "usage: ${_Synopsis}"
-  echo "${_Desc}"
-  exit 2
+  cat <<EOH
+Usage: ${argv0} [OPTION]... PATTERN [-- [GREPOPTS]]
+       ${argv0} --help
+
+Greps source files in current directory for PATTERN.
+
+Options:
+  --no-color    Disable color output. Default: colors are enabled.
+
+  -s, --source=SRCLIST
+                List of source types to search. The SRCLIST consists of
+                a comma separated concatenation of canned source types
+                and/or user file patterns.
+
+                SRCLIST ::= SRCTYPE[,SRCTYPE[,...]]
+                SRCTYPE ::= c | doxy | htm | html | j | java | make | md |
+                            pl | perl | py | python | swig | tcl | tk | yaml |
+                            USRSRC
+
+                  C and C++ files (default)
+                c ::= *.[cCh] *.cxx *.cpp *.[ch][ch] *.hpp
+
+                  Doxygen files
+                doxy ::= *.doxy
+
+                  HTML files
+                htm  ::= html
+                html ::= *.htm *.html *.xml *.css *.dtd
+
+                  Java files
+                j    ::= java
+                java ::= *.java'
+
+                  Makefiles
+                make ::= Makefile  makefile *.mk CMakeLists.txt *.cmake
+
+                  Markdown Files
+                md ::= *.md
+
+                  Perl files
+                pl   ::= perl
+                perl ::= *.pl
+
+                  Python files
+                py     ::= python
+                python ::= *.py
+
+                  Swig files
+                swig ::= *.i
+
+                  Tcl files
+                tcl ::= *.tcl
+
+                  Tk files
+                tk ::= *.tk
+
+                  Human-readable data serialization files
+                yaml ::= *.yaml *.yml *.json
+
+                  Files matching sh(1) pattern
+                USRSRC ::= SHPAT
+
+  --help        Print this help and exit.
+
+The ${argv0} command searches the current directory downward for PATTERN found
+in any files matching the SRCLIST. If no SRCLIST is specified, the default is
+all C and C++ files. The PATTERN is interpreted as an extended regular
+expression.
+
+${argv0} is aware of git, subversion, and RNMAKE hidden and auto-generated files
+and directories. These are excluded from search.
+
+Any GREPOPTS found are applied to evoking the grep command.
+
+Examples:
+  # Search current C/C++ source for 'FooBar'.
+  $ sgrep FooBar
+
+  # Search html, doxygen, and php files for beginning or ending unordered list
+  # tags.
+  $ sgrep --srclist='html,doxy,*.php' '<ul>\|</ul>'
+          
+  # Search C, C++, and python source for pattern -INF. Notice the -- to disable
+  # ${argv0} option parsing. Also the -i (ignore case) option is applied to
+  # grep.
+  $ sgrep -s 'c,py' -- '-INF' -i
+EOH
+  exit 0;
 }
 
-# exclude file list
-_excludes="/.svn|/obj|/.deps|/dist|/loc"
+# ansi colors
+color_pre="\033["
+color_post="\033[0m"
+color_red="0;31m"
+color_yellow="0;33m"
+color_cyan="0;36m"
+color_gray="1;30m"
+color_bold_red="1;31m"
 
-# 
-# Get options. Note: first colon says that getopts will not print errors.
-#
-while getopts :${optstr} opt
-do
-	case $opt in
-		p) 	color="" ;;
+# colors used
+color_warn="${color_pre}${color_yellow}"
+color_error="${color_pre}${color_red}"
+color_fatal="${color_pre}${color_bold_red}"
+color_banner="${color_pre}${color_cyan}"
+color_end=${color_post}
 
-		s) 	srclist="$OPTARG" ;;
+# showWarning wmsg [wmsg...]
+showWarning()
+{
+  printf "${argv0}: ${color_warn}${*}${color_end}\n" >&2
+}
 
-		# Usage option '-?' or bad option
-		\?) if [ "$OPTARG" = "?" ]
-				then
-					_usage
-				else
-					_usage "Error" "$OPTARG" "Unknown option."
-				fi
-				;;
+# showError emsg [emsg...]
+showError()
+{
+  printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
+}
 
-		# Option requiring argument but none found
-		\:)	_usage "Error" "$OPTARG" "Required argument not specified." ;;
-	esac
-done
+# fatal exitcode emsg
+fatal()
+{
+  printf "${argv0}: ${color_fatal}${2}${color_end}\n" >&2
+  exit ${1}
+}
 
-shift $(($OPTIND - 1))
+# long and short options
+longopts="no-color,source:,help"
+shortopts="s:"
 
-# default source list
-if [ "$srclist" = "" ]
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
 then
-	srclist="c"
+  fatal 2 "Try '${argv0} --help' for more information."
 fi
 
-typeset srclist=$srclist'+'	# lowercase & make sure loop terminates
+#echo "${OPTS}"
+eval set -- "${OPTS}"
 
-# build find source list
-while [ "$srclist" != "" ]
+# command line option and argument variables
+srclist=
+excludes="/.git*|/.svn|/obj|/.deps|/dist|/loc"
+grep_color="--color=always"
+
+# process command-line options
+while true
 do
-	srctype=${srclist%%+*}
-  case "$srctype" in
-    c) 
-				src="-name '*.[cCh]' -or -name '*.cxx' -or -name '*.cpp' -or -name '*.[ch][ch]' -or -name '*.hpp'"
-				;;
-    m|make|makefile) 
-				src="-name Makefile -or -name makefile -or -name '*.mk'"
-				;;
-    pl|perl) 
-				src="-name '*.pl'"
-				;;
-    py|python) 
-				src="-name '*.py'"
-				;;
-    j|java) 
-				src="-name '*.java'"
-				;;
-    tcl) 
-				src="-name '*.tcl'"
-				;;
-    tk) 
-				src="-name '*.tk'"
-				;;
-    htm[l]) 
-				src="-name '*.htm' -or -name '*.html' -or -name '*.xml'" 
-				;;
-    doxy) 
-				src="-name '*.doxy'"
-				;;
-		*) 
-				src="-name '*${srctype}'"
-				;;
-	esac
+  case "$1" in
+    --no-color)
+        color_warn=
+        color_error=
+        color_fatal=
+        color_banner=
+        color_end=
+        grep_color="--color=never"
+        shift;;
+    -s|--source) srclist="${2}"; shift 2;;
+    --help) callHelp; shift;;
 
-	_findlist=${_findlist:+"$_findlist -or "}${src}
-
-	srclist=${srclist#$srctype+}
+    --) shift; break;;
+    *)  break;;
+  esac
 done
 
 if [ $# -lt 1 ]
 then
-	_usage "Error" "No pattern <pat> specified."
-	exit 2
+  showError "No PATTERN specified."
+  fatal 2 "Try '${argv0} --help' for more information."
 fi
 
-_fixupgrepargs()
+pattern="${1}"
+shift
+
+#typeset srclist=${srclist}','  # lowercase & make sure loop terminates
+if [ -z "${srclist}" ]
+then
+  srclist='c'
+fi
+
+srclist=${srclist}','  # make sure loop terminates
+
+# build find source list
+while [ "${srclist}" != "" ]
+do
+  srctype=${srclist%%,*}
+  case "${srctype}" in
+    c) 
+        src="-name '*.[cCh]' -or -name '*.cxx' -or -name '*.cpp' -or -name '*.[ch][ch]' -or -name '*.hpp'"
+        ;;
+    doxy) 
+        src="-name '*.doxy'"
+        ;;
+    htm|html) 
+        src="-name '*.htm' -or -name '*.html' -or -name '*.xml' -or -name '*.css' -or -name '*.dtd'" 
+        ;;
+    j|java) 
+        src="-name '*.java'"
+        ;;
+    make) 
+        src="-name Makefile -or -name makefile -or -name '*.mk' -or -name 'CMakeLists.txt' -or -name '*.cmake'"
+        ;;
+    md) 
+        src="-name '*.md'"
+        ;;
+    pl|perl) 
+        src="-name '*.pl'"
+        ;;
+    py|python) 
+        src="-name '*.py'"
+        ;;
+    swig) 
+        src="-name '*.i'"
+        ;;
+    tcl) 
+        src="-name '*.tcl'"
+        ;;
+    tk) 
+        src="-name '*.tk'"
+        ;;
+    yaml) 
+        src="-name '*.yaml' -or -name '*.yml' -or -name '*.json'"
+        ;;
+    *) 
+        src="-name '${srctype}'"
+        ;;
+  esac
+
+  findlist=${findlist:+"${findlist} -or "}${src}
+
+  srclist=${srclist#$srctype,}
+done
+
+#echo "$findlist"
+
+grepopts="${@} -E ${pattern}"
+
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+
+# showBanner sgrep
+showBanner()
 {
-	# options e.g. -i
-	while [ $# -gt 1 ]
-	do
-		echo -n "$1 "
-		shift
-	done
-	# pattern
-	echo -n "-e $1"
+	printf "\n${color_banner}${bold_line}\n"
+  printf -- "${1}\n"
+	printf "${bold_line}${color_end}\n\n"
 }
 
-_grepargs=$(_fixupgrepargs "${@}")
+cmd="find . \( ${findlist} \) -print \
+| grep -v -E \"${excludes}\" \
+| xargs grep -n ${grep_color} ${grepopts}"
 
-echo -- "find . \( ${_findlist} \) -print | xargs grep -n ${color} $_grepargs"
-eval "find . \( ${_findlist} \) -print" \
-  | grep -v -E "${_excludes}" \
-  | xargs grep -n ${color} ${_grepargs}
+showBanner "${cmd}"
+
+eval "${cmd}"

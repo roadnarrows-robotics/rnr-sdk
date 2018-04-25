@@ -19,6 +19,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0}
        ${argv0} --help
+
 Monitor the status of the currently running 'dd' command.
 
 The dd command converts and copies files. It can perform disk-to-disk byte

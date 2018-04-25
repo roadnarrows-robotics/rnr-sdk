@@ -17,3 +17,4 @@ License Tags:
   rnrestricted  RoadNarrows restricted. (default)
   rnfree        RoadNarrows free, as-is. 
   comedtec      Comedtec restrictecd.
+  ref           Generic, one line reference to README and EULA files.

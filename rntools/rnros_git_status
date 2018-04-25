@@ -19,6 +19,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]...
        ${argv0} --help
+
 Determine the status all ROS git packages found under the user's workspace.
 
 Options:

@@ -1,48 +1,26 @@
 #!/usr/bin/python
-
-# //////////////////////////////////////////////////////////////////////////////
 #
-# Package:  tools
+# File:
+#   rnupdate_eula
 #
-# File:     rneula_update.py
-#
-# Usage: rneula_update.py [OPTIONS] <license> [<dir> | <file>]
+# Usage:
+#   rnupdate_eula [OPTION]... LICENSE [DIR | FILE]
+#   rnupdate_eula --help
 #
 # Description:
-#   RN package utility.
-#
 #   Update package source file EULA's.
 #
-# Author: Robin Knight (robin.knight@roadnarrows.com)
+# Author:
+#   Robin D. Knight (robin.knight@roadnarrows.com)
 #
-# Copyright (C) 2013-2018.  RoadNarrows LLC.
-# All Rights Reserved
+# Copyright:
+#   (C) 2013-2018. RoadNarrows LLC.
+#   http://www.roadnarrows.com
+#   All Rights Reserved
 #
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that
-# (1) The above copyright notice and the following two paragraphs
-# appear in all copies of the source code and (2) redistributions
-# including binaries reproduces these notices in the supporting
-# documentation.   Substantial modifications to this software may be
-# copyrighted by their authors and need not follow the licensing terms
-# described here, provided that the new terms are clearly indicated in
-# all files where they apply.
+# License:
+#   MIT
 #
-# IN NO EVENT SHALL THE AUTHOR, ROADNARROWS LLC, OR ANY MEMBERS/EMPLOYEES
-# OF ROADNARROW LLC OR DISTRIBUTORS OF THIS SOFTWARE BE LIABLE TO ANY
-# PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
-# DAMAGES ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION,
-# EVEN IF THE AUTHORS OR ANY OF THE ABOVE PARTIES HAVE BEEN ADVISED OF
-# THE POSSIBILITY OF SUCH DAMAGE.
-#
-# THE AUTHOR AND ROADNARROWS LLC SPECIFICALLY DISCLAIM ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-# FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN
-# "AS IS" BASIS, AND THE AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO
-# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-#
-# //////////////////////////////////////////////////////////////////////////////
 
 import os
 import sys
@@ -51,30 +29,29 @@ import fnmatch
 import re
 import getopt
 
+# command name
+argv0 = os.path.basename(__file__)
+
 RNMakeEnv = { }
 
 def initRNMakeEnv():
+  global RNMakeEnv
   RNMakeEnv['rnmake'] = os.getenv('RNMAKE_ROOT', 'UNDEF')
-  RNMakeEnv['arch_dft'] = os.getenv('RNMAKE_ARCH_DFT', 'x86_64')
+  RNMakeEnv['arch'] = os.getenv('RNMAKE_ARCH_DFT', 'x86_64')
   RNMakeEnv['xprefix'] = os.getenv('RNMAKE_INSTALL_XPREFIX')
   RNMakeEnv['prefix'] = os.getenv('RNMAKE_INSTALL_PREFIX')
   import __main__ as main
-  RNMakeEnv['argv0'] = os.path.realpath(main.__file__)
-  RNMakeEnv['tool_templates'] = os.path.dirname(RNMakeEnv['argv0']) \
-      + '/templates'
+  RNMakeEnv['cmdreal'] = os.path.realpath(main.__file__)
 
-
-## EULA templates root directory
-EulaTemplatesRoot = None
-
+# Eula Tags
 EulaTagBegin    = "EulaBegin"
 EulaTagEnd      = "EulaEnd"
-reEulaTagBegin  = r"@EulaBegin@|\\EulaBegin|@EulaBegin"
-reEulaTagEnd    = r"@EulaEnd@|\\EulaEnd|@EulaEnd"
+reEulaTagBegin  = r"\\EulaBegin|@EulaBegin@|@EulaBegin"
+reEulaTagEnd    = r"\\EulaEnd|@EulaEnd@|@EulaEnd"
 
 ## Excluded directories
 Pat_excludes  = [
-    '.svn', 'obj', '.deps', 'dist', 'loc', 'hw', 'gtest', 'tinyxml',
+    '.git', '.svn', 'obj', '.deps', 'dist', 'loc', 'hw', 'gtest', 'tinyxml',
     'build', 'build.*', 'doxy', 'deb-doc', 'deb-dev', 'deb-src'
 ]
 
@@ -90,12 +67,12 @@ Pat_src       = Pat_c_src + Pat_mk_src + Pat_py_src + Pat_j_src + \
                 Pat_xml_src + Pat_doxy_src + Pat_js_src
 
 ## Doxygen file comment style patterns
-Pat_slashstar_style = Pat_c_src + Pat_j_src + Pat_doxy_src + Pat_js_src + \
-                      Pat_mk_src
+Pat_slashstar_style = Pat_c_src + Pat_j_src + Pat_doxy_src + Pat_js_src
 Pat_hash_style      = Pat_py_src
 Pat_hashhash_style  = []
 Pat_hashbang_style  = []
 Pat_xml_style       = Pat_xml_src
+Pat_sol_style       = Pat_mk_src
 Pat_nocom_style     = []
 
 ## Slash-star (c, java, doxygen, php, ...) comment style constructs
@@ -113,13 +90,13 @@ ComHashEnd          = "#"
 ## Hash-hash doxygen comment style constructs
 ComHashHashKey      = "##"
 ComHashHashStart    = "##"
-ComHashHashMiddle   = "##"
+ComHashHashMiddle   = "## "
 ComHashHashEnd      = "##"
 
 ## Hash-bang doxygen filtered pattern comment style constructs
 ComHashBangKey      = "##!"
 ComHashBangStart    = "##!"
-ComHashBangMiddle   = "##!"
+ComHashBangMiddle   = "##! "
 ComHashBangEnd      = "##!"
 
 ## XML (html, xml, ...) comment style constructs
@@ -127,6 +104,12 @@ ComXmlKey           = "<!-- -->"
 ComXmlStart         = "<!--"
 ComXmlMiddle        = " - "
 ComXmlEnd           = " -->"
+
+## Start-Of-Line "comment" style constructs
+ComSolKey          = "^"
+ComSolStart        = ""
+ComSolMiddle       = ""
+ComSolEnd          = ""
 
 ## No comment doxygen comment style constructs
 NoComKey        = "nocomment"
@@ -159,12 +142,95 @@ CommentStyle = {
       'middle': ComXmlMiddle,
       'end':    ComXmlEnd
     },
+    ComSolKey: {
+      'start':  ComSolStart,
+      'middle': ComSolMiddle,
+      'end':    ComSolEnd
+    },
     NoComKey: {
       'start':  NoCom,
       'middle': NoCom,
       'end':    NoCom
     }
 }
+
+# ansi colors
+color_pre         = "\033["
+color_post        = "\033[0m"
+color_red         = "0;31m"
+color_bold_red    = "1;31m"
+color_green       = "0;32m"
+color_yellow      = "0;33m"
+color_gray        = "1;30m"
+
+# colors used
+color_info    = color_pre + color_green
+color_warn    = color_pre + color_yellow
+color_error   = color_pre + color_red
+color_fatal   = color_pre + color_bold_red
+color_banner  = color_pre + color_green
+color_end     = color_post
+
+# disable color output
+def turnOffColor():
+  global color_info, color_warn, color_error, color_fatal, color_banner
+  global color_end
+  color_info    = ''
+  color_warn    = ''
+  color_error   = ''
+  color_fatal   = ''
+  color_banner  = ''
+  color_end     = ''
+
+# showInfo msg [msg...]
+def showInfo(*msgs):
+  print color_info,
+  for msg in msgs:
+    print msg,
+  print color_end
+
+# showWarning wmsg [wmsg...]
+def showWarning(*wmsgs):
+  print "{0}: {1}Warning:".format(argv0, color_warn),
+  for msg in wmsgs:
+    print msg,
+  print color_end
+
+# showError emsg [emsg...]
+def showError(*emsgs):
+  print "{0}: {1}Error:".format(argv0, color_error),
+  for msg in emsgs:
+    print msg,
+  print color_end
+
+# fatal exitcode emsg [emsg...]
+def fatal(ec, *emsgs):
+  print "{0}: {1}Fatal:".format(argv0, color_fatal),
+  for msg in emsgs:
+    print msg,
+  print color_end
+  sys.exit(ec)
+
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+
+# showBanner eula isdir name doupdate forceit
+def showBanner(eula, isdir, name, doupdate, forceit):
+  print "\n{0}{1}".format(color_banner, bold_line)
+  print ":: {0:<15s} {1}".format("EULA:", eula)
+  if isdir:
+    print ":: {0:<15s} {1}".format("Directory:", name)
+  else:
+    print ":: {0:<15s} {1}".format("File:", name)
+  print ":: {0:<15s} {1}".format("Update File(s):", doupdate)
+  print ":: {0:<15s} {1}".format("Force Update:", forceit)
+  print "{0}{1}\n".format(bold_line, color_end)
+
+
+# showDirBanner dir
+def showDirBanner(dir):
+  print "\n{0}{1}".format(color_banner, bold_line)
+  print ":: {0}".format(dir)
+  print "{0}{1}\n".format(bold_line, color_end)
 
 ## \brief Command-line exception class.
 #
@@ -181,15 +247,15 @@ class usage(Exception):
     self.msg = msg
 
 
-## \brief Application class.
+## \brief Applicationclass.
 #
 class Application():
 
   ## \brief Constructor.
   #
   def __init__(self):
-    ## command name
-    self._Argv0 = __file__
+    ## command pathname
+    self.m_cmdname = __file__
 
     ## EULA license tag
     self.m_EulaLicenseTag = None
@@ -209,87 +275,97 @@ class Application():
   # \param emsg  Error message string.
   #
   def printUsageErr(self, emsg):
-    if emsg:
-      print "{0}: {1}".format(self._Argv0, emsg)
-    else:
-      print "{0}: error".format(self._Argv0)
-    print "Try '{0} --help' for more information.".format(self._Argv0)
+    showError(emsg)
+    fatal(2, "Try '{0} --help' for more information.".format(argv0))
 
-  ## \brief Print Command-Line Usage Message.
+  ## \brief Print command-line help.
   #
-  def printUsage(self):
-    print \
-"""
-Usage: {0} [OPTIONS] <license> [<dir>]
-       {0} [OPTIONS] <license> [<file>]
+  def callHelp(self):
+    tags = reEulaTagBegin.split('|')
+    eulaBeg = ''
+    for t in tags:
+      eulaBeg = eulaBeg + ' ' + "{0:<15s}".format(t.replace('\\\\', '\\'))
+    tags = reEulaTagEnd.split('|')
+    eulaEnd = ''
+    for t in tags:
+      eulaEnd = eulaEnd + ' ' + "{0:<15s}".format(t.replace('\\\\', '\\'))
+
+    print """\
+Usage: {0} [OPTIONS] LICENSE [DIR | FILE]
        {0} --help
 
-Update source file EULAs with the specified <license>.
-
-Description:
-  If a directory <dir> is specified, then recursively update all source files
-  with the EULA of the specified by <license>. Only files that differ in
-  <license> will be updated, unless the --force option is specified.
-  Source files are defined as:
-    C, C++, Java, Python, make files, doxygen, html, xml
-
-  If a regular <file> is specified, then update the file's EULA with the
-  specified <license>.
-
-  If neither <dir> nor <file> is specified, the default is '.' - the current
-  working directory.
-
-Supported licenses can be found in {1}. See help for list.
+Update source file EULAs with the specified LICENSE.
 
 Options and arguments:
--n, --noupdate            : List files that need updating, but don't update.
--f, --force               : Force update, even if EULAs match. Must be good.
--e, --exclude <dir>       : Exclude directory. May be iterated.
+  -l, --list              : List available EULAs and exit.
+      --no-color          : Disable color output.
+  -n, --no-update         : List files that need updating, but don't update.
+  -f, --force             : Force update, even if EULAs match. Must be good.
+  -e, --exclude=EXDIR     : Exclude directory. May be iterated.
+  -t, --templates=ETDIR   : EULA templates directory. Overrides default search
+                            directories.
 
+  -h, --help              : Display this help and exit.
 
--h, --help                : Display this help and exit.
-""".format(self._Argv0, EulaTemplatesRoot)
+Description:
+  If a directory DIR is specified, then recursively update all source files
+  with the EULA specified by the LICENSE tag, starting from directory DIR.
+  Only files that differ in EULA will be updated, unless the --force
+  option is specified. Source files are defined as:
+    C, C++, Java, Python, make files, doxygen, html, xml
+
+  If a regular FILE is specified, then update the file's EULA with the
+  specified LICENSE.
+
+  If neither DIR nor FILE is specified, the current working directory ('.') is
+  used.
+
+  EULAs are plain text and/or doxygen markup files of with naming format:
+    eula_LICENSE.txt
+
+  The contents of the files are inserted, verbatim, between the EULA tags within
+  the source files. Valid tag pairs:
+  {1}
+  {2}
+
+""".format(argv0, eulaBeg, eulaEnd)
  
   ## \brief Print list of availabe license keys.
   #
-  def printLicenseKeys(self):
-    licenses = []
-    for root, dirlist, filelist in os.walk(EulaTemplatesRoot):
+  def printLicenseKeys(self, templates):
+    eulaRoot = self.findEulaTemplates(templates)
+    showDirBanner(eulaRoot)
+
+    print "{0:<20s} {1:s}".format("license", "file")
+    print "{0:<20s} {1:s}".format("-------", "----")
+
+    for root, dirlist, filelist in os.walk(eulaRoot):
       for fname in filelist:
         if fnmatch.fnmatch(fname, 'eula_*.txt'):
-          licenses.append(fname[5:-4])
-    print \
-"""
-
-The <license> is one of: {0}
-""".format(licenses)
+          license = fname[5:-4]
+          print "{0:<20s} {1:s}".format(license, fname)
 
   ## \brief Print file i/o warning message.
   #
   # \param f        Opened file object or file name.
-  # \param warnmsg  Warning message with {n} markup starting at 0.
-  # \param args     Argument list to warnmsg.
+  # \param warnmsgs Warning message(s).
   #
-  def iowarning(self, f, warnmsg, *args):
+  def iowarning(self, f, *warnmsgs):
     if type(f) is file:
-      print "Warning: {0}:".format(f.name),
+      showWarning("{0}:".format(f.name), *warnmsgs)
     else:
-      print "Warning: {0}:".format(f),
-    print warnmsg.format(*args)
+      showWarning("{0}:".format(f), *warnmsgs)
 
   ## \brief Print file i/o error message.
   #
   # \param f        Opened file object or file name.
-  # \param errmsg   Error message with {n} markup starting at 0.
-  # \param args     Argument list to errmsg.
+  # \param errmsg   Error message(s).
   #
-  def ioerror(self, f, errmsg, *args):
+  def ioerror(self, f, *errmsgs):
     if type(f) is file:
-      print "Error: {0}:".format(f.name),
+      showError("{0}:".format(f.name), *errmsgs)
     else:
-      print "Error: {0}:".format(f),
-    print errmsg.format(*args)
-
+      showError("{0}:".format(f), *errmsgs)
 
   ## \brief Get command-line options
   #  
@@ -301,36 +377,52 @@ The <license> is one of: {0}
     if argv is None:
       argv = sys.argv
 
-    self._Argv0 = kwargs.get('argv0', __file__)
+    self.m_cmdname = kwargs.get('argv0', __file__)
 
     # defaults
-    kwargs['debug']   = 0
-    kwargs['update']  = True
-    kwargs['force']   = False
-    kwargs['topdir']  = '.'
-    kwargs['file']    = None
+    kwargs['debug']     = 0
+    kwargs['color']     = True
+    kwargs['update']    = True
+    kwargs['force']     = False
+    kwargs['license']   = ''
+    kwargs['templates'] = ''
+    kwargs['topdir']    = '.'
+    kwargs['file']      = None
+    kwargs['list']      = False
 
     # parse command-line options
     try:
       try:
-        opts, args = getopt.getopt(argv[1:], "?hnfe:",
-            ['help', 'noupdate', 'force', 'exclude=', ''])
+        opts, args = getopt.getopt(argv[1:], "nfe:lt:",
+            ['help', 'list', 'no-color', 'no-update', 'force', 'exclude=',
+             'templates=', ''])
       except getopt.error, msg:
         raise usage(msg)
       for opt, optarg in opts:
-        if opt in ('-n', '--noupdate'):
+        if opt in ('--no-color',):
+          kwargs['color'] = False
+          turnOffColor()
+        elif opt in ('-n', '--no-update',):
           kwargs['update'] = False
-        elif opt in ('-f', '--force'):
+        elif opt in ('-f', '--force',):
           kwargs['force'] = True
-        elif opt in ('-e', '--exlude'):
+        elif opt in ('-t', '--templates',):
+          kwargs['templates'] = optarg
+        elif opt in ('-e', '--exlude',):
           Pat_excludes.append(optarg)
-        elif opt in ('-h', '--help', '-?'):
-          self.printUsage()
-          self.printLicenseKeys()
+        elif opt in ('-l', '--list',):
+          kwargs['list'] = True
+        elif opt in ('--help',):
+          self.callHelp()
           sys.exit(0)
     except usage, err:
       self.printUsageErr(err.msg)
       sys.exit(2)
+
+    # list after options precessing
+    if kwargs['list']:
+      self.printLicenseKeys(kwargs['templates'])
+      sys.exit(0)
 
     if len(args) < 1:
       self.printUsageErr("No EULA license specified.")
@@ -556,9 +648,10 @@ The <license> is one of: {0}
   # \param kwargs  Optional keyword argument list.
   #
   def runOnFile(self, **kwargs):
-    print "EULA:       {0}".format(self.m_EulaLicenseTag)
-    print "File:       {0}".format(kwargs['file'])
-    print "Scanning..."
+    showBanner(self.m_EulaLicenseTag, False, kwargs['file'],
+        kwargs['update'], kwargs['force']) 
+
+    showInfo("Scanning...")
 
     self.m_nUpdateCnt = 0
 
@@ -582,9 +675,10 @@ The <license> is one of: {0}
   # \param kwargs  Optional keyword argument list.
   #
   def runOnDirectory(self, **kwargs):
-    print "EULA:       {0}".format(self.m_EulaLicenseTag)
-    print "Directory:  {0}".format(kwargs['topdir'])
-    print "Scanning..."
+    showBanner(self.m_EulaLicenseTag, True, kwargs['topdir'],
+        kwargs['update'], kwargs['force']) 
+
+    showInfo("Scanning...")
 
     self.m_nUpdateCnt = 0
 
@@ -611,6 +705,35 @@ The <license> is one of: {0}
           if not f.closed:
             f.close()
 
+  ## \brief Find EULA templates directory.
+  #
+  # \param templates  Optional templates directory which overrides default 
+  #                   search directories.
+  #
+  # \return EULA templates directory on success, fatal otherwise.
+  #
+  def findEulaTemplates(self, templates=''):
+    if templates:
+      if os.path.isdir(templates):
+        return templates
+      else:
+        fatal(8, "{0}: Not a directory".format(templates))
+    euladir = 'share/templates/eula'
+    prefix = ''
+    if RNMakeEnv['prefix']:
+      prefix = RNMakeEnv['prefix']
+    elif RNMakeEnv['xprefix']:
+      prefix = RNMakeEnv['xprefix']+'/'+RNMakeEnv['arch']
+    else:
+      prefix = '/usr/local'
+    searchPath = [
+        prefix+'/'+euladir,
+        os.path.dirname(RNMakeEnv['cmdreal'])+'/'+euladir
+    ]
+    for d in searchPath:
+      if os.path.isdir(d):
+        return d
+    fatal(8, "Cannot find EULA templates in: {0}".format(searchPath))
 
   ## \brief Load EULA plaintext file.
   #
@@ -618,8 +741,8 @@ The <license> is one of: {0}
   #
   def loadEula(self, license):
     self.m_EulaLicenseTag    = license
-    self.m_EulaPlainTextFile = EulaTemplatesRoot + os.path.sep + 'eula_' + \
-                                self.m_EulaLicenseTag + '.txt'
+    self.m_EulaPlainTextFile =  self.m_EulaTemplatesRoot + os.path.sep + \
+                                'eula_' + self.m_EulaLicenseTag + '.txt'
 
     try:
       f = open(self.m_EulaPlainTextFile, "r")
@@ -641,6 +764,8 @@ The <license> is one of: {0}
       
     kwargs = self.getOptions(argv, **kwargs)
 
+    self.m_EulaTemplatesRoot = self.findEulaTemplates(kwargs['templates'])
+
     self.loadEula(kwargs['license'])
 
     if kwargs['file']:
@@ -648,7 +773,7 @@ The <license> is one of: {0}
     else:
       self.runOnDirectory(**kwargs)
 
-    print "Files:      %s" % (self.m_nUpdateCnt)
+    showInfo("Files: {0}".format(self.m_nUpdateCnt))
 
     return 0
 
@@ -659,14 +784,14 @@ The <license> is one of: {0}
     self.m_nUpdateCnt = 0
 
     for root, dirlist, filelist in os.walk(kwargs['topdir']):
-      #print "------------------------"
-      #print "root: ", root
+      #print "DBG: ------------------------"
+      #print "DBG: root: ", root
       for pat in Pat_excludes:
         for dirname in dirlist:
           if fnmatch.fnmatch(dirname, pat):
             dirlist.remove(dirname)
             break
-      #print "dirlist: ", dirlist
+      #print "DBG: dirlist: ", dirlist
       for fname in filelist:
         style = self.classifyFileType(fname)
         if style:
@@ -680,7 +805,7 @@ The <license> is one of: {0}
           if not f.closed:
             f.close()
 
-    print "Files:      %s" % (self.m_nUpdateCnt)
+    showInfo("Files: {0}".format(self.m_nUpdateCnt))
 
     return 0
   ##
@@ -693,9 +818,7 @@ The <license> is one of: {0}
 if __name__ == '__main__':
   initRNMakeEnv()
 
-  print RNMakeEnv
-
-  EulaTemplatesRoot = RNMakeEnv['tool_templates'] + '/eula'
+  #print 'DBG:', RNMakeEnv
 
   # create utility application
   app = Application()

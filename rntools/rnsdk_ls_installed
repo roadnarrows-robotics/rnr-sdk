@@ -22,6 +22,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]... [RNMAKEVAR]... [PKG]...
        ${argv0} --help
+
 Convenience script to pretty print all of the install RoadNarrows Robotics SDK
 components.
 

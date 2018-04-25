@@ -19,6 +19,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]...
        ${argv0} --help
+
 Update all ROS git packages found under user's ROS workspace.
 
 Options:

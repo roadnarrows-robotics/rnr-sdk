@@ -20,6 +20,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]... [FILE]
        ${argv0} --help
+
 Print C Preprocessor built-in predefined macros and strings.
 
 FILE Options:

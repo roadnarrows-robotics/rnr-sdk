@@ -19,6 +19,7 @@ callHelp()
   cat <<EOH
 Usage: ${argv0} [OPTION]... [RNMAKEVAR]...
        ${argv0} --help
+
 List all available RoadNarrows Make System architectures.
 
 Options:
@@ -175,7 +176,7 @@ fi
 
 declare -a arch_real
 
-for arch_file in Arch.*.mk 2>/dev/null
+for arch_file in Arch.*.mk
 do
   arch_tag="${arch_file%%.mk}"
   arch_tag="${arch_tag##Arch.}"
