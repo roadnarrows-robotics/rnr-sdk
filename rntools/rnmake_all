@@ -43,14 +43,35 @@ EOH
 color_pre="\033["
 color_post="\033[0m"
 color_red="0;31m"
+color_bold_red="1;31m"
+color_green="0;32m"
 color_yellow="0;33m"
 color_gray="1;30m"
 
 # colors used
+color_info="${color_pre}${color_green}"
 color_warn="${color_pre}${color_yellow}"
 color_error="${color_pre}${color_red}"
+color_fatal="${color_pre}${color_bold_red}"
 color_banner="${color_pre}${color_gray}"
 color_end=${color_post}
+
+# turnOffColor
+turnOffColor()
+{
+  color_info=
+  color_warn=
+  color_error=
+  color_fatal=
+  color_banner=
+  color_end=
+}
+
+# showInfo msg [msg...]
+showInfo()
+{
+  printf "${color_info}${*}${color_end}\n"
+}
 
 # showWarning wmsg [wmsg...]
 showWarning()
@@ -67,7 +88,7 @@ showError()
 # fatal exitcode emsg
 fatal()
 {
-  printf "${argv0}: ${2}\n" >&2
+  printf "${argv0}: ${color_fatal}${2}${color_end}\n" >&2
   exit ${1}
 }
 
@@ -97,11 +118,8 @@ while true
 do
   case "$1" in
     --no-color)
+        turnOffColor
         rnmakevars="color=off"
-        color_warn=
-        color_error=
-        color_banner=
-        color_end=
         shift;;
     --stop-on-errors) stop_on_errors=true; shift;;
     --workspace) rnworkspace="$2"; shift 2;;
@@ -116,6 +134,9 @@ done
 if [ -z "${rnworkspace}" ]
 then 
   rnworkspace=.
+elif [ ! -d "${rnworkspace}" ]
+then
+  fatal 8 "${rnworkspace}: Workspace is not a directory."
 fi
 
 # findShared cmd srcfile
@@ -150,19 +171,18 @@ do
   fi
 done
 
+pkglist=
+
 # no package list, so build package list from directories found under workspace
 if [ -z "${pkgs}" ]
 then
-  flist=$(ls -1 ${rnworkspace})
-  for pkg in ${flist}
+  flist=$(ls -1 ${rnworkspace} 2>/dev/null)
+  for f in ${flist}
   do
+    pkg=${rnworkspace}/${f}
     if [ -d ${pkg} ]
     then
-      b=$(basename ${pkg})
-      if [ "${b}" != "rnmake" -a "${b}" != "rntools" ]
-      then
-        pkglist="${pkglist} ${pkg}"
-      fi
+      pkglist="${pkglist} ${pkg}"
     fi
   done
 

@@ -73,7 +73,7 @@ RNMAKE_PKG_SYS_INCDIRS = $(RNMAKE_OPT_PREFIX)/include
 RNMAKE_PKG_LIB_SUBDIRS = botsense
 
 # Installed Packages Library Subdirectories
-RNMAKE_PKG_LIB_INS_SUBDIRS = rnr botsense
+RNMAKE_PKG_LIB_INS_SUBDIRS = rnr botsense botsense/plugins
 
 # External System and Third Party Library Directories
 RNMAKE_PKG_LD_SYS_LIBDIRS = $(RNMAKE_OPT_PREFIX)/lib

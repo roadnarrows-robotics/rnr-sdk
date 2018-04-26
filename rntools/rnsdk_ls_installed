@@ -49,12 +49,14 @@ color_pre="\033["
 color_post="\033[0m"
 color_red="0;31m"
 color_bold_red="1;31m"
+color_green="0;32m"
 color_yellow="0;33m"
 color_bold_yellow="1;33m"
 color_green="1;32m"
 color_gray="1;30m"
 
 # colors used
+color_info="${color_pre}${color_green}"
 color_warn="${color_pre}${color_yellow}"
 color_error="${color_pre}${color_red}"
 color_fatal="${color_pre}${color_bold_red}"
@@ -62,6 +64,25 @@ color_banner="${color_pre}${color_green}"
 color_dir_banner="${color_pre}${color_gray}"
 color_dir="${color_pre}${color_bold_yellow}"
 color_end=${color_post}
+
+# turnOffColor
+turnOffColor()
+{
+  color_info=
+  color_warn=
+  color_error=
+  color_fatal=
+  color_banner=
+  color_dir_banner=
+  color_dir=
+  color_end=
+}
+
+# showInfo msg [msg...]
+showInfo()
+{
+  printf "${color_info}${*}${color_end}\n"
+}
 
 # showWarning wmsg [wmsg...]
 showWarning()
@@ -109,13 +130,7 @@ while true
 do
   case "$1" in
     --no-color)
-        color_warn=
-        color_error=
-        color_fatal=
-        color_banner=
-        color_dir=
-        color_dir_banner=
-        color_end=
+        turnOffColor
         lsopts="--color=never"
         shift;;
     --arch)     rnmakeArch=$2; shift 2;;

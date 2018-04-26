@@ -99,6 +99,9 @@ clean distclean clobber: rnbanner
 	@$(MAKE) -s -f $(RNMAKE_ROOT)/Rules.mk $(@)
 	$(footer)
 
+.PHONY: deps
+deps:
+
 .PHONY: rnbanner
 rnbanner:
 	$(call printPkgBanner,$(RNMAKE_PKG_FULL_NAME),any,$(MAKECMDGOALS))

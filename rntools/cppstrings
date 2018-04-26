@@ -48,14 +48,35 @@ EOH
 color_pre="\033["
 color_post="\033[0m"
 color_red="0;31m"
+color_bold_red="1;31m"
+color_green="0;32m"
 color_yellow="0;33m"
 color_cyan="0;36m"
 
 # colors used
+color_info="${color_pre}${color_green}"
 color_warn="${color_pre}${color_yellow}"
 color_error="${color_pre}${color_red}"
+color_fatal="${color_pre}${color_bold_red}"
 color_banner="${color_pre}${color_cyan}"
 color_end=${color_post}
+
+# turnOffColor
+turnOffColor()
+{
+  color_info=
+  color_warn=
+  color_error=
+  color_fatal=
+  color_banner=
+  color_end=
+}
+
+# showInfo msg [msg...]
+showInfo()
+{
+  printf "${color_info}${*}${color_end}\n"
+}
 
 # showWarning wmsg [wmsg...]
 showWarning()
@@ -72,7 +93,7 @@ showError()
 # fatal exitcode emsg
 fatal()
 {
-  printf "${argv0}: ${2}\n" >&2
+  printf "${argv0}: ${color_fatal}${2}${color_end}\n" >&2
   exit ${1}
 }
 
@@ -102,12 +123,7 @@ do
   case "$1" in
     -D|-I|-U) cppopts="${cppopts} ${1}${2}"; shift 2;;
     --cpp) cpp=${2}; shift 2;;
-    --no-color)
-        color_warn=
-        color_error=
-        color_banner=
-        color_end=
-        shift;;
+    --no-color) turnOffColor; shift;;
     --help) callHelp; shift;;
 
     --) shift; break;;
@@ -138,7 +154,7 @@ bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-
 # showBanner msg0 msg1
 showBanner()
 {
-	printf "\n\n\n${color_banner}${bold_line}\n"
+	printf "\n${color_banner}${bold_line}\n"
   printf ":: ${1}\n"
   printf ":: ${2}\n"
 	printf "${bold_line}${color_end}\n\n"
