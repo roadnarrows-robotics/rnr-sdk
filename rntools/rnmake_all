@@ -146,7 +146,7 @@ findShared()
   bindir=$(dirname ${cmd})
   prefix=$(dirname ${bindir})
   declare -a paths
-  paths=("./share" "${bindir}/share" "${prefix}/share")
+  paths=("./share" "${bindir}/share" "${prefix}/share/rntools")
   for p in "${paths[@]}"
   do
     f=${p}/${2}

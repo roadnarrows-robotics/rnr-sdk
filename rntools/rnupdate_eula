@@ -718,7 +718,7 @@ Description:
         return templates
       else:
         fatal(8, "{0}: Not a directory".format(templates))
-    euladir = 'share/templates/eula'
+    euladir = 'share/rntools/templates/eula'
     prefix = ''
     if RNMakeEnv['prefix']:
       prefix = RNMakeEnv['prefix']
