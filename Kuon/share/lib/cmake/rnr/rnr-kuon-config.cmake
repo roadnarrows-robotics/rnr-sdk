@@ -34,7 +34,7 @@ find_library(LIBGPIO
 
 find_library(LIBBOTSENSE
   NAMES botsense
-  PATHS /prj/lib /usr/local/lib
+  PATHS /prj/lib/botsense /usr/local/lib/botsense
 )
 
 find_library(LIBDXL

@@ -53,7 +53,10 @@ SWIG_EXTMODS 	= $(addprefix $(SWIG_EXTMOD_DIR)/_,\
 # Examples outputs from python --version:
 # 	Python 2.7.6
 # 	Python 2.7.11+
-PYTHON_VER	= $(shell python --version 2>&1 | sed -e 's/Python //' -e's/\.[0-9]*[\+]*$$//'  )
+#   Python 2.7.15rc1
+# Need major.minor:
+#   2.7
+PYTHON_VER	= $(shell python --version 2>&1 | sed -e 's/Python\s\+\([0-9]\+\.[0-9]\+\).*$$/\1/')
 
 ifeq "$(RNMAKE_ARCH)" "cygwin"
 SWIG_PYLIB	= -lpython$(PYTHON_VER).dll

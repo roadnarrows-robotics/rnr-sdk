@@ -3,7 +3,7 @@ Version: @VERSION@
 Section: devel
 Priority: optional
 Architecture: @ARCH@
-Depends: rnr-librnr-dev (>=1.14.0), rnr-netmsgs-dev (>= 1.2.0), rnr-libserial-dev (>=1.6.0), rnr-i2c-dev (>=1.4.0) 
+Depends: rnr-librnr-dev (>=1.14.0), rnr-netmsgs-dev (>= 1.2.0), rnr-libserial-dev (>=1.6.0), rnr-i2c-dev (>=1.4.0) python-dev (>=2.7.0) swig (>=3.0.0)
 Maintainer: Robin Knight <robin.knight@roadnarrows.com>
 Description: RoadNarows botsense development package.
   The BotSense software package provides a client-server framework for clients 

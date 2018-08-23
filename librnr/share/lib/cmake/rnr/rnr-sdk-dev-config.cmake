@@ -36,7 +36,7 @@ find_library(LIBNETMSGS
 # botsense package
 find_library(LIBBOTSENSE
   NAMES botsense
-  PATHS /prj/lib
+  PATHS /prj/lib/botsense
 )
 
 # appkit packages
