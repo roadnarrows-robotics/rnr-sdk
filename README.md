@@ -1,6 +1,8 @@
 # RoadNarrows Robotic Software Development Kits
 The rnr-sdk git repository holds software packages that support the
-RoadNarrows robotic products, sensors, and intelligent systems.
+RoadNarrows Robotics products, sensors, and intelligent systems.
+
+[![Logo][rnlogo]Wiki][wiki]
 
 ## Access
 Public
@@ -12,4 +14,8 @@ Public
 MIT
 
 ## Status
-In progress to convert private to public. But please, have at it!
+Maintenance
+
+<!-- references and media -->
+[wiki]: https://github.com/roadnarrows-robotics/rnr-sdk/wiki
+[rnlogo]: https://github.com/roadnarrows-robotics/rnr-sdk/wiki/images/RNLogo.png
