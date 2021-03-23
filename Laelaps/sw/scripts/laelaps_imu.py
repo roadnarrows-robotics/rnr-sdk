@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -78,7 +78,7 @@ class usage(Exception):
 ## \brief Print 'try' message'
 #
 def printTry():
-  print "Try '%s --help' for more information." % (Argv0)
+  print("Try '%s --help' for more information." % (Argv0))
 
 #
 ## \brief Print usage error.
@@ -87,14 +87,14 @@ def printTry():
 #
 def printUsageErr(emsg):
   if emsg:
-    print "%s: Error: %s" % (Argv0, emsg)
+    print("%s: Error: %s" % (Argv0, emsg))
   else:
-    print "%s: Error" % (Argv0)
+    print("%s: Error" % (Argv0))
   printTry()
 
 ## \brief Print Command-Line Usage Message.
 def printUsage():
-    print \
+    print(\
 """
 usage: %s [OPTIONS]
        %s --help
@@ -107,7 +107,7 @@ Options and arguments:
 Exit Status:
   Returns exits status of 0 on success. An exit status of 128 indicates usage 
   error.
-"""  % (Argv0, Argv0)
+"""  % (Argv0, Argv0))
  
 #
 ## \brief Get command-line options
@@ -125,7 +125,7 @@ def getOptions(kwargs):
   # parse command-line options
   try:
     opts, args = getopt.getopt(argv[1:], "?h", ['help', ''])
-  except getopt.error, msg:
+  except getopt.error as msg:
     raise usage(msg)
   for opt, optarg in opts:
     if opt in ('-h', '--help', '-?'):
@@ -139,12 +139,12 @@ def getOptions(kwargs):
 #
 try:
   CliArgs = getOptions(CliArgs)
-except usage, e:
+except usage as e:
   printUsageErr(e.msg)
   sys.exit(128)
 
-print "LaeLaps IMU"
-print
+print("LaeLaps IMU")
+print()
 
 imu = Imu.Imu()
 
@@ -152,25 +152,25 @@ imu.open(SysConf.ImuSymName, baudrate=SysConf.ImuBaudRate)
 
 ident = imu.readIdent()
 
-print "IMU Identity:"
-print "  Version:     %u" % (ident['version'])
-print "  Multi-Type:  %u" % (ident['multi_type'])
-print "  MSP Version: %u" % (ident['msp_version'])
-print "  Caps:        0x%04x" % (ident['caps'])
+print("IMU Identity:")
+print("  Version:     %u" % (ident['version']))
+print("  Multi-Type:  %u" % (ident['multi_type']))
+print("  MSP Version: %u" % (ident['msp_version']))
+print("  Caps:        0x%04x" % (ident['caps']))
 
 while True:
   try:
     meas = imu.readRawImu('si', 'si')
 
-    print "accel[x,y,z] (m/s^2)    = %.4f, %.4f, %.4f" % \
-      (meas['accel'][Imu.X], meas['accel'][Imu.Y], meas['accel'][Imu.Z])
-    print "gyro[x,y,z](radians/s)) = %.4f, %.4f, %.4f" % \
-      (meas['gyro'][Imu.X], meas['gyro'][Imu.Y], meas['gyro'][Imu.Z])
+    print("accel[x,y,z] (m/s^2)    = %.4f, %.4f, %.4f" % \
+      (meas['accel'][Imu.X], meas['accel'][Imu.Y], meas['accel'][Imu.Z]))
+    print("gyro[x,y,z](radians/s)) = %.4f, %.4f, %.4f" % \
+      (meas['gyro'][Imu.X], meas['gyro'][Imu.Y], meas['gyro'][Imu.Z]))
 
     rpy = imu.readAttitude('si')
 
-    print "roll,pitch,yaw(radians) = %.4f, %.4f, %.4f" % \
-      (rpy[Imu.ROLL], rpy[Imu.PITCH], rpy[Imu.YAW])
+    print("roll,pitch,yaw(radians) = %.4f, %.4f, %.4f" % \
+      (rpy[Imu.ROLL], rpy[Imu.PITCH], rpy[Imu.YAW]))
 
   except KeyboardInterrupt:
     break

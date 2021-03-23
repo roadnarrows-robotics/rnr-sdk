@@ -166,11 +166,11 @@ def importmodule(filename, modname):
     pass
   try:
     execfile(filename, module.__dict__, module.__dict__)
-  except IOError, err:
+  except IOError as err:
     del sys.modules[modname]
     sys.path = sys.path[1:]
     os.chdir(cwd)
-    raise ImportError, err
+    raise ImportError(err)
   sys.path = sys.path[1:]
   os.chdir(cwd)
   return module

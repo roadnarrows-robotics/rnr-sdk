@@ -173,13 +173,13 @@ class IVTimer:
 
 if __name__ == '__main__':
   def cb(ivt):
-    print 'callback made:', time.time()
+    print('callback made:', time.time())
     if ivt.args[0] == 0:
-      print 'callback args:', ivt.args[0], ivt.args[1], ivt.apple, ivt.grape  
+      print('callback args:', ivt.args[0], ivt.args[1], ivt.apple, ivt.grape)
       ivt.args[0] = 1
     elif ivt.args[0] == 1:
       args, kwargs = ivt.getuserdata()
-      print args, kwargs
+      print(args, kwargs)
       ivt.args[0] = 2
     time.sleep(0.40)
 
@@ -187,15 +187,15 @@ if __name__ == '__main__':
     """ IVTimer Unit Test Main """
     tstart = 1.0
     tiv = 2.0
-    print '\n  press any key to cancel\n'
+    print('\n  press any key to cancel\n')
     iv = IVTimer(tstart, tiv, cb, 0, 6, apple='granny', grape='concorde')
-    print 'starting IVTimer(%3.1f, %3.1f)' % (tstart, tiv)
-    print 'starting time:', time.time()
+    print('starting IVTimer(%3.1f, %3.1f)' % (tstart, tiv))
+    print('starting time:', time.time())
     iv.start()
     key = raw_input()
     iv.cancel()
-    print 'listing threads'
-    print thread.enumerate()
+    print('listing threads')
+    print(thread.enumerate())
 
   # run unit test
   main()

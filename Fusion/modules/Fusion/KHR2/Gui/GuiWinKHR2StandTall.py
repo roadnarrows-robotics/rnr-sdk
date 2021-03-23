@@ -416,7 +416,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
         Return Values:
           None
     """
-    #print "Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'bpimu':
       self.WinUpdateStandTall(**kwargs)
     elif request == 'cfg':
@@ -432,7 +432,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
     elif request == 'stop':
       self.WinUpdateStop()
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
   #--
   def WinUpdateStandTall(self, raw_data=None, cooked_data=None,
@@ -1236,14 +1236,14 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
           filename  - file name to write the data
     """
     fp = open(filename, 'w')
-    print >>fp, '#'
-    print >>fp, '# vKHR2 IMU Waypoints'
+    print('#', file=fp)
+    print('# vKHR2 IMU Waypoints', file=fp)
     ltime = time.localtime()
-    print >>fp, '# %d.%02d.%02d %02d:%02d:%02d' % \
-        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5])
-    print >>fp, '#\n'
-    print >>fp, '# waypoint IMU: (x(mm), y(mm), theta(radians))'
-    print >>fp, 'vKHR2 = [',
+    print('# %d.%02d.%02d %02d:%02d:%02d' % \
+        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5]), file=fp)
+    print('#\n', file=fp)
+    print('# waypoint IMU: (x(mm), y(mm), theta(radians))', file=fp)
+    print('vKHR2 = [', end='', file=fp)
     n = 0
     sep = ''
     for p in self.mBotIMU:
@@ -1253,9 +1253,10 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
         sep += '\n  '
       else:
         sep += ' '
-      print >>fp, '%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+      print('%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+          end='', file=fp)
       n += 1
-    print >>fp, '\n]'
+    print('\n]', file=fp)
     fp.close()
 
   #--
@@ -1314,9 +1315,9 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
         bpfoot_right=self.mBsClientSensors.mBsProxiedDev['bpfoot_right']['i2c'],
         i2c_dev_name=self.mDevNameI2C)
 
-      print "IMU enabled = ", self.mBpSensorState['bpimu']
-      print "Left foot enabled = ", self.mBpSensorState['bpfoot_left']
-      print "Right foot enabled = ", self.mBpSensorState['bpfoot_right']
+      print("IMU enabled = ", self.mBpSensorState['bpimu'])
+      print("Left foot enabled = ", self.mBpSensorState['bpfoot_left'])
+      print("Right foot enabled = ", self.mBpSensorState['bpfoot_right'])
 
   #--
   def CbCfgBsProxyRCB3(self):
@@ -1418,11 +1419,11 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
     if self.mTestGui:
       self.mTestGui = False
       self.mMenuBar['Tools|Go Live']['label'] = 'Test Gui'
-      print 'Going live, testing the Gui is off'
+      print('Going live, testing the Gui is off')
     else:
       self.mTestGui = True
       self.mMenuBar['Tools|Test Gui']['label'] = 'Go Live'
-      print 'Testing the Gui'
+      print('Testing the Gui')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -1719,7 +1720,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
     if rsp:
       rsp[k] = self.IMUADCtoG(rsp[k])
       self.WinQueueRequest('bpimu', **rsp)
-      #print rsp
+      #print(rsp)
 
   #--
   def IMUADCtoG(self, adclist):

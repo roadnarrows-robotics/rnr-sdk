@@ -1020,7 +1020,7 @@ Manufactured by K-Team of Switzerland."""
     try:
       self.mCmd.Open(port, baudrate=baudrate)
       self.SetCommStatus(True)
-    except IOError, err:
+    except IOError as err:
       s = "%s" % err
       self.GSReportErrorStatus(s)
       self.SetCommStatus(False)
@@ -1643,10 +1643,10 @@ if __name__ == '__main__':
     """ Create vHemisson unit test environment. """
     k = vHemisson(debuglevel=level)
     port = '/dev/rfcomm0'
-    print "Opening port %s..." % port
+    print("Opening port %s..." % port)
     k.mCmd.Open(port)
     k.SetCommStatus(True)
-    print "Port %s opened" % port
+    print("Port %s opened" % port)
     k.ExecLoad()
     return k
   
@@ -1654,16 +1654,16 @@ if __name__ == '__main__':
     """ Short run test """
     iv = 0.1
     i = iv
-    print k.BellumGetGoals();
+    print(k.BellumGetGoals())
     state = k.GetRobotState()
     if state == Gluon.EServerState.Ready:
       k.ExecStart()
       k.BellumSetGoals(speed_left=5, speed_right=3) # turn slowly right
     while i < sec:
-      print k.ShadowGet(hvals.HemiSensorMimeTypeSpeedometer)
+      print(k.ShadowGet(hvals.HemiSensorMimeTypeSpeedometer))
       time.sleep(iv)
       i += iv
-    print k.ShadowGet(hvals.HemiSensorMimeTypeSpeedometer)
+    print(k.ShadowGet(hvals.HemiSensorMimeTypeSpeedometer))
     k.ExecUnload()
   
   def main():

@@ -1269,6 +1269,13 @@ int SerDevSetByteSize(int fd, int nByteSize)
 
   LOGDIAG4CALL(_TINT(fd), _TINT(nByteSize));
 
+  // get the current device attributes
+  if( tcgetattr(fd, &tios) == -1 )
+  {
+    LOGSYSERROR("tcgetattr(%d,...) failed", fd);
+    return RC_ERROR;
+  }
+
   // set up data character size (bits)
   tios.c_cflag &= NOTBITS(CSIZE);
   switch( nByteSize )
@@ -1291,6 +1298,13 @@ int SerDevSetByteSize(int fd, int nByteSize)
       return RC_ERROR;
   }
 
+  // set byte size
+  if( tcsetattr(fd, TCSANOW, &tios) == -1 )
+  {
+    LOGSYSERROR("tcseattr(%d,TCSANOW,...)", fd);
+    return RC_ERROR;
+  }
+
   return OK;
 }
 
@@ -1299,6 +1313,13 @@ int SerDevSetParity(int fd, int cParity)
   struct termios  tios;
 
   LOGDIAG4CALL(_TINT(fd), _TCHAR(cParity));
+
+  // get the current device attributes
+  if( tcgetattr(fd, &tios) == -1 )
+  {
+    LOGSYSERROR("tcgetattr(%d,...) failed", fd);
+    return RC_ERROR;
+  }
 
   // set up parity
   tios.c_iflag &= NOTBITS(INPCK|ISTRIP);
@@ -1318,6 +1339,13 @@ int SerDevSetParity(int fd, int cParity)
       LOGERROR("Invalid parity: %c", cParity);
       errno = EINVAL;
       return RC_ERROR;
+  }
+
+  // set parity
+  if( tcsetattr(fd, TCSANOW, &tios) == -1 )
+  {
+    LOGSYSERROR("tcseattr(%d,TCSANOW,...)", fd);
+    return RC_ERROR;
   }
 
   return OK;

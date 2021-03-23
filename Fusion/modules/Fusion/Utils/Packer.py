@@ -109,7 +109,7 @@ class Packer:
     elif ftype == 'zstr':
       return self.PackZStr(fval)
     else:
-      raise TypeError, ftype
+      raise TypeError(ftype)
 
   #--
   def PackU8(self, fval):
@@ -273,7 +273,7 @@ class Packer:
     elif ftype == 'zstr':
       return self.UnpackZStr(msg, pos)
     else:
-      raise TypeError, ftype
+      raise TypeError(ftype)
 
   #--
   def UnpackU8(self, msg, pos=0):
@@ -408,10 +408,10 @@ class Packer:
       if type(byte) == str:
         byte = ord(byte)
       if byte >= 0x20 and byte <= 0x7e:
-        print "%c" % byte,
+        print("%c" % byte, end='')
       else:
-        print "0x%02x" % byte,
-    print
+        print("0x%02x" % byte, end='')
+    print()
 
   #--
   def _error(self, unpackedVals, pos, error_msg):

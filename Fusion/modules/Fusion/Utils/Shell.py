@@ -315,7 +315,7 @@ class Shell:
     try:
       self.mScriptFile = open(scriptFile, 'r')
       self.mIsInteractive = False
-    except IOError, err:
+    except IOError as err:
       return 'err', err
     self.mScriptDepth += 1
     self.RunLoopScript()
@@ -725,13 +725,14 @@ Partial command matching is done to find the unique command substring.
   def PError(self, *args):
     """ Print error to stderr. """
     for arg in args:
-      print >>sys.stderr, arg,
-    print >>sys.stderr
+      print(arg, end='', file=sys.stderr)
+    print('', file=sys.stderr)
 
   #--
   def Print(self, *args):
     """ Print to output stream. """
-    # do not use 'print >>fout' calls - it locks up threads reading pipes
+    # do not use 'print(..., file=fout)' calls - it locks up threads
+    # reading pipes
     sep = ''
     for arg in args:
       if type(arg) == str:
@@ -887,7 +888,7 @@ Partial command matching is done to find the unique command substring.
       try:
         self.mScriptFile = open(self.mOpts['script'], 'r')
         self.mIsInteractive = False
-      except IOError, err:
+      except IOError as err:
         PrintUsageErr("%s" % err)
         return 2
     return 0
@@ -938,7 +939,7 @@ Partial command matching is done to find the unique command substring.
       self.ExitHandler(0, 'Received Keyboard Interurrupt')
     except  EOFError:
       self.ExitHandler(0, 'Received EOF')
-    except IOError, msg:
+    except IOError as msg:
       self.ExitHandler(0, msg)
   
   #--

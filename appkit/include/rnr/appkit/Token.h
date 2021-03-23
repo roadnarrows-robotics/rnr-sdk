@@ -74,6 +74,11 @@ namespace rnr
    */
   namespace cmd
   {
+    // forward declarations in namespace rnr::cmd
+    class Token;
+    std::ostream &operator<<(std::ostream &os, const Token &tok);
+    LogBook &operator<<(LogBook &log, const Token &tok);
+
     //--------------------------------------------------------------------------
     // Token Class
     //--------------------------------------------------------------------------
@@ -203,7 +208,8 @@ namespace rnr
        *
        * \return Reference to output stream.
        */
-      friend std::ostream &operator<<(std::ostream &os, const Token &tok);
+      friend std::ostream &rnr::cmd::operator<<(std::ostream &os,
+                                                const Token  &tok);
 
       /*!
        * \brief Insert object into LogBook pending entry.

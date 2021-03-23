@@ -86,7 +86,7 @@ HekServoHealth::HekServoHealth(const HekServoHealth &src)
   m_uAlarms       = src.m_uAlarms;
 }
 
-HekServoHealth HekServoHealth::operator=(const HekServoHealth &rhs)
+HekServoHealth &HekServoHealth::operator=(const HekServoHealth &rhs)
 {
   m_nServoId      = rhs.m_nServoId;
   m_fTemperature  = rhs.m_fTemperature;
@@ -114,7 +114,7 @@ HekRobotState::HekRobotState(const HekRobotState &src)
   m_vecServoHealth    = src.m_vecServoHealth;
 }
 
-HekRobotState HekRobotState::operator=(const HekRobotState &rhs)
+HekRobotState &HekRobotState::operator=(const HekRobotState &rhs)
 {
   m_eRobotMode        = rhs.m_eRobotMode;
   m_eIsCalibrated     = rhs.m_eIsCalibrated;

@@ -238,7 +238,7 @@ class HemiCmdTts(HemiSerial.HemiSerial):
     # determine initial timeout: assume 180 words/minute
     wordcnt = len(msg.split())
     timeout = wordcnt * 0.33
-    #print timeout
+    #print(timeout)
 
     queries = 0
     #tto = 0.0
@@ -246,7 +246,7 @@ class HemiCmdTts(HemiSerial.HemiSerial):
       if self.TtsCmdQueryState() == TtsStateNotSpeaking: return rsp
       time.sleep(timeout)
       #tto += timeout
-      #print tto
+      #print(tto)
       timeout = 0.5 # new timeout
       queries += 1
 
@@ -273,13 +273,13 @@ class HemiCmdTts(HemiSerial.HemiSerial):
         if msg: msg += ' '
         msg += word
       else:
-        # print msg
+        # print(msg)
         if not self.TtsCmdSaySync(msg):
           return None
         msg = word
 
     if msg:
-      # print msg
+      # print(msg)
       if not self.TtsCmdSaySync(msg):
         return None
 

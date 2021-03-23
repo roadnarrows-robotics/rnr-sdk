@@ -337,7 +337,7 @@ class NetMsgsXmlParser:
     self.Debug(1, "Parsing RN NetMsgs XML file %s" % (self.mFileName))
     try:
       fp = open(self.mFileName, 'r')
-    except IOError, err:
+    except IOError as err:
       self.Error(self.mFileName, err)
     self.Reset()
     self._XmlParser                           = expat.ParserCreate()
@@ -865,57 +865,57 @@ class NetMsgsXmlParser:
     """ Pretty print database dictionary of parsed XML values. """
     now = time.localtime()
 
-    print "#"
+    print("#")
     if comment:
-      print "# %s" % (comment)
-    print "# %s database dump." % (self.__class__)
-    print "# Input XML file: %s" % (self.mFileName)
-    print "# Date: %d.%02d.%02d  %02d:%02d:%02d" % \
+      print("# %s" % (comment))
+    print("# %s database dump." % (self.__class__))
+    print("# Input XML file: %s" % (self.mFileName))
+    print("# Date: %d.%02d.%02d  %02d:%02d:%02d" % \
             (now.tm_year, now.tm_mon, now.tm_mday,
-             now.tm_hour, now.tm_min, now.tm_sec)
-    print "#"
+             now.tm_hour, now.tm_min, now.tm_sec))
+    print("#")
 
     sections = self.mDB.keys()
 
     dbkey = 'netmsgs'
-    print "%s:\n{" % (dbkey)
-    print "  encoding: %s" % (self.mDB[dbkey]['encoding'])
-    print "  endian:   %s" % (self.mDB[dbkey]['endian'])
-    print '}'
+    print("%s:\n{" % (dbkey))
+    print("  encoding: %s" % (self.mDB[dbkey]['encoding']))
+    print("  endian:   %s" % (self.mDB[dbkey]['endian']))
+    print('}')
     sections.remove(dbkey)
 
     dbkey = 'meta'
-    print "%s:\n{" % (dbkey)
-    print "  brief: %s" % (repr(self.mDB[dbkey]['brief']))
-    print "  ns:    %s" % (repr(self.mDB[dbkey]['ns']))
+    print("%s:\n{" % (dbkey))
+    print("  brief: %s" % (repr(self.mDB[dbkey]['brief'])))
+    print("  ns:    %s" % (repr(self.mDB[dbkey]['ns'])))
     for lang in ['h', 'c', 'python']:
-      print "  %s:prologue: %s" % (lang, self.mDB[dbkey][lang]['prologue'])
-      print "  %s:epilogue: %s" % (lang, self.mDB[dbkey][lang]['epilogue'])
-    print '}'
+      print("  %s:prologue: %s" % (lang, self.mDB[dbkey][lang]['prologue']))
+      print("  %s:epilogue: %s" % (lang, self.mDB[dbkey][lang]['epilogue']))
+    print('}')
     sections.remove(dbkey)
 
     dbkey = 'field_types'
-    print "%s:\n{" % (dbkey)
-    print "  %s: %s" % \
-          (nmBase.NMKeyOrder, repr(self.mDB[dbkey][nmBase.NMKeyOrder]))
+    print("%s:\n{" % (dbkey))
+    print("  %s: %s" % \
+          (nmBase.NMKeyOrder, repr(self.mDB[dbkey][nmBase.NMKeyOrder])))
     for ftid in self.mDB[dbkey][nmBase.NMKeyOrder]:
       self.PrettyPrintDBFieldDef(2, ftid, self.mDB[dbkey][ftid])
-    print '}'
+    print('}')
     sections.remove(dbkey)
 
     dbkey = 'msg_types'
-    print "%s:\n{" % (dbkey)
-    print "  %s: %s" % \
-          (nmBase.NMKeyOrder, repr(self.mDB[dbkey][nmBase.NMKeyOrder]))
+    print("%s:\n{" % (dbkey))
+    print("  %s: %s" % \
+          (nmBase.NMKeyOrder, repr(self.mDB[dbkey][nmBase.NMKeyOrder])))
     for msgid in self.mDB[dbkey][nmBase.NMKeyOrder]:
       self.PrettyPrintDBFieldDef(2, msgid, self.mDB[dbkey][msgid])
-    print '}'
+    print('}')
     sections.remove(dbkey)
 
     # application specific db augments
     for dbkey in sections:
-      print "%s:" % (dbkey)
-      print "  %s" % (repr(self.mDB[dbkey]))
+      print("%s:" % (dbkey))
+      print("  %s" % (repr(self.mDB[dbkey])))
   ##
 
   #--
@@ -927,15 +927,15 @@ class NetMsgsXmlParser:
           fields      - mDB[...]['fields'] sub-dictionary.
     """
     dbkey = 'fields'
-    print "%*s%s:" % (indent, '', dbkey)
-    print "%*s{" % (indent, '')
+    print("%*s%s:" % (indent, '', dbkey))
+    print("%*s{" % (indent, ''))
     indent += 2
-    print "%*s%s: %s" % (indent, '', \
-        nmBase.NMKeyOrder, repr(fields[nmBase.NMKeyOrder]))
+    print("%*s%s: %s" % (indent, '', \
+        nmBase.NMKeyOrder, repr(fields[nmBase.NMKeyOrder])))
     for fname in fields[nmBase.NMKeyOrder]:
       self.PrettyPrintDBFieldDef(indent, fname, fields[fname])
     indent -= 2
-    print "%*s}" % (indent, '')
+    print("%*s}" % (indent, ''))
   ##
 
   #--
@@ -949,8 +949,8 @@ class NetMsgsXmlParser:
     sections = fielddef.keys()
     if 'fields' in sections:
         sections.remove('fields')
-    print "%*s%s:" % (indent, '', fname)
-    print "%*s{" % (indent, '')
+    print("%*s%s:" % (indent, '', fname))
+    print("%*s{" % (indent, ''))
     indent += 2
     for k in ['ftype', 'vtype', 'size', 'const', 'min', 'max', 'count']:
       if fielddef.has_key(k):
@@ -961,7 +961,7 @@ class NetMsgsXmlParser:
     if fielddef.has_key('fields'):
       self.PrettyPrintDBFields(indent, fielddef['fields'])
     indent -= 2
-    print "%*s}" % (indent, '')
+    print("%*s}" % (indent, ''))
   ##
 
   #--
@@ -973,14 +973,14 @@ class NetMsgsXmlParser:
           name      - name
           value     - dictionary or other value type.
     """
-    print "%*s%s: " % (indent, '', name),
+    print("%*s%s: " % (indent, '', name), end='')
     if type(val) == dict:
-      print "\n%*s{" % (indent, '')
+      print("\n%*s{" % (indent, ''))
       for k,v in val.iteritems():
         self.PrettyPrintVal(indent+2, k, v)
-      print "%*s}" % (indent, '')
+      print("%*s}" % (indent, ''))
     else:
-      print repr(val)
+      print(repr(val))
   ##
 
 
@@ -1222,7 +1222,7 @@ class NetMsgsXmlParser:
        self._XmlParser.CurrentColumnNumber)
     for a in args:
       wmsg += ": %s" %(a)
-    print wmsg
+    print(wmsg)
   ##
 
   #--
@@ -1289,7 +1289,7 @@ class NetMsgsXmlParser:
        self._XmlParser.CurrentColumnNumber)
     for a in args:
       dmsg += ": %s" %(a)
-    print dmsg
+    print(dmsg)
   ##
 
   #--
@@ -1305,7 +1305,7 @@ class NetMsgsXmlParser:
     dmsg = 'DBG'
     for a in args:
       dmsg += ": %s" %(a)
-    print dmsg
+    print(dmsg)
   ##
 ##
 
@@ -1343,21 +1343,21 @@ if __name__ == '__main__':
           msg   - Error message string.
     """
     if emsg:
-      print "%s: %s" % (_Argv0, emsg)
+      print("%s: %s" % (_Argv0, emsg))
     else:
-      print "%s: error" % (_Argv0)
-    print "Try '%s --help' for more information." % (_Argv0)
+      print("%s: error" % (_Argv0))
+    print("Try '%s --help' for more information." % (_Argv0))
   ##
 
   #--
   def UTPrintUsage():
     """ Print Command-Line Usage Message. """
-    print """
+    print("""
 usage: %s [OPTIONS] <xmlfile>
 
        %s --help
-    """  % (_Argv0, _Argv0)
-    print """Options and arguments:
+    """  % (_Argv0, _Argv0))
+    print("""Options and arguments:
   -d, --debug=<level>       : Debug level. One of: 0 1 2 3
                               Default: 0  (off)
   -o, --overrides=<list>    : XML overrides. List of form name=value,...
@@ -1365,7 +1365,7 @@ usage: %s [OPTIONS] <xmlfile>
                                 encoding, endian, ns, brief
 
   -h, --help                : Display this help and exit.
-    """
+    """)
   ##
 
   #--
@@ -1392,7 +1392,7 @@ usage: %s [OPTIONS] <xmlfile>
       try:
         opts, args = getopt.getopt(argv[1:], "?hd:o:",
             ['help', 'debug=', "overrides=", ''])
-      except getopt.error, msg:
+      except getopt.error as msg:
         raise UTUsage(msg)
       for opt, optarg in opts:
         if opt in ('-h', '--help', '-?'):
@@ -1413,7 +1413,7 @@ usage: %s [OPTIONS] <xmlfile>
               kwargs[name] = value
             except:
               raise UTUsage("%s %s: bad syntax" % (opt, repr(optarg)))
-    except UTUsage, err:
+    except UTUsage as err:
       UTPrintUsageErr(err.msg)
       sys.exit(2)
 
@@ -1443,7 +1443,7 @@ usage: %s [OPTIONS] <xmlfile>
     try:
       xmlNetMsgs.Parse()
     except NetMsgsXmlParserError as inst:
-      print "Error: %s" % (inst)
+      print("Error: %s" % (inst))
       return 8
 
     xmlNetMsgs.PrettyPrintDB()

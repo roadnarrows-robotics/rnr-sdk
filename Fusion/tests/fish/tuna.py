@@ -5,4 +5,4 @@ class Tuna:
   def __init__(i=99):
     self.i = i
   def CanOfTuna(j):
-    print self.i * j
+    print(self.i * j)

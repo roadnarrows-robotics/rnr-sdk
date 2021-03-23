@@ -338,7 +338,7 @@ def GuiWinShell(master, shell, cbDestroy=None, title='GUI Shell',
 #--
 def ShellSignalHandler(signal, eventmsg):
   """ Default SIGINT Shell Interrupt Handler """
-  #print >>sys.stderr, 'SignalHandler', signal
+  #print('SignalHandler', signal, file=sys.stderr)
   SendQuit(4)
   sys.exit(0)
 
@@ -447,7 +447,7 @@ class GuiTerm(GuiWinText.GuiWinText):
         pass
       th.join(1.0)
     if th.isAlive():
-      print >>sys.stderr, '%s did not die' % self.mShellId
+      print('%s did not die' % self.mShellId, file=sys.stderr)
 
     # kill stdout thread if necessary
     if thread.currentThread().getName() != 'stdout':
@@ -457,7 +457,7 @@ class GuiTerm(GuiWinText.GuiWinText):
         info['fout'].flush()
         th.join(1.0)
       if th.isAlive():
-        print >>sys.stderr, 'StdoutThread did not die'
+        print('StdoutThread did not die', file=sys.stderr)
 
     # close up I/O
     info['fin'].close()
@@ -482,15 +482,15 @@ class GuiTerm(GuiWinText.GuiWinText):
         Note: Cannot destroy window in this thread under Window. 
               Must do it in the main thread, so start a timed callback.
     """
-    #print >>sys.stderr, 'stdout thread: started'
+    #print('stdout thread: started', file=sys.stderr)
     while not self.mDoQuit:
       #
       # read shell output
       #
       try:
         shOut = os.read(self.mFdShell2Gui, 80)
-      except (IOError, OSError), msg:
-        print >>sys.stderr, 'Stdoutthread: %s' % msg
+      except (IOError, OSError) as msg:
+        print('Stdoutthread: %s' % msg, file=sys.stderr)
         self.after(100, self.destroy)
         return
 
@@ -543,12 +543,12 @@ class GuiTerm(GuiWinText.GuiWinText):
     """ Stdin Key Press Callback. Processes key press to GUI display and 
         to shell's stdin.
     """
-    #print >>sys.stderr, 'keypress', event.keycode, event.keysym, \
-    #                                event.keysym_num
+    #print('keypress', event.keycode, event.keysym, event.keysym_num,
+    #        file=sys.stderr)
     textWidget = self.GetTextWidget()
     textWidget.mark_set(tk.INSERT, tk.END)  # move to end to echo input
     guistr, shstr = self.mKeySymMapper(event.keysym, event.keysym_num)
-    #print >>sys.stderr, '  maps to', repr(guistr), repr(shstr)
+    #print('  maps to', repr(guistr), repr(shstr), file=sys.stderr)
     if guistr:
       self.TextAdd(guistr)
     if not shstr:
@@ -569,7 +569,7 @@ class GuiTerm(GuiWinText.GuiWinText):
       #rl.insert_text(shstr)
       #rl.redisplay()
       #s = rl.get_line_buffer()
-      #print >>sys.stderr, 'rl.linebuf', repr(s)
+      #print('rl.linebuf', repr(s), file=sys.stderr)
     else:
       self.mStdinBuf += shstr
       #rl.insert_text(shstr)
@@ -583,8 +583,8 @@ class GuiTerm(GuiWinText.GuiWinText):
   #--
   def CbStdinRelease(self, event):
     """ Stdin Key Release Callback. """
-    #print >>sys.stderr, 'keyrelease', event.keycode, event.keysym, \
-    #                                  event.keysym_num
+    #print('keyrelease', event.keycode, event.keysym, event.keysym_num,
+              #file=sys.stderr)
     if event.keysym == 'Control_L' or event.keysym == 'Control_R':
       self.mKeySymMapper = self._keysymDefault
 
@@ -663,7 +663,7 @@ class GuiTerm(GuiWinText.GuiWinText):
           Return 'continue' for normal escape sequences. Return 'quit'
           for the quit escape sequence.
     """
-    #print >>sys.stderr, repr(self.mEscSeq)
+    #print(repr(self.mEscSeq), file=sys.stderr)
     if not self.mEscSeq:
       return 'continue'
     self.mEscSeq = self.mEscSeq[:-1]    # strip ']'
@@ -692,7 +692,7 @@ class GuiTerm(GuiWinText.GuiWinText):
     elif self.mEscSeq.find(_EscSeqDftStyle) == 0:
       self.mCurTag = 'default'
     else:
-      print >>sys.stderr, 'unknown escape sequence:', repr(self.mEscSeq)
+      print('unknown escape sequence:', repr(self.mEscSeq), file=sys.stderr)
     return 'continue'
 
 
@@ -716,25 +716,25 @@ if __name__ == '__main__':
   
     def Run(self):
       """ Run Loop for User Interactive Shell """
-      print >>self.mFout, "    Simple Test Command Shell"
-      print >>self.mFout, "(type 'help' for list of commands)"
-      print >>self.mFout, ""
-      print >>sys.stderr, 'mainloop'
+      print("    Simple Test Command Shell", file=self.mFout)
+      print("(type 'help' for list of commands)", file=self.mFout)
+      print("", file=self.mFout)
+      print('mainloop', file=sys.stderr)
       n = 0
       while True:
         ps1 = '%d$ ' % n
         try:
           cmd = utils.user_input(ps1, self.mFin, self.mFout)
         except KeyboardInterrupt:
-          print >>sys.stderr, 'interrupt'
+          print('interrupt', file=sys.stderr)
           return 2
         except EOFError:
-          print >>sys.stderr, 'eof'
+          print('eof', file=sys.stderr)
           return 0
-        except OSError, err:
-          print >>sys.stderr, err
+        except OSError as err:
+          print(err, file=sys.stderr)
           return 4
-        print >>sys.stderr, 'cmd', repr(cmd)
+        print('cmd', repr(cmd), file=sys.stderr)
         args = cmd.split()
         if not args:
           pass
@@ -754,15 +754,15 @@ if __name__ == '__main__':
         elif args[0] == 'set':
           SendSetStyle(args[1])
         elif args[0] == 'help':
-          print >>self.mFout, """Help:
+          print("""Help:
     add <name> <attr> <val>... - add new style with fg and bg colors
     del <name>                 - delete style
     dft                        - set current style to default
     set <name>                 - set current style
     help                       - this output
-    quit                       - quit shell"""
+    quit                       - quit shell""", file=self.mFout)
         else:
-          print >>self.mFout, 'echo', repr(cmd)
+          print('echo', repr(cmd), file=self.mFout)
         n += 1
   
   #--

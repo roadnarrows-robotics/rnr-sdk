@@ -364,7 +364,7 @@ class HemiRawShell(Shell.Shell):
       try:
         # establish communication with robot, change as needed
         self.mRobotCmds.Open(self.mOpts['port'])
-      except IOError, err:
+      except IOError as err:
         PrintUsageErr("%s" % err)
         return 2
 
@@ -414,22 +414,22 @@ class Usage(Exception):
 def PrintUsageErr(emsg):
   """ Print Error Usage Message. """
   if emsg:
-    print "%s: %s" % (_Argv0, emsg)
+    print("%s: %s" % (_Argv0, emsg))
   else:
-    print "%s: error" % (_Argv0)
-  print "Try '%s --help' for more information." % (_Argv0)
+    print("%s: error" % (_Argv0))
+  print("Try '%s --help' for more information." % (_Argv0))
 
 #--
 def PrintUsage():
   """ Print Shell Command-Line Usage Message """
-  print "usage: %s [options]..." % (_Argv0)
-  print "%s Command Shell." % (_ShName)
-  print """Options and arguments:
+  print("usage: %s [options]..." % (_Argv0))
+  print("%s Command Shell." % (_ShName))
+  print("""Options and arguments:
   -p, --port <port>          : Open on this serial port.
   -s, --script <file>        : Read commands from file.
 
   -h, --help                 : Display this help and exit.
-  """
+  """)
   
 #--
 def main(shclass=None, argv=None, **kwargs):
@@ -449,7 +449,7 @@ def main(shclass=None, argv=None, **kwargs):
     try:
       opts, args = getopt.getopt(argv[1:], "?hs:p:b:",
                                 ['help', 'script=', 'port=', 'baudrate='])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise Usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -459,7 +459,7 @@ def main(shclass=None, argv=None, **kwargs):
         kwargs['script'] = optarg
       elif opt in ('-p', '--port'):
         kwargs['port'] = optarg
-  except Usage, err:
+  except Usage as err:
     PrintUsageErr(err.msg)
     return 2
 

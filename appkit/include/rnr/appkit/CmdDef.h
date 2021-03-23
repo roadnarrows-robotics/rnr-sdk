@@ -78,6 +78,10 @@ namespace rnr
    */
   namespace cmd
   {
+    // forward declarations in namespace rnr::cmd
+    class CmdDef;
+    std::ostream &operator<<(std::ostream &os, const CmdDef &cmddef);
+
     //--------------------------------------------------------------------------
     // CmdDef Class
     //--------------------------------------------------------------------------
@@ -217,7 +221,8 @@ namespace rnr
        *
        * \return Reference to output stream.
        */
-      friend std::ostream &operator<<(std::ostream &os, const CmdDef &cmddef);
+      friend std::ostream &rnr::cmd::operator<<(std::ostream &os,
+                                                const CmdDef &cmddef);
 
       //
       // Friends

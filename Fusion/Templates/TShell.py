@@ -515,12 +515,13 @@ Partial command matching is done to find the unique command substring.
   def PError(self, *args):
     """ Print error to stderr. """
     for arg in args:
-      print >>sys.stderr, arg,
-    print >>sys.stderr
+      print(arg, file=sys.stderr, end='')
+    print('', file=sys.stderr)
 
   def Print(self, *args):
     """ Print to output stream. """
-    # do not use 'print >>fout' calls - it locks up threads reading pipes
+    # do not use 'print(..., file=sys.stdout)' calls - locks up threads
+    # reading pipes
     for arg in args:
       if type(arg) == str:
         self.mFout.write(arg+' ')
@@ -854,17 +855,17 @@ class Usage(Exception):
 def PrintUsageErr(emsg):
   """ Print Error Usage Message. """
   if emsg:
-    print "%s: %s" % (_Argv0, emsg)
+    print("%s: %s" % (_Argv0, emsg))
   else:
-    print "%s: error" % (_Argv0)
-  print "Try '%s --help' for more information." % (_Argv0)
+    print("%s: error" % (_Argv0))
+  print("Try '%s --help' for more information." % (_Argv0))
 
 #--
 def PrintUsage():
   """ Print Shell Command-Line Usage Message """
-  print "usage: %s [options]..." % (_Argv0)
-  print "USERSHELL %s Command Shell." % (_ShName)
-  print """Options and arguments:
+  print("usage: %s [options]..." % (_Argv0))
+  print("USERSHELL %s Command Shell." % (_ShName))
+  print("""Options and arguments:
   -p, --port <port>          : Open on this serial port.
   -b, --baudrate <baudrate>  : Open with this baudrate.
   -s, --script <file>        : Read commands from file.
@@ -874,7 +875,7 @@ def PrintUsage():
 Environment variables:
 PYTHONPATH                   : a ':'-seperated list of additional directories
                                to search for python packages and modules.
-  """
+  """)
   
 #--
 def main(shclass=None, argv=None, **kwargs):

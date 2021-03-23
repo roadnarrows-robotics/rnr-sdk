@@ -251,9 +251,9 @@ if __name__ == '__main__':
             }
     dlg = GuiDlgKHR2ProxySimple(root, lastSettings=last)
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

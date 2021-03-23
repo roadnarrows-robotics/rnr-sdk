@@ -282,13 +282,13 @@ class GuiDlgOpticFlowOpt(tkSimpleDialog.Dialog):
     for field in group:
       try:
         val = field['var'].get()
-      except (ValueError, TypeError), msg:
+      except (ValueError, TypeError) as msg:
         self.ShowStatus('Field %s: %s' % (repr(field['label']), msg), 
             fg=gt.ColorFgStatusError)
         return False
       try:
         val = field['store'](val)
-      except (ValueError, TypeError), msg:
+      except (ValueError, TypeError) as msg:
         self.ShowStatus('Field %s: %s' % (repr(field['label']), msg), 
             fg=gt.ColorFgStatusError)
         return False
@@ -350,9 +350,9 @@ if __name__ == '__main__':
             'ExecStepSize': 1.0}
     dlg = GuiDlgOpticFlowOpt(root, dfts)
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

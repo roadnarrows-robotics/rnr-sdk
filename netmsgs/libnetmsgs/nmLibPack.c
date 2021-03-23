@@ -1564,8 +1564,14 @@ int nmUnpackF64(byte_t buf[], size_t bufSize, double *pVal, NMEndian_T eEndian)
         break;
     }
 
-    d.ieee.negative   = ((uMSB >> IEEE754_F64_SIGN_SHIFT)
-                            & IEEE754_F64_SIGN_MASK)? 1: 0;
+    if( ((uMSB >> IEEE754_F64_SIGN_SHIFT) & IEEE754_F64_SIGN_MASK) )
+    {
+      d.ieee.negative   = 1;
+    }
+    else
+    {
+      d.ieee.negative   = 0;
+    }
     d.ieee.exponent   = (uMSB >> IEEE754_F64_EXPONENT_SHIFT)
                             & IEEE754_F64_EXPONENT_MASK;
     d.ieee.mantissa0  = (uMSB >> IEEE754_F64_MANTISSA0_SHIFT)

@@ -414,7 +414,7 @@ class GuiDlgPlugin(tkSimpleDialog.Dialog):
     # Try importing plugin module
     try:
       plugin = utils.importmodule(pluginpath, modbase)
-    except ImportError, err:
+    except ImportError as err:
       self.ShowStatus('%s: %s' % (self.mVarDir.get(), err),
                       fg=gt.ColorFgStatusError)
       return False
@@ -453,7 +453,7 @@ class GuiDlgPlugin(tkSimpleDialog.Dialog):
     pluginpath = self.mVarDir.get() + os.path.sep + '__plugins__.py'
     try:
       plugin = utils.importmodule(pluginpath, '__plugins__')
-    except ImportError, err:
+    except ImportError as err:
       self.ShowStatus('%s: %s' % (self.mVarDir.get(), err),
                       fg=gt.ColorFgStatusError)
       return
@@ -617,10 +617,10 @@ if __name__ == '__main__':
                '$HOME/src', '~/src/brains'],
       title='vRobot Plugins')
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
       help(dlg.result['pluginMod'])
     else:
-      print 'cancel'
+      print('cancel')
 
   # run unit test
   main()

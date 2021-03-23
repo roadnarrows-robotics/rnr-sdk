@@ -166,7 +166,7 @@ HekRobotJoint::~HekRobotJoint()
 {
 }
 
-HekRobotJoint HekRobotJoint::operator=(const HekRobotJoint &rhs)
+HekRobotJoint &HekRobotJoint::operator=(const HekRobotJoint &rhs)
 {
   int     i;
 
@@ -256,7 +256,7 @@ HekJointState::HekJointState(const HekJointState &src)
   }
 }
 
-HekJointState HekJointState::operator=(const HekJointState &rhs)
+HekJointState &HekJointState::operator=(const HekJointState &rhs)
 {
   m_strName         = rhs.m_strName;
   m_eOpState        = rhs.m_eOpState;

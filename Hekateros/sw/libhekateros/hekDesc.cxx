@@ -102,6 +102,7 @@ bool HekDesc::hasServo(int nServoId)
   }
   else if( m_descEE.hasServo(nServoId) )
   {
+    return true;
   }
   else
   {

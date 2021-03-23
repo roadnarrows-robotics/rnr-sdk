@@ -76,7 +76,7 @@ LaeSimplePathFeedback::LaeSimplePathFeedback(const LaeSimplePathFeedback &src)
   }
 }
 
-LaeSimplePathFeedback LaeSimplePathFeedback::operator=(
+LaeSimplePathFeedback &LaeSimplePathFeedback::operator=(
                                               const LaeSimplePathFeedback &rhs)
 {
   for(int i = 0; i < TrajNumOf; ++i)
@@ -131,7 +131,7 @@ LaeWaypoint::LaeWaypoint(const LaeWaypoint &src)
   m_fAcceleration = src.m_fAcceleration;
 }
 
-LaeWaypoint LaeWaypoint::operator=(const LaeWaypoint &rhs)
+LaeWaypoint &LaeWaypoint::operator=(const LaeWaypoint &rhs)
 {
   m_strName       = rhs.m_strName;
   m_timeStart     = rhs.m_timeStart;
@@ -203,7 +203,7 @@ LaePathFeedback::LaePathFeedback(const LaePathFeedback &src)
   }
 }
 
-LaePathFeedback LaePathFeedback::operator=(const LaePathFeedback &rhs)
+LaePathFeedback &LaePathFeedback::operator=(const LaePathFeedback &rhs)
 {
   for(int i = 0; i < TrajNumOf; ++i)
   {

@@ -22,7 +22,7 @@ class sb(tk.Frame):
     self.can.bind('<Configure>', self.resize)
 
   def configure(self, cnf=None, **kw):
-    print 'configure', repr(kw)
+    print('configure', repr(kw))
     tk.Frame.configure(self, cnf=cnf, **kw)
     width = kw.get('width', 0)
     if width == 0:
@@ -37,8 +37,8 @@ class sb(tk.Frame):
         self.pad['width'] = width-self.fixedwidth
 
   def resize(self, event):
-    print 'resize self=%dx%d' % (event.width, event.height)
-    print 'resize', 'master=', self.master.winfo_geometry()
+    print('resize self=%dx%d' % (event.width, event.height))
+    print('resize', 'master=', self.master.winfo_geometry())
     width = gut.geometry(self.master)[gut.W]
     self.configure(width=width)
   def x(self):

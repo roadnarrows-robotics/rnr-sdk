@@ -123,7 +123,7 @@ class GuiDlgSaveAs(tkFileDialog.SaveAs):
     try:
       self.mSaveCmd(self.mSaveFile)
       return {'status':'saved', 'filename':self.mSaveFile, 'errmsg':None}
-    except IOError, err:
+    except IOError as err:
       gut.ErrorBox(err)
       return {'status':'error', 'filename':self.mSaveFile, 'errmsg':err}
 
@@ -143,9 +143,9 @@ if __name__ == '__main__':
                              ('All files', '*')],
                   defaultextension='.txt')
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

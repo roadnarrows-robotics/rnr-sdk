@@ -214,16 +214,16 @@ if __name__ == '__main__':
   def PrintUsageErr(emsg):
     """ Print Error Usage Message. """
     if emsg:
-      print "%s: %s" % (_Argv0, emsg)
+      print("%s: %s" % (_Argv0, emsg))
     else:
-      print "%s: error" % (_Argv0)
-    print "Try '%s --help' for more information." % (_Argv0)
+      print("%s: error" % (_Argv0))
+    print("Try '%s --help' for more information." % (_Argv0))
    
   #--
   def PrintUsage():
     """ Print Command-Line Usage Message """
-    print "usage: %s [options]..." % (_Argv0)
-    print """Options and arguments:
+    print("usage: %s [options]..." % (_Argv0))
+    print("""Options and arguments:
     -c, --csv <file>     : Heart2Heart comma separated values file to convert.
     -s, --script <file>  : Fusion KHR1 converted output script file.
     -d, --desc <string>  : Description string.
@@ -232,7 +232,7 @@ if __name__ == '__main__':
                            script.
   
     -h, --help           : Display this help and exit.
-    """
+    """)
      
   #--
   def main():
@@ -250,7 +250,7 @@ if __name__ == '__main__':
       try:
         opts, args = getopt.getopt(argv[1:], "?hs:c:d:m:",
                         ['help', 'script=', 'csv=', 'desc=', 'motion='])
-      except getopt.error, msg:
+      except getopt.error as msg:
         raise Usage(msg)
       for opt, optarg in opts:
         if opt in ('-h', '--help', '-?'):
@@ -264,7 +264,7 @@ if __name__ == '__main__':
           desc = optarg
         elif opt in ('-m', '--motion'):
           motion = int(optarg)
-    except Usage, err:
+    except Usage as err:
       PrintUsageErr(err.msg)
       return 2
    

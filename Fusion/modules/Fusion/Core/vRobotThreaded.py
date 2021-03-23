@@ -554,7 +554,7 @@ if __name__ == '__main__':
 
   def tsthelp():
     for k in execs.iterkeys():
-      print k
+      print(k)
 
   def togglecomm():
     if vr.IsCommUp():
@@ -578,7 +578,7 @@ if __name__ == '__main__':
 
   def main():
     """ vRobotThreaded Test Main """
-    print "Enter executive ('help' for list of commands)"
+    print("Enter executive ('help' for list of commands)")
     while not doquit:
       rsp = raw_input('exec> ')
       for k, op in execs.iteritems():

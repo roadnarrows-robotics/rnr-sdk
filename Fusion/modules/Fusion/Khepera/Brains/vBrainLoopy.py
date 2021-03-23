@@ -421,7 +421,7 @@ if __name__ == '__main__':
     if state == Gluon.EServerState.Ready:
       k.ExecStart()
     while i < sec:
-      print 'thinking', i
+      print('thinking', i)
       time.sleep(iv)
       i += iv
     k.ExecUnload()

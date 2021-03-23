@@ -168,7 +168,8 @@ public:
   virtual int Open(const char *sSerialDevName, int nBaudRate)
   {
     DynaCommBotSense(sSerialDevName, nBaudRate, BSPROXY_URI_HOSTNAME_DFT,
-                    BSPROXY_LISTEN_PORT_DFT);
+                            BSPROXY_LISTEN_PORT_DFT);
+    return m_bIsOpen? DYNA_OK: DYNA_ECODE_BADF;
   }
 
   /*!

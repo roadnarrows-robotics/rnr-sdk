@@ -113,9 +113,9 @@ class KHR1Serial:
       self._mHndSer = ser.Serial(port=port, baudrate=115200,
                                  bytesize=8, parity='N', stopbits=1,
                                  timeout=0.25, writeTimeout=2.0)
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       self.mErr.SetErrGeneral(err.__str__())
-      raise IOError, err
+      raise IOError(err)
 
     if __debug__: self.mDbg.d5print("open %s 115200-8-N-1:" % port)
 
@@ -221,7 +221,7 @@ class KHR1Serial:
     """
     try:
       self._mHndSer.flushInput()
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: flush input on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -230,7 +230,7 @@ class KHR1Serial:
     try:
       while self._mHndSer.read(16):
         pass
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: read on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -245,7 +245,7 @@ class KHR1Serial:
     """
     try:
       self._mHndSer.flushOutput()
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: flush output on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -399,7 +399,7 @@ class KHR1Serial:
       if __debug__: self.mDbg.d5print("write: %s" % self.BinToHexStr(sOut))
       self._mHndSer.flush()
       return True
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       self.mErr.SetErrGeneral('Bad write: ' + err.__str__())
       return False
 
@@ -430,7 +430,7 @@ class KHR1Serial:
         if __debug__:
           self.mDbg.d5print("try=%d read(%d): rsp: %s" % \
               (tries, rspLen, self.BinToHexStr(sIn)))
-      except (ser.SerialException, OSError), err:
+      except (ser.SerialException, OSError) as err:
         self.mErr.SetErrGeneral('Bad read: ' + err.__str__())
         return None
 
@@ -496,7 +496,7 @@ if __name__ == '__main__':
     '5': ['Set Current Position as Home Position', [0xfb, 0x00], 2, 'ack'],
   }
 
-  print "Enter KHR-1 commands ('quit' to quit, 'help' for command list)"
+  print("Enter KHR-1 commands ('quit' to quit, 'help' for command list)")
   while True:
     ans = raw_input('cmd> ')
     if not ans:
@@ -508,17 +508,17 @@ if __name__ == '__main__':
       khr1ser.Close()
       break
     elif 'help'.find(args[0]) == 0:
-      print 'Commands'
-      print '--------'
-      print 'open <port> - Open serial connection'
-      print 'flush - Flush input'
-      print 'close - close connection'
-      print 'help - Print this help'
-      print 'quit - Quit test'
+      print('Commands')
+      print('--------')
+      print('open <port> - Open serial connection')
+      print('flush - Flush input')
+      print('close - close connection')
+      print('help - Print this help')
+      print('quit - Quit test')
       cmds = cmdlist.keys()
       cmds.sort()
       for k in cmds:
-        print "%s - %s" % (k, cmdlist[k][0])
+        print("%s - %s" % (k, cmdlist[k][0]))
     elif 'open'.find(args[0]) == 0:
       khr1ser.Open(args[1])
     elif 'flush'.find(args[0]) == 0:
@@ -533,8 +533,8 @@ if __name__ == '__main__':
           khr1ser.ClearErrStr()
           rsp = khr1ser.SendCmd(v[1], v[2], v[3])
           if rsp:
-            print khr1ser.BinToHexStr(rsp)
+            print(khr1ser.BinToHexStr(rsp))
           else:
-            print khr1ser.GetErrStr()
+            print(khr1ser.GetErrStr())
       if not gotcmd:
-        print "Huh?"
+        print("Huh?")

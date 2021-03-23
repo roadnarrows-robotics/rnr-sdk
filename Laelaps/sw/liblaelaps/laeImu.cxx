@@ -74,7 +74,7 @@ using namespace sensor::imu::msp;
 // Quaternion Class
 //------------------------------------------------------------------------------
 
-Quaternion Quaternion::operator=(const Quaternion &rhs)
+Quaternion &Quaternion::operator=(const Quaternion &rhs)
 {
   m_x = rhs.m_x;
   m_y = rhs.m_y;

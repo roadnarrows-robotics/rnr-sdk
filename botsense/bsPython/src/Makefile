@@ -51,6 +51,9 @@ SWIG_FILES 				= BotSenseCore.i
 SWIG_EXTMOD_DIR 	= ../modules/BotSense
 SWIG_EXTMOD_LIBS 	= -lbotsense -lrnr_netmsgs -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 all-extmod: swig-all
 
 # Clean extension module intermediates

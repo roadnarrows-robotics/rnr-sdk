@@ -1780,6 +1780,8 @@ int LaeKinActionVelocity::plan()
   {
     m_eActionState = ActionStateIdle;
   }
+
+  return LAE_OK;
 }
 
 int LaeKinActionVelocity::execute()
@@ -2153,7 +2155,9 @@ int LaeKinActionTwist::plan()
   if( m_eActionState != ActionStateExecute )
   {
     m_eActionState = ActionStateIdle;
-  }
+  } 
+
+  return LAE_OK;
 }
 
 int LaeKinActionTwist::execute()

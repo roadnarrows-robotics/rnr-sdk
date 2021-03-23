@@ -191,7 +191,7 @@ class Pid:
     """
 
     if self.trace:
-      print '%6.2fs: setpoint=%.3f, pv=%.3f' % (self.t_accum, setpoint, pv)
+      print('%6.2fs: setpoint=%.3f, pv=%.3f' % (self.t_accum, setpoint, pv))
 
     if self.Action == 'reverse':
       e_p = self.Wp * setpoint - pv
@@ -219,8 +219,8 @@ class Pid:
       self.cv = self.cv_max
 
     if self.trace:
-      print '        err=%.3f, pid=%.3f, output=%.3f' % \
-          (e_i, u, self.cv)
+      print('        err=%.3f, pid=%.3f, output=%.3f' % \
+          (e_i, u, self.cv))
 
     return self.cv
 
@@ -272,7 +272,7 @@ if __name__ == '__main__':
     pid = Pid(CbMsdInput, CbMsdPlant, 0.0, dt,
                 kp, 0.0, 0.0,
                 action='direct', trace=True)
-    print "Press <enter> to terminate..."
+    print("Press <enter> to terminate...")
     pid.start()
     raw_input()
     pid.cancel()

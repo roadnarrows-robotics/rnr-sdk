@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -85,7 +85,7 @@ class Sanity():
     # TODO enable here
     #powered = Gpio.areMotorCtlrsPowered()
     #if powered == True:
-    #  print "Warning: Motor controllers may be in use by another application."
+    #  print("Warning: Motor controllers may be in use by another application.")
     #else:
     #  Gpio.enableMotorCtlrsPower(True)
     #  time.sleep(0.5)
@@ -97,12 +97,12 @@ class Sanity():
     device  = SysConf.MotorCtlrDevName
     baud    = SysConf.MotorCtlrBaudRate
     #cs      = SysConf.MotorCtlrChipSelectGpio  # deprecated
-    print "Opening motor controller serial interface %s@%d" % (device, baud)
+    print("Opening motor controller serial interface %s@%d" % (device, baud))
     try:
       motorctlr.open(device, baud)
     except RoboClaw.RoboClawException as inst:
-      print 'Error:', inst.message
-      print
+      print('Error:', inst.message)
+      print()
 
     tf = True
 
@@ -117,10 +117,10 @@ class Sanity():
     return tf
 
   def saneMotorCtlr(self, motorctlr, key, addr):
-    print
-    print BigSep
-    print "*** Restore Laelaps %s motor controller sanity ***" % (key)
-    print
+    print()
+    print(BigSep)
+    print("*** Restore Laelaps %s motor controller sanity ***" % (key))
+    print()
 
     # defaults (very weak PID)
     #Kp    = RoboClaw.ParamVelPidPDft
@@ -140,48 +140,48 @@ class Sanity():
     try:
       motorctlr.setMainBatterySettings(addr, 60, 340)   # 6.0V - 34.0V
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set main battery cutoffs.", inst.message
+      print("Failed to set main battery cutoffs.", inst.message)
       return False
     try:
       motorctlr.setLogicBatterySettings(addr, 55, 340)    # 5.5V - 34.0V
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set logic battery cutoffs.", inst.message
+      print("Failed to set logic battery cutoffs.", inst.message)
       return False
     try:
       motorctlr.setM1EncoderMode(addr, 0)
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set motor 1 encoder mode to quadrature.", inst.message
+      print("Failed to set motor 1 encoder mode to quadrature.", inst.message)
       return False
     try:
       motorctlr.setM2EncoderMode(addr, 0)
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set motor 2 encoder mode to quadrature.", inst.message
+      print("Failed to set motor 2 encoder mode to quadrature.", inst.message)
       return False
     try:
       motorctlr.setM1Pidq(addr, Kp, Ki, Kd, Qpps)
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set motor 1 velocity PID.", inst.message
+      print("Failed to set motor 1 velocity PID.", inst.message)
       return False
     try:
       motorctlr.setM2Pidq(addr, Kp, Ki, Kd, Qpps)
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set motor 2 velocity PID:", inst.message
+      print("Failed to set motor 2 velocity PID:", inst.message)
       return False
     try:
       motorctlr.setM1MaxCurrentLimit(addr, maxAmps)
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set motor 1 maximum current.", inst.message
+      print("Failed to set motor 1 maximum current.", inst.message)
       return False
     try:
       motorctlr.setM2MaxCurrentLimit(addr, maxAmps)
     except RoboClaw.RoboClawException as inst:
-      print "Failed to set motor 2 maximum current.", inst.message
+      print("Failed to set motor 2 maximum current.", inst.message)
       return False
     # Note: write does not seem to work on controller
     #try:
     #  motorctlr.writeSettings(addr)
     #except RoboClaw.RoboClawException as inst:
-    #  print "Failed to save to EEPROM:", inst.message
+    #  print("Failed to save to EEPROM:", inst.message)
     #  return False
     return True
 
@@ -230,14 +230,14 @@ class application():
   #
   def printUsageErr(self, emsg):
     if emsg:
-      print "%s: Error: %s" % (self._Argv0, emsg)
+      print("%s: Error: %s" % (self._Argv0, emsg))
     else:
-      print "%s: Error" % (self._Argv0)
-    print "Try '%s --help' for more information." % (self._Argv0)
+      print("%s: Error" % (self._Argv0))
+    print("Try '%s --help' for more information." % (self._Argv0))
 
   ## \brief Print Command-Line Usage Message.
   def printUsage(self):
-    print \
+    print(\
 """
 usage: %s [OPTIONS] SUBSYS [SUBSYS ...]
        %s --help
@@ -253,7 +253,7 @@ SUBSYS            : Laelaps subsystem. One of: motors
 Exit Status:
   On success, 0. An exit status of 128 indicates usage 
   error.
-"""  % (self._Argv0, self._Argv0)
+"""  % (self._Argv0, self._Argv0))
  
   #
   ## \brief Get command-line options
@@ -278,7 +278,7 @@ Exit Status:
     try:
       opts, args = getopt.getopt(argv[1:], "?h",
           ['help', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -311,8 +311,8 @@ Exit Status:
     # parse command-line options and arguments
     try:
       self.kwargs = self.getOptions(argv, **kwargs)
-    except usage, e:
-      print e.msg
+    except usage as e:
+      print(e.msg)
       return 128
     
     sane = Sanity(self.kwargs)

@@ -507,7 +507,7 @@ Manufactured by K-Team of Switzerland."""
                           unitsG=ini.IniGet(section, 'unitsG'),
                           unitsR=ini.IniGet(section, 'unitsR'))
       return
-    except ValueError, msg:
+    except ValueError as msg:
       self.GSReportErrorStatus('GP2D120 sensor: ' + msg)
       if __debug__: self.mDbg.d2print('Error: '+ msg)
 
@@ -525,7 +525,7 @@ Manufactured by K-Team of Switzerland."""
         self.mCmd.GP2D120Calibrate(ini.IniGet(section, 'calData'), 
                             unitsG=ini.IniGet(section, 'unitsG'),
                             unitsR=ini.IniGet(section, 'unitsR'))
-      except ValueError, msg:
+      except ValueError as msg:
         pass  # what can we do?
 
   def IniInitSenseReact(self):
@@ -1053,7 +1053,7 @@ Manufactured by K-Team of Switzerland."""
     theta_c   = self.mShadow[kvals.KheSensorMimeTypeOdometer]['theta']
     speed_l_c = self.mSpeedGroup['speedometer_left'][CVTVAL]
     speed_r_c = self.mSpeedGroup['speedometer_right'][CVTVAL]
-    #print "theta_c=%f, speed_l/r_c=(%f,%f)" % (theta_c, speed_l_c, speed_r_c)
+    #print("theta_c=%f, speed_l/r_c=(%f,%f)" % (theta_c, speed_l_c, speed_r_c))
 
     # goal set
     speed_g = self.mBellumGoalSet['speed']
@@ -1104,12 +1104,12 @@ Manufactured by K-Team of Switzerland."""
       speed_g = self.mSpeedPosMax - speed_theta
     elif speed_g + speed_theta < -self.mSpeedPosMax:
       speed_g = -self.mSpeedPosMax - speed_theta
-    #print "speed_g=%f" % (speed_g)
+    #print("speed_g=%f" % (speed_g))
 
     # new left and right motor speed goals
     speed_l_g = speed_g + speed_theta
     speed_r_g = speed_g - speed_theta
-    #print "speed_l/r_g=(%f,%f)" % (speed_l_g, speed_r_g)
+    #print("speed_l/r_g=(%f,%f)" % (speed_l_g, speed_r_g))
 
     # send new speed setting only if there is a change in speed
     speed_l_g = self.mCmd.GetNearestSpeed(speed_l_g);
@@ -1118,9 +1118,9 @@ Manufactured by K-Team of Switzerland."""
       self.mCmd.CmdSetSpeed(speed_l_g, speed_r_g)
 
     #if speed_g != 0.0 or theta_g != 0.0:
-    #  print 'theta_g=%.2f, theta_c=%.2f, dtheta_u=%.2f, speed=(%.1f, %.1f)' % \
+    #  print('theta_g=%.2f, theta_c=%.2f, dtheta_u=%.2f, speed=(%.1f, %.1f)' % \
     #    (math.degrees(theta_g), math.degrees(theta_c), math.degrees(dtheta_u),
-    #     speed_l_g, speed_r_g)
+    #     speed_l_g, speed_r_g))
 
     if __debug__:
       self.mDbg.d4print(
@@ -1164,7 +1164,7 @@ Manufactured by K-Team of Switzerland."""
     try:
       self.mCmd.Open(port, baudrate=baudrate)
       self.SetCommStatus(True)
-    except IOError, err:
+    except IOError as err:
       s = "%s" % err
       self.GSReportErrorStatus(s)
       self.SetCommStatus(False)
@@ -1584,16 +1584,16 @@ if __name__ == '__main__':
     """ Short run test """
     iv = 0.1
     i = iv
-    print k.BellumGetGoals();
+    print(k.BellumGetGoals())
     state = k.GetRobotState()
     if state == Gluon.EServerState.Ready:
       k.ExecStart()
       k.BellumSetGoals(theta=math.pi, speed=20.0) # turn 180 going 20mm/s
     while i < sec:
-      print k.ShadowGet(kvals.KheSensorMimeTypeOdometer)
+      print(k.ShadowGet(kvals.KheSensorMimeTypeOdometer))
       time.sleep(iv)
       i += iv
-    print k.ShadowGet(kvals.KheSensorMimeTypeOdometer)
+    print(k.ShadowGet(kvals.KheSensorMimeTypeOdometer))
     k.ExecUnload()
   
   def main():

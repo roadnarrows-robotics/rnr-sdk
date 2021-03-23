@@ -7,14 +7,14 @@ example = 4
 
 if example == 1:
   def update_line(num, data, line):
-    #print 'dbg', num, data, line
+    #print('dbg', num, data, line)
     line.set_data(data[...,:num])
     return line,
 
   fig1 = plt.figure()
 
   data = np.random.rand(2, 25)
-  #print 'dbg', data
+  #print('dbg', data)
   l, = plt.plot([], [], 'r-')
   plt.xlim(0, 1)
   plt.ylim(0, 1)

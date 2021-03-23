@@ -344,7 +344,7 @@ class GuiWinKHR2Feet(GuiWin.GuiWin):
         Return Values:
           None
     """
-    #print "Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       self.WinUpdateStatus(**kwargs)
     elif request == 'bpfoot_left':
@@ -358,7 +358,7 @@ class GuiWinKHR2Feet(GuiWin.GuiWin):
     elif request == 'disconnect':
       self.WinUpdateDisconnect()
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
   #--
   def WinUpdateFeet(self, whichfoot, raw_data=None, cooked_data=None,
@@ -1053,14 +1053,14 @@ class GuiWinKHR2Feet(GuiWin.GuiWin):
           filename  - file name to write the data
     """
     fp = open(filename, 'w')
-    print >>fp, '#'
-    print >>fp, '# vKHR2 Feet Waypoints'
+    print('#', file=fp)
+    print('# vKHR2 Feet Waypoints', file=fp)
     ltime = time.localtime()
-    print >>fp, '# %d.%02d.%02d %02d:%02d:%02d' % \
-        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5])
-    print >>fp, '#\n'
-    print >>fp, '# waypoint feet: (x(mm), y(mm), theta(radians))'
-    print >>fp, 'vKHR2 = [',
+    print('# %d.%02d.%02d %02d:%02d:%02d' % \
+        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5]), file=fp)
+    print('#\n', file=fp)
+    print('# waypoint feet: (x(mm), y(mm), theta(radians))', file=fp)
+    print('vKHR2 = [', end='', file=fp)
     n = 0
     sep = ''
     for p in self.mBotFeet:
@@ -1070,9 +1070,10 @@ class GuiWinKHR2Feet(GuiWin.GuiWin):
         sep += '\n  '
       else:
         sep += ' '
-      print >>fp, '%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+      print('%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+          end='', file=fp)
       n += 1
-    print >>fp, '\n]'
+    print('\n]', file=fp)
     fp.close()
 
   #--
@@ -1138,8 +1139,8 @@ class GuiWinKHR2Feet(GuiWin.GuiWin):
           foot_right_i2c=self.mBsClient.mBsProxiedDev['bpfoot_right']['i2c'],
           i2c_dev_name=self.mI2CDevName)
 
-      print "Left foot enabled = ", self.mBpFootState['bpfoot_left']
-      print "Right foot enabled = ", self.mBpFootState['bpfoot_right']
+      print("Left foot enabled = ", self.mBpFootState['bpfoot_left'])
+      print("Right foot enabled = ", self.mBpFootState['bpfoot_right'])
 
   #--
   def CbI2CScan(self):
@@ -1208,11 +1209,11 @@ class GuiWinKHR2Feet(GuiWin.GuiWin):
     if self.mTestGui:
       self.mTestGui = False
       self.mMenuBar['Tools|Go Live']['label'] = 'Test Gui'
-      print 'Going live, testing the Gui is off'
+      print('Going live, testing the Gui is off')
     else:
       self.mTestGui = True
       self.mMenuBar['Tools|Test Gui']['label'] = 'Go Live'
-      print 'Testing the Gui'
+      print('Testing the Gui')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

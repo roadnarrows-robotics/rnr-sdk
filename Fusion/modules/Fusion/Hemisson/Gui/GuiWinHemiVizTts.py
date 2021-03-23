@@ -183,7 +183,7 @@ class GuiWinHemiVizTts(GuiWinText.GuiWinText):
         Return Values:
           None
     """
-    #print "%s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("%s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       items = {}
       for key,val in kwargs.iteritems():
@@ -197,7 +197,7 @@ class GuiWinHemiVizTts(GuiWinText.GuiWinText):
         colortag = 'black'
       self.TextAdd(repr(text)+'\n', colortag)
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

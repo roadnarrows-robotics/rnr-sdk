@@ -351,96 +351,96 @@ class pt:
 
 if __name__ == '__main__':
   def execdata(name, data):
-    print name
+    print(name)
     for s in data:
-      print '  ', s, '-->',
+      print('  ', s, '-->', end='')
       try:
         exec(s)
-      except TypeError, msg:
-        print msg
+      except TypeError as msg:
+        print(msg)
 
   def tstpt():
     name = 'assignment'
     data = [
-      'print pt(5, 6)',
-      'print pt((6, 7))',
-      'print pt(8)',
-      'print pt((9,))',
-      'p = 3, 5; print p',
-      'p = (4, 6); print p',
-      'p = pt(55, 66); print pt(p)',
-      'p = pt(-10, -100); q = pt(1,1); p = q; print p'
+      'print(pt(5, 6))',
+      'print(pt((6, 7)))',
+      'print(pt(8))',
+      'print(pt((9,)))',
+      'p = 3, 5; print(p)',
+      'p = (4, 6); print(p)',
+      'p = pt(55, 66); print(pt(p))',
+      'p = pt(-10, -100); q = pt(1,1); p = q; print(p)'
     ]
     execdata(name, data)
 
     name = 'addition'
     data = [
-      'p = pt(1,2); print p + 2',
-      'p = pt(1,2); print p + (2,)',
-      'p = pt(1,2); print p + (2,3)',
-      'p = pt(1,2); q=pt(-1, 55); print p + q',
-      'p = pt(1,2); print (2,3) + p',
-      'p = pt(1,2); print 2 + p',
-      'p = pt(1,2); p += (1000, 1000); print p',
-      'p = pt(1,2); q = pt(1000, 1000); p += q; print p',
+      'p = pt(1,2); print(p + 2)',
+      'p = pt(1,2); print(p + (2,))',
+      'p = pt(1,2); print(p + (2,3))',
+      'p = pt(1,2); q=pt(-1, 55); print(p + q)',
+      'p = pt(1,2); print((2,3)) + p',
+      'p = pt(1,2); print(2 + p)',
+      'p = pt(1,2); p += (1000, 1000); print(p)',
+      'p = pt(1,2); q = pt(1000, 1000); p += q; print(p)',
     ]
     execdata(name, data)
 
     name = 'subtraction'
     data = [
-      'p = pt(1,2); print p - 2',
-      'p = pt(1,2); print p - (2,)',
-      'p = pt(1,2); print p - (2,3)',
-      'p = pt(1,2); q=pt(-1, 55); print p - q',
-      'p = pt(1,2); print (2,3) - p',
-      'p = pt(1,2); print 2 - p',
-      'p = pt(1,2); p -= (1000, 1000); print p',
-      'p = pt(1,2); q = pt(1000, 1000); p -= q; print p',
+      'p = pt(1,2); print(p - 2)',
+      'p = pt(1,2); print(p - (2,))',
+      'p = pt(1,2); print(p - (2,3))',
+      'p = pt(1,2); q=pt(-1, 55); print(p - q)',
+      'p = pt(1,2); print((2,3) - p)',
+      'p = pt(1,2); print(2 - p)',
+      'p = pt(1,2); p -= (1000, 1000); print(p)',
+      'p = pt(1,2); q = pt(1000, 1000); p -= q; print(p)',
     ]
     execdata(name, data)
 
     name = 'dot product/scale'
     data = [
-      'p = pt(1,2); print p * 2',
-      'p = pt(1,2); print p * (2,)',
-      'p = pt(1,2); print p * (2,3)',
-      'p = pt(1,2); q=pt(-1, 55); print p * q',
-      'p = pt(1,2); print (2,3) * p',
-      'p = pt(1,2); print 2 * p',
-      'p = pt(1,2); p *= (1000, 1000); print p',
-      'p = pt(1,2); q = pt(1000, 1000); p *= q; print p',
+      'p = pt(1,2); print(p * 2)',
+      'p = pt(1,2); print(p * (2,))',
+      'p = pt(1,2); print(p * (2,3))',
+      'p = pt(1,2); q=pt(-1, 55); print(p * q)',
+      'p = pt(1,2); print((2,3) * p)',
+      'p = pt(1,2); print(2 * p)',
+      'p = pt(1,2); p *= (1000, 1000); print(p)',
+      'p = pt(1,2); q = pt(1000, 1000); p *= q; print(p)',
     ]
     execdata(name, data)
 
     name = 'magnitude'
     data = [
-      'print pt(1,2).mag()',
-      'print pt(1,0).mag()',
-      'print pt(0,1).mag()',
-      'print pt(1,1).mag()',
+      'print(pt(1,2).mag())',
+      'print(pt(1,0).mag())',
+      'print(pt(0,1).mag())',
+      'print(pt(1,1).mag())',
     ]
     execdata(name, data)
 
     name = 'cross product'
     data = [
-      'print pt(1,0).cross(1, 0)',
-      'print pt(1,0).cross(0, 1)',
-      'print pt(0,1).cross(1, 0)',
-      'print pt(0,1).cross(0, 1)',
-      'print pt(23,-6).cross(8, -44)',
+      'print(pt(1,0).cross(1, 0))',
+      'print(pt(1,0).cross(0, 1))',
+      'print(pt(0,1).cross(1, 0))',
+      'print(pt(0,1).cross(0, 1))',
+      'print(pt(23,-6).cross(8, -44))',
     ]
     execdata(name, data)
 
     name = 'rotate'
     data = [
-      'p= pt(1,0).rot(math.pi); print p, p.mag()',
-      'p= pt(1,0).rot(-math.pi); print p, p.mag()',
-      'p= pt(1,0).rot(2.0 * math.pi); print p, p.mag()',
-      'p= pt(1,0).rot(math.pi/4.0); print p, p.mag()',
-      'p= pt(1,1).rot(math.pi/4.0); print p, p.mag()',
-      'p= pt(1,1).rot(-math.pi/4.0); print p, p.mag()',
-      'p= pt(1,1).rot(-math.pi/2.0); print p, p.mag()',
-      'p= pt(53,42).rot(3.0); print p, p.mag()',
+      'p= pt(1,0).rot(math.pi); print(p, p.mag())',
+      'p= pt(1,0).rot(-math.pi); print(p, p.mag())',
+      'p= pt(1,0).rot(2.0 * math.pi); print(p, p.mag())',
+      'p= pt(1,0).rot(math.pi/4.0); print(p, p.mag())',
+      'p= pt(1,1).rot(math.pi/4.0); print(p, p.mag())',
+      'p= pt(1,1).rot(-math.pi/4.0); print(p, p.mag())',
+      'p= pt(1,1).rot(-math.pi/2.0); print(p, p.mag())',
+      'p= pt(53,42).rot(3.0); print(p, p.mag())',
     ]
     execdata(name, data)
 

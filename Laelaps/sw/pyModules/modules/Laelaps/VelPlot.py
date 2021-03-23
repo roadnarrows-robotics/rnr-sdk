@@ -230,7 +230,7 @@ class VelPlot:
       for motor in motors:
         self.m_rtData.enable(motor, setpoints[motor])
     else:
-      print "BUG: Bad paramaters:", repr(motors), repr(setpoints)
+      print("BUG: Bad paramaters:", repr(motors), repr(setpoints))
 
   def disable(self, motors):
     if type(motors) == str:
@@ -239,7 +239,7 @@ class VelPlot:
       for motor in motors:
         self.m_rtData.disable(motor)
     else:
-      print "BUG: Bad paramaters:", repr(motors), repr(setpoints)
+      print("BUG: Bad paramaters:", repr(motors), repr(setpoints))
 
   def setpoint(self, motors, setpoints):
     if type(motors) == str:
@@ -248,4 +248,4 @@ class VelPlot:
       for motor in motors:
         self.m_rtData.setpoint(motor, setpoints[motor])
     else:
-      print "BUG: Bad paramaters:", repr(motors), repr(setpoints)
+      print("BUG: Bad paramaters:", repr(motors), repr(setpoints))

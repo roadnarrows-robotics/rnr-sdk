@@ -424,7 +424,7 @@ class GuiTextBar:
     try:
       sRow, sCol = sIdx.split('.')
     except ValueError:      # Windows version sometimes goes nuts here
-      print 'Trace: ValueError: %s' % repr(sIdx)
+      print('Trace: ValueError: %s' % repr(sIdx))
       sRow = '0'
     return self.mText.index('%s.0lineend' % sRow)
     
@@ -435,14 +435,14 @@ class GuiTextBar:
     try:
       sRow, sCol = sIdx.split('.')
     except ValueError:      # Windows version sometimes goes nuts here
-      print 'Trace: ValueError: %s' % repr(sIdx)
+      print('Trace: ValueError: %s' % repr(sIdx))
       return 2, 0
     try:
       row = int(sRow)
       col = int(sCol)
       return row, col
     except ValueError:
-      print 'Trace: ValueError: %s' % repr(sIdx)
+      print('Trace: ValueError: %s' % repr(sIdx))
       return 2, 0
 
   #--
@@ -467,7 +467,7 @@ class GuiTextBar:
     for i in range(0, len(ranges), 2):
       start = ranges[i]
       stop = ranges[i+1]
-      print 'tag %s: %s' % (tag, repr(self.mText.get(start, stop)))
+      print('tag %s: %s' % (tag, repr(self.mText.get(start, stop))))
 
 
 #-------------------------------------------------------------------------------

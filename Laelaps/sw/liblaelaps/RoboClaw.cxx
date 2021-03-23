@@ -265,6 +265,7 @@ int RoboClawComm::close()
 int RoboClawComm::flushInput()
 {
   SerDevFIFOInputFlush(m_fd);
+  return OK;
 }
 
 int RoboClawComm::execCmd(byte_t cmd[], size_t lenCmd)

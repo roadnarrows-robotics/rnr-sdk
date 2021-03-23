@@ -76,6 +76,11 @@ namespace rnr
    */
   namespace cmd
   {
+    // forward declarations in namespace rnr::cmd
+    class CmdExtArg;
+    std::ostream &operator<<(std::ostream &os, const CmdExtArg &arg);
+    LogBook &operator<<(LogBook &log, const CmdExtArg &arg);
+
 
     //--------------------------------------------------------------------------
     // CmdExtArg Class
@@ -308,7 +313,8 @@ namespace rnr
        *
        * \return Reference to output stream.
        */
-      friend std::ostream &operator<<(std::ostream &os, const CmdExtArg &arg);
+      friend std::ostream &rnr::cmd::operator<<(std::ostream    &os,
+                                                const CmdExtArg &arg);
 
       /*!
        * \brief Insert object into LogBook pending entry.
@@ -318,7 +324,8 @@ namespace rnr
        *
        * \return Reference to LogBook.
        */
-      friend LogBook &operator<<(LogBook &log, const CmdExtArg &arg);
+      friend LogBook &rnr::cmd::operator<<(LogBook         &log,
+                                           const CmdExtArg &arg);
 
       //
       // Friends

@@ -50,6 +50,9 @@ SWIG_FILES 				= WatchDogMsgs.i RoboClawMsgs.i ImuMspMsgs.i
 SWIG_EXTMOD_DIR 	= ../modules/Laelaps
 SWIG_EXTMOD_LIBS 	= -llaelaps -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 all-extmod: swig-all
 
 # Clean extension module intermediates

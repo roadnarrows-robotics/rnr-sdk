@@ -103,9 +103,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeRptMotorCtlrHealth operator=(const LaeRptMotorCtlrHealth &rhs);
+    LaeRptMotorCtlrHealth &operator=(const LaeRptMotorCtlrHealth &rhs);
   };
 
 
@@ -147,9 +147,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeRptMotorHealth operator=(const LaeRptMotorHealth &rhs);
+    LaeRptMotorHealth &operator=(const LaeRptMotorHealth &rhs);
   };
 
 
@@ -214,9 +214,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeRptRobotStatus operator=(const LaeRptRobotStatus &rhs);
+    LaeRptRobotStatus &operator=(const LaeRptRobotStatus &rhs);
 
     /*!
      * \brief Clear report.
@@ -273,9 +273,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeRptDynPowertrain operator=(const LaeRptDynPowertrain &rhs);
+    LaeRptDynPowertrain &operator=(const LaeRptDynPowertrain &rhs);
 
     /*!
      * \brief Clear report.
@@ -334,9 +334,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeRptDynamics operator=(const LaeRptDynamics &rhs);
+    LaeRptDynamics &operator=(const LaeRptDynamics &rhs);
 
     /*!
      * \brief Clear report.

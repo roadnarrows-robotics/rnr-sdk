@@ -152,9 +152,9 @@ if __name__ == '__main__':
     root = tk.Tk()
     dlg = GuiDlgEntryBox(root, fieldname='Widgy Fidgy', title='Test Entry Box')
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

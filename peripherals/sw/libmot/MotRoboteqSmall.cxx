@@ -200,6 +200,7 @@ int MotRoboteqSmall::setSpeedRaw(int motID, int rawSpeed)
     LOGERROR("setSpeedRaw(id,speed) command failed.\n");
   }
 
+  return 0;
 }
 
 int MotRoboteqSmall::setSpeedRaw(VecSpeedRawTupples vecSpeedRawTupple)
@@ -227,17 +228,20 @@ int MotRoboteqSmall::setSpeedRaw(VecSpeedRawTupples vecSpeedRawTupple)
       return -1;
     }
   }
+  return 0;
 }
 
 int MotRoboteqSmall::stop(int motID)
 {
   setSpeedRaw(motID, 0);
+  return 0;
 }
  
 int MotRoboteqSmall::stop()
 {
   setSpeedRaw(1, 0);
   setSpeedRaw(2, 0);
+  return 0;
 }
 
 int MotRoboteqSmall::eStop()
@@ -260,6 +264,7 @@ int MotRoboteqSmall::eStop()
       LOGERROR("setSpeedRaw(vec) command failed\nIs firmware updated?\n");
       return -1;
     }
+  return 0;
 }
 
 int MotRoboteqSmall::eStopRelease()
@@ -282,6 +287,7 @@ int MotRoboteqSmall::eStopRelease()
     LOGERROR("setSpeedRaw(vec) command failed\nIs firmware updated?\n");
     return -1;
   }
+  return 0;
 }
 
 int MotRoboteqSmall::getCurrent(int motID, units_t units)

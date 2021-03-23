@@ -61,7 +61,7 @@ if __debug__: import Fusion.Utils.PyDebug as PyDebug
 
 #
 # Server State Enumeration
-#   None        pre-server existence
+#   Undef       undefined pre-server existence (s0)
 #   NotLoaded   server is not loaded (uninitialized, unknown state)
 #   NotReady    loaded, but not ready
 #   Ready       ready to run
@@ -71,7 +71,7 @@ if __debug__: import Fusion.Utils.PyDebug as PyDebug
 #   Errored     fatal errored condition (requires re-initialization)
 #
 EServerState = enum.Enum(
-    'None NotLoaded NotReady Ready Paused Stepping Running Errored')
+    'Undef NotLoaded NotReady Ready Paused Stepping Running Errored')
 
 #
 # Server Executive Primitives
@@ -90,33 +90,33 @@ EServerExec = enum.Enum('Load EStop Start Resume Suspend Step Stop Unload')
 # Invalid States for Executive Primatives 
 #
 ServerInvalidExecStateTbl = {
-  EServerExec.Load:     [EServerState.None] + \
+  EServerExec.Load:     [EServerState.Undef] + \
                          range(EServerState.NotReady, EServerState.numof()),
 
-  EServerExec.EStop:    [EServerState.None, EServerState.NotLoaded],
+  EServerExec.EStop:    [EServerState.Undef, EServerState.NotLoaded],
 
-  EServerExec.Start:    [EServerState.None, EServerState.NotLoaded, 
+  EServerExec.Start:    [EServerState.Undef, EServerState.NotLoaded, 
                          EServerState.NotReady, EServerState.Paused,
                          EServerState.Stepping, EServerState.Running,
                          EServerState.Errored],
 
-  EServerExec.Resume:   [EServerState.None, EServerState.NotLoaded,
+  EServerExec.Resume:   [EServerState.Undef, EServerState.NotLoaded,
                          EServerState.NotReady, EServerState.Ready,
                          EServerState.Stepping, EServerState.Running,
                          EServerState.Errored],
 
-  EServerExec.Suspend:  [EServerState.None, EServerState.NotLoaded,
+  EServerExec.Suspend:  [EServerState.Undef, EServerState.NotLoaded,
                          EServerState.NotReady, EServerState.Ready,
                          EServerState.Paused, EServerState.Errored],
 
-  EServerExec.Step:     [EServerState.None, EServerState.NotLoaded,
+  EServerExec.Step:     [EServerState.Undef, EServerState.NotLoaded,
                          EServerState.NotReady, EServerState.Stepping,
                          EServerState.Errored],
 
-  EServerExec.Stop:     [EServerState.None, EServerState.NotLoaded,
+  EServerExec.Stop:     [EServerState.Undef, EServerState.NotLoaded,
                          EServerState.NotReady, EServerState.Ready],
 
-  EServerExec.Unload:   [EServerState.None, EServerState.NotLoaded]
+  EServerExec.Unload:   [EServerState.Undef, EServerState.NotLoaded]
 }
 
 
@@ -482,7 +482,7 @@ class GluonServer:
     if self.mClient:
       self.mClient.GCReportNormalStatus(self.mServerId, msg)
     else:
-      print "%s: %s" % (self.mServerId, msg)
+      print("%s: %s" % (self.mServerId, msg))
 
   #--
   def GSReportErrorStatus(self, emsg):
@@ -497,7 +497,7 @@ class GluonServer:
     if self.mClient:
       self.mClient.GCReportErrorStatus(self.mServerId, emsg)
     else:
-      print "error: %s: %s" % (self.mServerId, emsg)
+      print("error: %s: %s" % (self.mServerId, emsg))
 
   def GSSetDebugLevel(self, debuglevel, debugfout=None):
     """ Set server debugging level.
@@ -777,7 +777,7 @@ class GluonClient:
         Return Value:
           None
     """
-    print "%s: %s" % (serverId, msg)
+    print("%s: %s" % (serverId, msg))
 
   #--
   def GCReportErrorStatus(self, serverId, emsg):
@@ -793,7 +793,7 @@ class GluonClient:
         Return Value:
           None
     """
-    print "error: %s: %s" % (serverId, emsg)
+    print("error: %s: %s" % (serverId, emsg))
 
   #--
   def GCSetDebugLevel(self, debuglevel, debugfout=None):

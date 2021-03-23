@@ -616,7 +616,7 @@ Manufactured by Kondo of Japan."""
     try:
       self.mCmd.Open(port, baudrate=baudrate)
       self.SetCommStatus(True)
-    except IOError, err:
+    except IOError as err:
       s = "%s" % err
       self.GSReportErrorStatus(s)
       self.SetCommStatus(False)
@@ -933,10 +933,10 @@ if __name__ == '__main__':
     """ Create vKHR2 unit test environment. """
     k = vKHR2(debuglevel=level)
     port = '/dev/ttyS0'
-    print "Opening port %s..." % port
+    print("Opening port %s..." % port)
     k.pRobotConnect(port)
     k.SetCommStatus(True)
-    print "Port %s opened" % port
+    print("Port %s opened" % port)
     k.ExecLoad()
     return k
   
@@ -948,11 +948,11 @@ if __name__ == '__main__':
     if state == Gluon.EServerState.Ready:
       k.ExecStart()
     while i < sec:
-      print 'Tick %4.1f' % i
-      print k.ShadowGet(kvals.KHR2SensorMimeTypeServo)
+      print('Tick %4.1f' % i)
+      print(k.ShadowGet(kvals.KHR2SensorMimeTypeServo))
       time.sleep(iv)
       i += iv
-    print k.ShadowGet(kvals.KHR2SensorMimeTypeServo)
+    print(k.ShadowGet(kvals.KHR2SensorMimeTypeServo))
     k.ExecUnload()
   
   #--

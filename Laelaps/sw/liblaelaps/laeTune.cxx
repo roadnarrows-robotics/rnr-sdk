@@ -173,6 +173,8 @@ LaeTunesBattery &LaeTunesBattery::operator=(const LaeTunesBattery &rhs)
   m_fMaxV     = rhs.m_fMaxV;
   m_fNominalV = rhs.m_fNominalV;
   m_fMinV     = rhs.m_fMinV;
+
+  return *this;
 }
 
 void LaeTunesBattery::print(int indent)
@@ -210,6 +212,8 @@ LaeTunesPowertrain &LaeTunesPowertrain::operator=(const LaeTunesPowertrain &rhs)
   m_fVelPidKd   = rhs.m_fVelPidKd;
   m_fTireRadius = rhs.m_fTireRadius;
   m_fTireWidth  = rhs.m_fTireWidth;
+
+  return *this;
 }
 
 void LaeTunesPowertrain::print(const string &strKey, int indent)

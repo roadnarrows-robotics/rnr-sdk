@@ -229,7 +229,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    VelSpeedTuple operator=(const VelSpeedTuple &rhs);
+    VelSpeedTuple &operator=(const VelSpeedTuple &rhs);
   };
  
 
@@ -277,7 +277,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    VelSpeedLookupTbl operator=(const VelSpeedLookupTbl &rhs);
+    VelSpeedLookupTbl &operator=(const VelSpeedLookupTbl &rhs);
 
     /*!
      * \brief Create lookup table.

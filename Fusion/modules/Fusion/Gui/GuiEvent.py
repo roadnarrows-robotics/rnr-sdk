@@ -113,7 +113,7 @@ class GuiEvent:
         become True are released. Mainloops that call wait() once the flag
         is true will not block at all.
     """
-    #print 'Dbg: GuiEvent.set()'
+    #print('Dbg: GuiEvent.set()')
     self._mutex.unlock() # equivalent: flag = True
 
   #--
@@ -122,7 +122,7 @@ class GuiEvent:
         calling wait() will block until set() is called to set the
         internal flag to True again.
     """
-    #print 'Dbg: GuiEvent.clear()'
+    #print('Dbg: GuiEvent.clear()')
     self._mutex.lock(self._cbdummy, 'clear')  # equivalent: flag = False
 
   #--
@@ -156,14 +156,14 @@ class GuiEvent:
     ivt = IVTimer.IVTimer(0.1, 0.1, self._feed, varstate=0)
     ivt.start()
     while self._varWait.get() == 0: 
-      #print 'Dbg: GuiEvent.wait(): waiting'
+      #print('Dbg: GuiEvent.wait(): waiting')
       self._master.wait_variable(self._varWait) # wait for variable set()
       if timeout:               # timeout specified
         timeout -= 0.1          # decrement the remaining time
         if timeout <= 0.0:      # timeout has expired
           self.clear()          # get back to False, eventually, hopefully
           break
-    #print 'Dbg: GuiEvent.wait(): finished'
+    #print('Dbg: GuiEvent.wait(): finished')
     self._isWaiting = False
     ivt.cancel()
     # leave mutex locked. equivalent: 'flag' == False
@@ -171,16 +171,16 @@ class GuiEvent:
   #--
   def _feed(self, ivt):
     """ Feed the wait()'s wait_variable() """
-    #print 'Dbg: GuiEvent._feed(): ivt callback, varstate=%d' % ivt.varstate
+    #print('Dbg: GuiEvent._feed(): ivt callback, varstate=%d' % ivt.varstate)
     if ivt.varstate == 1:           # already got the lock, stay at 1
-      #print 'Dbg: GuiEvent._feed(): still locked'
+      #print('Dbg: GuiEvent._feed(): still locked')
       pass
     elif self._mutex.testandset():  # lock mutex if posible (atomic)
-      #print 'Dbg: GuiEvent._feed(): acquired the lock'
+      #print('Dbg: GuiEvent._feed(): acquired the lock')
       ivt.varstate = 1
     # feed the variable
     if self._isWaiting:
-      #print 'Dbg: GuiEvent._feed(): set(%d)' % ivt.varstate
+      #print('Dbg: GuiEvent._feed(): set(%d)' % ivt.varstate)
       try:
         self._varWait.set(ivt.varstate)
       except tk.TclError:

@@ -104,9 +104,9 @@ class HemiSerial:
       self._mHndSer = ser.Serial(port=port, baudrate=115200,
                                  bytesize=8, parity='N', stopbits=1,
                                  timeout=0.3, writeTimeout=2.0)
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       self.mErr.SetErrGeneral(err.__str__())
-      raise IOError, err
+      raise IOError
 
     if __debug__: self.mDbg.d5print("open %s 115200-8-N-1:" % port)
     self.FlushInput()
@@ -202,7 +202,7 @@ class HemiSerial:
     """
     try:
       self._mHndSer.flushInput()
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: flush on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -211,7 +211,7 @@ class HemiSerial:
     try:
       while self._mHndSer.readline():
         pass
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: read on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -226,7 +226,7 @@ class HemiSerial:
     """
     try:
       self._mHndSer.flushOutput()
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: flush output on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -308,7 +308,7 @@ class HemiSerial:
       if __debug__: self.mDbg.d5print("write:", repr(cmd + '\r'))
       self._mHndSer.flush()
       return True
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       self.mErr.SetErrGeneral('Bad write: ' + err.__str__())
       return False
 
@@ -334,7 +334,7 @@ class HemiSerial:
         sIn = self._mHndSer.readline()
         if __debug__:
           self.mDbg.d5print("try=%d readline: %s" % (tries, repr(sIn)))
-      except (ser.SerialException, OSError), err:
+      except (ser.SerialException, OSError) as err:
         self.mErr.SetErrGeneral('Bad read: ' + err.__str__())
         return None
 
@@ -385,7 +385,7 @@ if __name__ == '__main__':
   else:
     dbg = None
   ser = HemiSerial(port='/dev/ttyUB0', dbgobj=dbg)
-  print "Enter Hemipera command(s) ('quit' to quit)"
+  print("Enter Hemipera command(s) ('quit' to quit)")
   while True:
     cmd = raw_input('cmd> ')
     if cmd == 'quit':
@@ -393,6 +393,6 @@ if __name__ == '__main__':
       break
     rsp = ser.SendCmd(cmd)
     if rsp:
-      print rsp
+      print(rsp)
     else:
-      print ser.GetErrStr()
+      print(ser.GetErrStr())

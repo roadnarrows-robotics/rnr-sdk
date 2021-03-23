@@ -213,9 +213,9 @@ if __name__ == '__main__':
     lastsettings = {'exposure': 1, 'threshold': 0xff}
     dlg = GuiDlgHemiModLinCam(root, lastSettings=lastsettings)
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

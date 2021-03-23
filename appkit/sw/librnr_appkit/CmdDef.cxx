@@ -121,6 +121,8 @@ CmdDef &CmdDef::operator=(const CmdDef &rhs)
   m_strSynopsis = rhs.m_strSynopsis;
   m_strLongDesc = rhs.m_strLongDesc;
   m_formDefs    = rhs.m_formDefs;
+
+  return *this;
 }
 
 bool CmdDef::isDefined() const

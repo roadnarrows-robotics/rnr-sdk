@@ -787,10 +787,10 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     """
     v     = self.mRobotSpeed['pathspeed']
     alpha = math.atan(self.mOpt['c'] * self.f_U()) / pi
-    #print 'alpha', alpha
+    #print('alpha', alpha)
     c_obs = self.mBrum['c_v_obs'] * (0.5 + alpha)
     c_tar = self.mBrum['c_v_tar'] * (0.5 - alpha)
-    #print 'c_obs', c_obs, 'c_tar', c_tar
+    #print('c_obs', c_obs, 'c_tar', c_tar)
     V_obs = self.mBrum['obs_dist_min'] * self.mOpt['psi_hat_max']
     V_tar = self.mBrum['u_max'] * self.mOpt['psi_hat_max']
     self.mBrum['dv/dt'] = -c_obs * (v - V_obs) - c_tar * (v - V_tar)
@@ -937,11 +937,11 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
       k = self.f_w(psi, psi_p)
       o = self.Omicron(self.mBrum['u'][i])
       #if self.mStep in [3, 4] and psi == math.radians(176):
-      #  print 'k=%.3f o=%.3f' % (k, o)
+      #  print('k=%.3f o=%.3f' % (k, o))
       ifi += k * o * dpsi
       i += 1
     #if self.mStep in [3, 4]:
-    #  print 'psi=%3f u=%.3f' % (math.degrees(psi), ifi)
+    #  print('psi=%3f u=%.3f' % (math.degrees(psi), ifi))
     return ifi
 
   #--
@@ -993,8 +993,8 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     h = self.mBrum['h']
     dhdt = -self.mBrum['r_h_min'] * c_h * (h - self.mOpt['h_min']) \
            - self.mBrum['r_h_max'] * (1.0 - c_h) * (h - self.mOpt['h_max'])
-    #print 'Ns=%.2f Nu=%.2f c_h=%.2f dh=%.3f h=%.3f' % \
-    #    (self.mBrum['Ns'], self.mBrum['Nu'], c_h, dhdt, h+dhdt)
+    #print('Ns=%.2f Nu=%.2f c_h=%.2f dh=%.3f h=%.3f' % \
+    #    (self.mBrum['Ns'], self.mBrum['Nu'], c_h, dhdt, h+dhdt))
     return dhdt
 
   #--
@@ -1261,7 +1261,7 @@ if __name__ == '__main__':
     if state == Gluon.EServerState.Ready:
       k.ExecStart()
     while i < sec:
-      print 'thinking', i
+      print('thinking', i)
       time.sleep(iv)
       i += iv
     k.ExecUnload()

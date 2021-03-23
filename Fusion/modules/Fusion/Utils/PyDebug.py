@@ -191,20 +191,20 @@ if __debug__:
         # get caller's frame and arguments
         s=inspect.formatargvalues(
             *inspect.getargvalues(inspect.currentframe(1)) )
-        #print "rdk!!!", repr(s)
+        #print("rdk!!!", repr(s))
         # strip of leading and trailing parens
         #s = s[1:-1]
-        #print "rdk!!!", repr(s)
+        #print("rdk!!!", repr(s))
         self._dprint(debuglevel, s)
 
     #--
     def _dprint(self, debuglevel, *args):
       """ Do the real debug printing of the given formatted arguments. """
       if self.mDebugLevel != DLOFF and self.mDebugLevel >= debuglevel:
-        print >>self.mFout, "DL" + repr(debuglevel) + ":", self.mPreface,
+        print("DL" + repr(debuglevel) + ":", self.mPreface, file=self.mFout)
         for arg in args:
-          print >>self.mFout, arg,
-        print >>self.mFout
+          print(arg, end='', file=self.mFout)
+        print('', file=self.mFout)
         self.mFout.flush()
 
     #--
@@ -220,10 +220,10 @@ if __debug__:
             raise IOError
           self.mFout = fout
         except (NameError, AttributeError):
-          print  self.__class__.__name__ + ":", fout, ": not a file object"
+          print( self.__class__.__name__ + ":", fout, ": not a file object")
           self.mFout = sys.stdout
         except IOError:
-          print  self.__class__.__name__ + ":", fout, ": read-only"
+          print( self.__class__.__name__ + ":", fout, ": read-only")
           self.mFout = sys.stdout
     
     #--

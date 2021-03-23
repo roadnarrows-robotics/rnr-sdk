@@ -134,26 +134,29 @@ def _getFusionPkgDir():
     pkgdir = FusionEnvVal
   # failed again to get package directory name
   if not pkgdir:
-    print >>sys.stderr, \
-      'Values error: cannot find %s package base directory' % FusionPkgName
-    print >>sys.stderr, 'Try setting environment variable %s' % FusionEnvVar
+    print(
+      'Values error: cannot find %s package base directory' % FusionPkgName,
+      file=sys.stderr)
+    print('Try setting environment variable %s' % FusionEnvVar, file=sys.stderr)
     return None
   # test directory name
   try:
     mode = os.stat(pkgdir)[stat.ST_MODE]
-  except OSError, msg:
-    print >>sys.stderr, 'Values error: ', msg
-    print >>sys.stderr, \
+  except OSError as msg:
+    print('Values error: ', msg, file=sys.stderr)
+    print(
     'Environment variable %s must point to the %s package base directory' % \
-        (FusionEnvVar, FusionPkgName)
+        (FusionEnvVar, FusionPkgName),
+        file=sys.stderr)
     return None
   if stat.S_ISDIR(mode):
     return pkgdir
   else:
-    print >>sys.stderr, 'Values error: %s: not a directory' % pkgdir
-    print >>sys.stderr, \
+    print('Values error: %s: not a directory' % pkgdir, file=sys.stderr)
+    print(
     'Environment variable %s must point to the %s package base directory' % \
-        (FusionEnvVar, FusionPkgName)
+        (FusionEnvVar, FusionPkgName),
+        file=sys.stderr)
     return None
 
 #--
@@ -164,19 +167,21 @@ def _getFusionPkgSubDir(subdir):
   pkgsubdir = os.path.join(FusionPkgDir, subdir)
   try:
     mode = os.stat(pkgsubdir)[stat.ST_MODE]
-  except OSError, msg:
-    print >>sys.stderr, 'Values error: ', msg
-    print >>sys.stderr, \
+  except OSError as msg:
+    print('Values error: ', msg, file=sys.stderr)
+    print(
     '%s package scrogged? Subdirectory %s should exist under %s' % \
-        (FusionPkgName, subdir, FusionPkgDir)
+        (FusionPkgName, subdir, FusionPkgDir),
+        file=sys.stderr)
     return None
   if stat.S_ISDIR(mode):
     return pkgsubdir
   else:
-    print >>sys.stderr, 'Values error: %s: not a directory' % subdir
-    print >>sys.stderr, \
+    print('Values error: %s: not a directory' % subdir, file=sys.stderr)
+    print(
     '%s package scrogged? Subdirectory %s should exist under %s' % \
-        (FusionPkgName, subdir, FusionPkgDir)
+        (FusionPkgName, subdir, FusionPkgDir),
+        file=sys.stderr)
     return None
 
 #--
@@ -193,8 +198,8 @@ def _setFusionIni():
     ext = '.win'
   try:
     shutil.copy2(FusionIniFileName+ext, FusionIniFileName)
-  except IOError, msg:
-    print >>sys.stderr, "Cannot set Fusion ini file: %s" % msg
+  except IOError as msg:
+    print("Cannot set Fusion ini file: %s" % msg, file=sys.stderr)
 
 #--
 def _listValues():
@@ -271,9 +276,9 @@ def InitOnce():
 
 if __name__ == '__main__':
   nvList, evList = _listValues()
-  print 'Fusion Variables'
+  print('Fusion Variables')
   for v in nvList:
-    print v
-  print 'Environment Variables'
+    print(v)
+  print('Environment Variables')
   for v in evList:
-    print v
+    print(v)

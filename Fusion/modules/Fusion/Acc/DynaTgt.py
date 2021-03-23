@@ -236,7 +236,7 @@ class DynaTgt:
     rho = 90.0 + self.mStep * 10.0
     if rho > 270.0:
       rho = 270.0
-    print 'rho=', rho
+    print('rho=', rho)
     rho = math.radians(rho)
     m   = 2.5
     self.SensorsSim([(rho, m)])
@@ -281,7 +281,7 @@ class DynaTgt:
     w = twopi / (2.0 * angrange)    # 0 at ends of [-angrange/2, angrange/2]
     angrange /= 2.0                 # half angle
     rho, m = rhoList[0]
-    #print '  rho=%f, m=%f' % (math.degrees(rho), m) 
+    #print('  rho=%f, m=%f' % (math.degrees(rho), m) )
     for id in self.mTgtSensors:
       zeta = self.mTgtSensors[id]['zeta']
       psi = math.fabs(rho - theta - zeta)
@@ -289,16 +289,16 @@ class DynaTgt:
         self.mTgtSensors[id]['Mi'] = m * math.cos(w*psi)
       else:
         self.mTgtSensors[id]['Mi'] = 0.0
-      #print '   %s[Mi]=%f' % (id, self.mTgtSensors[id]['Mi'])
+      #print('   %s[Mi]=%f' % (id, self.mTgtSensors[id]['Mi']))
 
     for rho, m in rhoList[1:]:
-      #print '  rho=%f, m=%f' % (math.degrees(rho), m) 
+      #print('  rho=%f, m=%f' % (math.degrees(rho), m) )
       for id in self.mTgtSensors:
         zeta = self.mTgtSensors[id]['zeta']
         psi = math.fabs(rho - theta - zeta)
         if psi <= angrange:
           self.mTgtSensors[id]['Mi'] += m * math.cos(w*psi)
-        #print '   %s[Mi]=%f' % (id, self.mTgtSensors[id]['Mi'])
+        #print('   %s[Mi]=%f' % (id, self.mTgtSensors[id]['Mi']))
 
   #--
   def BrumNull(self):
@@ -354,8 +354,8 @@ class DynaTgt:
 
     self.mShowTimeStep(self.mStep)
 
-    print 
-    print 'TimeStep', self.mStep
+    print()
+    print('TimeStep', self.mStep)
 
     # read obstacle sensors
     self.ReadObsSensors()
@@ -387,12 +387,12 @@ class DynaTgt:
     dtheta = self.mBrum['dtheta_obs'] + self.mBrum['dtheta_tar']
     dv     = self.f_dvdt()
 
-    print 'dtheta_obs=%.3f, dtheta_tar=%.3f' % \
+    print('dtheta_obs=%.3f, dtheta_tar=%.3f' % \
         (math.degrees(self.mBrum['dtheta_obs']), 
-         math.degrees(self.mBrum['dtheta_tar']))
-    print 'dv=%.3f, dtheta=%.3f' % (dv, math.degrees(dtheta))
-    #print 'Ns=%f, Nu=%f, h=%f' % \
-    #    (self.mBrum['Ns'], self.mBrum['Nu'], self.mBrum['h'])
+         math.degrees(self.mBrum['dtheta_tar'])))
+    print('dv=%.3f, dtheta=%.3f' % (dv, math.degrees(dtheta)))
+    #print('Ns=%f, Nu=%f, h=%f' % \
+    #    (self.mBrum['Ns'], self.mBrum['Nu'], self.mBrum['h']))
 
     self.mSGrapher.graph(title=self.mSGraphTitle,
         xlabel='psi', ylabel='S', xstep=60, ystep=1,
@@ -504,10 +504,10 @@ class DynaTgt:
     """
     v     = self.mRobotLoc['pathspeed']
     alpha = math.atan(self.mOpt['c'] * self.f_U()) / pi
-    print 'alpha', alpha
+    print('alpha', alpha)
     c_obs = self.mBrum['c_v_obs'] * (0.5 + alpha)
     c_tar = self.mBrum['c_v_tar'] * (0.5 - alpha)
-    print 'c_obs', c_obs, 'c_tar', c_tar
+    print('c_obs', c_obs, 'c_tar', c_tar)
     V_obs = self.mBrum['obs_dist_min'] * self.mOpt['psi_hat_max']
     V_tar = self.mBrum['u_max'] * self.mOpt['psi_hat_max']
     self.mBrum['dv/dt'] = -c_obs * (v - V_obs) - c_tar * (v - V_tar)
@@ -533,7 +533,7 @@ class DynaTgt:
       lamsqsig  = sensor['lambda_i'] * sqsigma
       U += lamsqsig * math.exp(-sensor['zeta']**2/(2*sqsigma)) - lamsqsig/sqrte
     self.mBrum['U'] = U
-    print 'U', U
+    print('U', U)
     return U
 
   #--
@@ -661,11 +661,11 @@ class DynaTgt:
       k = self.f_w(psi, psi_p)
       o = self.Omicron(self.mBrum['u'][i])
       #if self.mStep in [3, 4] and psi == math.radians(176):
-      #  print 'k=%.3f o=%.3f' % (k, o)
+      #  print('k=%.3f o=%.3f' % (k, o))
       ifi += k * o * dpsi
       i += 1
     #if self.mStep in [3, 4]:
-    #  print 'psi=%3f u=%.3f' % (math.degrees(psi), ifi)
+    #  print('psi=%3f u=%.3f' % (math.degrees(psi), ifi))
     return ifi
 
   #--
@@ -717,8 +717,8 @@ class DynaTgt:
     h = self.mBrum['h']
     dhdt = -self.mBrum['r_h_min'] * c_h * (h - self.mOpt['h_min']) \
            - self.mBrum['r_h_max'] * (1.0 - c_h) * (h - self.mOpt['h_max'])
-    #print 'Ns=%.2f Nu=%.2f c_h=%.2f dh=%.3f h=%.3f' % \
-    #    (self.mBrum['Ns'], self.mBrum['Nu'], c_h, dhdt, h+dhdt)
+    #print('Ns=%.2f Nu=%.2f c_h=%.2f dh=%.3f h=%.3f' % \
+    #    (self.mBrum['Ns'], self.mBrum['Nu'], c_h, dhdt, h+dhdt))
     return dhdt
 
   #--
@@ -1079,13 +1079,13 @@ class GuiViz:
   #--
   def test(self):
     v = self.mDynaTgt.Integral(self.parab, 0.0, 3.0, .25)
-    print 'I(x^2)|x=0,x=3 =', v
+    print('I(x^2)|x=0,x=3 =', v)
     v = self.mDynaTgt.Integral(self.parab, 0.0, 3.0, .22)
-    print 'I(x^2)|x=0,x=3 =', v
+    print('I(x^2)|x=0,x=3 =', v)
     v = self.mDynaTgt.Integral(self.fsin, 0.0, pi, .1, 1.0)
-    print 'I(sin(x)|x=0,x=pi =', v
+    print('I(sin(x)|x=0,x=pi =', v)
     v = self.mDynaTgt.Integral(self.fsin, 0.0, pi, .1, 2.0)
-    print 'I(sin(2x)|x=0,x=pi =', v
+    print('I(sin(2x)|x=0,x=pi =', v)
 
   #--
   def parab(self, x):

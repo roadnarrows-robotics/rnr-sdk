@@ -297,7 +297,7 @@ class GuiDlgKHR1Opt(tkSimpleDialog.Dialog):
 
     try:
       execCycle = self.mVarExecCycle.get()
-    except ValueError, err:
+    except ValueError as err:
       self.ShowStatus("Execution Cycle: field has invalid value: %s" % \
           repr(self.mEntryExecCycle.get()),
           fg=gt.ColorFgStatusError)
@@ -313,7 +313,7 @@ class GuiDlgKHR1Opt(tkSimpleDialog.Dialog):
 
     try:
       execStepSize = self.mVarExecStepSize.get()
-    except ValueError, err:
+    except ValueError as err:
       self.ShowStatus("Step Size: field has invalid value: %s" % \
           repr(self.mEntryExecStepSize.get()),
           fg=gt.ColorFgStatusError)
@@ -335,7 +335,7 @@ class GuiDlgKHR1Opt(tkSimpleDialog.Dialog):
 
     try:
       bid0 = self.mVarBid0.get()
-    except ValueError, err:
+    except ValueError as err:
       self.ShowStatus("First Board ID: field has invalid value: %s" % \
           repr(self.mEntryBid0.get()),
           fg=gt.ColorFgStatusError)
@@ -353,7 +353,7 @@ class GuiDlgKHR1Opt(tkSimpleDialog.Dialog):
     else:
       try:
         bid1 = self.mVarBid1.get()
-      except ValueError, err:
+      except ValueError as err:
         self.ShowStatus("Second Board ID: field has invalid value: %s" % \
           repr(self.mEntryBid1.get()),
           fg=gt.ColorFgStatusError)
@@ -416,9 +416,9 @@ if __name__ == '__main__':
     dlg = GuiDlgKHR1Opt(root, 
         lastSettings={'board_ids':[0, 1], 'servo_version':'blue'})
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run unit test
   main()

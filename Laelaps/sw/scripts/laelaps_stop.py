@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -77,7 +77,7 @@ class usage(Exception):
 ## \brief Print 'try' message'
 #
 def printTry():
-  print "Try '%s --help' for more information." % (Argv0)
+  print("Try '%s --help' for more information." % (Argv0))
 
 #
 ## \brief Print usage error.
@@ -86,14 +86,14 @@ def printTry():
 #
 def printUsageErr(emsg):
   if emsg:
-    print "%s: Error: %s" % (Argv0, emsg)
+    print("%s: Error: %s" % (Argv0, emsg))
   else:
-    print "%s: Error" % (Argv0)
+    print("%s: Error" % (Argv0))
   printTry()
 
 ## \brief Print Command-Line Usage Message.
 def printUsage():
-    print \
+    print(\
 """
 usage: %s [OPTIONS]
        %s --help
@@ -106,7 +106,7 @@ Options and arguments:
 Exit Status:
   Returns exits status of 0 on success. An exit status of 128 indicates usage 
   error.
-"""  % (Argv0, Argv0)
+"""  % (Argv0, Argv0))
  
 #
 ## \brief Get command-line options
@@ -124,7 +124,7 @@ def getOptions(kwargs):
   # parse command-line options
   try:
     opts, args = getopt.getopt(argv[1:], "?h", ['help', ''])
-  except getopt.error, msg:
+  except getopt.error as msg:
     raise usage(msg)
   for opt, optarg in opts:
     if opt in ('-h', '--help', '-?'):
@@ -138,7 +138,7 @@ def getOptions(kwargs):
 #
 try:
   CliArgs = getOptions(CliArgs)
-except usage, e:
+except usage as e:
   printUsageErr(e.msg)
   sys.exit(128)
 
@@ -154,11 +154,11 @@ if wd.open(SysConf.SensorDevName):
   ret = wd.cmdReadEnables()
   if ret['rc'] == 'ok':
     if not ret['enables']['motor_ctlr_en']:
-      print "Motor controllers already disabled, nothing to stop."
+      print("Motor controllers already disabled, nothing to stop.")
       DoStop = False
 else:
-  print 'Error: Failed to open connection to watchdog subprocessor.'
-  print '       Continuing...'
+  print('Error: Failed to open connection to watchdog subprocessor.')
+  print('       Continuing...')
 
 
 if DoStop:
@@ -173,7 +173,7 @@ if DoStop:
     motorctlr.setMixedSpeed(SysConf.MotorCtlrAddrRear,  0, 0)
     motorctlr.close()
   except RoboClaw.RoboClawException as inst:
-    print 'Error:', inst.message
+    print('Error:', inst.message)
 
 if wd.isOpen():
   wd.close()

@@ -217,9 +217,9 @@ class GuiWinDynaViz(GuiWin.GuiWin):
         Return Values:
           None
     """
-    #print "Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request)
-    #print "Dbg: %s: WinUpdate: request: %s, %s" % \
-    #    (self.mContextName, request, repr(kwargs))
+    #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
+    #print("Dbg: %s: WinUpdate: request: %s, %s" % \
+    #    (self.mContextName, request, repr(kwargs)))
     if request == 'f_obs_i':
       if self.mIsAutoMode == True or kwargs.get('force', False):
         self.WinUpdateRepellorSpikeGraph(obs_sensors=kwargs['obs_sensors'])
@@ -242,7 +242,7 @@ class GuiWinDynaViz(GuiWin.GuiWin):
     elif request == 'clear':
       self.WinUpdateClear()
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
   #--
   def WinUpdateCfg(self, **kwargs):

@@ -210,8 +210,8 @@ static int bsModNullReqWrite(BsVConnHnd_T hndVConn,
   //
   // Execute client request.
   //
-  n = write(pCtlBlk->m_fd, msgReq.m_writebuf.u.m_buf,
-                      (size_t)msgReq.m_writebuf.m_count);
+  n = (int)write(pCtlBlk->m_fd, msgReq.m_writebuf.u.m_buf,
+                 (size_t)msgReq.m_writebuf.m_count);
 
   // check operation return code
   if( n < 0 )

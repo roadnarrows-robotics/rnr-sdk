@@ -457,7 +457,7 @@ class GuiDlgSerConn(tkSimpleDialog.Dialog):
       self.result = {'port':port, 'baudrate':baudrate, 'bytesize':bytesize,
                      'parity':parity, 'stopbits':stopbits}
       return True
-    except IOError, err:
+    except IOError as err:
       s = "%s" % err
       self.ShowStatus(s, fg=gt.ColorFgStatusError)
       return False
@@ -552,8 +552,8 @@ class GuiDlgSerConn(tkSimpleDialog.Dialog):
 
 if __name__ == '__main__':
   def _opencmd(port, baudrate=2400, bytesize=8, parity='N', stopbits=2):
-    print '_opencmd(%s,%d,%d,%s,%d)' % \
-            (repr(port), baudrate, bytesize, repr(parity), stopbits)
+    print('_opencmd(%s,%d,%d,%s,%d)' % \
+            (repr(port), baudrate, bytesize, repr(parity), stopbits))
     open(port)
 
   def main():
@@ -564,9 +564,9 @@ if __name__ == '__main__':
                    '/dev/ttyUB1', '/dev/tty10', 'com3', 'com4', 'com5'],
       lastSettings={'port':'/dev/ttyUB0', 'baudrate':19200, 'parity':'E'})
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

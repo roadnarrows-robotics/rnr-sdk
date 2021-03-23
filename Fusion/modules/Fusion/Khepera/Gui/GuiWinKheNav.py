@@ -246,7 +246,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
         Return Values:
           None
     """
-    #print "Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       self.WinUpdateStatus(**kwargs)
     elif request == 'loc':
@@ -272,7 +272,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
         self.WinUpdateGoals(items['goal_speed'], items['goal_theta'])
         self.WinUpdateStatus(**items)
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
   #--
   def WinUpdateActuals(self, speed, theta):
@@ -574,7 +574,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
         Return Value:
           Canvas id.
     """
-    #print 'goalvector', r, theta, isFwd
+    #print('goalvector', r, theta, isFwd)
     orig = self.mNavOrigin
     if r > 0.0:
       if isFwd:
@@ -632,7 +632,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
           None.
     """
     r, theta = self._rect2polar(x, y)
-    #print 'polar', r, math.degrees(theta)
+    #print('polar', r, math.degrees(theta))
     if r > self.mNavRadius:
       return
     speed = self._speed(r)
@@ -1024,7 +1024,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
     # convert to navigator coordinates
     mousex = x - origx
     mousey = y - origy
-    #print 'navmouse', mousex, mousey
+    #print('navmouse', mousex, mousey)
 
     self.NavSetGoalsFromCoord(mousex, mousey, True)
 
@@ -1042,7 +1042,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
     # convert to navigator coordinates
     mousex = x - origx
     mousey = y - origy
-    #print 'navmouse', mousex, mousey
+    #print('navmouse', mousex, mousey)
 
     self.NavSetGoalsFromCoord(mousex, mousey, False)
  
@@ -1066,13 +1066,13 @@ class GuiWinKheNav(GuiWin.GuiWin):
     """
     x = float(x - self.mNavOrigin[0]) # x larger to the right
     y = float(self.mNavOrigin[1] - y) # y smaller to the top
-    #print 'x,y', x, y
+    #print('x,y', x, y)
     r = math.sqrt(math.pow(x, 2) + math.pow(y, 2))
     if x != 0.0:
       theta = math.atan(y/x) 
     else:
       theta = math.radians(90)
-    #print 'raw theta', theta, math.degrees(theta)
+    #print('raw theta', theta, math.degrees(theta))
 
     # fix up angle for different quadrants [0, 360)
     if x == 0 and y < 0.0:      # 270 is strange
@@ -1119,20 +1119,20 @@ class GuiWinKheNav(GuiWin.GuiWin):
       return self.mNavRadius
     r0 = self.mNavRadius / 2.0    # starting approximation
     cs = (s * self.mNavRadius) / self.mSpeedMax  # c(s)
-    #print 'cs', cs
+    #print('cs', cs)
     du = self.mK / self.mNavRadius           # du/dr
     n = 0
-    #print '>', r0
+    #print('>', r0)
     while n < 15:
       u = self.mK * (r0 / self.mNavRadius - 1.0) # u(r)
       eu = math.exp(u)          # exp(u)
       r1 = r0 - (r0 * eu - cs) / (eu * (1.0 + r0 * du)) # r0 - f(r0)/f'(r0)
-      #print n, r1
+      #print(n, r1)
       if math.fabs(r1-r0) < 0.001:
         return r1
       r0 = r1
       n += 1
-    #print n, r1
+    #print(n, r1)
     return r1
 
 

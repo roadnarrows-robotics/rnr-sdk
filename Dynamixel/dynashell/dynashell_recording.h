@@ -334,7 +334,7 @@ public:
     }
     else
     {
-      DynaRecord::NoField;
+      return DynaRecord::NoField;
     }
   }
 
@@ -440,7 +440,7 @@ public:
    *
    * \param nSamplePeriod Sample period in milliseconds.
    */
-  virtual int SetSamplePeriod(int nSamplePeriod)
+  virtual void SetSamplePeriod(int nSamplePeriod)
   {
     if( nSamplePeriod < 1 )
     {

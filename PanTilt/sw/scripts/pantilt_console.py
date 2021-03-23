@@ -1,19 +1,21 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
-# Package:   RoadNarrows Robotics Laelaps System V Init.d Console
+# Package:   RoadNarrows Robotics Pan-Tilt Console
 #
 # Link:      https://github.com/roadnarrows-robotics/laelaps
 #
-# File: laelaps_init.d
+# File: pantilt_console.py
+#
+# Note: This script is incomplete.
 #
 ## \file 
 ##
 ## $LastChangedDate: 2016-03-18 09:57:27 -0600 (Fri, 18 Mar 2016) $
 ## $Rev: 4354 $
 ##
-## \brief Graphical user interface console to control the Laelaps init.d
+## \brief Graphical user interface console to control the Pan-Tilt init.d
 ## daemons.
 ##
 ## \author Robin Knight (robin.knight@roadnarrows.com)
@@ -46,19 +48,19 @@ import tkFont
 sys.path.insert(0, "/usr/local/lib/python2.7/site-packages")
 sys.path.insert(0, "/prj/lib/python2.7/site-packages")
 
-from Laelaps.Utils import *
+from PanTilt.Utils import *
 
 ## \brief Application version. Update as needed. 
 appVersion = '1.0.0'
 
 ## \brief Additional image search paths.
 imagePath = [
-  "/prj/share/Laelaps/images",
-  "/prj/share/Laelaps/images/icons",
+  "/prj/share/PanTilt/images",
+  "/prj/share/PanTilt/images/icons",
   "/prj/share/appkit/images",
   "/prj/share/appkit/images/icons",
-  "/usr/local/share/Laelaps/images",
-  "/usr/local/share/Laelaps/images/icons"
+  "/usr/local/share/PanTilt/images",
+  "/usr/local/share/PanTilt/images/icons"
   "/usr/local/share/appkit/images",
   "/usr/local/share/appkit/images/icons"
 ]
@@ -107,11 +109,11 @@ class window(Frame):
     # intialize window data
     kw = self.initData(kw)
 
-    self.m_imageLoader = ImageLoader(py_pkg='Laelaps.images',
+    self.m_imageLoader = ImageLoader(py_pkg='PanTilt.images',
                                       image_paths=imagePath)
 
     Frame.__init__(self, master=master, cnf=cnf, **kw)
-    self.master.title("Laelaps Init.d Console")
+    self.master.title("PanTilt Init.d Console")
 
     self.m_icons['app_icon'] = \
                     self.m_imageLoader.loadImage("icons/LaelapsInitIcon.png")
@@ -146,9 +148,9 @@ class window(Frame):
     self.m_svcDesc        = {
         'laelaps_bsproxy':  'BotSense Proxy Server',
         'laelaps_roscore':  'ROS Master, Parameter Server, rosout logging node',
-        'laelaps_control':  'Laelaps Control ROS node',
+        'laelaps_control':  'PanTilt Control ROS node',
         'laelaps_xbox':     'HID Xbox360 daemon / ROS node',
-        'laelaps_teleop':   'Laelaps Teleoperation ROS node'}
+        'laelaps_teleop':   'PanTilt Teleoperation ROS node'}
     self.m_lock = threading.Lock()
 
     if kw.has_key('debug'):
@@ -190,7 +192,7 @@ class window(Frame):
     # top heading
     w = Label(self)
     w['font']   = ('Helvetica', 16)
-    w['text']   = 'Laelaps Init.d Console'
+    w['text']   = 'PanTilt Init.d Console'
     w['anchor'] = CENTER
     w.grid(row=0, column=1, sticky=E+W)
 
@@ -711,7 +713,7 @@ class usage(Exception):
 # ------------------------------------------------------------------------------
 
 ##
-## \brief Laelaps control panel.
+## \brief PanTilt control panel.
 ##
 class application():
 

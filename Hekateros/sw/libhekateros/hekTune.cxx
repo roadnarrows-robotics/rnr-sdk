@@ -82,6 +82,8 @@ HekTunesJoint &HekTunesJoint::operator=(const HekTunesJoint &rhs)
   m_fPidKd        = rhs.m_fPidKd;
   m_fPidMaxDeltaV = rhs.m_fPidMaxDeltaV;
   m_fOverTorqueTh = rhs.m_fOverTorqueTh;
+
+  return *this;
 }
 
 

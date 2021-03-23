@@ -94,6 +94,11 @@ namespace rnr
     // Forward declarations
     //
     class CommandLine;
+    class CmdExec;
+    class DataSect;
+    std::ostream &operator<<(std::ostream &os, const CommandLine &obj);
+    std::ostream &operator<<(std::ostream  &os, const CmdExec &obj);
+    std::ostream &operator<<(std::ostream &os, const DataSect &obj);
 
     //--------------------------------------------------------------------------
     // Types and Values
@@ -268,7 +273,8 @@ namespace rnr
        *
        * \return Reference to output stream.
        */
-      friend std::ostream &operator<<(std::ostream &os, const CmdExec &obj);
+      friend std::ostream &rnr::cmd::operator<<(std::ostream  &os,
+                                                const CmdExec &obj);
 
     protected:
       /*!
@@ -401,7 +407,8 @@ namespace rnr
        *
        * \return Reference to output stream.
        */
-      friend std::ostream &operator<<(std::ostream &os, const DataSect &obj);
+      friend std::ostream &rnr::cmd::operator<<(std::ostream   &os,
+                                                const DataSect &obj);
 
     }; // class DataSect
 

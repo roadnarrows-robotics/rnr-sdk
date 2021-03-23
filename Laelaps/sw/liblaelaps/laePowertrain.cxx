@@ -125,7 +125,7 @@ LaePowertrainAttr::LaePowertrainAttr(const LaePowertrainAttr &src)
   m_fMetersPerRadian    = src.m_fMetersPerRadian;
 }
 
-LaePowertrainAttr LaePowertrainAttr::operator=(const LaePowertrainAttr &rhs)
+LaePowertrainAttr &LaePowertrainAttr::operator=(const LaePowertrainAttr &rhs)
 {
   // (derived) attributes
   m_nMotorId            = rhs.m_nMotorId;
@@ -193,7 +193,7 @@ LaePowertrainState::LaePowertrainState(const LaePowertrainState &src)
   m_fPm       = src.m_fPm;
 }
 
-LaePowertrainState LaePowertrainState::operator=(const LaePowertrainState &rhs)
+LaePowertrainState &LaePowertrainState::operator=(const LaePowertrainState &rhs)
 {
   m_nEncoder  = rhs.m_nEncoder;
   m_nSpeed    = rhs.m_nSpeed;
@@ -228,7 +228,7 @@ LaePowertrain::LaePowertrain(const LaePowertrain &src)
   m_state   = src.m_state;
 }
 
-LaePowertrain LaePowertrain::operator=(const LaePowertrain &rhs)
+LaePowertrain &LaePowertrain::operator=(const LaePowertrain &rhs)
 {
   m_strName = rhs.m_strName;
   m_attr    = rhs.m_attr;
@@ -285,7 +285,7 @@ string LaePowertrain::toKey(const int nMotorId)
 
   if( (nMotorId >= 0) && (nMotorId < LaeMotorsNumOf) )
   {
-    LaeDesc::KeyPowertrain[nMotorId];
+    return LaeDesc::KeyPowertrain[nMotorId];
   }
   else
   {
@@ -348,6 +348,8 @@ int LaePowertrain::resetOdometer()
   m_state.m_fPosition = 0.0;
 
   RtDb.m_kin.m_powertrain[m_attr.m_nMotorId].m_fPosition = m_state.m_fPosition;
+ 
+  return LAE_OK;
 }
 
 int LaePowertrain::updateStateDynamics(s64_t   nEncoder,
@@ -402,6 +404,8 @@ int LaePowertrain::updateStateDynamics(s64_t   nEncoder,
   RtDb.m_kin.m_powertrain[m_attr.m_nMotorId].m_fVelocity = m_state.m_fVelocity;
   RtDb.m_kin.m_powertrain[m_attr.m_nMotorId].m_fPe       = m_state.m_fPe;
   RtDb.m_kin.m_powertrain[m_attr.m_nMotorId].m_fTorque   = m_state.m_fTorque;
+
+  return LAE_OK;
 }
 
 int LaePowertrain::updateHealth(double fVolts, double fTemp, uint_t uCtlrStatus)
@@ -485,4 +489,6 @@ int LaePowertrain::updateHealth(double fVolts, double fTemp, uint_t uCtlrStatus)
 
   m_state.m_fPe = m_state.m_fAmps * m_state.m_fVolts;
   m_state.m_fPm = m_state.m_fPe * 1.0;  // TODO need efficiency curve
+
+  return LAE_OK;
 }

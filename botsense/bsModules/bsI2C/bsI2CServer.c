@@ -516,7 +516,7 @@ static int bsModI2CScanCallback(i2c_t *pHndI2C, i2c_addr_t addr, void *pContext)
   if( pMsgRsp->m_scan.m_count < BSI2C_RSPSCAN_SCAN_LEN )
   {
     pMsgRsp->m_scan.u.m_buf[pMsgRsp->m_scan.m_count++] = addr;
-    return pMsgRsp->m_scan.m_count;
+    return (int)pMsgRsp->m_scan.m_count;
   }
   else
   {

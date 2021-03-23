@@ -179,14 +179,14 @@ if __name__ == '__main__':
     dlg = GuiDlgAskYesOrNo(root,
                     'Maybe yes, Maybe no',
                     'Do you wanna go out with me?', addcancel=True)
-    print dlg.result
+    print(dlg.result)
     if dlg.result == 'yes':
       return
 
     dlg = GuiDlgAskYesOrNo(root,
             'No???',
             'But I am a real nice guy.\nYou like hairy backs do you not?')
-    print dlg.result
+    print(dlg.result)
 
   # run unit test
   main()

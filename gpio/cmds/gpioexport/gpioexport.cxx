@@ -34,6 +34,7 @@
 #include <unistd.h>
 
 #include <string>
+#include <sstream>
 
 #include "rnr/rnrconfig.h"
 #include "rnr/log.h"
@@ -319,16 +320,19 @@ int main(int argc, char* argv[])
 
   if( OptsMode != NULL )
   {
-    char  gpioPath[MAX_PATH]; 
-    char  path[MAX_PATH]; 
+    char          gpioPath[MAX_PATH]; 
+    stringstream  path;
+    const char   *fname;
   
     gpioMakeDirname(ArgsGpioNum, gpioPath, sizeof(gpioPath));
 
-    sprintf(path, "%s/%s", gpioPath, "value");
+    path << gpioPath << "/value";
 
-    if( chmod(path, Permissions) < 0 )
+    fname = path.str().c_str();
+
+    if( chmod(fname, Permissions) < 0 )
     {
-      LOGSYSERROR("chmod(%s, %o)", path, Permissions);
+      LOGSYSERROR("chmod(%s, %o)", fname, Permissions);
       return APP_EC_EXEC;
     }
   }

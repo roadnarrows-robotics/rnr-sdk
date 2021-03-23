@@ -1507,6 +1507,8 @@ int DynaServoGeneric::Reset()
     SyncData();
     CheckData();
   }
+
+  return rc;
 }
 
 int DynaServoGeneric::SyncData()

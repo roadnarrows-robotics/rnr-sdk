@@ -2,6 +2,11 @@
 The rnr-sdk git repository holds software packages that support the
 RoadNarrows Robotics products, sensors, and intelligent systems.
 
+Originally the RNR SDK were separate git repositories. At end-of-life, the
+kits were loosely integrated into one repository. 
+
+See MakeAll to make all kits.
+
 [![Logo][rnlogo]The rnr-sdk wiki][wiki]
 
 ## Access

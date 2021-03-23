@@ -50,6 +50,9 @@ SWIG_FILES 				= i2ccore.i
 SWIG_EXTMOD_DIR 	= ../modules/rnr
 SWIG_EXTMOD_LIBS 	= -lrnr_i2c -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 all-extmod: swig-all
 
 # Clean extension module intermediates

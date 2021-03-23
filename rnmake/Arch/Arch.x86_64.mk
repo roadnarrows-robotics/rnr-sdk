@@ -87,7 +87,7 @@ RNMAKE_MAKEDEPS	= $(CC) $(CFLAGS_DEPS_ONLY)
 #------------------------------------------------------------------------------
 CXX                 = c++
 CXXFLAGS_CODEGEN		= -fPIC -m64
-CXXFLAGS_STD				= -std=c++11
+CXXFLAGS_STD				= -std=c++17
 CXXFLAGS_DEBUG      = -g
 CXXFLAGS_OPTIMIZE   = -O2
 CXXFLAGS_CPP_ONLY   = -E
@@ -171,8 +171,11 @@ RNMAKE_PYTHON_ENABLED	=	y
 
 # SWIG - Simplified Wrapper and Interface Generator command
 RNMAKE_SWIG_ENABLED	=	y
-SWIG_CFLAGS 				=	$(CFLAGS_CODEGEN) \
-											-pthread -shared -Wl,-O1 -Wl,-Bsymbolic-functions
+SWIG_CFLAGS_WARNING = -Wno-sign-conversion
+SWIG_CFLAGS_LD      = -Wl,-O1 -Wl,-Bsymbolic-functions
+SWIG_CFLAGS 				=	$(CFLAGS_CODEGEN) -pthread -shared \
+											$(SWIG_CFLAGS_WARNING) \
+											$(SWIG_CFLAGS_LD)
 SWIG_INCLUDES				= 
 SWIG_LDFLAGS 				=	
 

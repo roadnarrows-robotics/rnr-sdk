@@ -568,8 +568,8 @@ class GuiMenuBar:
         Return Value:
           None.
     """
-    #print 'DBG: stateSpace=%s, state=%s, mbPath=%s' % \
-    #    (repr(stateSpace), repr(state), repr(mbPath))
+    #print('DBG: stateSpace=%s, state=%s, mbPath=%s' % \
+    #    (repr(stateSpace), repr(state), repr(mbPath)))
     for mbPath in self.iterpaths(mbPath):
       mbItemParent, index = self._FindItem(mbPath, self.mMenuBarTree)
       mbItem = mbItemParent['subtrees'][index-1]
@@ -889,17 +889,17 @@ class GuiMenuBar:
 
     # print this item
     if mbTree['type'] == 'tearoff':
-      print "%*s%s (owner=%s)" % (indent, '', gt.MBPS, mbTree['owner'])
+      print("%*s%s (owner=%s)" % (indent, '', gt.MBPS, mbTree['owner']))
     elif mbTree['type'] == gt.MBTypeCascade:
-      print "%*s%s%s (owner=%s, activeDisabled=%s)" \
+      print("%*s%s%s (owner=%s, activeDisabled=%s)" \
           % (indent, '', repr(mbTree['label']), 
              gt.MBPS, repr(mbTree['owner']),
-             repr(mbTree['activeDisabled']))
+             repr(mbTree['activeDisabled'])))
     else:
-      print "%*s%s (type=%s, owner=%s, activeDisabled=%s)" \
+      print("%*s%s (type=%s, owner=%s, activeDisabled=%s)" \
           % (indent, '', repr(mbTree['label']), 
              repr(mbTree['type']), repr(mbTree['owner']),
-             repr(mbTree['activeDisabled']))
+             repr(mbTree['activeDisabled'])))
 
     # print subtrees
     for mbItem in mbTree['subtrees']:
@@ -914,16 +914,16 @@ if __name__ == '__main__':
   _Root     = None
   _MenuBar  = None
 
-  def cb1(): print 'cb1'
+  def cb1(): print('cb1')
 
-  def cb2(): print 'cb2'
+  def cb2(): print('cb2')
 
   def cbColorMenuBlue():
-    print 'cbColorMenuBlue'
+    print('cbColorMenuBlue')
     colormenu('blue')
 
   def cbColorMenuBlack():
-    print 'cbColorMenuBlack'
+    print('cbColorMenuBlack')
     colormenu('black')
 
   def colormenu(color):
@@ -935,35 +935,35 @@ if __name__ == '__main__':
         pass
 
   def cbPrintTree():
-    print 'cbPrintTree'
+    print('cbPrintTree')
     mb = _MenuBar
     mb._PrintTree()
 
   def cbAddTravel():
-    print 'cbAddTravel'
+    print('cbAddTravel')
     mbmaketraveltree()
 
   def cbDelTravel():
-    print 'cbDelTravel'
+    print('cbDelTravel')
     mb = _MenuBar
     mb.DelMenuItemsByOwner('travel')
 
   def cbDisAfricanFalls():
-    print 'cbDisAfricanFalls'
+    print('cbDisAfricanFalls')
     mb = _MenuBar
     mb.SetMenuItemStates('falls', 'africa')
 
   def cbDisSouthAmFalls():
-    print 'cbDisSouthAmFalls'
+    print('cbDisSouthAmFalls')
     mb = _MenuBar
     mb.SetMenuItemStates('falls', 'southamerica')
 
   def cbEnAll():
-    print 'cbEnAll'
+    print('cbEnAll')
     mb = _MenuBar
     mb.SetMenuItemStates('falls', 'nowhere')
 
-  def cbtravel(): print 'cbtravel'
+  def cbtravel(): print('cbtravel')
 
   def mbmakeroottree():
     mb = _MenuBar

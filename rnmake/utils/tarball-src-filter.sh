@@ -14,12 +14,14 @@ pkgroot="${1}"
 # In awk, regular expression rules are compared against the input records until
 # one fires which will execute the associated action. Actions are:
 #   'next' skips current record (i.e. filter out from stream)
-#   'print $0' prints the line line (i.e. allow).
+#   'print $0' prints the line (i.e. allow).
 # Note: Order is important. The last record allows all unfiltered lines to be
 #       included. Keep last.
 #
 find ${pkgroot} -print | \
 gawk '
+  /\.git/             { next }
+  /\.gitignore/       { next }
   /\.svn/             { next }
   /\.deps/            { next }
   /\/obj/             { next }
@@ -41,6 +43,7 @@ gawk '
   /\.o/               { next }
   /\.out/             { next }
   /\.log/             { next }
+  /\__pycache__/      { next }
   /\.pyc/             { next }
   /\.pyo/             { next }
   /\.done/            { next }

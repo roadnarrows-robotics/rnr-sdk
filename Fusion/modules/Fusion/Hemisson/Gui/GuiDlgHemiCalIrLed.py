@@ -537,9 +537,9 @@ if __name__ == '__main__':
                             cmd.ProximitySensorsGetCalParams())
  
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -161,7 +161,7 @@ class window(Frame):
     #RDK self.master.tk.call('wm', 'iconphoto', self.master._w,
     #RDK                    self.m_icons['app_icon'])
 
-    #print 'DBG', self.m_var
+    #print('DBG', self.m_var)
 
     # create and show widgets
     self.createWidgets()
@@ -169,7 +169,7 @@ class window(Frame):
 
     self.update_idletasks()
     #width = self.winfo_width()
-    #print 'DBG: self.width =', width
+    #print('DBG: self.width =', width)
 
     # RDK Comment out when done. Debug
     self.dbgSeedFields()
@@ -179,7 +179,7 @@ class window(Frame):
 
   def perfMark(self, msg):
     t1 = time.time()
-    print "%.4f: %s" % (t1 - self.t0, msg)
+    print("%.4f: %s" % (t1 - self.t0, msg))
     self.t0 = t1
 
   #
@@ -1275,7 +1275,7 @@ class window(Frame):
 
     self.update_idletasks()
     width = wframe.winfo_width()
-    #print 'DBG: plotcontrols width =', width
+    #print('DBG: plotcontrols width =', width)
 
     return width
 
@@ -1407,7 +1407,7 @@ class window(Frame):
   def notimpl(self):
     emsg = "Window function not implemented yet."
     self.showError(emsg)
-    print emsg
+    print(emsg)
 
   #
   ## \brief Apply tuning tweaks to controllers callback.
@@ -1518,7 +1518,7 @@ class window(Frame):
     prodInfo = None
     try:
       rospy.wait_for_service("laelaps_control/get_product_info", timeout=5)
-    except rospy.ROSException, e:
+    except rospy.ROSException as e:
       self.showError('Get product info: ' + e.message + '.')
     else:
       try:
@@ -1527,7 +1527,7 @@ class window(Frame):
                                           GetProductInfo)
         rsp = get_product_info()
         prodInfo = rsp.i
-      except rospy.ServiceException, e:
+      except rospy.ServiceException as e:
         self.showError("Get product info request failed: %s." % (e.message))
     return prodInfo
 
@@ -1540,7 +1540,7 @@ class window(Frame):
     name = "laelaps"
     try:
       rospy.wait_for_service("laelaps_control/get_product_info", timeout=5)
-    except rospy.ROSException, e:
+    except rospy.ROSException as e:
       rospy.logerr("Get product info: %s." % (e.message))
     else:
       try:
@@ -1549,7 +1549,7 @@ class window(Frame):
                                           GetProductInfo)
         rsp = get_product_info()
         name = rsp.i.hostname
-      except rospy.ServiceException, e:
+      except rospy.ServiceException as e:
         rospy.logerr("Get product info request failed: %s." % (e.message))
     return name
 
@@ -1668,21 +1668,21 @@ class application():
   #
   def printUsageErr(self, emsg):
     if emsg:
-      print "%s: %s" % (self._Argv0, emsg)
+      print("%s: %s" % (self._Argv0, emsg))
     else:
-      print "%s: error" % (self._Argv0)
-    print "Try '%s --help' for more information." % (self._Argv0)
+      print("%s: error" % (self._Argv0))
+    print("Try '%s --help' for more information." % (self._Argv0))
 
   ## \brief Print Command-Line Usage Message.
   def printUsage(self):
-    print \
+    print(\
 """
 usage: %s [OPTIONS]
        %s --help
 
 Options and arguments:
 -h, --help                : Display this help and exit.
-"""  % (self._Argv0, self._Argv0)
+"""  % (self._Argv0, self._Argv0))
  
   #
   ## \brief Get command-line options
@@ -1706,7 +1706,7 @@ Options and arguments:
     try:
       opts, args = getopt.getopt(argv[1:], "?h",
           ['help', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -1742,8 +1742,8 @@ Options and arguments:
     # parse command-line options and arguments
     try:
       kwargs = self.getOptions(argv, **kwargs)
-    except usage, e:
-      print e.msg
+    except usage as e:
+      print(e.msg)
       return 2
 
     # create root 

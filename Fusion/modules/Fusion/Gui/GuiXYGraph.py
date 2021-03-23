@@ -801,55 +801,55 @@ if __name__ == '__main__':
               xdata=[-3.2, -1.4, 0.0, 0.5, 2.0, 5.6], 
               ydata=[-12.0, 4.9, 0.0, -3.1, 6.8, 9.1],
               xstep=1.0, ystep=2.0, xlabel='weed\n(lbs)', ylabel='wacky\ndacky')
-      print val, 'raw data graph'
+      print(val, 'raw data graph')
     elif val == 1:
       graph.newdata(xdata=[-4.0, -1.4, 0.0, 0.5, 2.0, 6.0], 
                     ydata=[-12.0, 4.9, 0.0, -3.1, 6.8, 9.1])
-      print val, 'new raw data - should have same domain and range'
+      print(val, 'new raw data - should have same domain and range')
     elif val == 2:
       graph.newdata(xdata=[-4.0, -1.4, 0.0, 0.5, 2.0, 6.0], 
                     ydata=[-12.0, 4.9, 0.0, -3.1, 6.8, 10.0])
-      print val, 'new raw data - should have same domain and range'
+      print(val, 'new raw data - should have same domain and range')
     elif val == 3:
       graph.newdata(xdata=[-4.4, -1.4, 0.0, 0.5, 2.0, 6.0], 
                     ydata=[-12.0, 4.9, 0.0, -3.1, 6.8, 10.0])
-      print val, 'new raw data - should have new -x domain'
+      print(val, 'new raw data - should have new -x domain')
     elif val == 4:
       graph.newdata(xdata=[-4.4, -1.4, 0.0, 0.5, 2.0, 7.0], 
                     ydata=[-12.0, 4.9, 0.0, -3.1, 6.8, 10.0])
-      print val, 'new raw data - should have new +x domain'
+      print(val, 'new raw data - should have new +x domain')
     elif val == 5:
       graph.newdata(xdata=[-4.4, -1.4, 0.0, 0.5, 2.0, 7.0], 
                     ydata=[-12.0, 4.9, 0.0, -3.1, 6.8, 11.0])
-      print val, 'new raw data - should have new +y range'
+      print(val, 'new raw data - should have new +y range')
     elif val == 6:
       graph.newdata(xdata=[-4.4, -1.4, 0.0, 0.5, 2.0, 7.0], 
                     ydata=[-12.1, 4.9, 0.0, -3.1, 6.8, 10.0])
-      print val, 'new raw data - should have new -y range'
+      print(val, 'new raw data - should have new -y range')
     elif val == 7:
       graph.graph(title='y = x ^ 2',
               xdata=[0.0, 0.5, 1.0, 1.5, 2.0],
               fofx=parabola,
               xstep=1.0, ystep=1.0, linewidth=3, linecolor=gt.ColorGreen1,
               showpoints=False)
-      print val, 'graph x^2'
+      print(val, 'graph x^2')
     elif val == 8:
       graph.graph(title='y = x ^ 3',
               xdata=[-2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0],
               fofx=p3,
               xstep=1.0, ystep=1.0, linecolor=gt.ColorRed1,
               domain=(-2.0, 2.0), range=(-4.0, 4.0))
-      print val, 'graph x^3'
+      print(val, 'graph x^3')
     elif val == 9:
       graph.graph(title='y = cos(x)',
               xdata=[180, 135, 90, 45, 0, -45, -90, -135, -180],
               fofx=degcos,
               xstep=15.0, ystep=.5, linecolor=gt.ColorRed1, linewidth=2,
               domain=(-150, 60))
-      print val, 'graph cos(x)'
+      print(val, 'graph cos(x)')
     elif val == 10:
       graph.graph(title='null data')
-      print val, 'graph no data'
+      print(val, 'graph no data')
     val = (val + 1) % 11
 
   #--

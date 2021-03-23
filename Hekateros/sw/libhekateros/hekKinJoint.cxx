@@ -163,7 +163,7 @@ VelSpeedTuple::VelSpeedTuple(const VelSpeedTuple &src)
   m_nServoSpeed = src.m_nServoSpeed;
 }
 
-VelSpeedTuple VelSpeedTuple::operator=(const VelSpeedTuple &rhs)
+VelSpeedTuple &VelSpeedTuple::operator=(const VelSpeedTuple &rhs)
 {
   m_fJointVel   = rhs.m_fJointVel;
   m_nServoSpeed = rhs.m_nServoSpeed;
@@ -184,7 +184,7 @@ VelSpeedLookupTbl::VelSpeedLookupTbl()
   m_bDbg        = false;
 }
 
-VelSpeedLookupTbl VelSpeedLookupTbl::operator=(const VelSpeedLookupTbl &rhs)
+VelSpeedLookupTbl &VelSpeedLookupTbl::operator=(const VelSpeedLookupTbl &rhs)
 {
   m_fBucketSize = rhs.m_fBucketSize;
   m_nMaxIndex   = rhs.m_nMaxIndex;
@@ -192,6 +192,8 @@ VelSpeedLookupTbl VelSpeedLookupTbl::operator=(const VelSpeedLookupTbl &rhs)
   m_tbl         = rhs.m_tbl;
   m_strDbgId    = rhs.m_strDbgId;
   m_bDbg        = rhs.m_bDbg;
+
+  return *this;
 }
 
 void VelSpeedLookupTbl::create(double fJointMaxVel, double fBucketSize)

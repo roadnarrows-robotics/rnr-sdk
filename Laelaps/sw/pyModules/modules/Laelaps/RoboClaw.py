@@ -1079,8 +1079,8 @@ class RoboClaw:
 # UT main
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
-  print "Roboclaw Unit Test Example"
-  print
+  print("Roboclaw Unit Test Example")
+  print()
 
   addr = AddrDft
 
@@ -1091,52 +1091,52 @@ if __name__ == '__main__':
   try:
     motorctlr.open("/dev/ttyACM0", 1000000)
   except RoboClawException as inst:
-    print >>sys.stderr, "Error:", inst.message
+    print("Error:", inst.message, file=sys.stderr)
     sys.exit(4)
 
   # Get version string
   rcv = motorctlr.readVersion(addr)
-  print rcv[:-3]
+  print(rcv[:-3])
 
   #
   # Print settings
   #
   minV, maxV = motorctlr.readLogicBatterySettings(addr)
-  print "Logic Battery:    [%.1f, %.1f]" % (minV/10.0, maxV/10.0)
+  print("Logic Battery:    [%.1f, %.1f]" % (minV/10.0, maxV/10.0))
 
   minV, maxV = motorctlr.readMainBatterySettings(addr)
-  print "Main Battery:     [%.1f, %.1f]" % (minV/10.0, maxV/10.0)
+  print("Main Battery:     [%.1f, %.1f]" % (minV/10.0, maxV/10.0))
 
   mode1, mode2 = motorctlr.readEncoderMode(addr)
-  print "Encoder Modes:    0x%02x, 0x%02x" % (mode1, mode2)
+  print("Encoder Modes:    0x%02x, 0x%02x" % (mode1, mode2))
 
   motorctlr.setM1Pidq(addr, 0x00010000, 0x00008000, 0x00004000, 44000)
   motorctlr.setM2Pidq(addr, 0x00010000, 0x00008000, 0x00004000, 44000)
 
   p,i,d,qpps = motorctlr.readM1Pidq(addr)
-  print "M1 Velocity PID:"
-  print "  P    = 0x%08x" % (p / 65536.0)
-  print "  I    = 0x%08x" % (i / 65536.0)
-  print "  D    = 0x%08x" % (d / 65536.0)
-  print "  QPPS = %u" % (qpps)
+  print("M1 Velocity PID:")
+  print("  P    = 0x%08x" % (p / 65536.0))
+  print("  I    = 0x%08x" % (i / 65536.0))
+  print("  D    = 0x%08x" % (d / 65536.0))
+  print("  QPPS = %u" % (qpps))
 
   p,i,d,qpps = motorctlr.readM2Pidq(addr)
-  print "M2 Velocity PID:"
-  print "  P    = 0x%08x" % (p / 65536.0)
-  print "  I    = 0x%08x" % (i / 65536.0)
-  print "  D    = 0x%08x" % (d / 65536.0)
-  print "  QPPS = %u" % (qpps)
+  print("M2 Velocity PID:")
+  print("  P    = 0x%08x" % (p / 65536.0))
+  print("  I    = 0x%08x" % (i / 65536.0))
+  print("  D    = 0x%08x" % (d / 65536.0))
+  print("  QPPS = %u" % (qpps))
 
-  print
+  print()
 
-  print "All stop"
+  print("All stop")
   motorctlr.setM1Speed(addr, 0)
   motorctlr.setM2Speed(addr, 0)
 
-  print "Reset encoders"
+  print("Reset encoders")
   motorctlr.resetEncoderCnts(addr)
 
-  print
+  print()
 
   cnt = 0
   maxcnt = 15
@@ -1145,21 +1145,21 @@ if __name__ == '__main__':
 
   while True:
     cnt=cnt+1
-    print "Count = ",cnt
+    print("Count = ",cnt)
   
-    print "  Status:        0x%04x" % (motorctlr.readStatus(addr))
-    print "  Temperature:   %.1f" % (motorctlr.readTemperature(addr)/10.0)
-    print "  Main Battery:  %.1f" % (motorctlr.readMainBattery(addr)/10.0)
-    print "  Logic Battery: %.1f" % (motorctlr.readLogicBattery(addr)/10.0)
+    print("  Status:        0x%04x" % (motorctlr.readStatus(addr)))
+    print("  Temperature:   %.1f" % (motorctlr.readTemperature(addr)/10.0))
+    print("  Main Battery:  %.1f" % (motorctlr.readMainBattery(addr)/10.0))
+    print("  Logic Battery: %.1f" % (motorctlr.readLogicBattery(addr)/10.0))
 
     m1cur, m2cur = motorctlr.readCurrents(addr)
-    print "  Current M1:    %.1f" % (m1cur/100.0)
-    print "  Current M2:    %.1f" % (m2cur/100.0)
+    print("  Current M1:    %.1f" % (m1cur/100.0))
+    print("  Current M2:    %.1f" % (m2cur/100.0))
   
     pos1, status1 = motorctlr.readM1Encoder(addr)
     pos2, status2 = motorctlr.readM2Encoder(addr)
-    print "  Position M1:   %u, 0x%02x" % (pos1, status1)
-    print "  Position M2:   %u, 0x%02x" % (pos2, status2)
+    print("  Position M1:   %u, 0x%02x" % (pos1, status1))
+    print("  Position M2:   %u, 0x%02x" % (pos2, status2))
 
     tgtspeed1 += 1000
     tgtspeed2 += 1000
@@ -1168,20 +1168,20 @@ if __name__ == '__main__':
       tgtspeed1 = 0
       tgtspeed2 = 0
 
-    print "  Set Speeds:    %u, %u" % (tgtspeed1, tgtspeed2)
+    print("  Set Speeds:    %u, %u" % (tgtspeed1, tgtspeed2))
     motorctlr.setM1Speed(addr, tgtspeed1)
     motorctlr.setM2Speed(addr, tgtspeed2)
 
     speed1, status1 = motorctlr.readM1Speed(addr)
     speed2, status2 = motorctlr.readM2Speed(addr)
-    print "  Speed M1:      %u, 0x%02x" % (speed1, status1)
-    print "  Speed M2:      %u, 0x%02x" % (speed2, status2)
+    print("  Speed M1:      %u, 0x%02x" % (speed1, status1))
+    print("  Speed M2:      %u, 0x%02x" % (speed2, status2))
 
     time.sleep(2)
 
     if cnt > maxcnt:
       break
 
-  print "Stop"
+  print("Stop")
   motorctlr.setM1Speed(addr, 0)
   motorctlr.setM2Speed(addr, 0)

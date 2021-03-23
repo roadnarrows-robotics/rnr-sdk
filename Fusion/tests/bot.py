@@ -10,7 +10,7 @@ wb = float(KheBase.KheWheelBase)
 def theta(odl, odr):
   """ odometer left and right readings (mm) """
   r = (odr - odl) / wb
-  #print 'raw ratio', r
+  #print('raw ratio', r)
   if r > 1.0:
     qspins = math.floor(r)  # ccw quater spins
     offset = math.radians(qspins * 90.0)
@@ -21,13 +21,13 @@ def theta(odl, odr):
     r -= qspins
   else:
     offset = 0.0
-  #print 'adj ratio', r
+  #print('adj ratio', r)
   ftheta = math.asin(r)
-  #print 'raw theta', ftheta
+  #print('raw theta', ftheta)
   ftheta = math.fmod(ftheta+offset, twopi)
   if ftheta < 0.0:
     ftheta += twopi
-  #print 'theta in degrees', math.degrees(ftheta)
+  #print('theta in degrees', math.degrees(ftheta))
   return ftheta
 
 thetatestset = [
@@ -56,6 +56,6 @@ thetatestset = [
 def testtheta():
   for tstpt in thetatestset:
     ftheta = theta(tstpt[0], tstpt[1])
-    print 'odometer (%.3f, %.3f): theta exepct: %.3f  --> theta got: %.3f' % \
-        (tstpt[0], tstpt[1], tstpt[2], math.degrees(ftheta))
+    print('odometer (%.3f, %.3f): theta exepct: %.3f  --> theta got: %.3f' % \
+        (tstpt[0], tstpt[1], tstpt[2], math.degrees(ftheta)))
 

@@ -143,9 +143,9 @@ namespace sensor
        *
        * \param rhs   Right hand side object.
        *
-       * \return Returns copy of this.
+       * \return Returns reference to this.
        */
-      Quaternion operator=(const Quaternion &rhs);
+      Quaternion &operator=(const Quaternion &rhs);
 
       /*!
        * \brief Clear quaternion values.

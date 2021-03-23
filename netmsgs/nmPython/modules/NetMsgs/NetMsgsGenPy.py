@@ -166,7 +166,7 @@ class NetMsgsGenPy:
     # open python file for writing
     try:
       fp = open(self.mPyFilePath, 'w')
-    except IOError, err:
+    except IOError as err:
       raise nmBase.NetMsgsError("Error: %s" % (err))
     self.PrettyPrintTopComment(fp)
     self.GenPrologue(fp)

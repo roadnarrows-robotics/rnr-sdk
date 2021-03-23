@@ -325,9 +325,9 @@ if __name__ == '__main__':
         lastSettings={'active_channels':KHR1CmdBase.KHR1FacDftActiveServos},
         defaultSettings={'active_channels':KHR1CmdBase.KHR1FacDftActiveServos})
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run unit test
   main()

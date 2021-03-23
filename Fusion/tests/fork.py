@@ -12,28 +12,28 @@ def me():
   pid = os.fork()
 
   if pid == 0:
-    print 'child here'
+    print('child here')
 
     loc = 'and this is childs play'
 
-    print 'c', glob
-    print loc
+    print('c', glob)
+    print(loc)
 
     time.sleep(5)
 
-    print 'goodbye'
+    print('goodbye')
 
   else:
-    print 'parent here'
+    print('parent here')
 
     loc = 'but why am i here?'
 
-    print 'p', glob
-    print loc
+    print('p', glob)
+    print(loc)
 
     time.sleep(8)
 
-    print 'adieu'
+    print('adieu')
 
 def start():
   global childpid
@@ -50,16 +50,16 @@ def start():
   cmd =  'python -c "import Fusion.tests.fork as f; f.child(%s);"' % sshargs
   childin, childout = os.popen2(cmd, 'w') #, 0)
 
-  print 'parent: isatty(childin)', childin.isatty()
-  print 'parent: isatty(childout)', childout.isatty()
+  print('parent: isatty(childin)', childin.isatty())
+  print('parent: isatty(childout)', childout.isatty())
 
-  print 'parent: started'
+  print('parent: started')
   n = 0
   while n < 10:
     line = childout.readline()
-    print 'parent: rcvd %s' % repr(line)
+    print('parent: rcvd %s' % repr(line))
     if line == 'quit\n':
-      print 'parent: exiting'
+      print('parent: exiting')
       break
     n += 1
 
@@ -69,16 +69,16 @@ def child(arg1, arg2):
   childpid = os.getpid()
 
   fp = open('/tmp/child.out', 'w')
-  print >>fp, 'time=%.2f' % time.time()
-  print >>fp, 'pid=%d' % childpid
+  print('time=%.2f' % time.time(), file=fp)
+  print('pid=%d' % childpid, file=fp)
 
-  print 'child: child pid=%d' % childpid
-  print 'child: arg1=%s' % repr(arg1)
-  print 'child: arg2=%s' % repr(arg2)
+  print('child: child pid=%d' % childpid)
+  print('child: arg1=%s' % repr(arg1))
+  print('child: arg2=%s' % repr(arg2))
   time.sleep(1)
-  print 'quit'
-  print 'child: exiting'
-  print >>fp, 'child: exiting'
+  print('quit')
+  print('child: exiting')
+  print('child: exiting', file=fp)
 
 
 if __name__ == '__main__':

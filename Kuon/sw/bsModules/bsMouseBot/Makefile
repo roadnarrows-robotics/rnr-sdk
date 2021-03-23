@@ -111,6 +111,9 @@ SWIG_FILES 				= bsMouseBotCore.i
 SWIG_EXTMOD_DIR 	= $(RNMAKE_PKG_ROOT)/pyModules/modules/BotSense/MouseBot
 SWIG_EXTMOD_LIBS 	= -lbsclient_mousebot -lbotsense -lnetmsgs -li2c -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 # Include Swig Rules Makefile
 #include $(RNMAKE_ROOT)/Rules.swig.mk
 

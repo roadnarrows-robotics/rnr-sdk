@@ -187,7 +187,7 @@ static void cbLogPkt(cbHnd_T       hnd,
               "{magic=0x%02x, tid=%d, msglen=%d, msg=%s(msgid=%u)}",
               hnd->m_fd, sEvent,
               pPktHdr->m_hdrMagic, pPktHdr->m_hdrTid, pPktHdr->m_hdrMsgLen,
-              CB_MSG_NAME_ID(uMsgId));
+              sMsgName, uMsgId);
 }
 #endif // LOG
 

@@ -118,7 +118,7 @@ class SM:
         Return Value:
           None
     """
-    print state, opPost.__name__, transList
+    print(state, opPost.__name__, transList)
     
   #--
   def Transition(self, input):
@@ -195,15 +195,15 @@ if __name__ == '__main__':
 
   #--
   def s0_post(state, input):
-    print 's0_post(%s, %s)' % (repr(state), repr(input))
+    print('s0_post(%s, %s)' % (repr(state), repr(input)))
 
   #--
   def s1_post(state, input):
-    print 's1_post(%s, %s)' % (repr(state), repr(input))
+    print('s1_post(%s, %s)' % (repr(state), repr(input)))
 
   #--
   def s2_post(state, input):
-    print 's2_post(%s, %s)' % (repr(state), repr(input))
+    print('s2_post(%s, %s)' % (repr(state), repr(input)))
 
   #--
   def main():
@@ -216,7 +216,7 @@ if __name__ == '__main__':
       },
       s_init='s0')
 
-    print "Enter SM integer input value or 'quit' to quit"
+    print("Enter SM integer input value or 'quit' to quit")
     while True:
       i = raw_input("input value> ")
       if i == 'quit':
@@ -224,7 +224,7 @@ if __name__ == '__main__':
       try:
         i = int(i)
       except ValueError:
-        print "Enter SM integer input value or 'quit' to quit"
+        print("Enter SM integer input value or 'quit' to quit")
       sm.Transition(i)
 
   # run test

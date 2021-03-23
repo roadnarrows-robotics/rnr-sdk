@@ -138,7 +138,7 @@ namespace laelaps
      *
      * \return this.
      */
-    LaeDescBase operator=(const LaeDescBase &rhs);
+    LaeDescBase &operator=(const LaeDescBase &rhs);
 
     /*!
      * \brief Clear description.
@@ -208,7 +208,7 @@ namespace laelaps
      *
      * \return this.
      */
-    LaeDescPowertrain operator=(const LaeDescPowertrain &rhs);
+    LaeDescPowertrain &operator=(const LaeDescPowertrain &rhs);
 
     /*!
      * \brief Clear description.
@@ -261,7 +261,7 @@ namespace laelaps
      *
      * \return this.
      */
-    LaeDescBattery operator=(const LaeDescBattery &rhs);
+    LaeDescBattery &operator=(const LaeDescBattery &rhs);
 
     /*!
      * \brief Clear description.
@@ -316,7 +316,7 @@ namespace laelaps
      *
      * \return this.
      */
-    LaeDescRangeSensor operator=(const LaeDescRangeSensor &rhs);
+    LaeDescRangeSensor &operator=(const LaeDescRangeSensor &rhs);
 
     /*!
      * \brief Clear description.
@@ -371,7 +371,7 @@ namespace laelaps
      *
      * \return this.
      */
-    LaeDescImu operator=(const LaeDescImu &rhs);
+    LaeDescImu &operator=(const LaeDescImu &rhs);
 
     /*!
      * \brief Clear description.
@@ -421,7 +421,7 @@ namespace laelaps
      *
      * \return this.
      */
-    LaeDescOptions operator=(const LaeDescOptions &rhs);
+    LaeDescOptions &operator=(const LaeDescOptions &rhs);
 
     /*!
      * \brief Clear description.

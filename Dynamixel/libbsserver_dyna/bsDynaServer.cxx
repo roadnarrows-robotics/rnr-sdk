@@ -440,6 +440,8 @@ public:
     // Send ok response.
     //
     BsModCallbacks->m_cbSendOkRsp(hndVConn, uTid);
+
+    return BS_OK;
   }
 
   /*!

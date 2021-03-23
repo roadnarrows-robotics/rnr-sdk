@@ -246,14 +246,14 @@ if __name__ == '__main__':
   tbar = None
 
   def cbDo():
-    print 'Do'
+    print('Do')
 
   def cbIt():
-    print 'It'
+    print('It')
     tbar.SetButtonStates('funny', 'pie-in-face')
 
   def cbNow():
-    print 'Now'
+    print('Now')
     tbar.SetButtonStates('funny', 'tickle')
 
   #--

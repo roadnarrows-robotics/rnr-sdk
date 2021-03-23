@@ -148,7 +148,7 @@ static void logtest_num1(void *p, const char *sFruit, int n, int half,
  *
  * \param count   Count.
  */
-static int logtest_num2(int count)
+static void logtest_num2(int count)
 {
   FILE        *fp;
   const char  *sFileName = "PackingShedOnStrike.newsflash";

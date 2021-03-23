@@ -129,7 +129,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekJointTraj operator=(const HekJointTraj &rhs)
+    HekJointTraj &operator=(const HekJointTraj &rhs)
     {
       m_strName       = rhs.m_strName;
       m_fPosition     = rhs.m_fPosition;
@@ -211,7 +211,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekJointTrajectoryPoint operator=(const HekJointTrajectoryPoint &rhs)
+    HekJointTrajectoryPoint &operator=(const HekJointTrajectoryPoint &rhs)
     {
       m_uTimeFromStart  = rhs.m_uTimeFromStart;
       m_trajectory      = rhs.m_trajectory;
@@ -349,7 +349,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekJointTrajectoryFeedback operator=(const HekJointTrajectoryFeedback &rhs)
+    HekJointTrajectoryFeedback &operator=(const HekJointTrajectoryFeedback &rhs)
     {
       for(int i = 0; i< TRAJ_NUMOF; ++i)
       {

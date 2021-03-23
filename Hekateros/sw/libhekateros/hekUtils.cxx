@@ -159,7 +159,8 @@ bool hekateros::operator<(const struct timeval& lhs, const struct timeval& rhs)
   }
 }
 
-bool hekateros::operator==(const struct timeval& lhs, const struct timeval& rhs)
+bool hekateros::operator==(const struct timeval& lhs,
+                           const struct timeval& rhs)
 {
   return (lhs.tv_sec == rhs.tv_sec) && (lhs.tv_usec == rhs.tv_usec)?
             true: false;

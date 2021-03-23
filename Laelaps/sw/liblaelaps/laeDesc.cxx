@@ -113,7 +113,7 @@ LaeDescBase::~LaeDescBase()
 {
 }
 
-LaeDescBase LaeDescBase::operator=(const LaeDescBase &rhs)
+LaeDescBase &LaeDescBase::operator=(const LaeDescBase &rhs)
 {
   m_strKey            = rhs.m_strKey;
   m_dimRobot          = rhs.m_dimRobot;
@@ -252,7 +252,7 @@ LaeDescPowertrain::~LaeDescPowertrain()
 {
 }
 
-LaeDescPowertrain LaeDescPowertrain::operator=(const LaeDescPowertrain &rhs)
+LaeDescPowertrain &LaeDescPowertrain::operator=(const LaeDescPowertrain &rhs)
 {
   m_strKey        = rhs.m_strKey;
   m_nMotorId      = rhs.m_nMotorId;
@@ -313,7 +313,7 @@ LaeDescBattery::~LaeDescBattery()
 {
 }
 
-LaeDescBattery LaeDescBattery::operator=(const LaeDescBattery &rhs)
+LaeDescBattery &LaeDescBattery::operator=(const LaeDescBattery &rhs)
 {
   m_strKey        = rhs.m_strKey;
   m_strType       = rhs.m_strType;
@@ -429,7 +429,7 @@ LaeDescRangeSensor::~LaeDescRangeSensor()
 {
 }
 
-LaeDescRangeSensor LaeDescRangeSensor::operator=(const LaeDescRangeSensor &rhs)
+LaeDescRangeSensor &LaeDescRangeSensor::operator=(const LaeDescRangeSensor &rhs)
 {
   m_strKey    = rhs.m_strKey;
   m_nChan     = rhs.m_nChan;
@@ -491,7 +491,7 @@ LaeDescImu::~LaeDescImu()
 {
 }
 
-LaeDescImu LaeDescImu::operator=(const LaeDescImu &rhs)
+LaeDescImu &LaeDescImu::operator=(const LaeDescImu &rhs)
 {
   m_strKey  = rhs.m_strKey;
   m_strHw   = rhs.m_strHw;
@@ -535,7 +535,7 @@ LaeDescOptions::~LaeDescOptions()
 {
 }
 
-LaeDescOptions LaeDescOptions::operator=(const LaeDescOptions &rhs)
+LaeDescOptions &LaeDescOptions::operator=(const LaeDescOptions &rhs)
 {
   m_strPkgToF   = rhs.m_strPkgToF;
   m_strPkgFCam  = rhs.m_strPkgFCam;

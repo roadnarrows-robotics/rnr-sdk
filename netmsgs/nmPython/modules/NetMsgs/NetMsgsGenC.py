@@ -571,7 +571,7 @@ class NetMsgsGenC:
     # open C header file for writing
     try:
       fp = open(self.mHFilePath, 'w')
-    except IOError, err:
+    except IOError as err:
       raise nmBase.NetMsgsError("Error: %s" % (err))
     self.PrettyPrintTopComment(fp, self.mHBaseName, self.mXml['meta']['brief'])
     self.HGenPrologue(fp)
@@ -594,7 +594,7 @@ class NetMsgsGenC:
     # open C source file for writing
     try:
       fp = open(self.mCFilePath, 'w')
-    except IOError, err:
+    except IOError as err:
       raise nmBase.NetMsgsError("Error: %s" % (err))
     self.PrettyPrintTopComment(fp, self.mCBaseName, self.mXml['meta']['brief'])
     self.CGenPrologue(fp)

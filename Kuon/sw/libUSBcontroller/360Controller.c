@@ -59,12 +59,31 @@
 int err = 0;
 
 //Low level buffer for controler pipe.
-static unsigned char LowBuff[200] = {'x',};
+static byte_t LowBuff[200] = {'x',};
+
+//Function converts byte segments into boolean bits.
+int ConvertToBit(int NonBit) {
+  if(NonBit != 0) {
+    return 1;
+  }
+  return 0;
+}
+
+//Function converts a low/high value into an integer.
+int ConvertToInt(byte_t one, byte_t two) {
+  static uint16_t sign = 32768;
+  uint16_t resultant;
+  int final;
+  resultant = (uint16_t)((two << 8)| (one) );
+  final = resultant + sign;
+  return final;
+}
 
 //Function opens controller
 int Find360Controller(struct Control360 *Controller) {
   libusb_init(NULL);
-  libusb_set_debug(NULL, 3);
+  //DEPRECATED libusb_set_debug(NULL, 3);
+  libusb_set_option(NULL, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_WARNING);
   LOGDIAG3("Looking for Wired 360 Controller.\n");
   Controller->USB_lockOn = libusb_open_device_with_vid_pid(NULL,ID_VENDOR,
                                                          ID_PRODUCT_WI);
@@ -304,9 +323,6 @@ void Interpret360(struct Control360 *Controller) {
 //CallBack function for the interrupt transfer.
 void CB360(struct libusb_transfer *trans) {
   struct Control360 *Controller;
-  int i=0;
-  int Steer;
-  int WhatAmI;
   Controller = (struct Control360 *) (trans->user_data);
   switch(trans->status) {
     case LIBUSB_TRANSFER_COMPLETED:
@@ -362,23 +378,6 @@ int USBSetupReader(struct Control360 *Controller) {
   return 0; 
 }
 
-//Function converts byte segments into boolean bits.
-int ConvertToBit(int NonBit) {
-  if(NonBit != 0) {
-    return 1;
-  }
-  return 0;
-}
-
-//Function converts a low/high value into an integer.
-int ConvertToInt(int one, int two) {
-  uint16_t resultant = 32768;
-  int final;
-  resultant += ((two << 8)| (one) );
-  final = resultant;
-  return final;
-}
-
 
 
 //Function executing all necessary functions starting USB communications.
@@ -415,11 +414,11 @@ int GetRaw360(unsigned char *TempBuff,
   for(y=0; y<=3; y++) {
     err = libusb_handle_events(NULL);
     if(err == 0) {
-      memcpy(TempBuff, LowBuff, LeN);
+      memcpy(TempBuff, LowBuff, (size_t)LeN);
       break;
     }
   }
-  transferred = strlen(LowBuff);
+  transferred = (int)strlen((char *)LowBuff);
   if(err < 0) {
     return err;
   }

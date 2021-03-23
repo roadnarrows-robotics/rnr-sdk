@@ -110,6 +110,8 @@ int HekUno::close()
   }
   m_uHekHwVer = 0;
   m_nFwVer    = 0;
+
+  return HEK_OK;
 }
 
 int HekUno::scan()

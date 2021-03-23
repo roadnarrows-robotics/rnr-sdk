@@ -367,7 +367,7 @@ class vRobot(Gluon.GluonServer):
       self.GSReportErrorStatus('Connection is down')
       if self.mServerState == Gluon.EServerState.Ready:
         self.SetRobotState(Gluon.EServerState.NotReady)
-      if self.mServerState not in [Gluon.EServerState.None,
+      if self.mServerState not in [Gluon.EServerState.Undef,
                                    Gluon.EServerState.NotLoaded,
                                    Gluon.EServerState.NotReady]:
         self.SetRobotState(Gluon.EServerState.NotReady)

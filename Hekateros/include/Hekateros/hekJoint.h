@@ -102,7 +102,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekRobotJoint operator=(const HekRobotJoint &rhs);
+    HekRobotJoint &operator=(const HekRobotJoint &rhs);
 
     /*!
      * \brief Get joint name.
@@ -252,7 +252,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekJointOptical operator=(const HekJointOptical &rhs)
+    HekJointOptical &operator=(const HekJointOptical &rhs)
     {
       m_uMask   = rhs.m_uMask;
       m_uCurVal = rhs.m_uCurVal;
@@ -311,7 +311,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekJointState operator=(const HekJointState &rhs);
+    HekJointState &operator=(const HekJointState &rhs);
 
     std::string m_strName;        ///< joint name
     HekOpState  m_eOpState;       ///< joint operational state
@@ -374,7 +374,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekJointStatePoint operator=(const HekJointStatePoint &rhs)
+    HekJointStatePoint &operator=(const HekJointStatePoint &rhs)
     {
       m_strKinName = rhs.m_strKinName;
       m_jointState = rhs.m_jointState;

@@ -309,7 +309,7 @@ def findblobs (pixlist):
             return bloblist
         bloblist.append(data)
         start, end, mass, center = data
-        #print start, end, mass, center
+        #print(start, end, mass, center)
         start=end+1
 
 def findbestblob(blobs):

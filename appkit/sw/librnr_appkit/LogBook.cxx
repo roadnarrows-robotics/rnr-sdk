@@ -108,6 +108,8 @@ LogBook::Entry &LogBook::Entry::operator=(const LogBook::Entry &rhs)
   m_timestamp = rhs.m_timestamp;
   m_strMark   = rhs.m_strMark;
   m_strText   = rhs.m_strText;
+
+  return *this;
 }
 
 LogBook::Entry::~Entry()
@@ -138,6 +140,8 @@ LogBook::BookMark & LogBook::BookMark::operator=(const LogBook::BookMark &rhs)
 {
   m_strMark = rhs.m_strMark;
   m_index   = rhs.m_index;
+
+  return *this;
 }
 
 

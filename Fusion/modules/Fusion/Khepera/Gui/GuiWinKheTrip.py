@@ -296,7 +296,7 @@ class GuiWinKheTrip(GuiWin.GuiWin):
         Return Values:
           None
     """
-    #print "Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       self.WinUpdateStatus(**kwargs)
     elif request == 'loc':
@@ -311,7 +311,7 @@ class GuiWinKheTrip(GuiWin.GuiWin):
     elif request == 'reset':
       self.WinUpdateReset()
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
   #--
   def WinUpdateTrip(self, x, y, theta):
@@ -591,10 +591,10 @@ class GuiWinKheTrip(GuiWin.GuiWin):
         Return Value:
           None
     """
-    #print '(%.2f, %.2f) (%.2f, %.2f)' % (p1[X], p1[Y], p2[X], p2[Y])
+    #print('(%.2f, %.2f) (%.2f, %.2f)' % (p1[X], p1[Y], p2[X], p2[Y]))
     p1 = self._world2canvas(p1)
     p2 = self._world2canvas(p2)
-    #print p1, p2
+    #print(p1, p2)
     dim = p1[X], p1[Y], p2[X], p2[Y]
     id = self.mTripCanvas.create_line(dim, fill=gt.ColorGreenBlue)
     self.mGidTrip += [id]
@@ -989,14 +989,14 @@ class GuiWinKheTrip(GuiWin.GuiWin):
           filename  - file name to write the data
     """
     fp = open(filename, 'w')
-    print >>fp, '#'
-    print >>fp, '# vKhepera Trip Waypoints'
+    print('#', file=fp)
+    print('# vKhepera Trip Waypoints', file=fp)
     ltime = time.localtime()
-    print >>fp, '# %d.%02d.%02d %02d:%02d:%02d' % \
-        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5])
-    print >>fp, '#\n'
-    print >>fp, '# waypoint triplet: (x(mm), y(mm), theta(radians))'
-    print >>fp, 'vKheperaWaypoints = [',
+    print('# %d.%02d.%02d %02d:%02d:%02d' % \
+        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5]), file=fp)
+    print('#\n', file=fp)
+    print('# waypoint triplet: (x(mm), y(mm), theta(radians))', file=fp)
+    print('vKheperaWaypoints = [', end='', file=fp)
     n = 0
     sep = ''
     for p in self.mBotTrip:
@@ -1006,9 +1006,10 @@ class GuiWinKheTrip(GuiWin.GuiWin):
         sep += '\n  '
       else:
         sep += ' '
-      print >>fp, '%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+      print('%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+          end='', file=fp)
       n += 1
-    print >>fp, '\n]'
+    print('\n]', file=fp)
     fp.close()
 
   #--

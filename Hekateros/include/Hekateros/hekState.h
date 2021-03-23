@@ -95,7 +95,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekServoHealth operator=(const HekServoHealth &rhs);
+    HekServoHealth &operator=(const HekServoHealth &rhs);
 
     int     m_nServoId;       ///< servo id
     float   m_fTemperature;   ///< servo temperature (Celsius)
@@ -143,7 +143,7 @@ namespace hekateros
      *
      * \return Returns copy of this.
      */
-    HekRobotState operator=(const HekRobotState &rhs);
+    HekRobotState &operator=(const HekRobotState &rhs);
 
     /*!
      * \brief Clear data.

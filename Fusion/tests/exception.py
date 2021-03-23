@@ -82,48 +82,48 @@ def t1():
   """ Raise ChannelError(5) """
   try:
     raise ChannelError(5)
-  except ChannelError, e:
-    print "ChannelError: %d, %s" % (e.cherr, e.emsg)
-    print e
+  except ChannelError as e:
+    print("ChannelError: %d, %s" % (e.cherr, e.emsg))
+    print(e)
     
 def t2():
   """ Raise ChannelError(-1, "ugh") """
   try:
     raise ChannelError(-1, "ugh")
-  except ChannelError, (code, strerror, msg):
-    print "ChannelError: %d: %s: %s" % (code, strerror, msg)
+  except ChannelError as (code, strerror, msg):
+    print("ChannelError: %d: %s: %s" % (code, strerror, msg))
 
 def t3():
   """ Raise ChannelError(-2, "badboy") """
   try:
     raise ChannelError(-2, "badboy")
-  except ChannelError, e:
-    print e
+  except ChannelError as e:
+    print(e)
 
 def t4():
   """ Raise ChannelError(-99, "what?") """
   try:
     raise ChannelError(-99, "what?")
-  except ChannelError, e:
-    print e
+  except ChannelError as e:
+    print(e)
 
 def t5():
   """ Raise IOError(5, "file") """
   try:
     raise IOError(5, "file")
-  except IOError, (x, y):
-    print x, y
+  except IOError as (x, y):
+    print(x, y)
 
 def t6():
   """ Open noexist file """
   try:
     f = open("/oogabooga", "r")
-  except IOError, err:
-    print err
+  except IOError as err:
+    print(err)
 
 def t6():
   """ Open noexist file v2 """
   try:
     f = open("/oogabooga", "r")
-  except IOError, (errno, strerror):
-    print errno, strerror
+  except IOError as (errno, strerror):
+    print(errno, strerror)

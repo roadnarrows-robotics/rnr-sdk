@@ -162,7 +162,7 @@ public:
    * \param nLevel  Published level. The root level is 0.
    * \param sParent Parent to which this command was published.
    */
-  int SetPublishedInfo(int nLevel, const char *sParent=NULL)
+  void SetPublishedInfo(int nLevel, const char *sParent=NULL)
   {
     m_nPubLevel = nLevel;
 

@@ -119,7 +119,7 @@ void LaeMotorCtlrChipSelect::select(int fd, byte_t addrSel)
     value = addrSel == LaeMotorCtlrCsHigh? 1: 0; 
     if( gpioQuickWrite(m_fdGpio, value) < 0 )
     {
-      LOGWARN("Failed to select motor controller 0x%02x.", addrSel);
+      LOGERROR("Failed to select motor controller 0x%02x.", addrSel);
     }
     usleep(100);
 

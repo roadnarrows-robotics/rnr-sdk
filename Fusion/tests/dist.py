@@ -7,20 +7,20 @@ def dist(v1, v2, w=2, mod=10):
   mod = float(mod)
   l = math.fmod(v2 - w + mod, mod)
   u = math.fmod(v2 + w, mod)
-  print 'w(%7.3f, %7.3f) = [%7.3f, %7.3f] <-- %7.3f' % \
+  print('w(%7.3f, %7.3f) = [%7.3f, %7.3f] <-- %7.3f' % \
       (math.degrees(v2), math.degrees(w), 
-       math.degrees(l), math.degrees(u), math.degrees(v1)),
+       math.degrees(l), math.degrees(u), math.degrees(v1)), end='')
   if l > u:
     if l <= v1 and v1 <= mod:
-      print 'y'
+      print('y')
     elif v1 <= u:
-      print 'y'
+      print('y')
     else:
-      print 'n'
+      print('n')
   elif l <= v1 and v1 <= u:
-    print 'y'
+    print('y')
   else:
-    print 'n'
+    print('n')
 
 def run1():
   d = [
@@ -32,7 +32,7 @@ def run1():
     (6, 5), (6, 4), (6, 3), (6, 2), (6, 1), (6, 0)
   ]
   for p in d:
-    print p, ':',
+    print(p, ':', end='')
     dist(p[0], p[1])
 
 
@@ -45,5 +45,5 @@ def f_w():
   for psi1 in [0, 60, 120, 180, 240, 360]:
     for psi2 in [0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 
                  260, 280, 300, 320, 340, 360]:
-      print '(%4d, %4d)' % (psi1, psi2),
+      print('(%4d, %4d)' % (psi1, psi2), end='')
       dist(math.radians(psi1), math.radians(psi2), w=w, mod=math.pi*2.0)

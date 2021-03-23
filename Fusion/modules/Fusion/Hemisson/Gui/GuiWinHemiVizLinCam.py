@@ -139,7 +139,7 @@ class GuiWinHemiVizLinCam(GuiWin.GuiWin):
       elif key == 'num_rows':
         try:
           self.mNumRows = int(val)
-        except ValueError, TypeError:
+        except (ValueError, TypeError):
           self.mNumRows = _NumOfPixelRowsDft
       elif key == 'sense_lincam':
         self.mCbRobotSenseLinCam = val
@@ -241,7 +241,7 @@ class GuiWinHemiVizLinCam(GuiWin.GuiWin):
           None
  
     """
-    #print "%s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("%s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       items = {}
       for key,val in kwargs.iteritems():
@@ -276,7 +276,7 @@ class GuiWinHemiVizLinCam(GuiWin.GuiWin):
       self.mRowIndex = 0
       self.VizCanvasRefresh()
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

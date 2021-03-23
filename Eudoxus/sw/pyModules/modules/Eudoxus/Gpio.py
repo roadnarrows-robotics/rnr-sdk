@@ -70,12 +70,12 @@ def gpioReadValue(gpio):
   try:
     fp = open(valFileName, "r")
   except IOError as inst:
-    print >>sys.stderr, "Error:", inst
+    print("Error:", inst, file=sys.stderr)
     return ''
   try:
     val = fp.read(1)
   except IOError as inst:
-    print >>sys.stderr, "Error:", inst
+    print("Error:", inst, file=sys.stderr)
     val = ''
   fp.close()
   return val
@@ -95,7 +95,7 @@ def gpioWriteValue(gpio, value):
   try:
     fp = open(valFileName, "w")
   except IOError as inst:
-    print >>sys.stderr, "Error:", inst
+    print("Error:", inst, file=sys.stderr)
     return ''
   if (value == '0') or (value == '1'):
     val = value
@@ -106,7 +106,7 @@ def gpioWriteValue(gpio, value):
   try:
     val = fp.write(val+'\n')
   except IOError as inst:
-    print >>sys.stderr, "Error:", inst
+    print("Error:", inst, file=sys.stderr)
     val = ''
   fp.close()
   return val

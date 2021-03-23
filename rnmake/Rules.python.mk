@@ -73,12 +73,16 @@ python-all:
 # Target: make python source documentation
 .PHONY: python-doc
 python-doc:
-	$(call printGoalDesc,$(@),Making python source documentation)
-	@test -d "$(DISTDIR_DOC)/pydoc" || $(MKDIR) $(DISTDIR_DOC)/pydoc
-	@$(PYTHON) $(RNMAKE_ROOT)/utils/pydocmk.py \
-		--docroot=$(DISTDIR_DOC)/pydoc \
-		--vpath=$(DIST_VPATH_LIB) \
-		setup
+	$(call printGoalDesc,$(@),No python3 source documentation)
+
+# not converted from 2.7 to 3.x format, so disable
+#python-doc:
+#	$(call printGoalDesc,$(@),Making python source documentation)
+#	@test -d "$(DISTDIR_DOC)/pydoc" || $(MKDIR) $(DISTDIR_DOC)/pydoc
+#	@$(PYTHON) $(RNMAKE_ROOT)/utils/pydocmk.py \
+#		--docroot=$(DISTDIR_DOC)/pydoc \
+#		--vpath=$(DIST_VPATH_LIB) \
+#		setup
 
 # Target:	python-clean
 .PHONY: python-clean

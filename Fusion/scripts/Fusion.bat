@@ -29,5 +29,5 @@ REM
 REM Linux users, please use Reactor (Fusion) to invoke Fusion.
 REM
 
-C:\python24\python ..\Fusion\Core\Reactor.py
+C:\python38\python3 ..\Fusion\Core\Reactor.py
 

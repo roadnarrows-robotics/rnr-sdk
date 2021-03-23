@@ -56,6 +56,9 @@ SWIG_FILES 				= NetMsgsCore.i
 SWIG_EXTMOD_DIR 	= ../modules/NetMsgs
 SWIG_EXTMOD_LIBS 	= -lrnr_netmsgs -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 all-extmod: swig-all
 
 # Clean extension module intermediates

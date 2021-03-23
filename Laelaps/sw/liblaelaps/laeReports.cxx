@@ -89,7 +89,7 @@ LaeRptMotorCtlrHealth::LaeRptMotorCtlrHealth(const LaeRptMotorCtlrHealth &src)
   LaeAlarms::copyAlarms(src.m_alarms, m_alarms);
 }
 
-LaeRptMotorCtlrHealth LaeRptMotorCtlrHealth::operator=(
+LaeRptMotorCtlrHealth &LaeRptMotorCtlrHealth::operator=(
                                               const LaeRptMotorCtlrHealth &rhs)
 {
   m_strName       = rhs.m_strName;
@@ -122,7 +122,7 @@ LaeRptMotorHealth::LaeRptMotorHealth(const LaeRptMotorHealth &src)
   LaeAlarms::copyAlarms(src.m_alarms, m_alarms);
 }
 
-LaeRptMotorHealth LaeRptMotorHealth::operator=(const LaeRptMotorHealth &rhs)
+LaeRptMotorHealth &LaeRptMotorHealth::operator=(const LaeRptMotorHealth &rhs)
 {
   m_strName       = rhs.m_strName;
   m_fTemperature  = rhs.m_fTemperature;
@@ -164,7 +164,7 @@ LaeRptRobotStatus::LaeRptRobotStatus(const LaeRptRobotStatus &src)
   m_vecMotorHealth    = src.m_vecMotorHealth;
 }
 
-LaeRptRobotStatus LaeRptRobotStatus::operator=(const LaeRptRobotStatus &rhs)
+LaeRptRobotStatus &LaeRptRobotStatus::operator=(const LaeRptRobotStatus &rhs)
 {
   // standard ROS industrial
   m_eRobotMode        = rhs.m_eRobotMode;
@@ -327,8 +327,8 @@ LaeRptDynPowertrain::LaeRptDynPowertrain(const LaeRptDynPowertrain &src)
 }
 
 
-LaeRptDynPowertrain LaeRptDynPowertrain::operator=(const LaeRptDynPowertrain
-                                                                          &rhs)
+LaeRptDynPowertrain &LaeRptDynPowertrain::operator=(
+                                                const LaeRptDynPowertrain &rhs)
 {
   m_strName   = rhs.m_strName;
   m_nEncoder  = rhs.m_nEncoder;
@@ -382,7 +382,7 @@ LaeRptDynamics::LaeRptDynamics(const LaeRptDynamics &src)
   m_vecDynPowertrain = src.m_vecDynPowertrain;
 }
 
-LaeRptDynamics LaeRptDynamics::operator=(const LaeRptDynamics &rhs)
+LaeRptDynamics &LaeRptDynamics::operator=(const LaeRptDynamics &rhs)
 {
   m_pose          = rhs.m_pose;
   m_fOdometer     = rhs.m_fOdometer;

@@ -513,7 +513,6 @@ static void *ThServiceThread(void *pThArg)
 {
   BsProxyThCtl_T *pThCtl = (BsProxyThCtl_T *)pThArg;
   BsProxyThReq_T *pThReq;
-  int             rc;
 
   LOGDIAG1("Service Thread \"%s\" created.", pThCtl->m_sDevUri);
 
@@ -538,12 +537,12 @@ static void *ThServiceThread(void *pThArg)
     // service request then destroy
     else
     {
-      rc = pThCtl->m_fnRequest(pThReq->m_hndClient,
-                               pThReq->m_hndVConn,
-                               pThReq->m_uTid,
-                               pThReq->m_uMsgId,
-                               pThReq->m_bufReq,
-                               pThReq->m_uReqLen);
+      pThCtl->m_fnRequest(pThReq->m_hndClient,
+                          pThReq->m_hndVConn,
+                          pThReq->m_uTid,
+                          pThReq->m_uMsgId,
+                          pThReq->m_bufReq,
+                          pThReq->m_uReqLen);
       ThReqDelete(pThReq);
     }
   }

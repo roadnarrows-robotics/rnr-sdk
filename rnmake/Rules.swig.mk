@@ -56,7 +56,7 @@ SWIG_EXTMODS 	= $(addprefix $(SWIG_EXTMOD_DIR)/_,\
 #   Python 2.7.15rc1
 # Need major.minor:
 #   2.7
-PYTHON_VER	= $(shell python --version 2>&1 | sed -e 's/Python\s\+\([0-9]\+\.[0-9]\+\).*$$/\1/')
+PYTHON_VER	= $(shell $(PYTHON) --version 2>&1 | sed -e 's/Python\s\+\([0-9]\+\.[0-9]\+\).*$$/\1/')
 
 ifeq "$(RNMAKE_ARCH)" "cygwin"
 SWIG_PYLIB	= -lpython$(PYTHON_VER).dll
@@ -70,12 +70,11 @@ endif
 
 
 SWIG_LIBS			= $(SWIG_EXTMOD_LIBS) $(SWIG_PYLIB)
-
 SWIG_DONE			= $(RNMAKE_ARCH).done
 
 # C and link loader flags
-CFLAGS 	:= $(EXTRA_CFLAGS) $(RNMAKE_PKG_CFLAGS) $(SWIG_CFLAGS)
-LDFLAGS	:= $(EXTRA_LDFLAGS) $(RNMAKE_PKG_LDFLAGS) $(SWIG_LDFLAGS)
+#CFLAGS 	:= $(EXTRA_CFLAGS) $(RNMAKE_PKG_CFLAGS) $(SWIG_CFLAGS)
+#LDFLAGS	:= $(EXTRA_LDFLAGS) $(RNMAKE_PKG_LDFLAGS) $(SWIG_LDFLAGS)
 
 define cond-clean
 endef

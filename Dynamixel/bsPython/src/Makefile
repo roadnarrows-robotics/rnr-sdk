@@ -49,6 +49,9 @@ SWIG_FILES 				=
 SWIG_EXTMOD_DIR 	= ../modules/rnr
 SWIG_EXTMOD_LIBS 	= -lrnr_dynamixel -l dxl2 -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 all-extmod: swig-all
 
 # Clean extension module intermediates

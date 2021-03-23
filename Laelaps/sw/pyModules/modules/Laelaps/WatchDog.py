@@ -136,7 +136,7 @@ class WatchDog:
     try:
       self.m_i2c = i2c.i2c()
       self.m_i2c.open(devName)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("open", inst.message)
       rc = False
     else:
@@ -215,14 +215,14 @@ class WatchDog:
     if self.m_fw['version'] <= 1:
       try:
         self.m_i2c.write(self.m_addr, cmd)
-      except i2c.I2CException, inst:
+      except i2c.I2CException as inst:
         self.printError("CmdId %d" % (cmdId), inst.message)
         ret['rc'] = WDRcErr
     else: # versions 2+
       rspLen = LaeWdRspLenPetDog_2
       try:
         rsp = self.m_i2c.write_read(self.m_addr, cmd, rspLen)
-      except i2c.I2CException, inst:
+      except i2c.I2CException as inst:
         self.printError("CmdId %d" % (cmdId), inst.message)
         ret['rc'] = WDRcErr
       else:
@@ -258,7 +258,7 @@ class WatchDog:
     # send command and receive response
     try:
       rsp = self.m_i2c.write_read(self.m_addr, cmd, rspLen)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -299,7 +299,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -336,7 +336,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -378,7 +378,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -412,7 +412,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -460,7 +460,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -502,7 +502,7 @@ class WatchDog:
     # send command
     try:
       rsp = self.m_i2c.write_read(self.m_addr, cmd, rspLen)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -551,7 +551,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -594,7 +594,7 @@ class WatchDog:
     # send command
     try:
       rsp = self.m_i2c.write_read(self.m_addr, cmd, rspLen)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -648,7 +648,7 @@ class WatchDog:
     # send command
     try:
       rsp = self.m_i2c.write_read(self.m_addr, cmd, rspLen)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -699,7 +699,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -749,7 +749,7 @@ class WatchDog:
     # send command
     try:
       self.m_i2c.write(self.m_addr, cmd)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -785,7 +785,7 @@ class WatchDog:
     # send command
     try:
       rsp = self.m_i2c.write_read(self.m_addr, cmd, rspLen)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -836,7 +836,7 @@ class WatchDog:
     # send command
     try:
       rsp = self.m_i2c.write_read(self.m_addr, cmd, rspLen)
-    except i2c.I2CException, inst:
+    except i2c.I2CException as inst:
       self.printError("CmdId %d" % (cmdId), inst.message)
       ret['rc'] = WDRcErr
     else:
@@ -857,6 +857,6 @@ class WatchDog:
   #
   def printError(self, emsg1, emsg2=None):
     if emsg2 is None:
-      print >>sys.stderr, "Error: WatchDog: {0}".format(emsg1)
+      print("Error: WatchDog: {0}".format(emsg1), file=sys.stderr)
     else:
-      print >>sys.stderr, "Error: WatchDog: {0}: {1}".format(emsg1, emsg2)
+      print("Error: WatchDog: {0}: {1}".format(emsg1, emsg2), file=sys.stderr)

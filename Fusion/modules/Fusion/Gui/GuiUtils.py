@@ -121,7 +121,7 @@ def GetFusionImageFileName(imageFile):
     return None
   try:
     mode = os.stat(imageFile)[stat.ST_MODE]
-  except OSError, msg:
+  except OSError as msg:
     return None
   if stat.S_ISREG(mode):
     return imageFile

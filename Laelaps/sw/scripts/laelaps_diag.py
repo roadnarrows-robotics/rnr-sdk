@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -175,10 +175,10 @@ class DiagMotors():
     }
 
   def run(self):
-    print
-    print DiagSep
-    print "*** Laelaps Motors Diagnostics ***"
-    print
+    print()
+    print(DiagSep)
+    print("*** Laelaps Motors Diagnostics ***")
+    print()
 
     testCnt = 0
     passCnt = 0
@@ -194,16 +194,16 @@ class DiagMotors():
     baud    = SysConf.MotorCtlrBaudRate
     cs      = SysConf.MotorCtlrChipSelectGpio
     testCnt += 1
-    print "Test: Open motor controller serial interface %s@%d" % (device, baud)
+    print("Test: Open motor controller serial interface %s@%d" % (device, baud))
     try:
       motorctlr.open(device, baud, cs)
       passCnt += 1
     except RoboClaw.RoboClawException as inst:
-      print 'Error:', inst.message
-      print
+      print('Error:', inst.message)
+      print()
       return 0
-    print "    ... %d/%d tests passed." % (passCnt, testCnt)
-    print
+    print("    ... %d/%d tests passed." % (passCnt, testCnt))
+    print()
 
     for k in self.ctlrKeys:
       m, n = self.testMotorCtlrState(motorctlr, self.ctlrInfo[k]['addr'],
@@ -226,8 +226,8 @@ class DiagMotors():
 
     motorctlr.close()
 
-    print "Summary:"
-    print "  ... %d/%d motors diagnostic tests passed." % (passCnt, testCnt)
+    print("Summary:")
+    print("  ... %d/%d motors diagnostic tests passed." % (passCnt, testCnt))
 
     if passCnt == testCnt:
       return 1
@@ -235,8 +235,8 @@ class DiagMotors():
       return 0
 
   def testMotorCtlrState(self, motorctlr, addr, name):
-    print "Test: Read %s motor controller state (address=0x%02x)." % \
-        (name, addr)
+    print("Test: Read %s motor controller state (address=0x%02x)." % \
+        (name, addr))
 
     testCnt = 0
     passCnt = 0
@@ -278,13 +278,13 @@ class DiagMotors():
       if self.runTest(t[0], t[1], t[2], t[3], t[4]):
         passCnt +=1
 
-    print "    ... %d/%d tests passed." % (passCnt, testCnt)
-    print
+    print("    ... %d/%d tests passed." % (passCnt, testCnt))
+    print()
 
     return (passCnt, testCnt)
 
   def testMotorState(self, motorctlr, addr, motorIndex, name):
-    print "Test: Read %s motor state." % (name)
+    print("Test: Read %s motor state." % (name))
 
     testCnt = 0
     passCnt = 0
@@ -327,13 +327,13 @@ class DiagMotors():
       if self.runTest(t[0], t[1], t[2], t[3], t[4]):
         passCnt +=1
 
-    print "    ... %d/%d tests passed." % (passCnt, testCnt)
-    print
+    print("    ... %d/%d tests passed." % (passCnt, testCnt))
+    print()
 
     return (passCnt, testCnt)
 
   def testMotors(self, motorctlr):
-    print "Test: Drive motors."
+    print("Test: Drive motors.")
 
     testCnt = 0
     passCnt = 0
@@ -366,7 +366,7 @@ class DiagMotors():
             lambda v: "[PASS]"):
       passCnt += 1
 
-    print "  Loop through speed profile:"
+    print("  Loop through speed profile:")
 
     for speed in speedProf:
       for k in self.motorKeys:
@@ -376,11 +376,11 @@ class DiagMotors():
             self.good, 
             lambda v: "[PASS] (speed = %d)" % (v)):
           passCnt += 1
-      print
+      print()
       time.sleep(1.0)
 
-    print "    ... %d/%d tests passed." % (passCnt, testCnt)
-    print
+    print("    ... %d/%d tests passed." % (passCnt, testCnt))
+    print()
 
     return (passCnt, testCnt)
 
@@ -394,7 +394,7 @@ class DiagMotors():
       s = "[FAIL] (%s)" % (e)
     else:
       s = '[FAIL]'
-    print "%s%s" % (what, s)
+    print("%s%s" % (what, s))
     return pf
 
   def serReadHelper(self, fnRead, *argsRead):
@@ -492,13 +492,13 @@ class DiagToFs():
     self.kwargs = kwargs
 
   def run(self):
-    print
-    print DiagSep
-    print "*** Laelaps Time-of-Flight Diagnostics ***"
-    print
+    print()
+    print(DiagSep)
+    print("*** Laelaps Time-of-Flight Diagnostics ***")
+    print()
 
-    print "Diagnostics not supported yet: [FAIL]"
-    print
+    print("Diagnostics not supported yet: [FAIL]")
+    print()
     return 0
 
 
@@ -511,13 +511,13 @@ class DiagImu():
     self.kwargs = kwargs
 
   def run(self):
-    print
-    print DiagSep
-    print "*** Laelaps Inertia Measurement Unit Diagnostics ***"
-    print
+    print()
+    print(DiagSep)
+    print("*** Laelaps Inertia Measurement Unit Diagnostics ***")
+    print()
 
-    print "Diagnostics not supported yet: [FAIL]"
-    print
+    print("Diagnostics not supported yet: [FAIL]")
+    print()
     return 0
 
 
@@ -530,13 +530,13 @@ class DiagWatchdog():
     self.kwargs = kwargs
 
   def run(self):
-    print
-    print DiagSep
-    print "*** Laelaps Arduino Watchdog Diagnostics ***"
-    print
+    print()
+    print(DiagSep)
+    print("*** Laelaps Arduino Watchdog Diagnostics ***")
+    print()
 
-    print "Diagnostics not supported yet: [FAIL]"
-    print
+    print("Diagnostics not supported yet: [FAIL]")
+    print()
     return 0
 
 
@@ -584,14 +584,14 @@ class application():
   #
   def printUsageErr(self, emsg):
     if emsg:
-      print "%s: Error: %s" % (self._Argv0, emsg)
+      print("%s: Error: %s" % (self._Argv0, emsg))
     else:
-      print "%s: Error" % (self._Argv0)
-    print "Try '%s --help' for more information." % (self._Argv0)
+      print("%s: Error" % (self._Argv0))
+    print("Try '%s --help' for more information." % (self._Argv0))
 
   ## \brief Print Command-Line Usage Message.
   def printUsage(self):
-    print \
+    print(\
 """
 usage: %s [OPTIONS] DIAG [DIAG ...]
        %s --help
@@ -612,7 +612,7 @@ DIAG              : Diagnostic to run. One of:
 Exit Status:
   The number of diagnostics passed. An exit status of 128 indicates usage 
   error.
-"""  % (self._Argv0, self._Argv0)
+"""  % (self._Argv0, self._Argv0))
  
   #
   ## \brief Get command-line options
@@ -637,7 +637,7 @@ Exit Status:
     try:
       opts, args = getopt.getopt(argv[1:], "f?h",
           ['help', 'fake', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise usage(msg)
     for opt, optarg in opts:
       if opt in ('-f', '--fake'):
@@ -670,8 +670,8 @@ Exit Status:
     # parse command-line options and arguments
     try:
       self.kwargs = self.getOptions(argv, **kwargs)
-    except usage, e:
-      print e.msg
+    except usage as e:
+      print(e.msg)
       return 128
 
     passCnt = 0
@@ -680,7 +680,7 @@ Exit Status:
       try:
         Diagnostics.index(diag)
       except ValueError:
-        print "%s: Unknown diagnostic - ignoring" % (diag)
+        print("%s: Unknown diagnostic - ignoring" % (diag))
         continue
       diagCnt += 1
       if diag == 'motors':
@@ -693,10 +693,10 @@ Exit Status:
         diag = DiagWatchdog(self.kwargs)
       passCnt += diag.run()
       
-    print
-    print "      ~~~"
-    print "%d/%d diagnostics passed." % (passCnt, diagCnt)
-    print
+    print()
+    print("      ~~~")
+    print("%d/%d diagnostics passed." % (passCnt, diagCnt))
+    print()
 
     return passCnt
 

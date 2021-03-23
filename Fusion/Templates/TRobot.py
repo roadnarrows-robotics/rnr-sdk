@@ -603,7 +603,7 @@ class USERROBOT(vRobotThreaded.vRobotThreaded):
     try:
       # USERACTION: do real connect here
       self.SetCommStatus(True)
-    except IOError, err:
+    except IOError as err:
       s = "%s" % err
       self.GSReportErrorStatus(s)
       self.SetCommStatus(False)

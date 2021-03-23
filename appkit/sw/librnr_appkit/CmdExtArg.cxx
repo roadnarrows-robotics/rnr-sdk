@@ -136,6 +136,8 @@ CmdExtArg &CmdExtArg::operator=(const CmdExtArg &rhs)
   m_bCvtVal       = rhs.m_bCvtVal;
   m_lCvtVal       = rhs.m_lCvtVal;
   m_fCvtVal       = rhs.m_fCvtVal;
+
+  return *this;
 }
 
 void CmdExtArg::s(const string &strVal)

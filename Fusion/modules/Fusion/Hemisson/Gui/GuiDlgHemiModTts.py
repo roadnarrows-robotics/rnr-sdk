@@ -226,9 +226,9 @@ if __name__ == '__main__':
     lastsettings = {'gain': 0, 'pitch': 5, 'rate': 3}
     dlg = GuiDlgHemiModTts(root, lastSettings=lastsettings)
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

@@ -149,16 +149,16 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdDevCmd
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     if whichfoot not in BsProxiedDevFeet:
-      print >>sys.stderr, "error: %s %s: which foot?" % (cmdName, args[0])
+      print("error: %s %s: which foot?" % (cmdName, args[0]), file=sys.stderr)
       return None
 
     handle = self.mBsProxiedDev[whichfoot]['handle']
     if handle is None or handle < 0:
-      print >>sys.stderr, "error: %s: proxied device not found" % whichfoot
+      print("error: %s: proxied device not found" % whichfoot, file=sys.stderr)
       return None
 
     # get raw pressure data command
@@ -171,7 +171,7 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId,
               [{'fname':'press_raw', 'ftype':'u16',
@@ -179,7 +179,7 @@ class BsProxyClient:
       if vals['_rc'] == 'ok':
         return {'raw_data': vals['press_raw']}
       else:
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
         return None
 
     # get calibrated data command
@@ -192,7 +192,7 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId,
               [{'fname':'press_cal', 'ftype':'u16',
@@ -200,7 +200,7 @@ class BsProxyClient:
       if vals['_rc'] == 'ok':
         return {'cooked_data': vals['press_cal']}
       else:
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
         return None
 
     # get device id and firmware version command
@@ -213,7 +213,7 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId,
                 [ {'fname':'devId', 'ftype':'u16'},
@@ -222,7 +222,7 @@ class BsProxyClient:
       if vals['_rc'] == 'ok':
         return {'device_id':vals['devId'], 'version':vals['version']}
       else:
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
         return None
 
     # set foot calibration command
@@ -235,16 +235,16 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId, [])
       if vals['_rc'] == 'error':
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
       return None
 
     # bad command
     else:
-      print >>sys.stderr, "error: %s: unknown device command" % args[1]
+      print("error: %s: unknown device command" % args[1], file=sys.stderr)
       return None
   
   #--
@@ -264,12 +264,12 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdDevCmd
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     handle = self.mBsProxiedDev['bpimu']['handle']
     if handle is None or handle < 0:
-      print >>sys.stderr, "error: bpimu: proxied device not found"
+      print("error: bpimu: proxied device not found", file=sys.stderr)
       return None
 
     # get raw acceleration data command
@@ -282,7 +282,7 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId,
               [{'fname':'accel_raw', 'ftype':'u8',
@@ -290,7 +290,7 @@ class BsProxyClient:
       if vals['_rc'] == 'ok':
         return {'raw_data': vals['accel_raw']}
       else:
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
         return None
 
     # get calibrated acceleration data command
@@ -303,7 +303,7 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId,
               [{'fname':'accel_cal', 'ftype':'u8',
@@ -311,7 +311,7 @@ class BsProxyClient:
       if vals['_rc'] == 'ok':
         return {'cooked_data': vals['accel_cal']}
       else:
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
         return None
 
     # get device id and firmware version command
@@ -324,7 +324,7 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId,
                 [ {'fname':'devId', 'ftype':'u16'},
@@ -333,7 +333,7 @@ class BsProxyClient:
       if vals['_rc'] == 'ok':
         return {'device_id':vals['devId'], 'version':vals['version']}
       else:
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
         return None
 
     # set foot calibration command
@@ -347,16 +347,16 @@ class BsProxyClient:
       self.sendCmd(cmd)
       rsp = self.recvRsp()
       if not rsp:
-        print >>sys.stderr, "error: no response"
+        print("error: no response", file=sys.stderr)
         return None
       vals = self.mPacker.UnpackMsg(rsp, msgId, [])
       if vals['_rc'] == 'error':
-        print >>sys.stderr, "error:", vals['_error_msg']
+        print("error:", vals['_error_msg'], file=sys.stderr)
       return None
 
     # bad command
     else:
-      print >>sys.stderr, "error: %s: unknown device command" % args[1]
+      print("error: %s: unknown device command" % args[1], file=sys.stderr)
       return None
   
   #--
@@ -459,19 +459,19 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdDevScan
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     handle = self.mBsProxiedDev[proxdev]['handle']
     if handle is None or handle < 0:
-      print >>sys.stderr, "error: %s: proxied device not found" % proxdev
+      print("error: %s: proxied device not found" % proxdev, file=sys.stderr)
       return None
 
     cmd = self.mPacker.PackMsg(msgId, [{'fval':handle, 'ftype':'u8'}])
     self.sendCmd(cmd)
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId,
                                   [{'fname':'num_scanned', 'ftype':'u8'}])
@@ -488,7 +488,7 @@ class BsProxyClient:
         num_scanned -= 1
       return scanned
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return None
   
   #--
@@ -507,12 +507,12 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdDevCmd
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     handle = self.mBsProxiedDev[proxdev]['handle']
     if handle is None or handle < 0:
-      print >>sys.stderr, "error: %s: proxied device not found" % proxdev
+      print("error: %s: proxied device not found" % proxdev, file=sys.stderr)
       return None
 
     packAll = \
@@ -522,13 +522,13 @@ class BsProxyClient:
     self.sendCmd(cmd)
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId, unpackFmt)
     if vals['_rc'] == 'ok':
       return vals
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return None
    
   #--
@@ -546,12 +546,12 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdDevOpen
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     devType = BsProxiedDevId.get(proxdev)
     if not devType:
-      print >>sys.stderr, "error: 0x%02x: unknown type" % proxdev
+      print("error: 0x%02x: unknown type" % proxdev, file=sys.stderr)
       return None
 
     if proxdev in BsProxiedDevBrainPack:
@@ -568,19 +568,19 @@ class BsProxyClient:
     self.sendCmd(cmd)
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId,  
                           [{'fname':'handle', 'ftype':'u8'}],
                           self.mPacker.GetLastTid())
     if vals['_rc'] == 'ok':
       handle = vals['handle']
-      print "proxied device %s's handle is %d" % (proxdev, handle)
+      print("proxied device %s's handle is %d" % (proxdev, handle))
       self.mBsProxiedDev[proxdev]['i2c']     = i2cAddr
       self.mBsProxiedDev[proxdev]['handle']  = handle
       return handle
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return None
   
   #--
@@ -596,14 +596,14 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdDevDel
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     cmd = self.mPacker.PackMsg(msgId, [{'fval':handle, 'ftype':'u8'}])
     self.sendCmd(cmd)
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId,
                                 [{'fname':'handle', 'ftype':'u8'}])
@@ -614,7 +614,7 @@ class BsProxyClient:
           return True
       return False
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return False
   
 
@@ -632,22 +632,22 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdVersion
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     cmd = self.mPacker.PackMsg(msgId, [])
     self.sendCmd(cmd)
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId,
                                   [{'fname':'version', 'ftype':'zstr'}])
     if vals['_rc'] == 'ok':
-      print vals['version']
+      print(vals['version'])
       return vals['version']
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return None
   
   #--
@@ -663,7 +663,7 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdLog
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     logLevels = ['off', 'error', 'diag1', 'diag2', 'diag3', 'diag4', 'diag5'] 
@@ -674,7 +674,7 @@ class BsProxyClient:
       nLevel = level
 
     if type(nLevel) != int:
-      print >>sys.stderr, "error: %s: invalid log level" % repr(level)
+      print("error: %s: invalid log level" % repr(level), file=sys.stderr)
       return None
 
     cmd = self.mPacker.PackMsg(msgId, [{'fval':nLevel, 'ftype':'u8'}])
@@ -682,15 +682,15 @@ class BsProxyClient:
 
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId,
                                   [{'fname':'level', 'ftype':'u8'}])
     if vals['_rc'] == 'ok':
-      print "Server log level set to", vals['level'], "."
+      print("Server log level set to", vals['level'], ".")
       return vals['level']
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return None
   
   #--
@@ -706,7 +706,7 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdLoopback
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     cmd = self.mPacker.PackMsg(msgId, [{'fval':msg, 'ftype':'zstr'}])
@@ -714,15 +714,15 @@ class BsProxyClient:
 
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId,
                                   [{'fname':'msg', 'ftype':'zstr'}])
     if vals['_rc'] == 'ok':
-      print "Loopbacked: '%s'" % vals['msg']
+      print("Loopbacked: '%s'" % vals['msg'])
       return vals['msg']
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return None
   
   #--
@@ -735,7 +735,7 @@ class BsProxyClient:
     msgId   = MsgDef.BsProxyMsgIdProxyInfo
 
     if not self.mBsIsConn:
-      print >>sys.stderr, "error: connection to server not open"
+      print("error: connection to server not open", file=sys.stderr)
       return None
 
     cmd = self.mPacker.PackMsg(msgId, [])
@@ -743,7 +743,7 @@ class BsProxyClient:
 
     rsp = self.recvRsp()
     if not rsp:
-      print >>sys.stderr, "error: no response"
+      print("error: no response", file=sys.stderr)
       return None
     vals = self.mPacker.UnpackMsg(rsp, msgId, [])
     if vals['_rc'] == 'ok':
@@ -757,7 +757,7 @@ class BsProxyClient:
         else:
           devidlist += [byte]
         num_dev -= 1
-      print "Server supported proxied device ids:", devidlist
+      print("Server supported proxied device ids:", devidlist)
       proxlist = []
       for proxdev,devid in BsProxiedDevIds.iteritems():
         try:
@@ -767,7 +767,7 @@ class BsProxyClient:
           pass
       return proxlist
     else:
-      print >>sys.stderr, "error:", vals['_error_msg']
+      print("error:", vals['_error_msg'], file=sys.stderr)
       return None
   
   #--
@@ -789,13 +789,13 @@ class BsProxyClient:
       self.mBsProxyPort = bsproxy_port
     rc = self.mBsSocket.connect_ex((self.mBsProxyAddr, self.mBsProxyPort))
     if rc != 0:
-      print "Failed to connect, rc=%d (%s)" % \
-          (rc, errno.errorcode.get(rc, 'UNKNOWN'))
+      print("Failed to connect, rc=%d (%s)" % \
+          (rc, errno.errorcode.get(rc, 'UNKNOWN')))
       return False
     for proxdev in self.mBsProxiedDev.iterkeys():
       self.mBsProxiedDev[proxdev]['handle'] = None
     self.mBsIsConn = True
-    print "Connected to bsproxy@%s:%d" % (self.mBsProxyAddr, self.mBsProxyPort)
+    print("Connected to bsproxy@%s:%d" % (self.mBsProxyAddr, self.mBsProxyPort))
     return True
 
   #--
@@ -809,8 +809,8 @@ class BsProxyClient:
       self.mBsSocket = socket.socket()  # and recreate
       for proxdev in self.mBsProxiedDev.iterkeys():
         self.mBsProxiedDev[proxdev]['handle'] = None
-      print "Disconnected from bsproxy@%s:%d" % \
-        (self.mBsProxyAddr, self.mBsProxyPort)
+      print("Disconnected from bsproxy@%s:%d" % \
+        (self.mBsProxyAddr, self.mBsProxyPort))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

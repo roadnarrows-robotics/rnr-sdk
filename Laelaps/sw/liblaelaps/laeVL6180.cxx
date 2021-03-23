@@ -142,7 +142,7 @@ LaeVL6180SensorInfo::~LaeVL6180SensorInfo()
 {
 }
 
-LaeVL6180SensorInfo LaeVL6180SensorInfo::operator=(
+LaeVL6180SensorInfo &LaeVL6180SensorInfo::operator=(
                                                 const LaeVL6180SensorInfo &rhs)
 {
   m_nIndex    = rhs.m_nIndex;
@@ -374,6 +374,8 @@ int LaeVL6180Mux::writeDefaults()
   writeReg8(VL6180X_SYSRANGE_RANGE_IGNORE_VALID_HEIGHT, 255);
 
   writeReg8(VL6180X_FIRMWARE_RESULT_SCALER, 0x01);
+
+  return LAE_OK;
 }
 
 int LaeVL6180Mux::tune(uint_t uRangeOffset, uint_t uRangeCrossTalk,
@@ -2287,6 +2289,7 @@ int LaeRangeMuxSubproc::getAmbientLight(std::vector<std::string> &vecNames,
     vecLux.push_back(m_vecLux[iter->second.m_nIndex]);
   }
 
+  return LAE_OK;
 }
 
 int LaeRangeMuxSubproc::getSensorProps(const std::string &strKey,
@@ -2459,8 +2462,8 @@ int LaeRangeSensorGroup::readSensorIdentity(const string          &strKey,
   else
   {
     memset(&ident, 0, sizeof(VL6180xIdentification));
-    return LAE_OK;
   }
+  return LAE_OK;
 }
 
 int LaeRangeSensorGroup::readSensorTunes(const string &strKey,
@@ -2473,6 +2476,7 @@ int LaeRangeSensorGroup::readSensorTunes(const string &strKey,
   {
     m_interface->readSensorTunes(strKey, uRangeOffset, uRangeCrossTalk,
                                          fAlsGain,     uAlsIntPeriod);
+    return LAE_OK;
   }
   else
   {

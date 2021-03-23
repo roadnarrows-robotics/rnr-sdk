@@ -139,9 +139,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePoint operator=(const LaePoint &rhs)
+    LaePoint &operator=(const LaePoint &rhs)
     {
       m_x     = rhs.m_x;
       m_y     = rhs.m_y;
@@ -220,9 +220,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePose operator=(const LaePose &rhs)
+    LaePose &operator=(const LaePose &rhs)
     {
       m_x     = rhs.m_x;
       m_y     = rhs.m_y;
@@ -332,9 +332,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeSimpleWaypoint operator=(const LaeSimpleWaypoint &rhs)
+    LaeSimpleWaypoint &operator=(const LaeSimpleWaypoint &rhs)
     {
       m_ptDist        = rhs.m_ptDist;
       m_fVelocity     = rhs.m_fVelocity;
@@ -411,9 +411,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeSimplePath operator=(const LaeSimplePath &rhs)
+    LaeSimplePath &operator=(const LaeSimplePath &rhs)
     {
       m_timeStart = rhs.m_timeStart;
       m_path      = rhs.m_path;
@@ -535,9 +535,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeSimplePathFeedback operator=(const LaeSimplePathFeedback &rhs);
+    LaeSimplePathFeedback &operator=(const LaeSimplePathFeedback &rhs);
 
     /*!
      * \brief Get the number of wheel points in trajectory.
@@ -623,9 +623,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeWaypoint operator=(const LaeWaypoint &rhs);
+    LaeWaypoint &operator=(const LaeWaypoint &rhs);
 
     /*!
      * \brief Get waypoint data.
@@ -722,9 +722,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePath operator=(const LaePath &rhs)
+    LaePath &operator=(const LaePath &rhs)
     {
       m_timeStart = rhs.m_timeStart;
       m_path      = rhs.m_path;
@@ -846,9 +846,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePathFeedback operator=(const LaePathFeedback &rhs);
+    LaePathFeedback &operator=(const LaePathFeedback &rhs);
 
     /*!
      * \brief Get the number of wheel points in trajectory.

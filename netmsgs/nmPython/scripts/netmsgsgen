@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 ###############################################################################
 #
@@ -61,23 +61,23 @@ class Usage(Exception):
 def PrintUsageErr(emsg):
   """ Print Error Usage Message. """
   if emsg:
-    print "%s: %s" % (_Argv0, emsg)
+    print("%s: %s" % (_Argv0, emsg))
   else:
-    print "%s: error" % (_Argv0)
-  print "Try '%s --help' for more information." % (_Argv0)
+    print("%s: error" % (_Argv0))
+  print("Try '%s --help' for more information." % (_Argv0))
 ##
 
 #--
 def PrintUsage():
   """ Print Command-Line Print Usage Message. """
-  print """
+  print("""
 usage: %s [OPTIONS] --lang=c --xml=<xmlfile> <hfile> <cfile>
        %s [OPTIONS] --lang=python --xml=<xmlfile> <pyfile>
 
        %s [OPTIONS] --version
        %s [OPTIONS] --help
-"""  % (_Argv0, _Argv0, _Argv0, _Argv0)
-  print """Options and arguments:
+"""  % (_Argv0, _Argv0, _Argv0, _Argv0))
+  print("""Options and arguments:
   -d, --debug=<level>       : Debug level. One of: 0 1 2
                               Default: 0  (off)
   -i, --incprefix=<path>    : Include prefix for #include in .c source file for
@@ -93,7 +93,7 @@ usage: %s [OPTIONS] --lang=c --xml=<xmlfile> <hfile> <cfile>
 
   -v, --version             : Display version strings and exit.
   -h, --help                : Display this help and exit.
-  """
+  """)
 ##
 
 #--
@@ -130,14 +130,14 @@ def GetOptions(argv=None, **kwargs):
       opts, args = getopt.getopt(argv[1:], "?hvd:i:l:o:x:",
           [ 'help', 'version', 'debug=', 'incprefix=', 'lang=', 
             'overrides=', 'xml=', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise Usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
         PrintUsage()
         sys.exit(0)
       elif opt in ('-v', '--version'):
-        print "%s %s" %(_Argv0, _CmdVer)
+        print("%s %s" %(_Argv0, _CmdVer))
         sys.exit(0)
       elif opt in ('-d', '--debug'):
         try:
@@ -163,7 +163,7 @@ def GetOptions(argv=None, **kwargs):
             cmdargs['overrides'][name] = value
           except:
             raise Usage("%s %s: bad syntax" % (opt, repr(optarg)))
-  except Usage, err:
+  except Usage as err:
     PrintUsageErr(err.msg)
     sys.exit(2)
 
@@ -211,7 +211,7 @@ def main(argv=None, **kwargs):
   try:
     xml.Parse()
   except NMXmlParser.NetMsgsXmlParserError as inst:
-    print "Error: %s" % (inst)
+    print("Error: %s" % (inst))
     return 8
 
   if kwargs['lang'] == 'c':
@@ -224,7 +224,7 @@ def main(argv=None, **kwargs):
   try:
     gen.GenSource()
   except NMBase.NetMsgsError as inst:
-    print "Error: %s" % (inst)
+    print("Error: %s" % (inst))
     return 8
 
   return 0

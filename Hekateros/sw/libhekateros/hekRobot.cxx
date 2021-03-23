@@ -431,6 +431,8 @@ int HekRobot::disconnect()
   m_bAtParkedPos      = false;
 
   LOGDIAG1("Disconnected from Hekateros.");
+
+  return HEK_OK;
 }
 
 int HekRobot::calibrate(bool bForceRecalib)

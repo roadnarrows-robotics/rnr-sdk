@@ -60,8 +60,8 @@ XARGS					= xargs
 TOUCH					= touch
 
 # Interpreters
+PYTHON       ?= /usr/bin/python3
 PERL          = /usr/bin/perl
-PYTHON        = /usr/bin/python
 
 # LEX and YACC
 LEX           = flex

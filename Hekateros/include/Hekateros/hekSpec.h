@@ -116,7 +116,7 @@ namespace hekateros
      *
      * \return this.
      */
-    HekSpecLink_T operator=(const HekSpecLink_T &rhs)
+    HekSpecLink_T &operator=(const HekSpecLink_T &rhs)
     {
       m_strName     = rhs.m_strName;
       m_fLength     = rhs.m_fLength;
@@ -145,7 +145,7 @@ namespace hekateros
      *
      * \return this.
      */
-    HekSpecJoint_T operator=(const HekSpecJoint_T &rhs)
+    HekSpecJoint_T &operator=(const HekSpecJoint_T &rhs)
     {
       int i;
 
@@ -205,13 +205,15 @@ namespace hekateros
      *
      * \return this.
      */
-    HekSpecServo_T operator=(const HekSpecServo_T &rhs)
+    HekSpecServo_T &operator=(const HekSpecServo_T &rhs)
     {
       m_nServoId        = rhs.m_nServoId;
       m_bMaster         = rhs.m_bMaster;
       m_bIsContinuous   = rhs.m_bIsContinuous;
       m_nDir            = rhs.m_nDir;
       m_fTorqueLimitPct = rhs.m_fTorqueLimitPct;
+
+      return *this;
     }
 
     int     m_nServoId;       ///< servo id

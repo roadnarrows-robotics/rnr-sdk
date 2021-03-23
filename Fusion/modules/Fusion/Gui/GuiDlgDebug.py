@@ -326,9 +326,9 @@ if __name__ == '__main__':
     root = tk.Tk()
     dlg = GuiDlgDebug(root)
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

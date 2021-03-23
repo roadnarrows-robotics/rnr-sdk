@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # Package:  RN Makefile System Utility
 # File:     pydocmk.py
 # Desc:     Make python documentation for python [sub]package.
@@ -100,10 +100,10 @@ def AtAtReplace(fileNameIn, userDict, bReplace=True):
   lineNum = 1
   line = fpSrc.readline()
   while line:
-    #print "[%d] %s" % (lineNum, line),
+    #print("[%d] %s" % (lineNum, line), end='')
     m = 0
     for match in _reAtAt.finditer(line):
-      #print match.group(0), match.start(), match.end()
+      #print(match.group(0), match.start(), match.end())
       fpTmp.write(line[m:match.start()])
       id,fmt = AtAtIdentifier(match)
       if userDict.has_key(id):
@@ -137,7 +137,7 @@ def AtAtWarning(fileName, lineNum, colNum, *args):
   wmsg = "Warning: %s[%d,%d]" % (fileName, lineNum, colNum)
   for a in args:
     wmsg += ": %s" %(a)
-  print wmsg
+  print(wmsg)
 
 
 #------------------------------------------------------------------------------
@@ -186,10 +186,10 @@ def MakeEnv(docRoot, modSetup):
 #--
 def MakeDirs():
   if not os.path.exists(DocRoot):
-    os.makedirs(DocRoot, mode=0775)
+    os.makedirs(DocRoot, mode=0o775)
   imgdir = DocRoot+os.sep+'images'
   if not os.path.exists(imgdir):
-    os.mkdir(DocRoot+os.sep+'images', 0775)
+    os.mkdir(DocRoot+os.sep+'images', 0o775)
 
 #--
 def CopyImages():
@@ -199,7 +199,7 @@ def CopyImages():
   dstdir = DocRoot+os.sep+'images'+os.sep
   for varname,imgfile in PyDocInfo['images'].iteritems():
     shutil.copy(srcdir+os.sep+imgfile, dstdir)
-  print "  Copied images."
+  print("  Copied images.")
 
 #--
 def GetCbWalk(pyfilelist, dirname, fnames):
@@ -271,13 +271,13 @@ def MakeHtmlPkgDocs():
       try:
         os.rename(srcfile, DocRoot+os.sep+html)
       except OSError:
-        print >>sys.stderr, "%s -> %s: cannot copy" % (srcfile, dstfile)
+        print("%s -> %s: cannot copy" % (srcfile, dstfile), file=sys.stderr)
 
 #--
 def MakeHtmlIndex():
   postfile = AtAtReplace(PyDocInfo['index_template'], HtmlVars, False)
   os.rename(postfile, DocRoot+os.sep+'index.html')
-  print '  Wrote index.html'
+  print('  Wrote index.html')
 
 #--
 def MakePyDoc(docRoot, modSetup):
@@ -304,25 +304,25 @@ class Usage(Exception):
 def PrintUsageErr(emsg):
   """ Print Error Usage Message. """
   if emsg:
-    print "%s: %s" % (_Argv0, emsg)
+    print("%s: %s" % (_Argv0, emsg))
   else:
-    print "%s: error" % (_Argv0)
-  print "Try '%s --help' for more information." % (_Argv0)
+    print("%s: error" % (_Argv0))
+  print("Try '%s --help' for more information." % (_Argv0))
 
 #--
 def PrintUsage():
   """ Print Command-Line Usage Message """
-  print """"
+  print(""""
 usage: %s [OPTIONS] <setup_py_file>
 
      %s --help
-  """  % (_Argv0, _Argv0)
-  print """Options and arguments:
+  """  % (_Argv0, _Argv0))
+  print("""Options and arguments:
 -d, --docroot=<dir>      : Generated HTML documentation root directory
     --vpath=<path>       : Library virtual path
 
 -h, --help               : Display this help and exit.
-  """
+  """)
 
 #--
 def GetOptions(argv=None, **kwargs):
@@ -343,7 +343,7 @@ def GetOptions(argv=None, **kwargs):
     try:
       opts, args = getopt.getopt(argv[1:], "?hd:",
                         ['help', 'docroot=', 'vpath=', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise Usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -353,7 +353,7 @@ def GetOptions(argv=None, **kwargs):
         kwargs['docroot'] = optarg
       elif opt in ('--vpath'):
         kwargs['vpath'] = optarg
-  except Usage, err:
+  except Usage as err:
     PrintUsageErr(err.msg)
     sys.exit(2)
 

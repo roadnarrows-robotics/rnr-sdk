@@ -39,7 +39,7 @@ int QikOpenConnection( int *Descriptor) {
 
 int WriteToSerial(byte_t *ControlString, int Length, int Descriptor) {
   ssize_t err;
-  err = SerDevWrite(Descriptor, (byte_t *)ControlString, Length, 0);
+  err = SerDevWrite(Descriptor, (byte_t *)ControlString, (size_t)Length, 0);
   if(err < 0) {
     return -1;
   }

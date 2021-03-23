@@ -34,7 +34,9 @@ Yost::~Yost() {
 //Returns -1 if no YOST sensor on USB
 int Yost::checkYost() {
   libusb_init(&tmpcntxt);
-  libusb_set_debug(tmpcntxt, 1);
+  //DEPRECATED libusb_set_debug(tmpcntxt, 1);
+  libusb_set_option(tmpcntxt, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_ERROR);
+
   //Looking for a USB devive with same vendor and product ID as YOST
   USB_lock = libusb_open_device_with_vid_pid(tmpcntxt, YOST_ID_VENDOR,
                                                    YOST_ID_PRODUCTA);

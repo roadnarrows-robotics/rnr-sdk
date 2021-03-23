@@ -121,9 +121,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePowertrainAttr operator=(const LaePowertrainAttr &rhs);
+    LaePowertrainAttr &operator=(const LaePowertrainAttr &rhs);
   }; // LaePowertrainAttr
 
 
@@ -178,9 +178,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePowertrainState operator=(const LaePowertrainState &rhs);
+    LaePowertrainState &operator=(const LaePowertrainState &rhs);
   }; // class LaePowertrainState
 
 
@@ -222,9 +222,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePowertrain operator=(const LaePowertrain &rhs);
+    LaePowertrain &operator=(const LaePowertrain &rhs);
 
     /*!
      * \brief Map motor controller id and motor index to motor id.

@@ -116,6 +116,9 @@ SWIG_FILES 				= bsHekCore.i
 SWIG_EXTMOD_DIR 	= $(RNMAKE_PKG_ROOT)/sw/pyModules/modules/Hekateros
 SWIG_EXTMOD_LIBS 	= -lbsclient_hek -lbotsense -lrnr_netmsgs -lrnr_i2c -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 .PHONY: extra-make
 extra-make: netmsgs-all
 

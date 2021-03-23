@@ -194,7 +194,7 @@ if __name__ == "__main__":
   while True:
     version = BsRcb3.CmdRCB3Version()
     if version:
-      print version
+      print(version)
       break
     else:
       time.sleep(1)
@@ -224,7 +224,7 @@ if __name__ == "__main__":
               cv_min=-20.0, cv_max=20.0,  # cv min and max ranges (degrees)
               trace=True)
 
-  print "Press <enter> to terminate..."
+  print("Press <enter> to terminate...")
   time.sleep(1)
 
   # start active control loops

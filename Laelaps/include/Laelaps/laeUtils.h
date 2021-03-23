@@ -574,7 +574,7 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
     Dim operator=(const Dim &rhs)
     {

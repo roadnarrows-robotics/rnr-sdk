@@ -276,7 +276,7 @@ class GuiDlgKheOpt(tkSimpleDialog.Dialog):
 
     try:
       execCycle = self.mVarExecCycle.get()
-    except ValueError, err:
+    except ValueError as err:
       self.ShowStatus("Execution Cycle: field has invalid value: %s" % \
           repr(self.mEntryExecCycle.get()),
           fg=gt.ColorFgStatusError)
@@ -292,7 +292,7 @@ class GuiDlgKheOpt(tkSimpleDialog.Dialog):
 
     try:
       execStepSize = self.mVarExecStepSize.get()
-    except ValueError, err:
+    except ValueError as err:
       self.ShowStatus("Step Size: field has invalid value: %s" % \
           repr(self.mEntryExecStepSize.get()),
           fg=gt.ColorFgStatusError)
@@ -350,9 +350,9 @@ if __name__ == '__main__':
     root = tk.Tk()
     dlg = GuiDlgKheOpt(root)
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

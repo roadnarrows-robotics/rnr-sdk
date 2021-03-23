@@ -753,25 +753,25 @@ if __name__ == '__main__':
     def cbconn(self):
       tbl = ['disconnected', '115200-8-N-1', '9600-8-E-2']
       s = random.choice(tbl)
-      print 'UT: Update(Connection=%s)' % s
+      print('UT: Update(Connection=%s)' % s)
       self.sb.Update(Connection=s)
   
     #--
     def cbhex(self):
       i = random.randint(0,255)
-      print 'UT: Update(hex=0x%x)' % i
+      print('UT: Update(hex=0x%x)' % i)
       self.sb.Update(hex=i)
   
     #--
     def cbstr(self):
       tbl = ['apples', 'bananas', 'cherries', 'dates', 'figs']
       s = random.choice(tbl)
-      print 'UT: Update(str=%s)' % s
+      print('UT: Update(str=%s)' % s)
       self.sb.Update(str=s)
   
     #--
     def cball(self):
-      print "UT: Update(Connection='disconnected', hex=0, str='sweets')"
+      print("UT: Update(Connection='disconnected', hex=0, str='sweets')")
       self.sb.Update(Connection='disconnected', hex=0, str='sweets')
   
     #--
@@ -782,7 +782,7 @@ if __name__ == '__main__':
       tag = '#'+random.choice(a)+random.choice(b)+random.choice(c)
       val = random.random()
       fmt = '%6.4f'
-      print 'UT: AppendItem(%s,val=%f,fmt=%s)' % (tag, val, fmt)
+      print('UT: AppendItem(%s,val=%f,fmt=%s)' % (tag, val, fmt))
       self.sb.AppendItem(tag, val=val, fmt=fmt, max_width=6)
   
     #--
@@ -794,14 +794,14 @@ if __name__ == '__main__':
           deltags += [tag]
       if deltags:
         tag = random.choice(deltags)
-        print 'UT: DelItem(%s)' % (tag)
+        print('UT: DelItem(%s)' % (tag))
         self.sb.DelItem(tag)
 
   #--
   def main():
     """ GuiStatusBar Unit Test Main """
     win = mywin()
-    print win.sb.configure()
+    print(win.sb.configure())
     win.mainloop()
 
   # run unit test

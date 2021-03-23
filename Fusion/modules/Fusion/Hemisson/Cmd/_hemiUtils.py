@@ -69,12 +69,12 @@ def iniOpen(mode='r'):
   inilist = ['HemiDemo/hemisson.ini', './hemisson.ini']
   ini = os.getenv('HEMISSONSTARTUP')
   if ini: inilist.insert(0, ini)
-  #print "DBG:", inilist
+  #print("DBG:", inilist)
   for ini in inilist:
     try:
       f = open(ini, mode)
       return f
-    except IOError, err:
+    except IOError as err:
       pass
   return None
 

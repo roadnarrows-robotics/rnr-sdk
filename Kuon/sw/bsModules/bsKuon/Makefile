@@ -113,6 +113,9 @@ SWIG_FILES 				= bsKuonCore.i
 SWIG_EXTMOD_DIR 	= $(RNMAKE_PKG_ROOT)/pyModules/modules/BotSense/Kuon
 SWIG_EXTMOD_LIBS 	= -lbsclient_kuon -lbotsense -lnetmsgs -li2c -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 .PHONY: extra-make
 extra-make: netmsgs-all
 

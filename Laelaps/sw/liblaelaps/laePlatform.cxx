@@ -87,7 +87,7 @@ LaeMotorCtlrState::LaeMotorCtlrState(const LaeMotorCtlrState &src)
   m_uStatus     = src.m_uStatus;
 }
 
-LaeMotorCtlrState LaeMotorCtlrState::operator=(const LaeMotorCtlrState &rhs)
+LaeMotorCtlrState &LaeMotorCtlrState::operator=(const LaeMotorCtlrState &rhs)
 {
   m_strName     = rhs.m_strName;
   m_fMainVolts  = rhs.m_fMainVolts;
@@ -146,7 +146,7 @@ LaePlatform::LaePlatform(const LaePlatform &src)
   }
 }
 
-LaePlatform LaePlatform::operator=(const LaePlatform &rhs)
+LaePlatform &LaePlatform::operator=(const LaePlatform &rhs)
 {
   int   nCtlr;
   int   i;
@@ -222,6 +222,8 @@ int LaePlatform::configure(const LaeDescBase &desc)
   m_dimRobot    = desc.m_dimRobot;
   m_fWheelbase  = desc.m_fWheelbase;
   m_fWheeltrack = desc.m_fWheeltrack;
+
+  return LAE_OK;
 }
 
 int LaePlatform::configure(const LaeTunes &tunes)
@@ -259,6 +261,8 @@ int LaePlatform::resetOdometer()
   }
 
   m_fOdometer = 0.0;
+
+  return LAE_OK;
 }
 
 int LaePlatform::updateStateDynamics(const LaeMapPowertrain &mapPowertrains)

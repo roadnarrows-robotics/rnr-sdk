@@ -105,9 +105,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaeMotorCtlrState operator=(const LaeMotorCtlrState &rhs);
+    LaeMotorCtlrState &operator=(const LaeMotorCtlrState &rhs);
 
     /*!
      * \brief Clear data sans name.
@@ -182,9 +182,9 @@ namespace laelaps
      *
      * \param rhs   Right hand side object.
      *
-     * \return Returns copy of this.
+     * \return Returns reference to this.
      */
-    LaePlatform operator=(const LaePlatform &rhs);
+    LaePlatform &operator=(const LaePlatform &rhs);
 
     /*!
      * \brief Clear data sans name.

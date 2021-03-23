@@ -110,8 +110,8 @@ FusionAppName  = 'Reactor'
 #
 BadCorrState  = -1
 _CorrStateLowerMatrix = [
-  # None
-  [Gluon.EServerState.None],
+  # Undef
+  [Gluon.EServerState.Undef],
   # NotLoaded
   [Gluon.EServerState.NotLoaded,    Gluon.EServerState.NotLoaded],
   # NotReady
@@ -150,7 +150,7 @@ _EmptyPlugin = {
 
 #
 # Fusion Core Actions
-#   None      no current action
+#   Idle      no current action
 #   Plugin    select a server plug-in 
 #   EStop     emergency stop all servers
 #   Load      load all plugged in servers
@@ -164,7 +164,7 @@ _EmptyPlugin = {
 #   Quit      quit fusion
 #
 EAction = enum.Enum(
-  'None Plugin Load EStop Start Resume Pause Step Stop Unload Unplug Quit')
+  'Idle Plugin Load EStop Start Resume Pause Step Stop Unload Unplug Quit')
 
 
 #-------------------------------------------------------------------------------
@@ -249,8 +249,8 @@ class Reactor(Gluon.GluonClient):
     self.mBrain       = None          # the instantiated brain
     self.mGmsEnabled  = False         # turn off Gui Messaging Services
                                       #  during initialization
-    self.mCurAction   = EAction.None  # no current fusion action
-    self.mCorrState   = Gluon.EServerState.None # correlated servers' state
+    self.mCurAction   = EAction.Idle  # no current fusion action
+    self.mCorrState   = Gluon.EServerState.Undef # correlated servers' state
 
   #--
   def PostInit(self):
@@ -281,7 +281,7 @@ class Reactor(Gluon.GluonClient):
       self.mRobot.ExecEStop()
     if self.HasBrain():
       self.mBrain.ExecEStop()
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
   def PushPlay(self):
     if __debug__: self.mDbg.d1print('PushPlay')
@@ -299,7 +299,7 @@ class Reactor(Gluon.GluonClient):
         self.mRobot.ExecResume()
       if self.HasBrain():
         self.mBrain.ExecResume()
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
   def PushPause(self):
     if __debug__: self.mDbg.d1print('PushPause')
@@ -309,7 +309,7 @@ class Reactor(Gluon.GluonClient):
       self.mRobot.ExecSuspend()
     if self.HasBrain():
       self.mBrain.ExecSuspend()
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
   def PushStep(self):
     if __debug__: self.mDbg.d1print('PushStep')
@@ -319,7 +319,7 @@ class Reactor(Gluon.GluonClient):
       self.mRobot.ExecStep()
     if self.HasBrain():
       self.mBrain.ExecStep()
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
   def PushStop(self):
     if __debug__: self.mDbg.d1print('PushStop')
@@ -329,7 +329,7 @@ class Reactor(Gluon.GluonClient):
       self.mRobot.ExecStop()
     if self.HasBrain():
       self.mBrain.ExecStop()
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
   def PushLoadUnload(self):
     if __debug__: self.mDbg.d1print('PushLoadUnload')
@@ -343,7 +343,7 @@ class Reactor(Gluon.GluonClient):
       self.ShowMsg(' * Pushed Unload *')
       self.mCurAction = EAction.Unload
       self.UnloadServers()
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -658,7 +658,7 @@ class Reactor(Gluon.GluonClient):
     # Try importing plugin module
     try:
       plugin = utils.importmodule(modFile, modbase)
-    except ImportError, err:
+    except ImportError as err:
       self.ShowError('%s: %s: %s' % (option, modFile, err))
       return None
     except:
@@ -678,7 +678,7 @@ class Reactor(Gluon.GluonClient):
     # verify the interface
     try:
       isif = issubclass(ePoint, ifClass)
-    except TypeError, err:
+    except TypeError as err:
       self.ShowError('%s: %s plugin entry point %s: not a class.' % \
           (option, modFile, repr(ePointName)))
       del ePoint
@@ -731,7 +731,7 @@ class Reactor(Gluon.GluonClient):
     self.IniLastMinutes()
     try:
       ini.IniWrite(filename)
-    except IOError, err:
+    except IOError as err:
       msgbox.ErrorBox(err)
       self.ShowError(err)
       return
@@ -807,7 +807,7 @@ class Reactor(Gluon.GluonClient):
       if self.mPref['AutoSavePlugins']:
         self.GCGetIni().SetModifiedFlag()
 
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
     self.GuiSetPluginStates()
     self.GuiShowRobotInfo()
@@ -826,7 +826,7 @@ class Reactor(Gluon.GluonClient):
     self.GCUnregisterServer(serverId)
     self.mRobotPlugin = self._DelPlugin(self.mRobot, self.mRobotPlugin)
     self.mRobot = None
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
     self.GuiSetPluginStates()
     self.GuiShowRobotInfo()
     if self.mPref['AutoSavePlugins']:
@@ -873,7 +873,7 @@ class Reactor(Gluon.GluonClient):
       if self.mPref['AutoSavePlugins']:
         self.GCGetIni().SetModifiedFlag()
 
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
 
     self.GuiSetPluginStates()
     self.GuiShowBrainInfo()
@@ -892,7 +892,7 @@ class Reactor(Gluon.GluonClient):
     self.GCUnregisterServer(serverId)
     self.mBrainPlugin = self._DelPlugin(self.mBrain, self.mBrainPlugin)
     self.mBrain = None
-    self.mCurAction = EAction.None
+    self.mCurAction = EAction.Idle
     self.GuiSetPluginStates()
     self.GuiShowBrainInfo()
     if self.mPref['AutoSavePlugins']:
@@ -927,7 +927,7 @@ class Reactor(Gluon.GluonClient):
   def GetRobotState(self):
     """ Returns current robot server state. """
     if not self.HasRobot():
-      return Gluon.EServerState.None
+      return Gluon.EServerState.Undef
     else:
       return self.mRobot.GSGetServerState()
 
@@ -935,7 +935,7 @@ class Reactor(Gluon.GluonClient):
   def GetBrainState(self):
     """ Returns current brain server state. """
     if not self.HasBrain():
-      return Gluon.EServerState.None
+      return Gluon.EServerState.Undef
     else:
       return self.mBrain.GSGetServerState()
   
@@ -1090,7 +1090,7 @@ class Reactor(Gluon.GluonClient):
       return
 
     # no server loaded
-    elif server.GSGetServerState() in [Gluon.EServerState.None,
+    elif server.GSGetServerState() in [Gluon.EServerState.Undef,
                                        Gluon.EServerState.NotLoaded]:
       return
 
@@ -1267,7 +1267,7 @@ class Reactor(Gluon.GluonClient):
       try:
         fp = open(newFileName, 'w')
         self.mIniSessDebugFile = (newFileName, fp)
-      except IOError, err:
+      except IOError as err:
         self.ShowError('Debug file %s: using <stdout>' % err)
         self.mIniSessDebugFile = ('<stdout>', sys.stdout)
     self.DebugSetAllLevels(dlFusion, dlRobot, dlBrain, 
@@ -1313,7 +1313,7 @@ class Reactor(Gluon.GluonClient):
     if not self.mGmsEnabled:
       return
 
-    if self.mCorrState == Gluon.EServerState.None:
+    if self.mCorrState == Gluon.EServerState.Undef:
       prompt = "Select a vRobot and/or a vBrain plug-in"
     elif self.mCorrState == Gluon.EServerState.NotLoaded:
       if not self.HasRobotOrBrain():
@@ -1378,7 +1378,7 @@ class Reactor(Gluon.GluonClient):
     if self.mGmsEnabled:
       self.mHistoryBar.ShowNormalStatus(msg)
     else:
-      print msg
+      print(msg)
 
   def ShowError(self, emsg):
     """ Show error message on the history bar.
@@ -1392,7 +1392,7 @@ class Reactor(Gluon.GluonClient):
     if self.mGmsEnabled:
       self.mHistoryBar.ShowErrorStatus(emsg)
     else:
-      print >>sys.stderr, emsg
+      print(emsg, file=sys.stderr)
     if __debug__: self.mDbg.d2print(emsg)
 
 
@@ -1463,7 +1463,7 @@ class Reactor(Gluon.GluonClient):
     if geostr:
       try:
         self.mGuiRoot.wm_geometry(geostr)
-      except tk.TclError, msg:
+      except tk.TclError as msg:
         self.ShowError('%s: %s' % (option, msg))
 
   #--
@@ -1486,7 +1486,7 @@ class Reactor(Gluon.GluonClient):
         'file': ['nofile']
       },
       'exec_play': {
-        'corr': [Gluon.EServerState.None,
+        'corr': [Gluon.EServerState.Undef,
                  Gluon.EServerState.NotLoaded, 
                  Gluon.EServerState.NotReady,
                  Gluon.EServerState.Stepping,
@@ -1879,7 +1879,7 @@ class Reactor(Gluon.GluonClient):
     elif self.mCorrState in [Gluon.EServerState.Ready,
                              Gluon.EServerState.Paused]:
       self.mVizExecState.SetActive('stopped')
-    elif self.mCorrState in [Gluon.EServerState.None,
+    elif self.mCorrState in [Gluon.EServerState.Undef,
                              Gluon.EServerState.NotLoaded]:
       self.mVizExecState.SetActive('notloaded')
     elif self.mCorrState in [Gluon.EServerState.NotReady]:
@@ -2216,7 +2216,7 @@ class Reactor(Gluon.GluonClient):
       if updatefunc and session['win'].isAlive:
         try:
           updatefunc(*args, **kwargs)
-        except tk.TclError, msg:
+        except tk.TclError as msg:
           if __debug__: self.mDbg.d3print('%s: %s' % (winId, msg))
           pass
 
@@ -2335,7 +2335,7 @@ class Reactor(Gluon.GluonClient):
       self.mMirror.AsyncRequestMirrorDie()
       self.mGuiRoot.destroy()
     else:
-      self.mCurAction = EAction.None
+      self.mCurAction = EAction.Idle
 
   #--
   def GuiCbFileOpenIni(self):
@@ -2442,7 +2442,7 @@ class Reactor(Gluon.GluonClient):
       # verify the vRobot interface
       try:
         isvrobot = issubclass(dlg.result['pluginEPoint'], vRobot.vRobot)
-      except TypeError, err:
+      except TypeError as err:
         self.ShowError('vRobot plugin entry point %s: not a class.' % \
                 repr(dlg.result['pluginEPointName']))
         del dlg.result['pluginEPoint']
@@ -2492,7 +2492,7 @@ class Reactor(Gluon.GluonClient):
       # verify the vBrain interface
       try:
         isvbrain = issubclass(dlg.result['pluginEPoint'], vBrain.vBrain)
-      except TypeError, err:
+      except TypeError as err:
         self.ShowError('vBrain plugin entry point %s: not a class.' % \
                 repr(dlg.result['pluginEPointName']))
         utils.delmodule(dlg.result['pluginMod'])

@@ -90,6 +90,7 @@ int laelaps::i2cTryOpen(LaeI2C &i2cBus, uint_t addr)
     }
   }
   rc = -LAE_ECODE_NO_DEV;
+  return rc;
 }
 
 //------------------------------------------------------------------------------

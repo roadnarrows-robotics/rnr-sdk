@@ -375,7 +375,7 @@ if __name__ == '__main__':
   def winsync():
     global mirror, wlabel
     rsp = mirror.SyncRequest(0, 'label')
-    print 'winsync', repr(rsp)
+    print('winsync', repr(rsp))
     wlabel['text'] = rsp
 
   #--
@@ -401,17 +401,17 @@ if __name__ == '__main__':
     global cnt
     cnt += 1
     text = "synchronous update %d of label widget" % (cnt)
-    print 'label:', repr(text)
+    print('label:', repr(text))
     time.sleep(1.0)
     return text
 
   #--
   def cbecho(request, msg):
-    print repr(msg)
+    print(repr(msg))
 
   #--
   def cbshowcall(request, *args, **kwargs):
-    print 'cbshowcall(%s, %s, %s)' % (repr(request), repr(args), repr(kwargs))
+    print('cbshowcall(%s, %s, %s)' % (repr(request), repr(args), repr(kwargs)))
 
   #--
   def main():
@@ -429,16 +429,16 @@ if __name__ == '__main__':
     mirror.AsyncRequestRegister(rqList[0][0], cbecho)
     mirror.AsyncRequestRegister(rqList[1][0], cbshowcall)
     mirror.AsyncRequestRegister(rqList[2][0], cbwinlabel)
-    print "Enter <request> or 'help' for list of request"
+    print("Enter <request> or 'help' for list of request")
     while True:
       request = raw_input("request> ")
       if not request:
         continue
       elif request == 'help':
         for rq in rqList:
-          print rq[0], rq[1]
-        print 'help'
-        print 'quit'
+          print(rq[0], rq[1])
+        print('help')
+        print('quit')
       elif request == 'quit':
         mirror.AsyncRequestMirrorDie()
         root.destroy()
@@ -461,5 +461,5 @@ if __name__ == '__main__':
   # run unit test
   try:
     main()
-  except SystemExit, status:
+  except SystemExit as status:
     sys.exit(status)

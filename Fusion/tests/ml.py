@@ -95,7 +95,7 @@ class GuiWin(tk.Toplevel):
   #--
   def _WinServer(self, args=(), kwargs={}):
     """ Window Server thread.  """
-    print "Starting %s" % self.mWinThread.getName()
+    print("Starting %s" % self.mWinThread.getName())
     while self.isAlive: 
       try:
         qargs, qkwargs = self.mWinQueue.get(True, 0.5)  # block with timeout
@@ -106,7 +106,7 @@ class GuiWin(tk.Toplevel):
       else:
         self.ShowMeter(self.mWinQueue.qsize())
         self.WinUpdate(*qargs, **qkwargs) 
-    print "Quitting %s" % self.mWinThread.getName()
+    print("Quitting %s" % self.mWinThread.getName())
 
   #--
   def WinQueueRequest(self, *qargs, **qkwargs):
@@ -123,7 +123,7 @@ class GuiWin(tk.Toplevel):
     """ Not thread safe... """
     obj = qargs[0]
     color = qkwargs.get('color', 'white')
-    print "%s: WinUpdate(%s,%s)" % (self.mContextName, obj, color)
+    print("%s: WinUpdate(%s,%s)" % (self.mContextName, obj, color))
     if obj == 'oval':
       self.CanvasOval(color=color)
     elif obj == 'circle':
@@ -141,7 +141,7 @@ class GuiWin(tk.Toplevel):
     elif obj == 'erase':
       self.CanvasErase()
     else:
-      print "%s: unknown object: %s" % (self.mContextName, obj)
+      print("%s: unknown object: %s" % (self.mContextName, obj))
 
   #--
   def body(self):
@@ -192,7 +192,7 @@ class GuiWin(tk.Toplevel):
   #--
   def destroy(self):
     """ Destroy window callback event. """
-    print 'Destroying', self.wm_title()
+    print('Destroying', self.wm_title())
     self.isAlive = False
     self.WinQueueRequest(WinRequestDie)
     self.ondestroy()
@@ -269,7 +269,7 @@ class GuiWin(tk.Toplevel):
 
   #--
   def CbBlast(self):
-    print "%s: CbBlast" % self.wm_title()
+    print("%s: CbBlast" % self.wm_title())
     self.WinQueueRequest('erase')
     self.WinQueueRequest('oval')
     self.WinQueueRequest('circle')
@@ -278,12 +278,12 @@ class GuiWin(tk.Toplevel):
 
   #--
   def CbClear(self):
-    print "%s: CbClear" % self.wm_title()
+    print("%s: CbClear" % self.wm_title())
     self.WinQueueRequest('erase')
 
   #--
   def CbDrawAll(self):
-    print "%s: CbDrawAll" % self.wm_title()
+    print("%s: CbDrawAll" % self.wm_title())
     self.WinQueueRequest('all')
 
 
@@ -301,11 +301,11 @@ def drawrequest():
       'blue', 'cyan', 'magenta', 'pink', 'gray', 'white']
   obj = random.choice(objList)
   color=random.choice(colorList)
-  print "drawrequest: %s, %s" % (obj, color)
+  print("drawrequest: %s, %s" % (obj, color))
   Win1.WinQueueRequest(obj, color=color)
 
 def drawblast(n=20):
-  print "** drawblast(%d) **" % n
+  print("** drawblast(%d) **" % n)
   i = 0
   while i < n:
     drawrequest()
@@ -317,7 +317,7 @@ def rootclose():
 
 def startroot():
   global Root
-  print 'Starting root'
+  print('Starting root')
   Root = tk.Tk()
   Root.wm_title("root")
   w = tk.Button(Root, text='Send', command=drawrequest)
@@ -331,7 +331,7 @@ def startroot():
 
 def startaux():
   global AuxThread
-  print 'Starting AuxThread'
+  print('Starting AuxThread')
   AuxThread = thread.Thread(target=auxmain, name="AuxThread", kwargs={})
   AuxSema.acquire()
   AuxThread.start()
@@ -356,11 +356,11 @@ def auxquit():
   AuxSema.release()
 
 startroot()
-print 'Starting window #1'
+print('Starting window #1')
 Win1 = GuiWin(Root, title="WinOne")
 startaux()
-print 'Entering root.mainloop()'
+print('Entering root.mainloop()')
 Root.mainloop()
-print "Root exit"
+print("Root exit")
 auxquit()
-print "AuxThread exit"
+print("AuxThread exit")

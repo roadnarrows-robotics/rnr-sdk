@@ -62,14 +62,14 @@ class ActiveImageWidget(tk.Canvas):
   #--
   def destroy(self):
     """ Destroy this widget. """
-    print 'rdk', 'destroy'
+    print('rdk', 'destroy')
     if self._mIterator:
       self._mIterator.cancel()
     tk.Canvas.destroy(self)
 
   def _CbIterStart(self):
     """ Start image sequencer iterator. """
-    print 'rdk', 'after_idle'
+    print('rdk', 'after_idle')
     self.after_cancel(self.mId)
     if self.mNumImages > 1:
       self._mIterator = IVTimer.IVTimer(self.mFps, self.mFps, self._CbIterNext)
@@ -84,7 +84,7 @@ class ActiveImageWidget(tk.Canvas):
     """ Image sequencing iterator. """
     # mainloop may not have beed created or is in process of being destroyed
     try:
-      print 'rdk', 'index=', self.mIndex
+      print('rdk', 'index=', self.mIndex)
       #self.itemconfigure(self.mId, image=self.mImgList[self.mIndex])
       if self.mId >= 0:
         self.delete(self.mId)

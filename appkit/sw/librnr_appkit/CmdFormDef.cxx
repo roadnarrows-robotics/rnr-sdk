@@ -132,6 +132,8 @@ CmdFormDef &CmdFormDef::operator=(const CmdFormDef &rhs)
   m_argDefs   = rhs.m_argDefs;
   m_nArgcReq  = rhs.m_nArgcReq;
   m_nArgcOpt  = rhs.m_nArgcOpt;
+
+  return *this;
 }
 
 bool CmdFormDef::isDefined() const

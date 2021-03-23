@@ -50,6 +50,9 @@ SWIG_FILES 				=
 SWIG_EXTMOD_DIR 	= ../modules/Hekateros
 SWIG_EXTMOD_LIBS 	= -lhekateros -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 all-extmod: swig-all
 
 # Clean extension module intermediates

@@ -234,7 +234,7 @@ class Imu:
     rspLen = MSP_RSP_HDR_LEN + lenData + 1
     rspBuf = self.m_port.read(rspLen)
 
-    #print "rspBuf[%d] = '%s'" % (len(rspBuf), rspBuf.encode("hex"))
+    #print("rspBuf[%d] = '%s'" % (len(rspBuf), rspBuf.encode("hex")))
 
     msgLen = len(rspBuf)
     if msgLen < MSP_RSP_MIN_LEN:
@@ -466,13 +466,13 @@ class Imu:
 # UT main
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':
-  print "IMU Unit Test Example"
-  print
+  print("IMU Unit Test Example")
+  print()
 
   device    = "/dev/ttyUSB0"
   baud      = 115200
 
-  print "Get raw IMU data:"
+  print("Get raw IMU data:")
 
   imu = Imu()
 
@@ -480,30 +480,30 @@ if __name__ == '__main__':
 
   ident = imu.readIdent()
 
-  print "IMU Identity:"
-  print "  Version:     %u" % (ident['version'])
-  print "  Multi-Type:  %u" % (ident['multi_type'])
-  print "  MSP Version: %u" % (ident['msp_version'])
-  print "  Caps:        0x%04x" % (ident['caps'])
+  print("IMU Identity:")
+  print("  Version:     %u" % (ident['version']))
+  print("  Multi-Type:  %u" % (ident['multi_type']))
+  print("  MSP Version: %u" % (ident['msp_version']))
+  print("  Caps:        0x%04x" % (ident['caps']))
 
   while True:
     meas = imu.readRawImu()
 
-    print "accel_raw(x,y,z) = %6d, %6d, %6d" % \
-        (meas['accel'][X], meas['accel'][Y], meas['accel'][Z])
-    print "gyro_raw(x,y,z)  = %6d, %6d, %6d" % \
-        (meas['gyro'][X], meas['gyro'][Y], meas['gyro'][Z])
+    print("accel_raw(x,y,z) = %6d, %6d, %6d" % \
+        (meas['accel'][X], meas['accel'][Y], meas['accel'][Z]))
+    print("gyro_raw(x,y,z)  = %6d, %6d, %6d" % \
+        (meas['gyro'][X], meas['gyro'][Y], meas['gyro'][Z]))
 
     meas = imu.readRawImu('g', 'deg/s')
 
-    print "accel_g(x,y,z)   = %.3f, %.3f, %.3f" % \
-        (meas['accel'][X], meas['accel'][Y], meas['accel'][Z])
-    print "gyro_dps(x,y,z)  = %.3f, %.3f, %.3f" % \
-        (meas['gyro'][X], meas['gyro'][Y], meas['gyro'][Z])
+    print("accel_g(x,y,z)   = %.3f, %.3f, %.3f" % \
+        (meas['accel'][X], meas['accel'][Y], meas['accel'][Z]))
+    print("gyro_dps(x,y,z)  = %.3f, %.3f, %.3f" % \
+        (meas['gyro'][X], meas['gyro'][Y], meas['gyro'][Z]))
 
     rpy = imu.readAttitude('degrees')
-    print "roll,pitch,yaw   = %.3f, %.3f, %.3f" % \
-        (rpy[ROLL], rpy[PITCH], rpy[YAW])
+    print("roll,pitch,yaw   = %.3f, %.3f, %.3f" % \
+        (rpy[ROLL], rpy[PITCH], rpy[YAW]))
 
     try:
       time.sleep(1.0)

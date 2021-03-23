@@ -1654,7 +1654,7 @@ class NetMsgsStreamBuf:
     """
     try:
       return d[k]
-    except KeyError, inst:
+    except KeyError as inst:
       name = d.get('name', '?name?')
       self.Error(epreface, name, inst.args[0], EMsgReqKeyword, stateId=stateId)
   ##
@@ -1768,7 +1768,7 @@ class NetMsgsStreamBuf:
     for a in args:
       if a:
         wmsg += ": %s" % (a)
-    print >>sys.stderr, wmsg
+    print(wmsg, file=sys.stderr)
   ##
 
   #--

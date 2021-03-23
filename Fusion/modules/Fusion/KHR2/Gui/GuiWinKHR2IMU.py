@@ -267,7 +267,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
         Return Values:
           None
     """
-    #print "Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'bpimu':
       self.WinUpdateIMU(**kwargs)
     elif request == 'cfg':
@@ -279,7 +279,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
     elif request == 'disconnect':
       self.WinUpdateDisconnect()
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
   #--
   def WinUpdateIMU(self, raw_data=None, cooked_data=None,
@@ -779,14 +779,14 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
           filename  - file name to write the data
     """
     fp = open(filename, 'w')
-    print >>fp, '#'
-    print >>fp, '# vKHR2 IMU Waypoints'
+    print('#', file=fp)
+    print('# vKHR2 IMU Waypoints', file=fp)
     ltime = time.localtime()
-    print >>fp, '# %d.%02d.%02d %02d:%02d:%02d' % \
-        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5])
-    print >>fp, '#\n'
-    print >>fp, '# waypoint IMU: (x(mm), y(mm), theta(radians))'
-    print >>fp, 'vKHR2 = [',
+    print('# %d.%02d.%02d %02d:%02d:%02d' % \
+        (ltime[0], ltime[1], ltime[2], ltime[3], ltime[4], ltime[5]), file=fp)
+    print('#\n', file=fp)
+    print('# waypoint IMU: (x(mm), y(mm), theta(radians))', file=fp)
+    print('vKHR2 = [', end='', file=fp)
     n = 0
     sep = ''
     for p in self.mBotIMU:
@@ -796,9 +796,10 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
         sep += '\n  '
       else:
         sep += ' '
-      print >>fp, '%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+      print('%s(%.2f, %.2f, %.7f)' % (sep, p[X], p[Y], p[THETA]),
+          end='', file=fp)
       n += 1
-    print >>fp, '\n]'
+    print('\n]', file=fp)
     fp.close()
 
   #--
@@ -854,7 +855,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
           bpimu=self.mBsClient.mBsProxiedDev['bpimu']['i2c'],
           i2c_dev_name=self.mI2CDevName)
 
-      print "IMU enabled = ", self.mBpIMUState
+      print("IMU enabled = ", self.mBpIMUState)
 
   #--
   def CbI2CScan(self):
@@ -916,11 +917,11 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
     if self.mTestGui:
       self.mTestGui = False
       self.mMenuBar['Tools|Go Live']['label'] = 'Test Gui'
-      print 'Going live, testing the Gui is off'
+      print('Going live, testing the Gui is off')
     else:
       self.mTestGui = True
       self.mMenuBar['Tools|Test Gui']['label'] = 'Go Live'
-      print 'Testing the Gui'
+      print('Testing the Gui')
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -964,7 +965,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
     if rsp:
       rsp[k] = self.ADCtoG(rsp[k])
       self.WinQueueRequest('bpimu', **rsp)
-      #print rsp
+      #print(rsp)
 
   #--
   def ADCtoG(self, adclist):

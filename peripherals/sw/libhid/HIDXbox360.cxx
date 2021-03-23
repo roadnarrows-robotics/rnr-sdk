@@ -134,7 +134,8 @@ HIDXbox360::HIDXbox360(int usbDebugLevel) : HIDInput(HIDClassXbox360)
   // set debug level
   else
   {
-    libusb_set_debug(m_usbContext, usbDebugLevel);
+    //DEPRECATED libusb_set_debug(m_usbContext, usbDebugLevel);
+    libusb_set_option(m_usbContext, LIBUSB_OPTION_LOG_LEVEL, usbDebugLevel);
   }
 }
 
@@ -994,6 +995,8 @@ int HIDXbox360::initTransferPkts()
     m_usbPkt[i].m_bHasSubmitted = false;
     m_usbPkt[i].m_bCancel       = false;
   }
+
+  return LIBUSB_SUCCESS;
 }
 
 void HIDXbox360::freeTransferPkts()

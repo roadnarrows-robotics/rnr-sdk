@@ -203,7 +203,7 @@ class GuiWin(tk.Toplevel):
           **options   - keyword options passed back to any registered
                         ondestroy callback.
     """
-    #print 'Dbg: %s: destroy()' % self.mContextName
+    #print('Dbg: %s: destroy()' % self.mContextName)
     self.isAlive = False                  # this window is now defunct
     if self.mWinThread and self.mWinThread.isAlive():  # kiil thread
       self.WinQueueRequest(WinRequestDie) # queue death
@@ -250,14 +250,14 @@ class GuiWin(tk.Toplevel):
   def _WinServer(self, args=(), kwargs={}):
     """ The Window Update Request Server thread.  """
     # process request loop
-    #print "Dbg: Starting %s" % self.mWinThread.getName()
+    #print("Dbg: Starting %s" % self.mWinThread.getName())
     while self.isAlive: 
       try:
         qargs, qkwargs = self.mWinQueue.get(True, 0.5)  # block with timeout
       except Queue.Empty:
         continue
       if len(qargs) > 0 and qargs[0] == WinRequestDie:       # die request
-          #print "Dbg: Breaking %s" % self.mWinThread.getName()
+          #print("Dbg: Breaking %s" % self.mWinThread.getName())
           break;
       elif len(qargs) > 0 and qargs[0] == WinRequestResize:  # resize request
           #self.OnResize()    # RDK future
@@ -266,7 +266,7 @@ class GuiWin(tk.Toplevel):
         if self.mHasQMeter:
           self._ShowQMeter(self.mWinQueue.qsize())
         self.WinUpdate(*qargs, **qkwargs)               # service request
-    #print "Dbg: Quitting %s" % self.mWinThread.getName()
+    #print("Dbg: Quitting %s" % self.mWinThread.getName())
 
   #--
   def WinQueueRequest(self, *qargs, **qkwargs):
@@ -282,8 +282,8 @@ class GuiWin(tk.Toplevel):
           True if the request was successfully queued.
           False if the request could not be queued.
     """
-    #print "Dbg: %s: WinQueueRequest(%s...)" % \
-    #    (self.mContextName, len(qargs[0])>0 and repr(qargs[0]) or '')
+    #print("Dbg: %s: WinQueueRequest(%s...)" % \
+    #    (self.mContextName, len(qargs[0])>0 and repr(qargs[0]) or ''))
     if not self.mWinThread or not self.mWinThread.isAlive():
       return
     try:
@@ -294,7 +294,7 @@ class GuiWin(tk.Toplevel):
     except Queue.Full:
       if self.mHasQMeter:
         self._ShowQMeter(self.mWinQueue.qsize()+1)
-      #print "Dbg: %s: WinQueueRequest(...): Full" % self.mContextName
+      #print("Dbg: %s: WinQueueRequest(...): Full" % self.mContextName)
       return False
 
   #--
@@ -323,7 +323,7 @@ class GuiWin(tk.Toplevel):
         Return Value:
           None
     """
-    #print "Dbg: %s: WinUpdate(...)" % (self.mContextName)
+    #print("Dbg: %s: WinUpdate(...)" % (self.mContextName))
     pass
  
   #--
@@ -414,7 +414,7 @@ if __name__ == '__main__':
       root.destroy()
       pass
     except tk.TclError:
-      print >>sys.stderr, 'TclError: root.destroy()'
+      print('TclError: root.destroy()', file=sys.stderr)
       pass
 
   #--
@@ -424,14 +424,14 @@ if __name__ == '__main__':
       if win.isAlive:
         win._ShowQMeter(count)
     except tk.TclError:
-      print >>sys.stderr, 'TclError: _ShowQMeter()'
+      print('TclError: _ShowQMeter()', file=sys.stderr)
       pass
     count = (count + 1) % (WinServerQueueSize + 2)
     try:
       if win.isAlive:
         win.AlarmFakeId = win.after(1000, fakequeueing, win, count)
     except tk.TclError:
-      print >>sys.stderr, 'TclError: win.after()'
+      print('TclError: win.after()', file=sys.stderr)
       pass
 
   #--
@@ -444,7 +444,7 @@ if __name__ == '__main__':
     win = GuiWin(root)
     win.CreateQMeter(win, 0, 0)
     win.AlarmFakeId = win.after(1000, fakequeueing, win, 0)
-    print "Unit Test: Cycle thru QMeter forever until window is destroyed"
+    print("Unit Test: Cycle thru QMeter forever until window is destroyed")
     root.mainloop()
 
   #--
@@ -453,10 +453,10 @@ if __name__ == '__main__':
       try:
         raw_input("Press <Enter> or <Ctrl-D> ")
       except EOFError:
-        print "<EOF>"
+        print("<EOF>")
         break
       t = random.randint(500, 3000)
-      print "\n*** Create GuiWin for %dmsec***" % t
+      print("\n*** Create GuiWin for %dmsec***" % t)
       main(killtime=t)
 
   # run unit test

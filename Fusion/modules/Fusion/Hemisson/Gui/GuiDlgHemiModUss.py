@@ -200,9 +200,9 @@ if __name__ == '__main__':
     lastsettings = {'range': 6000}
     dlg = GuiDlgHemiModUss(root, lastSettings=lastsettings)
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

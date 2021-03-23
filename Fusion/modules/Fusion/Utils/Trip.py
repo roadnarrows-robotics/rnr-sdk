@@ -440,40 +440,40 @@ class tripLegIter:
 if __name__ == '__main__':
   def main():
     """ Trip Test Main """
-    print 'assignment'
+    print('assignment')
     t0 = trip()
-    print t0
+    print(t0)
     t1 = trip([(0, 0, 0), (1, 1, .5), (2, .75, .3)])
-    print t1
+    print(t1)
     t2 = trip(3, 4, math.pi)
-    print t2
+    print(t2)
     t3 = trip(t1)
-    print t2
+    print(t2)
     t3 += (44, 55, 0.0)
-    print t3
+    print(t3)
     t3 += [(100, 200, -1), (101, 201, -2)]
-    print t3
+    print(t3)
     t3 += t1
-    print t3
+    print(t3)
     t3 += t0
-    print t3
+    print(t3)
 
-    print '\niterator'
+    print('\niterator')
     for p1 in t3:
-      print p1
+      print(p1)
 
-    print '\niterlegs()'
+    print('\niterlegs()')
     for p1, p2 in t3.iterlegs():
-      print p1, '-->', p2
+      print(p1, '-->', p2)
 
-    print '\niterlegs(3,5)'
+    print('\niterlegs(3,5)')
     for p1, p2 in t3.iterlegs(3, 5):
-      print p1, '-->', p2
+      print(p1, '-->', p2)
 
   # run test
   main()
 
-  print """
+  print("""
 See also the unit test in GuiWinKheTrip.py. To test, run the python script
-'GuiWinKheTrip.py' and choose the 'testpattern' option at the prompt."""
+'GuiWinKheTrip.py' and choose the 'testpattern' option at the prompt.""")
 

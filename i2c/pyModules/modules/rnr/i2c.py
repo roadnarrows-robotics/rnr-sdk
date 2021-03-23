@@ -176,7 +176,7 @@ class i2c:
   def read(self, addr, count):
     try:
       rbuf = basetypes.ByteBuf(count)
-    except AssertionError, inst:
+    except AssertionError as inst:
       raise I2CException("%s: read(0x%02x, ...): %s" % \
           (self.m_device, addr, inst.message))
     n = i2ccore.i2ccore_read(self.m_fd, self.m_addr, addr,
@@ -188,7 +188,7 @@ class i2c:
     self.m_addr = addr
     try:
       rbuf.copyFromSwigObj(n)
-    except AssertionError, inst:
+    except AssertionError as inst:
       raise I2CException("%s: read(0x%02x, ...): %s" % \
           (self.m_device, addr, inst.message))
     return rbuf.buf
@@ -205,7 +205,7 @@ class i2c:
     try:
       wbuf = basetypes.ByteBuf.Clone(buf)
       wbuf.copyToSwigObj(len(wbuf))
-    except AssertionError, inst:
+    except AssertionError as inst:
       raise I2CException("%s: write(0x%02x, ...): %s" % \
           (self.m_device, addr, inst.message))
     n = i2ccore.i2ccore_write(self.m_fd, self.m_addr, addr,
@@ -234,7 +234,7 @@ class i2c:
       wbuf = basetypes.ByteBuf.Clone(buf)
       wbuf.copyToSwigObj(len(wbuf))
       rbuf = basetypes.ByteBuf(count)
-    except AssertionError, inst:
+    except AssertionError as inst:
       raise I2CException("%s: transfer(0x%02x, ...): %s" % \
           (self.m_device, addr, inst.message))
     rc = i2ccore.i2ccore_transfer(self.m_fd, self.m_addr, addr,
@@ -247,7 +247,7 @@ class i2c:
     self.m_addr = addr
     try:
       rbuf.copyFromSwigObj(n)
-    except AssertionError, inst:
+    except AssertionError as inst:
       raise I2CException("%s: read(0x%02x, ...): %s" % \
           (self.m_device, addr, inst.message))
     return rbuf.buf

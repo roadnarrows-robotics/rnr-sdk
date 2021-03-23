@@ -122,7 +122,7 @@ class GuiDlgOpen(tkFileDialog.Open):
     try:
       self.mOpenCmd(self.mOpenFile)
       return True
-    except IOError, err:
+    except IOError as err:
       gut.ErrorBox(err)
       return False
 
@@ -142,9 +142,9 @@ if __name__ == '__main__':
                              ('All files', '*')],
                   defaultextension='.txt')
     if dlg.result:
-      print 'ok:', dlg.result
+      print('ok:', dlg.result)
     else:
-      print 'cancel'
+      print('cancel')
 
   # run test
   main()

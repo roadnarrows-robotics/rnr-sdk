@@ -115,9 +115,9 @@ class KheSerial:
                                  timeout=0.3, writeTimeout=2.0)
       if __debug__: self.mDbg.d5print("open %s %d-8-N-2:" % (port, baudrate))
       self.FlushInput()
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       self.mErr.SetErrGeneral(err.__str__())
-      raise IOError, err
+      raise IOError(err)
 
   #--
   def Close(self):
@@ -218,7 +218,7 @@ class KheSerial:
     """
     try:
       self._mHndSer.flushInput()
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: flush on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -227,7 +227,7 @@ class KheSerial:
     try:
       while self._mHndSer.readline():
         pass
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: read on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -242,7 +242,7 @@ class KheSerial:
     """
     try:
       self._mHndSer.flushOutput()
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       if __debug__:
         self.mDbg.d5print("Error: flush output on port %s: %s" % \
                       (self.GetPort(), err.__str__()))
@@ -314,7 +314,7 @@ class KheSerial:
       if __debug__: self.mDbg.d5print("write:", repr(cmd + '\r'))
       self._mHndSer.flush()
       return True
-    except (ser.SerialException, OSError), err:
+    except (ser.SerialException, OSError) as err:
       self.mErr.SetErrGeneral('Bad write: ' + err.__str__())
       return False
 
@@ -339,7 +339,7 @@ class KheSerial:
         sIn = self._mHndSer.readline()
         if __debug__:
           self.mDbg.d5print("try=%d readline: %s" % (tries, repr(sIn)))
-      except (ser.SerialException, OSError), err:
+      except (ser.SerialException, OSError) as err:
         self.mErr.SetErrGeneral('Bad read: ' + err.__str__())
         return None
 
@@ -383,7 +383,7 @@ if __name__ == '__main__':
   else:
     dbg = None
   ser = KheSerial(port='/dev/ttyS0', dbgobj=dbg)
-  print "Enter Khepera command(s) ('quit' to quit)"
+  print("Enter Khepera command(s) ('quit' to quit)")
   while True:
     cmd = raw_input('cmd> ')
     if cmd == 'quit':
@@ -391,6 +391,6 @@ if __name__ == '__main__':
       break
     rsp = ser.SendCmd(cmd)
     if rsp:
-      print rsp
+      print(rsp)
     else:
-      print ser.GetErrStr()
+      print(ser.GetErrStr())

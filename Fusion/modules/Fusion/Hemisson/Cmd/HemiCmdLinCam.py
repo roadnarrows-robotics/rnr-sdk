@@ -247,7 +247,7 @@ class HemiCmdLinCam(HemiSerial.HemiSerial):
     else:
       numvals = LinCamNumPixels
     if len(rsp) != hdrlen + (numvals * 2):
-      #print "bad rsp:", repr(rsp)
+      #print("bad rsp:", repr(rsp))
       return self.mErr.SetErrBadRsp(rsp)
     rsp = rsp[hdrlen:]   # strip off header
     return hutil.cvtCatHHStr(rsp, numvals)

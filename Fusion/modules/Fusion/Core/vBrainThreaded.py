@@ -532,7 +532,7 @@ if __name__ == '__main__':
 
   def tsthelp():
     for k in execs.iterkeys():
-      print k
+      print(k)
 
   execs = {
     'quit':     quit,
@@ -549,7 +549,7 @@ if __name__ == '__main__':
 
   def main():
     """ vBrainThreaded Test Main """
-    print "Enter executive ('help' for list of commands)"
+    print("Enter executive ('help' for list of commands)")
     while not doquit:
       rsp = raw_input('exec> ')
       for k, op in execs.iteritems():

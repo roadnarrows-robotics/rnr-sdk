@@ -1,0 +1,225 @@
+#!/bin/bash
+#
+# File:
+#   MakeAll
+#
+# Usage:
+#   MakeAll [OPTION]... [RNMAKEVAR]... [TARGET]... 
+#   MakeAll --help
+#
+# Description:
+#   Make target(s) for all RoadNarrows Robotics Software Development Kits.
+
+argv0=$(basename $0)
+
+# callHelp
+callHelp()
+{
+  cat <<EOH
+Usage: ${argv0} [OPTION]... [RNMAKEVAR]... [TARGET]...
+       ${argv0} --help
+
+Make TARGETs of all kits.
+
+Options:
+  --no-color        Disable color output. Default: colors are enabled.
+  --stop-on-errors  Stop on make errors. Default: warn and continue.
+
+  --help            Print this help and exit.
+
+Make all RNR SDKs for given TARGETs.
+
+Arguments:
+  TARGET        Any supported rnmake target. Common targets are:
+                  deps all install clobber clean
+  RNMAKEVAR     GNU make macro of form name=value.
+
+Any command-line argument of the form name=value is considered an RNMAKEVAR 
+argument. All RNMAKEVAR arguments are passed to the make commands.
+
+Environment (see env.sh):
+  RNR_WORKSPACE         The rnr-sdk root directory. Unset default: pwd
+  RNR_ARCH_DFT          Default architecture. Unset default: x86_64
+  RNR_INSTALL_XPREFIX   Install prefix. Unset default: ${HOME}/xinstall
+  RNR_PYTHON            Python interpreter. Unset default: /usr/bin/python3
+  RNR_PYTHON_VERSION    $(RNR_PYTHON) version x.y
+EOH
+  exit 0;
+}
+
+# ansi colors
+color_pre="\033["
+color_post="\033[0m"
+color_red="0;31m"
+color_bold_red="1;31m"
+color_green="0;32m"
+color_yellow="0;33m"
+color_gray="1;30m"
+
+# colors used
+color_info="${color_pre}${color_green}"
+color_warn="${color_pre}${color_yellow}"
+color_error="${color_pre}${color_red}"
+color_fatal="${color_pre}${color_bold_red}"
+color_banner="${color_pre}${color_gray}"
+color_end=${color_post}
+
+# turnOffColor
+turnOffColor()
+{
+  color_info=
+  color_warn=
+  color_error=
+  color_fatal=
+  color_banner=
+  color_end=
+}
+
+# showInfo msg [msg...]
+showInfo()
+{
+  printf "${color_info}${*}${color_end}\n"
+}
+
+# showWarning wmsg [wmsg...]
+showWarning()
+{
+  printf "${argv0}: ${color_warn}${*}${color_end}\n" >&2
+}
+
+# showError emsg [emsg...]
+showError()
+{
+  printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
+}
+
+# fatal exitcode emsg
+fatal()
+{
+  printf "${argv0}: ${color_fatal}${2}${color_end}\n" >&2
+  exit ${1}
+}
+
+# long and short options
+longopts="no-color,stop-on-errors,help"
+shortopts=""
+
+# get the options
+OPTS=$(getopt --name ${argv0} -o "${shortopts}" --long "${longopts}" -- "${@}")
+
+if [ $? != 0 ]
+then
+  fatal 2 "Try '${argv0} --help' for more information."
+fi
+
+#echo "${OPTS}"
+eval set -- "${OPTS}"
+
+# command line option and argument variables
+rnrsdk=$(pwd)
+stop_on_errors=false
+rnmakevars=
+tgtlist=
+
+# process command-line options
+while true
+do
+  case "$1" in
+    --no-color)
+        turnOffColor
+        rnmakevars="color=off"
+        shift;;
+    --stop-on-errors) stop_on_errors=true; shift;;
+    --help) callHelp; shift;;
+    --) shift; break;;
+    *)  break;;
+  esac
+done
+
+source ${rnrsdk}/env.sh
+
+# RoadNarrows Robotics SDK packages, list in order of dependence.
+# Notes:
+#   + The botsense package should follow immediately after netmsgs but has
+#     residual dependencies on i2c and libserial.
+#   + The rnmake and rntools packages are excluded.
+pkglist='
+  librnr
+  netmsgs
+  libserial
+  i2c
+  gpio
+  odroid
+  botsense
+  appkit
+  Dynamixel
+  peripherals
+  CogniBoost
+  Hekateros
+  Laelaps
+  PanTilt
+  Kuon
+  Fusion
+  Eudoxus'
+
+for arg in "${@}"
+do
+  # name=value
+  if [ "${arg%=*}" != "${arg}" ]
+  then
+    rnmakevars="${rnmakevars} ${arg}"
+   # target
+  else
+    tgtlist="${tgtlist} ${arg}"
+  fi
+done
+
+if [ -z "${tgtlist}" ]
+then
+  tgtlist=all
+fi
+
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+
+# showBanner pkg
+showBanner()
+{
+	printf "\n\n\n${color_banner}${bold_line}\n"
+  printf ":: ${1}\n"
+	printf "${bold_line}${color_end}\n\n"
+}
+
+# makeIt vars tgt
+makeIt()
+{
+  if ! make "${@}"
+  then
+    if ${stop_on_errors}
+    then
+      showError "'make ${@}' failed."
+      fatal 8 "make stopped."
+    else
+      showWarning "'make ${@}' failed - continuing."
+    fi
+  fi
+}
+
+# make target for all packages in list
+for tgt in "${tgtlist}"
+do
+  for pkg in ${pkglist}
+  do
+    if [[ ! -d ${pkg} ]]
+    then
+      showWarning "'${pkg}' is not a directory - ignoring."
+    elif [[ ! -f ${pkg}/Makefile ]]
+    then
+      showWarning "'${pkg}/Makefile' not found - ignoring."
+    else
+      cd ${pkg}
+      showBanner ${pkg}
+      makeIt ${rnmakevars} ${tgt}
+      cd -
+    fi
+  done
+done

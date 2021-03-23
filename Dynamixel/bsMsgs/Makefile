@@ -59,6 +59,9 @@ SWIG_FILES 				= bsDynaCore.i
 SWIG_EXTMOD_DIR 	= $(RNMAKE_PKG_ROOT)/bsPython/modules/BotSense/Dynamixel
 SWIG_EXTMOD_LIBS 	= -lbotsense -lrnr_netmsgs -lrnr
 
+EXTRA_CFLAGS += $(SWIG_CFLAGS)
+EXTRA_LDFLAGS += $(SWIG_LDFLAGS)
+
 .PHONY: extra-make
 extra-make: netmsgs-all
 

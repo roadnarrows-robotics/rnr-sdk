@@ -1144,6 +1144,7 @@ int LaeRobot::getAsyncJobRc()
   if( m_pAsyncJob != NULL )
   {
     m_pAsyncJob->getRc();
+    return LAE_OK;
   }
   else
   {

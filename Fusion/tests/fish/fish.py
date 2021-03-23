@@ -4,5 +4,5 @@ sole = 5
 mackeral = 6
 
 def Fish(i = 42):
-  print 'fish says', i
+  print('fish says', i)
 

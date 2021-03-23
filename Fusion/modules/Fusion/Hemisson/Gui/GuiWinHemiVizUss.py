@@ -218,7 +218,7 @@ class GuiWinHemiVizUss(GuiWin.GuiWin):
         Return Values:
           None
     """
-    #print "Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request)
+    #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       items = {}
       for key,val in kwargs.iteritems():
@@ -240,7 +240,7 @@ class GuiWinHemiVizUss(GuiWin.GuiWin):
       self.mBlipSets['cur']['blips'] = []
       self.UssCanvasRefresh()
     else:
-      print "%s: WinUpdate: unknown request: %s" % (self.mTitle, request)
+      print("%s: WinUpdate: unknown request: %s" % (self.mTitle, request))
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

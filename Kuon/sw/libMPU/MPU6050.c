@@ -11,7 +11,7 @@
 void GyCalibrate(i2c_t *sensor) {
   int cnt = 0;
   float aye, bee, cee, exx, whyy, zeee;
-  float tempX, tempY, tempZ;
+  float tempX=0, tempY=0, tempZ=0;
   while(cnt < CALIB_COUNT) {
     BulkUpdate(sensor, &aye, &bee, &cee, &exx, &whyy, &zeee);
     tempX += exx;
@@ -58,10 +58,10 @@ void Seti2cReg(i2c_t *sensor, uint8_t registr, uint8_t buffr) {
 void BulkUpdate(i2c_t *sensor,
                 float *acx, float *acy, float *acz, 
                 float *gyx, float *gyy, float *gyz ) {
-  uint8_t buff[15];
-  short temp;
+  byte_t buff[15];
+  int temp;
   const byte_t registr = HIGH_AX;
-  i2c_transfer(sensor, MPU_ADDR, &registr, 1, &buff, 14);
+  i2c_transfer(sensor, MPU_ADDR, &registr, 1, buff, 14);
   usleep(5000);
   temp = (((int16_t)buff[0]) << 8) | buff[1];
   *acx = (float)temp/4300;
@@ -177,7 +177,7 @@ void initMPU6050(i2c_t *sensor) {
 float ReadSingleValue(i2c_t *sensor, uint8_t highRegistr, uint8_t lowRegistr) {
   unsigned char high;
   unsigned char low;
-  short retVal;
+  int retVal;
   i2c_transfer(sensor, MPU_ADDR, &highRegistr, 1, &high, 1);
   usleep(5000);
   i2c_transfer(sensor, MPU_ADDR, &lowRegistr, 1, &low, 1);

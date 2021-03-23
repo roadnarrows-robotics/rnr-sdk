@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -210,11 +210,11 @@ class Speed():
     motorkey  = self.kwargs['motor']
     goalspeed = self.kwargs['speed']
 
-    print
-    print TestSep
-    print "*** Laelaps %s(%d) motor speed=%d test ***" % \
-        (motorkey, self.motorKeys.index(motorkey), goalspeed)
-    print
+    print()
+    print(TestSep)
+    print("*** Laelaps %s(%d) motor speed=%d test ***" % \
+        (motorkey, self.motorKeys.index(motorkey), goalspeed))
+    print()
 
     # Create motor controller object
     if self.kwargs['fake']:
@@ -226,12 +226,12 @@ class Speed():
     device  = SysConf.MotorCtlrDevName
     baud    = SysConf.MotorCtlrBaudRate
     
-    print "Open motor controller serial interface %s@%d" % (device, baud)
+    print("Open motor controller serial interface %s@%d" % (device, baud))
     try:
       motorctlr.open(device, baud, None)
     except RoboClaw.RoboClawException as inst:
-      print 'Error:', inst.message
-      print
+      print('Error:', inst.message)
+      print()
 
     if motorctlr.isOpen():
       addr  = self.ctlrInfo[self.motorInfo[motorkey]['ctlr_key']]['addr']
@@ -251,12 +251,12 @@ class Speed():
       try:
         setSpeed(addr, goalspeed)
       except RoboClaw.RoboClawException as inst:
-        print "Failed to set speed"
+        print("Failed to set speed")
         return
 
-      print
-      print "Press any key to abort"
-      print
+      print()
+      print("Press any key to abort")
+      print()
 
       kb = keyboard()
       kb.setNonBlocking()
@@ -267,7 +267,7 @@ class Speed():
         try:
           curspeed, status = readSpeed(addr)
           curenc, status = readEncoder(addr)
-          print "%5d. %10d  %14d\r" % (n, curspeed, curenc),
+          print("%5d. %10d  %14d\r" % (n, curspeed, curenc), end='')
           sys.stdout.flush()
           n += 1
           if nErrs > 0:
@@ -279,13 +279,13 @@ class Speed():
         time.sleep(0.1)
         keepalive()
 
-      print "                                                               \r"
+      print("                                                               \r")
 
       try:
         setSpeed(addr, 0)
-        print "Stopped"
+        print("Stopped")
       except RoboClaw.RoboClawException as inst:
-        print "Failed to stop"
+        print("Failed to stop")
 
       motorctlr.close()
 
@@ -303,8 +303,8 @@ class MotorCtlrEnable():
 
   def enable(self):
     if not self.m_wd.open(SysConf.SensorDevName):
-      print 'Error: Failed to open connection to watchdog subprocessor.'
-      print '       Continuing...'
+      print('Error: Failed to open connection to watchdog subprocessor.')
+      print('       Continuing...')
       return
 
     # get firmware version 
@@ -313,25 +313,25 @@ class MotorCtlrEnable():
     # read motor controller enable lines state
     ret = self.m_wd.cmdReadEnables()
     if ret['rc'] != 'ok':
-      print 'Error: Failed to read enable lines.'
-      print '       Continuing...'
+      print('Error: Failed to read enable lines.')
+      print('       Continuing...')
       return
 
     if ret['enables']['motor_ctlr_en']:
-      print "Warning: Motor controllers already enabled - may be in use."
+      print("Warning: Motor controllers already enabled - may be in use.")
       return
 
     self.m_doDisable = True
 
     ret = self.m_wd.cmdEnableMotorCtlrs(True)
     if ret['rc'] != 'ok':
-      print 'Error: Failed to enable motor controllers.'
-      print '       Continuing...'
+      print('Error: Failed to enable motor controllers.')
+      print('       Continuing...')
       return
 
     time.sleep(0.5)
 
-    print "Motor controllers enabled."
+    print("Motor controllers enabled.")
 
   def keepalive(self):
     if self.m_wd.isOpen():
@@ -341,7 +341,7 @@ class MotorCtlrEnable():
     if self.m_doDisable:
       ret = self.m_wd.cmdEnableMotorCtlrs(False)
       if ret['rc'] == 'ok':
-        print "Motor controllers disabled."
+        print("Motor controllers disabled.")
     self.m_wd.close()
 
 
@@ -389,14 +389,14 @@ class application():
   #
   def printUsageErr(self, emsg):
     if emsg:
-      print "%s: Error: %s" % (self._Argv0, emsg)
+      print("%s: Error: %s" % (self._Argv0, emsg))
     else:
-      print "%s: Error" % (self._Argv0)
-    print "Try '%s --help' for more information." % (self._Argv0)
+      print("%s: Error" % (self._Argv0))
+    print("Try '%s --help' for more information." % (self._Argv0))
 
   ## \brief Print Command-Line Usage Message.
   def printUsage(self):
-    print \
+    print(\
 """
 usage: %s [OPTIONS] MOTOR SPEED
        %s --help
@@ -416,7 +416,7 @@ SPEED             : Signed qpps speed of motor, with positive being forwards.
 Exit Status:
   On success, 0. An exit status of 128 indicates usage 
   error.
-"""  % (self._Argv0, self._Argv0)
+"""  % (self._Argv0, self._Argv0))
  
   #
   ## \brief Get command-line options
@@ -441,7 +441,7 @@ Exit Status:
     try:
       opts, args = getopt.getopt(argv[1:], "f?h",
           ['help', 'fake', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise usage(msg)
     for opt, optarg in opts:
       if opt in ('-f', '--fake'):
@@ -494,8 +494,8 @@ Exit Status:
     # parse command-line options and arguments
     try:
       self.kwargs = self.getOptions(argv, **kwargs)
-    except usage, e:
-      print e.msg
+    except usage as e:
+      print(e.msg)
       return 128
     
     en = MotorCtlrEnable()

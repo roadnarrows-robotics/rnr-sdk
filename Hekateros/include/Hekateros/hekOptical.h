@@ -154,7 +154,7 @@ namespace hekateros
      *
      * \return this.
      */
-    HekOpticalLimit_T operator=(const HekOpticalLimit_T &rhs)
+    HekOpticalLimit_T &operator=(const HekOpticalLimit_T &rhs)
     {
       m_uBit          = rhs.m_uBit;
       m_fMinEdgePos   = rhs.m_fMinEdgePos;
@@ -162,6 +162,8 @@ namespace hekateros
       m_fCenterPos    = rhs.m_fCenterPos;
       m_fMaxBlackPos  = rhs.m_fMaxBlackPos;
       m_fMaxEdgePos   = rhs.m_fMaxEdgePos;
+
+      return *this;
     }
 
     void clear()

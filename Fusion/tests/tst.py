@@ -11,9 +11,9 @@ def insterr(code):
   try:
     x = y
   except Exception, inst:
-    print type(inst)     # the exception instance
-    print inst.args      # arguments stored in .args
-    print inst       
+    print(type(inst))    # the exception instance
+    print(inst.args)     # arguments stored in .args
+    print(inst)      
 
 def newmodule(modname, filename=None):
   null_module = 'Fusion.Utils.null_module'
@@ -30,7 +30,7 @@ def delmodule(module):
   modname = module.__name__
   if sys.modules.has_key(modname):
     del sys.modules[modname]
-  print module
+  print(module)
   #exec('del %s' % module)
 
 def importmodule(filename, modname):
@@ -63,18 +63,18 @@ def dlgconn():
   return r, f
 
 def gtseplabel(mbPath=None):
-  print gt.MBMakeSepLabel(mbPath)
+  print(gt.MBMakeSepLabel(mbPath))
 
 def dofusion():
   khe = vKhepera.vKhepera()
   return Fusion.Fusion(vRobot=khe)
 
 
-def cb1(): print 'cb1'
-def cb2(): print 'cb2'
-def cb3(): print 'cb3'
-def cb4(): print 'cb4'
-def cbtravel(): print 'cbtravel'
+def cb1(): print('cb1')
+def cb2(): print('cb2')
+def cb3(): print('cb3')
+def cb4(): print('cb4')
+def cbtravel(): print('cbtravel')
 
 def mbmakefulltree(mb):
   mbmakeroottree(mb)
@@ -128,13 +128,13 @@ def mbmaketraveltree(mb):
 
 def mbprinttree(menuTree=None, indent=0):
   if menuTree is None: menuTree = self.mMenuTree
-  #print menuTree
+  #print(menuTree)
   for item in menuTree['items']:
     if item['type'] == 'cascade':
-      print "%*s%s|" % (indent, ' ', item['label'])
+      print("%*s%s|" % (indent, ' ', item['label']))
       PrintMenuTree(item, indent+2)
     else:
-      print "%*s%s (%s)" % (indent, ' ', item['label'], item['type'])
+      print("%*s%s (%s)" % (indent, ' ', item['label'], item['type']))
 
 def mbcolormenu(mb, color):
   for p in mb:
@@ -149,10 +149,10 @@ def tkprintmenudata(menu):
   i = 0
   while i > j and k < 10:
     mtype = menu.type(i)
-    print i, mtype,
+    print(i, mtype, end='')
     if mtype != 'tearoff' and mtype != 'separator':
-      print menu.entrycget(i, 'label'),
-    print
+      print(menu.entrycget(i, 'label'), end='')
+    print()
     j = i
     i = menu.index(i+1)
     k += 1
@@ -168,7 +168,7 @@ class B:
     self.i = 99
     self.ddata = 98
   def b(self):
-    print 'b', self.state, self.estate.sname[self.state]
+    print('b', self.state, self.estate.sname[self.state])
 
 class D(B):
   def __init__(self):
@@ -176,7 +176,7 @@ class D(B):
     self.ddata = 101
     B.__init__(self)
   def d(self):
-    print 'd', self.i
+    print('d', self.i)
 
 class E:
   class EE:
@@ -186,12 +186,12 @@ class E:
   def __init__(self):
     self.i = self.EE.ready
   def e(self):
-    print '.', self.i
+    print('.', self.i)
 
 def k(kw):
   for k,v in kw.iteritems():
-    if v is None: print k, 'only'
-    else: print k, v
+    if v is None: print(k, 'only')
+    else: print(k, v)
 
 class Enum:
   def __init__(self, names):
@@ -207,7 +207,7 @@ class helper:
   def __init__(self):
     self.i = 42
   def __getitem__(self, option):
-    print 'helper.__getitem__', self.i, option
+    print('helper.__getitem__', self.i, option)
   def _SetI(self, i):
     self.i = i
 
@@ -216,12 +216,12 @@ class hamburger:
     self.h = helper()
     self.cnt = 0
   def __getitem__(self, name):
-    print 'hamburger.__getitem__', repr(name)
+    print('hamburger.__getitem__', repr(name))
     self.h._SetI(self.cnt)
     self.cnt += 1
     return self.h
   def __setitem__(self, name, val):
-    print '__setitem__', val
+    print('__setitem__', val)
 
 
 class RevIter:
@@ -229,7 +229,7 @@ class RevIter:
     self.r = r
     self.index  = len(r.data)
   def __del__(self):
-    print '__del__'
+    print('__del__')
   def __iter__(self):
     return self
   def next(self):
@@ -246,23 +246,23 @@ class Reverse:
   def __iter__(self):
     return RevIter(self)
   def next(self):
-    print 'Reverse.next'
+    print('Reverse.next')
     raise StopIteration
 
 def revc(r):
   for c in r:
-    print c,
+    print(c, end='')
 
 def revd(r):
   for c in r:
-    print c,
+    print(c, end='')
     for d in r:
-      print d,
+      print(d, end='')
 
 def reve(r):
   i = 0
   for e in r:
-    print c,
+    print(c, end='')
 
 class bar:
   IDX0 = 0
@@ -270,8 +270,8 @@ class bar:
   def __init__(self):
     self.lst = [55, 66]
   def pr(self):
-    print self.lst[self.IDX0]
-    print self.lst[self.IDX1]
+    print(self.lst[self.IDX0])
+    print(self.lst[self.IDX1])
 
 def tstgrid():
   root = tk.Tk()
@@ -343,10 +343,10 @@ def statusbar():
 
   family='helvetica'
   fontStatus = tkFont.Font(family=family, size=10)#, weight=tkFont.BOLD)
-  print fontStatus.actual()
-  print fontStatus.metrics()
+  print(fontStatus.actual())
+  print(fontStatus.metrics())
   if not fontStatus:
-    print 'not found:', 
+    print('not found:', end='')
     return
   linespace = fontStatus.metrics()['linespace']
   em = fontStatus.measure('M')
@@ -477,14 +477,14 @@ def texttag(wtext, tag):
   for i in range(0, len(ranges), 2):
     start = ranges[i]
     stop = ranges[i+1]
-    print i, tag, repr(wtext.get(start, stop))
+    print(i, tag, repr(wtext.get(start, stop)))
 
 def firsttag(wtext, tag):
   range = wtext.tag_nextrange(tag, 1.0)
   if range:
     start = range[0]
     stop = range[1]
-    print tag, repr(wtext.get(start, stop))
+    print(tag, repr(wtext.get(start, stop)))
 
 def deltag(wtext, tag):
   global wtextmax, wtextlinecnt, wtextstart, wtextend
@@ -501,14 +501,14 @@ class s:
   #def __init__(self, args=(), kwargs={}):
   def __init__(self, args=(), **kwargs):
     for arg in args:
-      print repr(arg)
+      print(repr(arg))
     for k,v in kwargs.iteritems():
-      print repr(k), '=', repr(v)
+      print(repr(k), '=', repr(v))
     self.d = {'this':self.f1, 'that':self.f2}
   def f1(self):
-    print 'f1'
+    print('f1')
   def f2(self):
-    print 'f2'
+    print('f2')
 
 class testApp2:
   def __init__( self, master ):
@@ -523,7 +523,7 @@ class testApp2:
     self.ma.bind('<Configure>', self.resize )
 
   def resize( self, event ):
-    print '(%d, %d)' % (event.width, event.height)
+    print('(%d, %d)' % (event.width, event.height))
     #self.cv.configure( width = event.width-4, height = event.height-4 )
 
 def resizer():
@@ -537,14 +537,14 @@ def endpoint(tx):
   return tx.index('%d.0lineend' % l)
 
 def iterlines(s):
-  print '*', repr(s), '*'
+  print('*', repr(s), '*')
   start = 0
   while start < len(s):
     idx = s.find('\n', start)
     if idx >= 0:
-      print repr(s[start:idx+1])
+      print(repr(s[start:idx+1]))
     else:
-      print repr(s[start:])
+      print(repr(s[start:]))
       break
     start = idx + 1
 
@@ -553,7 +553,7 @@ class B:
   def __init__(self):
     self.me = 'yeou'
   def foo(self):
-    print self.me
+    print(self.me)
   def bar(self):
-    print self.val
+    print(self.val)
 

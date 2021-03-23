@@ -82,12 +82,12 @@ def resetpose(pose):
   pose['theta']     = 0.0
 
 def printpose(name, pose):
-  print "%s: (x,y,theta)=(%.3f, %.3f, %.3f), " \
+  print("%s: (x,y,theta)=(%.3f, %.3f, %.3f), " \
       "s=%.3f, r=%.3f, c=%.3f, " \
       "od=[%.3f, %.3f]" % \
       (name, pose['x'], pose['y'], m.degrees(pose['theta']),
       pose['s'], pose['r'], m.degrees(pose['c']),
-      pose['od_left'], pose['od_right'])
+      pose['od_left'], pose['od_right']))
 
 def theta(od_left, od_right):
   theta = (od_right - od_left) / Wheelbase
@@ -153,7 +153,7 @@ def nav(path):
   for desc, odl, odr in path:
     od[0] += odl
     od[1] += odr
-    print "%d. %s: [%.2f, %.2f]" % (n, desc, od[0], od[1])
+    print("%d. %s: [%.2f, %.2f]" % (n, desc, od[0], od[1]))
 
     prev_pose = cur_pose.copy()
     printpose("  prev_pose", prev_pose)
@@ -171,7 +171,8 @@ def nav(path):
 
 def testall():
   for key, path in paths.iteritems():
-    print "\n------------------------------------------------------------------"
-    print key
-    print "------------------------------------------------------------------"
+    print(f"""
+------------------------------------------------------------------
+{key}
+------------------------------------------------------------------""")
     nav(path)

@@ -324,9 +324,9 @@ namespace sensor
        *
        * \param rhs   Right hand side object.
        *
-       * \reture *this
+       * \return *this
        */
-      LaeVL6180SensorInfo operator=(const LaeVL6180SensorInfo &rhs);
+      LaeVL6180SensorInfo &operator=(const LaeVL6180SensorInfo &rhs);
     
       /*!
        * \brief Get sensor properties.

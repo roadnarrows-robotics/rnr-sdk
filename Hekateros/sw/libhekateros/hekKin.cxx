@@ -173,7 +173,7 @@ HekKinematics::~HekKinematics()
 // major hack
 void HekKinematics::buildTaskList()
 {
-  m_taskList.empty();
+  m_taskList.clear();
 
   // 4DOF arms have no rotating base
   if( m_kinChain.find("base_rot") != m_kinChain.end() )

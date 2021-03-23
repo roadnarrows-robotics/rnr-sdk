@@ -7,7 +7,7 @@ root = tk.Tk()
 #root.font = Font(root, font = 
 #    (u'\u30d2\u30e9\u30ae\u30ce\u89d2\u30b4 Pro W3', 12))
 root.font = Font(root, font=gt.FontHelv12Bold)
-print root.font.actual()
+print(root.font.actual())
 
 myFrame = tk.Frame(root)
 root.resizable(1, 1)
@@ -28,7 +28,7 @@ for u in v:
   greek += u
 EntryGreek.insert(0, greek)
 EntryGreek.grid()
-#print repr(EntryGreek.get())
+#print(repr(EntryGreek.get()))
 
 EntrySS = tk.Entry(myFrame, borderwidth = 1, font=root.font, width=100)
 script = ''
