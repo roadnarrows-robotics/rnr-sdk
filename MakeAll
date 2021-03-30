@@ -19,11 +19,11 @@ callHelp()
 Usage: ${argv0} [OPTION]... [RNMAKEVAR]... [TARGET]...
        ${argv0} --help
 
-Make TARGETs of all kits.
+Make TARGETs, depth first, of all kits.
 
 Options:
   --no-color        Disable color output. Default: colors are enabled.
-  --stop-on-errors  Stop on make errors. Default: warn and continue.
+  --ignore-errors   Do not stop on make errors. Default: stop execution.
 
   --help            Print this help and exit.
 
@@ -40,6 +40,7 @@ argument. All RNMAKEVAR arguments are passed to the make commands.
 Environment (see env.sh):
   RNR_WORKSPACE         The rnr-sdk root directory. Unset default: pwd
   RNR_ARCH_DFT          Default architecture. Unset default: x86_64
+  RNR_ARCH              Target architecture. Unset default: RNR_ARCH_DFT
   RNR_INSTALL_XPREFIX   Install prefix. Unset default: ${HOME}/xinstall
   RNR_PYTHON            Python interpreter. Unset default: /usr/bin/python3
   RNR_PYTHON_VERSION    $(RNR_PYTHON) version x.y
@@ -100,8 +101,18 @@ fatal()
   exit ${1}
 }
 
+bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+
+# showBanner pkg
+showBanner()
+{
+	printf "\n\n\n${color_banner}${bold_line}\n"
+  printf ":: ${1}\n"
+	printf "${bold_line}${color_end}\n\n"
+}
+
 # long and short options
-longopts="no-color,stop-on-errors,help"
+longopts="no-color,ignore-errors,help"
 shortopts=""
 
 # get the options
@@ -117,8 +128,9 @@ eval set -- "${OPTS}"
 
 # command line option and argument variables
 rnrsdk=$(pwd)
-stop_on_errors=false
+stop_on_errors=true
 rnmakevars=
+arch=
 tgtlist=
 
 # process command-line options
@@ -129,64 +141,57 @@ do
         turnOffColor
         rnmakevars="color=off"
         shift;;
-    --stop-on-errors) stop_on_errors=true; shift;;
+    --ignore-errors) stop_on_errors=false; shift;;
     --help) callHelp; shift;;
     --) shift; break;;
     *)  break;;
   esac
 done
 
-source ${rnrsdk}/env.sh
-
-# RoadNarrows Robotics SDK packages, list in order of dependence.
-# Notes:
-#   + The botsense package should follow immediately after netmsgs but has
-#     residual dependencies on i2c and libserial.
-#   + The rnmake and rntools packages are excluded.
-pkglist='
-  librnr
-  netmsgs
-  libserial
-  i2c
-  gpio
-  odroid
-  botsense
-  appkit
-  Dynamixel
-  peripherals
-  CogniBoost
-  Hekateros
-  Laelaps
-  PanTilt
-  Kuon
-  Fusion
-  Eudoxus'
-
+# process command-line arguments
 for arg in "${@}"
 do
   # name=value
-  if [ "${arg%=*}" != "${arg}" ]
+  n="${arg%=*}
+  v="${arg#*=}
+  if [ "${n}" != "${arg}" ]
   then
     rnmakevars="${rnmakevars} ${arg}"
-   # target
+    if [ "${n}" = "arch" ]
+    then
+      arch="${v}"
+    fi
+  # target
   else
     tgtlist="${tgtlist} ${arg}"
   fi
 done
 
+# default target list if none specified
 if [ -z "${tgtlist}" ]
 then
-  tgtlist=all
+  tgtlist='clobber deps all install'
 fi
 
-bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
+# source rnr sdk environment
+source ${rnrsdk}/env.sh ${arch}
 
-# showBanner pkg
-showBanner()
+# old/original paths
+opath=${PATH}
+olibpath=${LD_LIBRARY_PATH}
+opypath=${PYTHONPATH}
+
+# pre-make fix up environment
+prefix_env()
 {
-	printf "\n\n\n${color_banner}${bold_line}\n"
-  printf ":: ${1}\n"
-	printf "${bold_line}${color_end}\n\n"
+  _pkg=${1}
+  _root=${RNR_WORKSPACE}/${_pkg}
+  _dist=dist/dist.${RNR_ARCH}
+  _pydist=${_dist}/lib/python${RNR_PYTHON_VERSION}/site-packages
+  export PATH=${_root}/${_dist}/bin:${PATH}
+  export LD_LIBRARY_PATH=${_root}/${_dist}/lib:${LD_LIBRARY_PATH}
+  export PYTHONPATH=${_root}/${_pydist}:${PYTHONPATH}
+  unset _pkg _root _dist _pydist
 }
 
 # makeIt vars tgt
@@ -204,22 +209,49 @@ makeIt()
   fi
 }
 
-# make target for all packages in list
-for tgt in "${tgtlist}"
+sudomsg=''
+
+# post-make fix up environment
+postfix_env()
+{
+  _pkg=${1}
+  _tgt=${2}
+  echo
+  echo
+  echo "${color_info}Fixing environment for ${_pkg}${color_end}"
+  if [ "${_tgt}" = 'install' ]
+  then
+    if [ -z ${sudomsg} ]
+    then
+      sudomsg="(sudo password maybe required)"
+      echo "${color_warn}${sudomsg}${color_end}"
+    fi
+    sudo ldconfig
+  fi
+  export PATH=${opath}
+  export LD_LIBRARY_PATH=${olibpath}
+  export PYTHONPATH=${opypath}
+  unset _pkg _tgt
+}
+
+# make target(s) for all packages in list
+for pkg in ${RNR_PKG_LIST}
 do
-  for pkg in ${pkglist}
-  do
-    if [[ ! -d ${pkg} ]]
-    then
-      showWarning "'${pkg}' is not a directory - ignoring."
-    elif [[ ! -f ${pkg}/Makefile ]]
-    then
-      showWarning "'${pkg}/Makefile' not found - ignoring."
-    else
-      cd ${pkg}
+  if [[ ! -d ${pkg} ]]
+  then
+    showWarning "'${pkg}' is not a directory - ignoring."
+  elif [[ ! -f ${pkg}/Makefile ]]
+  then
+    showWarning "'${pkg}/Makefile' not found - ignoring."
+  else
+    cd ${pkg}
+    prefix_env ${pkg}
+    for tgt in "${tgtlist}"
+    do
       showBanner ${pkg}
       makeIt ${rnmakevars} ${tgt}
-      cd -
-    fi
-  done
+    done
+    postfix_env ${pkg} ${tgt}
+    cd -
+  fi
 done

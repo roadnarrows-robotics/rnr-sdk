@@ -63,7 +63,7 @@ import sys
 import warnings
 import struct
 
-import NetMsgsBase as nmBase
+import NetMsgs.NetMsgsBase as nmBase
 
 #
 # Set filter for warnings.

@@ -73,8 +73,8 @@ import sys
 import warnings
 import itertools
 
-import NetMsgsBase as nmBase
-from   NetMsgsLib import *
+import NetMsgs.NetMsgsBase as nmBase
+from   NetMsgs.NetMsgsLib import *
 
 ## space over
 space = lambda indent: "%*s" % (indent, '')
@@ -190,7 +190,7 @@ class NetMsgsStreamBuf:
   #--
   def Optimize(self):
     """ Optimize message definition set for packing and unpacking. """
-    for msgid, msgdef in self.mMsgDefSet.iteritems():
+    for msgid, msgdef in self.mMsgDefSet.items():
       self.OptimizeMsgDef(msgid, msgdef)
   ##
 
@@ -204,7 +204,7 @@ class NetMsgsStreamBuf:
     """
     if type(msgid) != int:
       self.Error("msgid=%s" % repr(msgid), EMsgBadId)
-    if not msgdef.has_key('name'):
+    if 'name' not in msgdef:
       msgdef['name'] = "Msg%s" % repr(msgid)
     msgdef['msgid'] = msgid
     fdeflist = self.GetDefReqVal(msgdef, 'fielddef',
@@ -227,27 +227,27 @@ class NetMsgsStreamBuf:
     fname = self.GetDefReqVal(fielddef, 'name', epreface="FieldDef")
     fid   = self.GetDefReqVal(fielddef, 'fid', epreface="FieldDef")
     ftype = self.GetDefReqVal(fielddef, 'ftype', epreface="FieldDef")
-    if not fielddef.has_key('disposition'):
+    if 'disposition' not in fielddef:
       fielddef['disposition'] = 'active'
     if fielddef['disposition'] == 'deprecated':
       return
     if ftype == nmBase.NMFCode('pad'):        # pad
-      if not fielddef.has_key('count'):
+      if 'count' not in fielddef:
         fielddef['count'] = nmBase.NMPadDftCount
     elif ftype == nmBase.NMFCode('string'):   # string
-      if not fielddef.has_key('max_count'):
+      if 'max_count' not in fielddef:
         fielddef['max_count'] = nmBase.NMStringMaxCount
     elif ftype == nmBase.NMFCode('vector'):   # vector
-      if not fielddef.has_key('max_count'):
+      if 'max_count' not in fielddef:
         fielddef['max_count'] = nmBase.NMVectorMaxCount
       vdef  = self.GetDefReqVal(fielddef, 'vdef', epreface="FieldDef")
-      if not vdef.has_key('name'):
+      if 'name' not in vdef:
         vdef['name'] = "%s_item" % fname
       vdef['fid'] = 0     # field id not used, but required when packing
       self.OptimizeFieldDef(vdef)
     elif ftype == nmBase.NMFCode('struct'):   # struct
       msgdef  = self.GetDefReqVal(fielddef, 'msgdef', epreface="FieldDef")
-      if not msgdef.has_key('name'):
+      if 'name' not in msgdef:
         msgdef['name'] = "%s_struct" % fname
       msgdef['msgid'] = 0 # field id not used, but required when packing
       self.OptimizeMsgDef(msgdef['msgid'], msgdef)
@@ -341,7 +341,7 @@ class NetMsgsStreamBuf:
     }
 
     # overrides and implementation specifics
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       d[k] = v
 
     # add new state (thread safe)
@@ -386,7 +386,7 @@ class NetMsgsStreamBuf:
     d = self.mState[stateId]
     for key in keypath:
       d = d[key]
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       d[k] = v
   ##
 
@@ -415,7 +415,7 @@ class NetMsgsStreamBuf:
                   }
 
     # overrides and implementation specifics
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       d[k] = v
 
     # push
@@ -456,7 +456,7 @@ class NetMsgsStreamBuf:
     d = self.mState[stateId]['fstack'][-1]
     for key in keypath:
       d = d[key]
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       d[k] = v
   ##
 

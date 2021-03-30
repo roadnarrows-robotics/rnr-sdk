@@ -64,9 +64,9 @@ NetMsgs Run-Time Library Packing and Unpacking Flat Encoding Module.
 import sys
 import warnings
 
-import NetMsgsBase as nmBase
-from   NetMsgsLib import *
-import NetMsgsLibStreamBuf as nmStream
+import NetMsgs.NetMsgsBase as nmBase
+from   NetMsgs.NetMsgsLib import *
+import NetMsgs.NetMsgsLibStreamBuf as nmStream
 
 ## space over
 space = lambda indent: "%*s" % (indent, '')

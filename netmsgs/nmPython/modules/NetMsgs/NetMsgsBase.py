@@ -58,7 +58,7 @@ NetMsgs Base Data Module
 
 import sys
 
-from NetMsgsCore import *
+from NetMsgs.NetMsgsCore import *
 
 ## Message Encoding Type Enumeration
 NMEncoding = ['flat', 'itv']    # future , 'cli']
@@ -472,7 +472,7 @@ def PrintBits(val, msbit, count=None, preface='', fp=sys.stderr):
 
 #--
 def _atval(val):
-  """ Convert value to string equivaling.
+  """ Convert value to string equivalent.
 
       String values starting with an '@' are treated as variables, not strings.
       The '@' is stripped.
@@ -552,9 +552,7 @@ def PrettyPrintDict(d, col=0, indent=0, fp=sys.stderr):
   if col + sp + len(s) < 80:
     fp.write('%s{' % space(sp))
     col = col + sp + 1
-    keys = d.keys()
-    keys.sort()
-    for k in keys:
+    for k in sorted(d):
       key = _atval(k)
       fp.write("%s:" % key)
       col += len(key) + 1
@@ -567,9 +565,7 @@ def PrettyPrintDict(d, col=0, indent=0, fp=sys.stderr):
     fp.write('%s{\n' % space(sp))
     col = 0
     indent += 2
-    keys = d.keys()
-    keys.sort()
-    for k in keys:
+    for k in sorted(d):
       key = _atval(k)
       key = "%s%s: " % (space(indent), key)
       fp.write(key)

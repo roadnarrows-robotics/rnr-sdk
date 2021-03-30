@@ -202,7 +202,7 @@ class NetMsgsGenC:
       maxlen = self.Pass0XmlDefString(pathXids, xdef, depth)
 
     # simple field type
-    elif nmBase.NMBuiltInFieldTypes.has_key(ftype):
+    elif ftype in nmBase.NMBuiltInFieldTypes:
       maxlen = self.Pass0XmlDefSimple(pathXids, xdef, depth)
 
     # typdef'ed derived field type
@@ -268,7 +268,7 @@ class NetMsgsGenC:
       for fname in xdef['fields'][nmBase.NMKeyOrder]:
         n = self.Pass0XmlDef(pathXids+[fname], xdef['fields'][fname], depth+1)
         eq_sum += [n]
-        if n > 0:
+        if len(n) > 0:
           active_cnt += 1
       maxlen = self.EvalNum(*eq_sum)          # max length of structure
 
@@ -847,7 +847,7 @@ C_DECLS_BEGIN
       return
 
     for macro in ['macro_len']: # add others as needed
-      if xdef['genc'].has_key(macro) and xdef['genc'][macro]['token_seq']:
+      if macro in xdef['genc'] and xdef['genc'][macro]['token_seq']:
         fp.write("/*! %s */\n" % (xdef['genc'][macro]['comment']))
         fp.write("#define %s %s\n\n" % \
             (xdef['genc'][macro]['name'], xdef['genc'][macro]['token_seq']))
@@ -1143,11 +1143,11 @@ C_DECLS_END
     """
     ftype   = xdef['ftype']             # (derivied) XML field type
 
-    if self.IsDeprecated(xdef):                   # deprecated element
+    if self.IsDeprecated(xdef):             # deprecated element
       return
-    elif len(pathXids) <= 1:                      # global struct defined in .h
+    elif len(pathXids) <= 1:                # global struct defined in .h
       return
-    elif self.mXml['field_types'].has_key(ftype): # typedef struct defined in .h
+    elif ftype in self.mXml['field_types']: # typedef struct defined in .h
       return
     if xdef['genc']['active_cnt'] == 0:
       return
@@ -1347,7 +1347,7 @@ C_DECLS_END
     else:
       this      = 'm_' + ftype
       casttype  = nmBase.NMBuiltInFieldTypes[ftype]['T']
-    if fdef.has_key('min'):
+    if 'min' in fdef:
       val     = fdef['min']
       bits   += "%sNMBITS_HAS_MIN" % (bitssep)
       bitssep = "|"
@@ -1355,7 +1355,7 @@ C_DECLS_END
       val     = '0'
     this_init += [('m_valMin', "(%s)(%s)" % (casttype, val))]
 
-    if fdef.has_key('max'):
+    if 'max' in fdef:
       val     = fdef['max']
       bits   += "%sNMBITS_HAS_MAX" % (bitssep)
       bitssep = "|"
@@ -1363,7 +1363,7 @@ C_DECLS_END
       val     = '0'
     this_init += [('m_valMax', "(%s)(%s)" % (casttype, val))]
 
-    if fdef.has_key('const'):
+    if 'const' in fdef:
       val     = fdef['const']
       bits   += "%sNMBITS_HAS_CONST" % (bitssep)
       bitssep = "|"
@@ -1398,7 +1398,7 @@ C_DECLS_END
     val = fdef['genc']['const_expr']
     this_init += [('m_uMaxCount', "(size_t)%s" % (val))]
 
-    if fdef.has_key('const'):
+    if 'const' in fdef:
       val     = fdef['const']
     else:
       val     = 'NULL'
@@ -1495,7 +1495,7 @@ C_DECLS_END
 
     # only top-level stucture definitions under 'msg_types' section have
     # message ids.
-    if len(pathXids) == 1 and self.mXml['msg_types'].has_key(pathXids[0]):
+    if len(pathXids) == 1 and pathXids[0] in self.mXml['msg_types']:
       msgid_enum = "%sMsgId%s" % (ns, xname), 
     else:
       msgid_enum = "%sMsgIdNone" % (ns), 
@@ -1747,7 +1747,7 @@ On error, returns the appropriate \\< 0 negated NM_ECODE.""" % \
         Returns:
           Type specifier.
     """
-    if nmBase.NMBuiltInFieldTypes.has_key(ftype):
+    if ftype in nmBase.NMBuiltInFieldTypes:
       type_spec = nmBase.NMBuiltInFieldTypes[ftype]['T']
     else:
       type_spec = self.mXml['meta']['ns'] + ftype + '_T'
@@ -2018,10 +2018,10 @@ On error, returns the appropriate \\< 0 negated NM_ECODE.""" % \
           Returns 'this' if fname is a base field, otherwise the XML
           cross-referenced field name is returned.
     """
-    if nmBase.NMBuiltInFieldTypes.has_key(fname):
+    if fname in nmBase.NMBuiltInFieldTypes:
       return 'this'
     ftype = self.mXml['field_types'][fname]['ftype']
-    while not nmBase.NMBuiltInFieldTypes.has_key(ftype):
+    while ftype not in nmBase.NMBuiltInFieldTypes:
       fname = ftype
       ftype = self.mXml['field_types'][fname]['ftype']
     return fname
@@ -2039,8 +2039,8 @@ On error, returns the appropriate \\< 0 negated NM_ECODE.""" % \
     """
     if ftype == 'pad':
       return ftype
-    while not nmBase.NMBuiltInFieldTypes.has_key(ftype):
-      if self.mXml['field_types'].has_key(ftype):
+    while ftype not in nmBase.NMBuiltInFieldTypes:
+      if ftype in self.mXml['field_types']:
         ftype = self.mXml['field_types'][ftype]['ftype']
       else:
         raise nmBase.NetMsgsError("Error: %s is not a defined ftype" % (ftype))

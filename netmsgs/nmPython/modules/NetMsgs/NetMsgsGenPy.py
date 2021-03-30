@@ -375,7 +375,7 @@ from %s import %s
 
     # in-situ definition
     else:
-      if not msgdef.has_key('fields'):
+      if 'fields' not in msgdef:
         return
       fields    = msgdef['fields']
       max_count = 0
@@ -488,12 +488,12 @@ from %s import %s
       # derived string
       if eve:
         dentry['max_count'] = ftentry['max_count']
-        if ftentry.has_key('const'):
+        if 'const' in ftentry:
           dentry['const'] = ftentry['const']
       # in-situ definition
       else:
         dentry['max_count'] = '@' + fdef.get('size', 'nmBase.NMStringMaxCount')
-        if fdef.has_key('const'):
+        if 'const' in fdef:
             dentry['const'] = '@' + fdef['const']
 
     # padding definition
@@ -504,19 +504,19 @@ from %s import %s
     else:
       # derived simple
       if eve:
-        if ftentry.has_key('min'):
+        if 'min' in ftentry:
           dentry['min'] = ftentry['min']
-        if ftentry.has_key('max'):
+        if 'max' in ftentry:
           dentry['max'] = ftentry['max']
-        if ftentry.has_key('const'):
+        if 'const' in ftentry:
           dentry['const'] = ftentry['const']
       # in-situ definition
       else:
-        if fdef.has_key('min'):
+        if 'min' in fdef:
           dentry['min'] = '@' + fdef['min']
-        if fdef.has_key('max'):
+        if 'max' in fdef:
           dentry['max'] = '@' + fdef['max']
-        if fdef.has_key('const'):
+        if 'const' in fdef:
           dentry['const'] = '@' + fdef['const']
   ##
 
@@ -648,8 +648,8 @@ class %s(%s):
     """
     if ftype == 'pad':
       return ftype
-    while not nmBase.NMBuiltInFieldTypes.has_key(ftype):
-      if self.mXml['field_types'].has_key(ftype):
+    while ftype not in nmBase.NMBuiltInFieldTypes:
+      if ftype in self.mXml['field_types']:
         ftype = self.mXml['field_types'][ftype]['ftype']
       else:
         raise nmBase.NetMsgsError("Error: %s is not a defined ftype" % (ftype))
@@ -669,8 +669,8 @@ class %s(%s):
     lineage = []
     if xtype == 'pad':
       return lineage
-    while not nmBase.NMBuiltInFieldTypes.has_key(xtype):
-      if self.mXml['field_types'].has_key(xtype):
+    while xtype not in nmBase.NMBuiltInFieldTypes:
+      if xtype in self.mXml['field_types']:
         lineage = [xtype] + lineage
         xtype = self.mXml['field_types'][xtype]['ftype']
       else:

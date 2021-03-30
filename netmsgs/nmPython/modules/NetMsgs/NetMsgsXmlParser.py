@@ -63,7 +63,7 @@ import os
 import xml.parsers.expat as expat
 import time
 
-import NetMsgsBase as nmBase
+import NetMsgs.NetMsgsBase as nmBase
 
 #------------------------------------------------------------------------------
 # CLASS: NetMsgsXmlParserError
@@ -228,7 +228,7 @@ class NetMsgsXmlParser:
     for elem in elemList:
       if elem not in olist:
         olist += [elem]
-        if self.XmlTree.has_key(elem):
+        if elem in self.XmlTree:
           self._InitElemOList(self.XmlTree[elem], olist)
   ##
 
@@ -336,12 +336,12 @@ class NetMsgsXmlParser:
       self.Error('No filename')
     self.Debug(1, "Parsing RN NetMsgs XML file %s" % (self.mFileName))
     try:
-      fp = open(self.mFileName, 'r')
+      fp = open(self.mFileName, 'rb')
     except IOError as err:
       self.Error(self.mFileName, err)
     self.Reset()
     self._XmlParser                           = expat.ParserCreate()
-    self._XmlParser.returns_unicode           = False
+    # 2.7 self._XmlParser.returns_unicode           = False
     #self._XmlParser.UseForeignDTD(True)
     #self._XmlParser.ExternalEntityRefHandler  = self.XmlHandlerDTD
     #self._XmlParser.StartDoctypeDeclHandler   = self.XmlHandlerStartDoctype
@@ -376,7 +376,7 @@ class NetMsgsXmlParser:
   #--
   def PostParse(self):
     """ Post-parse configuration and validation. """
-    for k,v in self.mXmlOverrides.iteritems():
+    for k,v in self.mXmlOverrides.items():
       if v is None:
         continue
       elif k == 'encoding':
@@ -609,7 +609,7 @@ class NetMsgsXmlParser:
     ftid          = self.XmlChkTokenId(elem, 'ftid', attrs.get('ftid'))
     ftype, vtype  = self.XmlChkTokenFType(elem, attrs.get('ftype'))
     fsize         = attrs.get('size')
-    if self.mDB['field_types'].has_key(ftid):
+    if ftid in self.mDB['field_types']:
       self.XmlError("<%s ftid='%s'>" % (elem, ftid),
           "field type id already exists.")
     self.mDB['field_types'][nmBase.NMKeyOrder] += [ftid]
@@ -654,7 +654,7 @@ class NetMsgsXmlParser:
           attrs   - Element attributes.
     """
     msgid = self.XmlChkTokenId(elem, 'msgid', attrs.get('msgid'))
-    if self.mDB['msg_types'].has_key(msgid):
+    if msgid in self.mDB['msg_types']:
       self.XmlError("<%s msgid='%s'>" % (elem, msgid),
           "messsage definition id already exists.")
     dispo = self.XmlChkTokenDispo(elem, attrs.get('disposition'))
@@ -700,7 +700,7 @@ class NetMsgsXmlParser:
     ftype, vtype  = self.XmlChkTokenFType(elem, attrs.get('ftype'))
     fsize         = attrs.get('size')
     dispo         = self.XmlChkTokenDispo(elem, attrs.get('disposition'))
-    if self._DbCurFieldDict.has_key(fname):
+    if fname in self._DbCurFieldDict:
       self.XmlError("<%s fname='%s'>" % (elem, fname),
           "field definition name already exists in current context.")
     self._DbCurFieldDict[nmBase.NMKeyOrder] += [fname]
@@ -953,12 +953,12 @@ class NetMsgsXmlParser:
     print("%*s{" % (indent, ''))
     indent += 2
     for k in ['ftype', 'vtype', 'size', 'const', 'min', 'max', 'count']:
-      if fielddef.has_key(k):
+      if k in fielddef:
         self.PrettyPrintVal(indent, k, fielddef[k])
         sections.remove(k)
     for k in sections:
       self.PrettyPrintVal(indent, k, fielddef[k])
-    if fielddef.has_key('fields'):
+    if 'fields' in fielddef:
       self.PrettyPrintDBFields(indent, fielddef['fields'])
     indent -= 2
     print("%*s}" % (indent, ''))
@@ -976,7 +976,7 @@ class NetMsgsXmlParser:
     print("%*s%s: " % (indent, '', name), end='')
     if type(val) == dict:
       print("\n%*s{" % (indent, ''))
-      for k,v in val.iteritems():
+      for k,v in val.items():
         self.PrettyPrintVal(indent+2, k, v)
       print("%*s}" % (indent, ''))
     else:
@@ -1026,14 +1026,14 @@ class NetMsgsXmlParser:
           "required 'ftype' attribute not specified.")
     ftype, vtype = self.XmlTokenFType(ftype)
     if vtype:
-      if not nmBase.NMBuiltInFieldTypes.has_key(vtype) and \
-         not self.mDB['field_types'].has_key(vtype):
+      if vtype not in nmBase.NMBuiltInFieldTypes and \
+         vtype not in self.mDB['field_types']:
         self.XmlError("<%s ftype='%s%s'>" % \
             (elem, vtype, nmBase.NMVectorSuffix),
             "vector field type is unknown.")
     else:
-      if not nmBase.NMBuiltInFieldTypes.has_key(ftype) and \
-         not self.mDB['field_types'].has_key(ftype):
+      if ftype not in nmBase.NMBuiltInFieldTypes and \
+         ftype not in self.mDB['field_types']:
         self.XmlError("<%s ftype='%s'>" % (elem, ftype),
           "field type is unknown.")
     return ftype, vtype
@@ -1116,14 +1116,14 @@ class NetMsgsXmlParser:
         Parameters:
           ftype   - (Derived) field type.
     """
-    if nmBase.NMBuiltInFieldTypes.has_key(ftype):
+    if ftype in nmBase.NMBuiltInFieldTypes:
       if nmBase.NMBuiltInFieldTypes[ftype]['comp'] == 'simple':
         return True
       else:
         return False
-    while self.mDB['field_types'].has_key(ftype):
+    while ftype in self.mDB['field_types']:
       ftype = self.mDB['field_types'][ftype]['ftype']
-      if nmBase.NMBuiltInFieldTypes.has_key(ftype):
+      if ftype in nmBase.NMBuiltInFieldTypes:
         if nmBase.NMBuiltInFieldTypes[ftype]['comp'] == 'simple':
           return True
         else:
