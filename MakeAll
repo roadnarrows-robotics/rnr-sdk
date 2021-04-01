@@ -40,7 +40,7 @@ argument. All RNMAKEVAR arguments are passed to the make commands.
 Environment (see env.sh):
   RNR_WORKSPACE         The rnr-sdk root directory. Unset default: pwd
   RNR_ARCH_DFT          Default architecture. Unset default: x86_64
-  RNR_ARCH              Target architecture. Unset default: RNR_ARCH_DFT
+  RNR_ARCH              Target architecture. Unset default: ${RNR_ARCH_DFT}
   RNR_INSTALL_XPREFIX   Install prefix. Unset default: ${HOME}/xinstall
   RNR_PYTHON            Python interpreter. Unset default: /usr/bin/python3
   RNR_PYTHON_VERSION    $(RNR_PYTHON) version x.y
@@ -199,19 +199,16 @@ prefix_env()
 # makeIt vars tgt
 makeIt()
 {
-  for tgt in ${@}
-  do
-    if ! make ${tgt}
+  if ! make ${tgt}
+  then
+    if ${stop_on_errors}
     then
-      if ${stop_on_errors}
-      then
-        showError "'make ${tgt}' failed."
-        fatal 8 "make stopped."
-      else
-        showWarning "'make ${tgt}' failed - continuing."
-      fi
+      showError "'make ${tgt}' failed."
+      fatal 8 "make stopped."
+    else
+      showWarning "'make ${tgt}' failed - continuing."
     fi
-  done
+  fi
 }
 
 sudomsg=''
@@ -236,10 +233,13 @@ do
   then
     showWarning "'${pkg}/Makefile' not found - ignoring."
   else
-    showBanner ${pkg} ${tgtlist}
+    #showBanner ${pkg} ${tgtlist}
     cd ${pkg}
     prefix_env ${pkg}
-    makeIt ${rnmakevars} ${tgtlist}
+    for tgt in ${tgtlist}
+    do
+      makeIt ${rnmakevars} ${tgt}
+    done
     postfix_env ${pkg}
     cd - >/dev/null
     echo

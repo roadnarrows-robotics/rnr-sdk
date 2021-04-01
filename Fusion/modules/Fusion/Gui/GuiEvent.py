@@ -56,7 +56,8 @@ Copyright (C) 2006.  RoadNarrows LLC.
 ################################################################################
 
 import tkinter as tk
-import mutex
+# python2 import mutex
+from threading import Lock
 import Fusion.Utils.IVTimer as IVTimer
 import time
 
@@ -93,8 +94,10 @@ class GuiEvent:
           master    - Tkinter root or widget object
     """
     self._master  = master
-    self._mutex = mutex.mutex()               # equivalent: the flag
-    self._mutex.lock(self._cbdummy, 'init')   # equivalent: flag = False
+    #self._mutex = mutex.mutex()               # equivalent: the flag
+    #self._mutex.lock(self._cbdummy, 'init')   # equivalent: flag = False
+    self._mutex = Lock()
+    self._mutex.acquire()
 
     # wait() event synchronization
     self._varWait   = tk.IntVar(self._master)   # wait variable
@@ -105,7 +108,8 @@ class GuiEvent:
     """ Return True if and only if the internal flag is True.
         Otherwise return False.
     """
-    return self._mutext.test() == 0   # 0 == unlocked, 1 == locked
+    #return self._mutex.test() == 0   # 0 == unlocked, 1 == locked
+    return self._mutex.locked()
 
   #--
   def set(self):
@@ -114,7 +118,8 @@ class GuiEvent:
         is true will not block at all.
     """
     #print('Dbg: GuiEvent.set()')
-    self._mutex.unlock() # equivalent: flag = True
+    #self._mutex.unlock() # equivalent: flag = True
+    self._mutex.release() # equivalent: flag = True
 
   #--
   def clear(self):
@@ -123,7 +128,8 @@ class GuiEvent:
         internal flag to True again.
     """
     #print('Dbg: GuiEvent.clear()')
-    self._mutex.lock(self._cbdummy, 'clear')  # equivalent: flag = False
+    #self._mutex.lock(self._cbdummy, 'clear')  # equivalent: flag = False
+    self._mutex.acquire()
 
   #--
   def _cbdummy(self, why):
@@ -175,7 +181,8 @@ class GuiEvent:
     if ivt.varstate == 1:           # already got the lock, stay at 1
       #print('Dbg: GuiEvent._feed(): still locked')
       pass
-    elif self._mutex.testandset():  # lock mutex if posible (atomic)
+    #elif self._mutex.testandset():  # lock mutex if posible (atomic)
+    elif self._mutex.acquire(blocking=False):  # lock mutex if posible (atomic)
       #print('Dbg: GuiEvent._feed(): acquired the lock')
       ivt.varstate = 1
     # feed the variable
