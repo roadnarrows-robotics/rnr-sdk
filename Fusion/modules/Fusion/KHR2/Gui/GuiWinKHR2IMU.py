@@ -53,7 +53,7 @@ import time
 import math
 import random
 
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Core.Values as Values
 
@@ -184,7 +184,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
     self.mTestGui           = False
 
     # set options from input parameters
-    for k,v in options.iteritems():
+    for k,v in options.items():
       if k == 'auto':
         if v:
           self.mIsAutoMode = True
@@ -328,7 +328,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
           None.
     """
     items = {}
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       if k == 'run_time':
         if v == 'update':
           if not self.mBsClient.mBsIsConn:
@@ -838,7 +838,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
     dlg = GuiDlgKHR2Proxy.GuiDlgKHR2Proxy(self, lastSettings=last)
 
     if dlg.result:
-      for k,v in dlg.result.iteritems():
+      for k,v in dlg.result.items():
         if k == 'proxy_addr' and v:
           self.mBsClient.SetProxyAddr(v)
         elif k == 'proxy_port' and v:
@@ -860,7 +860,7 @@ class GuiWinKHR2IMU(GuiWin.GuiWin):
   #--
   def CbI2CScan(self):
     if self.mBsClient.mBsIsConn:
-      for proxdev,proxdata in self.mBsClient.mBsProxiedDev.iteritems():
+      for proxdev,proxdata in self.mBsClient.mBsProxiedDev.items():
         handle = proxdata['handle']
         if handle is not None:
           break;

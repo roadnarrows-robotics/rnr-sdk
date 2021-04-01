@@ -47,7 +47,7 @@ Copyright (C) 2006.  RoadNarrows LLC.
 ################################################################################
 
 import sys
-import Queue
+import queue
 import threading as thread
 import time
 
@@ -109,7 +109,7 @@ class Mirror:
     self.mSyncRsp   = None
 
     # Input Request Queue
-    self.mQueue = Queue.Queue(qsize)
+    self.mQueue = queue.Queue(qsize)
 
     # Dispatch Table
     self.mDispatchTbl = {}
@@ -244,7 +244,7 @@ class Mirror:
         Return Value:
           None
     """
-    if not self.mDispatchTbl.has_key(request):
+    if request not in self.mDispatchTbl:
       err = 'Error: Request %s: not registered' % repr(request)
       if __debug__: self.mDbg.d3print('Mirror: %s' % err)
       raise ValueError(request)
@@ -253,7 +253,7 @@ class Mirror:
     try:
       self.mQueue.put((request, issync, qargs, qkwargs), True, 0.1)
       return Ok
-    except Queue.Full:
+    except queue.Full:
       err = 'Error: Request %s: queue full' % repr(request)
       if __debug__: self.mDbg.d3print('Mirror: %s' % err)
       raise   # re-raise queue full
@@ -267,7 +267,7 @@ class Mirror:
     self.mDispatchTbl[request_to_reg] = callback_to_reg;
 
   def _DispatchUnregister(self, request, request_to_unreg):
-    if self.mDispatchTbl.has_key(request_to_unreg):
+    if request_to_unreg in self.mDispatchTbl:
       del self.mDispatchTbl[request_to_unreg]
 
   def _DispatchThreadDie(self, request):
@@ -301,11 +301,11 @@ class Mirror:
       # block for request with 0.5 second timeout
       try:
         request, issync, qargs, qkwargs = self.mQueue.get(True, 0.5)
-      except Queue.Empty:
+      except queue.Empty:
         continue
  
       # dispatch
-      if self.mDispatchTbl.has_key(request):
+      if request in self.mDispatchTbl:
         if __debug__:
           self.mDbg.d3print('%s: dispatch, sync=%s: %s' % (thName, repr(issync),
             self._CallPrettyPrint(self.mDispatchTbl[request], request, *qargs,
@@ -339,7 +339,7 @@ class Mirror:
       for a in args:
         s += sep+self._CallPrettyArg(a)
         sep = ','
-      for k,v in kwargs.iteritems():
+      for k,v in kwargs.items():
         s += sep+k+'='+self._CallPrettyArg(v)
         sep = ','
       s += ')'
@@ -363,7 +363,7 @@ class Mirror:
 
 if __name__ == '__main__':
 
-  import Tkinter as tk
+  import tkinter as tk
   import time
 
   # globals
@@ -431,7 +431,7 @@ if __name__ == '__main__':
     mirror.AsyncRequestRegister(rqList[2][0], cbwinlabel)
     print("Enter <request> or 'help' for list of request")
     while True:
-      request = raw_input("request> ")
+      request = input("request> ")
       if not request:
         continue
       elif request == 'help':

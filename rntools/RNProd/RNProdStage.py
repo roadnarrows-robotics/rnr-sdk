@@ -181,7 +181,7 @@ def YesOrNo(ps):
 def CollectUserData(prodXml):
   fOrder = prodXml.GetElemList()
   for fKey in fOrder:
-    if not RNProdStageFInfo.has_key(fKey):    # skip 
+    if fKey not in RNProdStageFInfo:    # skip 
       continue
     try:
       CollectUserField(prodXml, fKey)
@@ -580,7 +580,7 @@ def PrintUserData(prodXml):
   print "\n"
   print "RN Product Staging Information"
   for fKey in prodXml.GetElemList():
-    if not RNProdStageFInfo.has_key(fKey):    # skip 
+    if fKey not in RNProdStageFInfo:    # skip 
       continue
     print "%-*s" % (20, RNProdStageFInfo[fKey]['psname']+":"),
     print prodXml[fKey]
@@ -685,7 +685,7 @@ def main(argv=None, **kwargs):
   global _Argv0, _CmdName, _CmdVer
   
   kwargs = GetOptions(argv, **kwargs)
-  if kwargs.has_key('xml') and kwargs['xml']:
+  if 'xml' in kwargs and kwargs['xml']:
     rc = ExecFile(kwargs['xml'])
   else:
     rc = ExecInteractive()

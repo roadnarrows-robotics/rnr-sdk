@@ -387,7 +387,7 @@ if __name__ == '__main__':
   ser = HemiSerial(port='/dev/ttyUB0', dbgobj=dbg)
   print("Enter Hemipera command(s) ('quit' to quit)")
   while True:
-    cmd = raw_input('cmd> ')
+    cmd = input('cmd> ')
     if cmd == 'quit':
       ser.Close()
       break
@@ -395,4 +395,4 @@ if __name__ == '__main__':
     if rsp:
       print(rsp)
     else:
-      print(ser.GetErrStr())
+      print((ser.GetErrStr()))

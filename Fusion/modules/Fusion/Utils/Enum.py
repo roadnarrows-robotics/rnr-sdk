@@ -89,7 +89,7 @@ class Enum:
         Return Value:
           Returns True if enum exists, else returns False.
     """
-    return self.mNames.has_key(ival)
+    return ival in self.mNames
 
   def numof(self):
     """ Gets the number of enums.

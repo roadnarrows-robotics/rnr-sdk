@@ -1,5 +1,5 @@
-import Tkinter as tk
-from tkFont import Font as Font
+import tkinter as tk
+from tkinter.font import Font as Font
 import Fusion.Gui.GuiTypes as gt
 
 root = tk.Tk()
@@ -22,7 +22,7 @@ EntryGreek = tk.Entry(myFrame, borderwidth = 1, font=root.font, width=100)
 
 # greek
 greek     = ''
-v = gt.UniGreek.values()
+v = list(gt.UniGreek.values())
 v.sort()
 for u in v:
   greek += u
@@ -32,11 +32,11 @@ EntryGreek.grid()
 
 EntrySS = tk.Entry(myFrame, borderwidth = 1, font=root.font, width=100)
 script = ''
-for k,v in gt.UniSubscript.iteritems():
+for k,v in gt.UniSubscript.items():
   script += k
   script += v
 script += '     '
-for k,v in gt.UniSuperscript.iteritems():
+for k,v in gt.UniSuperscript.items():
   script += k
   script += v
 EntrySS.insert(0, script)

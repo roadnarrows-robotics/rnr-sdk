@@ -51,7 +51,7 @@ import time
 import threading as thread
 import math
 import re
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Utils.Tools as utils
 
@@ -401,9 +401,9 @@ Manufactured by K-Team of Switzerland."""
     ini         = self.GSGetIni()
 
     # load all non-existing ini entries with defaults
-    for section,sdata in self.mIniDD.iteritems():
+    for section,sdata in self.mIniDD.items():
       optdict = sdata[1]
-      for option,odata in optdict.iteritems():
+      for option,odata in optdict.items():
         if ini.IniGet(section, option) == ini.NullObj:
           ini.IniSet(section, option, odata[0])
 
@@ -503,7 +503,7 @@ Manufactured by K-Team of Switzerland."""
     options   = ini.IniGetItems(section)
     settings  = utils.tuples2dict(options)
 
-    if self.IsCommUp() and self.mModScan.has_key('linear_camera'):
+    if self.IsCommUp() and 'linear_camera' in self.mModScan:
       self.GSReportNormalStatus("Initializing Hemisson Linear Camera Module")
       self.mCmd.LinCamCmdSetExposureTime(settings['exposure'])
       self.mCmd.LinCamCmdSetQThreshold(settings['threshold'])
@@ -530,7 +530,7 @@ Manufactured by K-Team of Switzerland."""
       pass
 
     # configure the TTS module
-    elif self.IsCommUp() and self.mModScan.has_key('tts'):
+    elif self.IsCommUp() and 'tts' in self.mModScan:
       self.GSReportNormalStatus(
           "Initializing Hemisson Text-To-Speech Module")
       self.mCmd.TtsCmdSetSpeakerGain(settings['gain'])
@@ -550,7 +550,7 @@ Manufactured by K-Team of Switzerland."""
     options   = ini.IniGetItems(section)
     settings  = utils.tuples2dict(options)
 
-    if self.IsCommUp() and self.mModScan.has_key('uss'):
+    if self.IsCommUp() and 'uss' in self.mModScan:
       self.GSReportNormalStatus(
           "Initializing Hemisson UltraSonic Sensor Module")
       self.mCmd.UssCmdSetUnits('C')
@@ -773,7 +773,7 @@ Manufactured by K-Team of Switzerland."""
           empty list of failure.
     """
     # communication must be up and the module attached
-    if not self.IsCommUp() or not self.mModScan.has_key('linear_camera'):
+    if not self.IsCommUp() or 'linear_camera' not in self.mModScan:
       return []
     sensorData = self.mCmd.LinCamCmdGrabPPixels()
     if sensorData is None:
@@ -798,7 +798,7 @@ Manufactured by K-Team of Switzerland."""
           All distances are in mm.
     """
     # communication must be up and the module attached
-    if not self.IsCommUp() or not self.mModScan.has_key('uss'):
+    if not self.IsCommUp() or 'uss' not in self.mModScan:
       return []
     self.mCmd.UssCmdTakeMeasurement()         # make a measurement
     sensorData = self.mCmd.UssCmdGetEchoSet() # read the sensor
@@ -833,7 +833,7 @@ Manufactured by K-Team of Switzerland."""
         Return Value:
           None
     """
-    if self.IsCommUp() and self.mModScan.has_key('tts'):
+    if self.IsCommUp() and 'tts' in self.mModScan:
       # speak if tts is free
       if self.mCmd.TtsCmdQueryState() == HemiTts.TtsStateNotSpeaking:
         self.mCmd.TtsCmdSay(spokenText)
@@ -862,7 +862,7 @@ Manufactured by K-Team of Switzerland."""
         Return Value:
           Returns new current goal set. 
     """
-    for k, v in kwGoals.iteritems():
+    for k, v in kwGoals.items():
       if k == 'speed_left':
         speedLeft = v
         if speedLeft < HemiBase.HemiSpeedBackwardMax:
@@ -1054,7 +1054,7 @@ Manufactured by K-Team of Switzerland."""
             'i2c_addr': scaninfo[2],
             'ver':      scaninfo[3],
           }
-        for mod, modinfo in self.mModScan.iteritems():
+        for mod, modinfo in self.mModScan.items():
           if mod == 'linear_camera':
             self.IniInitLinCam()
           elif mod == 'tts':
@@ -1065,7 +1065,7 @@ Manufactured by K-Team of Switzerland."""
       self.mModScan = {}
     for winId, modName in [
         ('VizLinCam', 'linear_camera'), ('VizTts', 'tts'), ('VizUss', 'uss')]:
-      if self.mModScan.has_key(modName):
+      if modName in self.mModScan:
         state = 'detected'
       else:
         state = 'not detected'
@@ -1193,7 +1193,7 @@ Manufactured by K-Team of Switzerland."""
       comcfg['run_time'] = 'enabled'
     else:
       comcfg['run_time'] = 'disabled'
-    if self.mModScan.has_key(modName):
+    if modName in self.mModScan:
       comcfg['module'] = 'detected'
     else:
       comcfg['module'] = 'not detected'
@@ -1429,7 +1429,7 @@ Manufactured by K-Team of Switzerland."""
     hdr = 'Module                   Id    I2C   Version\n' + \
           '------                   --   ----   -------\n'
     txt = ''
-    for modinfo in self.mModScan.itervalues():
+    for modinfo in self.mModScan.values():
       txt += modinfo['modname']
       sp = 26 - len(modinfo['modname'])
       txt += '%*s' %(sp, modinfo['mid'])

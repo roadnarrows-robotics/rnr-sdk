@@ -55,7 +55,7 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import Tkinter as tk
+import tkinter as tk
 import mutex
 import Fusion.Utils.IVTimer as IVTimer
 import time

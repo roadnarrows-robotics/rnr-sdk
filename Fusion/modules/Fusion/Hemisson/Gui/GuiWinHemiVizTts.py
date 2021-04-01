@@ -46,8 +46,8 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkFont
+import  tkinter as tk
+import  tkinter.font
 
 import  Fusion.Core.Values as Values
 
@@ -106,7 +106,7 @@ class GuiWinHemiVizTts(GuiWinText.GuiWinText):
     self.mCbRobotEffectTts  = None
 
     # set options from input parameters
-    for key,val in options.iteritems():
+    for key,val in options.items():
       if key == 'effect_tts':
         self.mCbRobotEffectTts = val
 
@@ -123,7 +123,7 @@ class GuiWinHemiVizTts(GuiWinText.GuiWinText):
     }
 
     # add color tags
-    for tag,color in self.mColors.iteritems():
+    for tag,color in self.mColors.items():
       self.TagAdd(tag, foreground=color)
 
 
@@ -186,14 +186,14 @@ class GuiWinHemiVizTts(GuiWinText.GuiWinText):
     #print("%s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       items = {}
-      for key,val in kwargs.iteritems():
+      for key,val in kwargs.items():
         if key in ['run_time', 'module', 'gain', 'pitch', 'rate']:
           items[key] = val
       self.mStatusBar.Update(**items)
     elif request == 'tts':
       text = kwargs.get('text', '')
       colortag = kwargs.get('colortag', 'black')
-      if not self.mColors.has_key(colortag):
+      if colortag not in self.mColors:
         colortag = 'black'
       self.TextAdd(repr(text)+'\n', colortag)
     else:

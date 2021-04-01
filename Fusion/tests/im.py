@@ -1,7 +1,7 @@
 # image testing
 import time
-import Tkinter as tk
-import tkFont
+import tkinter as tk
+import tkinter.font
 import Fusion.Gui.GuiTypes as gt
 import Fusion.Utils.IVTimer as IVTimer
 #import Fusion.Gui.GuiUtils as gut

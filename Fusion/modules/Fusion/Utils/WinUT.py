@@ -45,7 +45,7 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import Tkinter as tk
+import tkinter as tk
 import Fusion.Utils.IVTimer as IVTimer
 import Fusion.Gui.GuiTextBar as GuiTextBar
 
@@ -76,7 +76,7 @@ class WinUT:
       relief=tk.RAISED)
     mb.grid(row=0, column=0, stick=tk.W)
     mb.menu = tk.Menu(mb, tearoff=0)
-    for k,v in ut.iteritems():
+    for k,v in ut.items():
       mb.menu.add_command(label=k, command=v)
     mb.config(menu=mb.menu)
     b = tk.Button(root, text="Quit", bg="#990000", fg="#ffffff",

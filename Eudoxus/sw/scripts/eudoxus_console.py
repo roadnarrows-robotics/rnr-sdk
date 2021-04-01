@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -40,10 +40,10 @@ import re
 import threading
 import getopt
 
-from Tkinter import *
-from Tkconstants import *
-from tkFileDialog import *
-import tkFont
+from tkinter import *
+from tkinter.constants import *
+from tkinter.filedialog import *
+import tkinter.font
 
 # running as su does not necessary have all paths setup - so fix up here
 sys.path.insert(0, "/usr/local/lib/python2.7/site-packages")
@@ -209,7 +209,7 @@ class window(Frame):
 
     self.m_lock = threading.Lock()
 
-    if kw.has_key('debug'):
+    if 'debug' in kw:
       self.m_debug = kw['debug']
       del kw['debug']
 
@@ -279,7 +279,7 @@ class window(Frame):
                 'ROSLISP_PACKAGE_DIRECTORIES', 'ROS_DISTRO', 'ROS_ETC_DIR',
                 'ROS_MASTER_URI', 'ROS_PACKAGE_PATH', 'ROS_ROOT']:
       val = self.m_env.get(var, '')
-      print "{0}={1}".format(var, val)
+      print("{0}={1}".format(var, val))
 
   #
   ## \brief Create gui widgets with supporting data and show.
@@ -759,7 +759,7 @@ class window(Frame):
     try:
       s = subprocess.check_output(["service", service, "start"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       emsg = inst.message
     else:
       if not reFail.search(s):
@@ -784,7 +784,7 @@ class window(Frame):
       try:
         self.m_svc[service]['subproc'] = subprocess.Popen(args, env=self.m_env)
         pf = True
-      except OSError, inst:
+      except OSError as inst:
         self.m_svc[service]['subproc'] = None
         emsg = "{0}: {1}(errno={2}".format(args[0], inst.strerror, inst.errno)
     else:
@@ -821,7 +821,7 @@ class window(Frame):
     try:
       s = subprocess.check_output(["service", service, "stop"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       emsg = inst.message
     else:
       if not reFail.search(s):
@@ -847,7 +847,7 @@ class window(Frame):
         self.kill(p)
         self.m_svc[service]['subproc'] = None
         pf = True
-      except OSError, inst:
+      except OSError as inst:
         emsg = "{0}: {1}(errno={2}".format(args[0], inst.strerror, inst.errno)
     else:
       emsg = 'not running'
@@ -893,7 +893,7 @@ class window(Frame):
     try:
       s = subprocess.check_output(["service", service, "restart"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       emsg = inst.message
     else:
       if reDoneDone.search(s):
@@ -940,7 +940,7 @@ class window(Frame):
     try:
       s = subprocess.check_output(["service", service, "status"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       s = inst.output
     else:
       if reRunning.search(s):
@@ -1056,14 +1056,14 @@ class application():
   #
   def printUsageErr(self, emsg):
     if emsg:
-      print "%s: %s" % (self._Argv0, emsg)
+      print("%s: %s" % (self._Argv0, emsg))
     else:
-      print "%s: error" % (self._Argv0)
-    print "Try '%s --help' for more information." % (self._Argv0)
+      print("%s: error" % (self._Argv0))
+    print("Try '%s --help' for more information." % (self._Argv0))
 
   ## \brief Print Command-Line Usage Message.
   def printUsage(self):
-    print \
+    print(
 """
 usage: %s [OPTIONS]
        %s --help
@@ -1071,7 +1071,7 @@ usage: %s [OPTIONS]
 Options and arguments:
 
 -h, --help                : Display this help and exit.
-"""  % (self._Argv0, self._Argv0)
+"""  % (self._Argv0, self._Argv0))
  
   #
   ## \brief Get command-line options
@@ -1095,7 +1095,7 @@ Options and arguments:
     try:
       opts, args = getopt.getopt(argv[1:], "?h",
           ['help', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -1123,8 +1123,8 @@ Options and arguments:
     # parse command-line options and arguments
     try:
       kwargs = self.getOptions(argv, **kwargs)
-    except usage, e:
-      print e.msg
+    except usage as e:
+      print(e.msg)
       return 2
 
     # create root 

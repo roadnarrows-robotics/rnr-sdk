@@ -45,8 +45,8 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 ################################################################################
 
 import  sys
-import  Tkinter as tk
-import  tkFileDialog
+import  tkinter as tk
+import  tkinter.filedialog
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiUtils as gut
 
@@ -61,7 +61,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgSaveAs
 #-------------------------------------------------------------------------------
-class GuiDlgSaveAs(tkFileDialog.SaveAs):
+class GuiDlgSaveAs(tkinter.filedialog.SaveAs):
   """ Save As Dialog Class
 
       The result on dialog exit:
@@ -108,7 +108,7 @@ class GuiDlgSaveAs(tkFileDialog.SaveAs):
     self.result   = None
     self.mSaveCmd = saveCmd
 
-    tkFileDialog.SaveAs.__init__(self, guiParent, **options)
+    tkinter.filedialog.SaveAs.__init__(self, guiParent, **options)
 
     self.mSaveFile = self.show()
 

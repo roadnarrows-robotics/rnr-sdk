@@ -498,7 +498,7 @@ if __name__ == '__main__':
 
   print("Enter KHR-1 commands ('quit' to quit, 'help' for command list)")
   while True:
-    ans = raw_input('cmd> ')
+    ans = input('cmd> ')
     if not ans:
       continue
     args = ans.split()
@@ -515,7 +515,7 @@ if __name__ == '__main__':
       print('close - close connection')
       print('help - Print this help')
       print('quit - Quit test')
-      cmds = cmdlist.keys()
+      cmds = list(cmdlist.keys())
       cmds.sort()
       for k in cmds:
         print("%s - %s" % (k, cmdlist[k][0]))
@@ -527,7 +527,7 @@ if __name__ == '__main__':
       khr1ser.Close()
     else:
       gotcmd = False
-      for t,v in cmdlist.iteritems():
+      for t,v in cmdlist.items():
         if t == args[0]:
           gotcmd = True
           khr1ser.ClearErrStr()

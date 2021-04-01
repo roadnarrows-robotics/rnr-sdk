@@ -111,7 +111,7 @@ class XmlParser:
     olist = []
     for elem in elemList:
       olist += [elem]
-      if self._XmlTree.has_key(elem):
+      if elem in self._XmlTree:
         olist += self._InitElemOList(self._XmlTree[elem])
     return olist
 
@@ -162,7 +162,7 @@ class XmlParser:
         Return Value:
           True or False
     """
-    return self.mPDataDft.has_key(pname)
+    return pname in self.mPDataDft
 
   #--
   def GetPDataDft(self, pname):
@@ -237,7 +237,7 @@ class XmlParser:
         continue
       elif self.mPData[pname]:        # data present and already validated
         continue
-      elif not self.mPDataDft.has_key(pname): 
+      elif pname not in self.mPDataDft: 
         self._Error("<%s>: required element data not specified" % (pname))
 
   #--
@@ -283,7 +283,7 @@ class XmlParser:
           elemList  - element level (depth)
     """
     for elem in elemList:
-      if self._XmlTree.has_key(elem):
+      if elem in self._XmlTree:
         fp.write("%*s<%s>\n" % (level*2, "", elem))
         self.WriteXmlTree(fp, level+1, self._XmlTree[elem])
         fp.write("%*s</%s>\n" % (level*2, "", elem))

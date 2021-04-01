@@ -666,8 +666,8 @@ class KheCmdBase(KheSerial.KheSerial):
         Return Value:
           None
     """
-    for id, newParams in newCal.iteritems():
-      if not self.mIrProxCalParams.has_key(id): # bogus id
+    for id, newParams in newCal.items():
+      if id not in self.mIrProxCalParams: # bogus id
         continue
       sensor = self.mIrProxCalParams[id]
       sensor['enabled'] = newParams['enabled']
@@ -782,8 +782,8 @@ class KheCmdBase(KheSerial.KheSerial):
         Return Value:
           None
     """
-    for id, newParams in newCal.iteritems():
-      if not self.mIrAmbCalParams.has_key(id): # bogus id
+    for id, newParams in newCal.items():
+      if id not in self.mIrAmbCalParams: # bogus id
         continue
       sensor = self.mIrAmbCalParams[id]
       sensor['enabled'] = newParams['enabled']
@@ -937,7 +937,7 @@ class KheCmdBase(KheSerial.KheSerial):
       else:
         return addr
     else:
-      if not KheExtBusAddrDict.has_key(addr):
+      if addr not in KheExtBusAddrDict:
         return self.mErr.SetErrBadParam('addr', 'Invalid Ext. Bus mnemonic', 
                                           addr)
       else:
@@ -952,7 +952,7 @@ class KheCmdBase(KheSerial.KheSerial):
       else:
         return tid
     else:
-      if not KheTidDict.has_key(tid):
+      if tid not in KheTidDict:
         return self.mErr.SetErrBadParam('tid', 'Invalid Turret Id mnemonic', 
                                           tid)
       else:

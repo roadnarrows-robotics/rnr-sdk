@@ -46,8 +46,8 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 ################################################################################
 
 import  time
-import  Tkinter as tk
-import  tkFont
+import  tkinter as tk
+import  tkinter.font
 import  Fusion.Utils.Tools as utils
 import  Fusion.Gui.GuiWinText as GuiWinText
 import  Fusion.Gui.GuiDlgSaveAs as GuiDlgSaveAs
@@ -106,7 +106,7 @@ class GuiWinIniListing(GuiWinText.GuiWinText):
     iniDefaults = self.mIni.defaults()
     if iniDefaults:
       self.ShowSection('DEFAULT')
-      for option,value in iniDefaults.iteritems():
+      for option,value in iniDefaults.items():
         self.ShowOption(option, value)
         self.TextAdd('\n', 'punctuation')
 
@@ -143,7 +143,7 @@ class GuiWinIniListing(GuiWinText.GuiWinText):
           None
     """
     self.TextAdd('\n', 'punctuation')
-    if self.mIniDD and self.mIniDD.has_key(section):
+    if self.mIniDD and section in self.mIniDD:
       self.ShowCommentBlock(['', self.mIniDD[section][0], ''])
     self.TextAdd('[', 'punctuation')
     self.TextAdd(section, 'section')
@@ -248,10 +248,10 @@ class GuiWinIniListing(GuiWinText.GuiWinText):
     """
     if not self.mIniDD:
       return None, None
-    if not self.mIniDD.has_key(section):
+    if section not in self.mIniDD:
       return None, None
     optDict = self.mIniDD[section][1]
-    if not optDict.has_key(option):
+    if option not in optDict:
       return None, None
     else:
       return optDict[option][0], optDict[option][1]

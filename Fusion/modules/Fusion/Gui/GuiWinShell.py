@@ -74,8 +74,8 @@ try:
 except ImportError:
   pass
 
-import  Tkinter as tk
-import  tkFont
+import  tkinter as tk
+import  tkinter.font
 
 import  Fusion.Utils.Tools as utils
 import  Fusion.Gui.GuiWinText as GuiWinText
@@ -164,7 +164,7 @@ def ThisShellHasAGui():
       Return Value:
         Return True if the is a GUI, else False.
   """
-  return _ShInfo.has_key(thread.currentThread().getName())
+  return thread.currentThread().getName() in _ShInfo
 
 #--
 def SendQuit(exitcode):
@@ -209,7 +209,7 @@ def SendAddStyle(styleName, **kw):
   tagkw = {}
   escSeq = _EscSeqAddStyle+','+styleName
   kwstr = ''
-  for key, value in kw.iteritems():
+  for key, value in kw.items():
     if type(value) != str:
       value = repr(value)
     if key == 'foreground' or key == 'fg':
@@ -625,7 +625,7 @@ class GuiTerm(GuiWinText.GuiWinText):
       return None, None
     elif num >= ord(' ') and num <= ord('~'):
       return None, chr(num)
-    elif _KeySymDict.has_key(keysym):
+    elif keysym in _KeySymDict:
       return _KeySymDict[keysym]
     else:
       return None, None
@@ -644,7 +644,7 @@ class GuiTerm(GuiWinText.GuiWinText):
           send to the shell's stdin.
     """
     global _KeySymDictCtrlSeq
-    if _KeySymDictCtrlSeq.has_key(keysym):
+    if keysym in _KeySymDictCtrlSeq:
       return _KeySymDictCtrlSeq[keysym]
     elif num >= ord('a') and num <= ord('z'): # a to z
         num = num - ord('a') + 1
@@ -705,11 +705,11 @@ if __name__ == '__main__':
     """ Demonstrate GUI Shell capabilities. """
     def __init__(self, args=(), **kwargs):
       """ Initialization """
-      if kwargs.has_key('fin'):
+      if 'fin' in kwargs:
         self.mFin = kwargs['fin']
       else:
         self.mFin = sys.stdin
-      if kwargs.has_key('fout'):
+      if 'fout' in kwargs:
         self.mFout = kwargs['fout']
       else:
         self.mFout = sys.stdout

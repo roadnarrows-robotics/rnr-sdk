@@ -44,8 +44,8 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkFont
+import  tkinter as tk
+import  tkinter.font
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiUtils as gut
 
@@ -125,7 +125,7 @@ class GuiTextBar:
           haveScrolling - textbar does [not] have scrolling
           wrap          - wrap method
     """
-    self.mFont = tkFont.Font(parent, font=self.mFontTuple)
+    self.mFont = tkinter.font.Font(parent, font=self.mFontTuple)
 
     # core attributes
     kwargs = {

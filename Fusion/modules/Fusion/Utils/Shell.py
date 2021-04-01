@@ -147,8 +147,8 @@ class Shell:
         Return Value:
           None
     """
-    for key, value in kwargs.iteritems():
-      if self.mOpts.has_key(key):
+    for key, value in kwargs.items():
+      if key in self.mOpts:
         self.mOpts[key] = value
 
     self.mOpts['argv0'] = os.path.basename(self.mOpts['argv0'])
@@ -297,7 +297,7 @@ class Shell:
         Return Value:
           None.
     """
-    for k,v in newdict.iteritems():
+    for k,v in newdict.items():
       self.mCmdDict[k] = v
 
 
@@ -347,7 +347,7 @@ class Shell:
     """ Help Shell Command. """
     # list of commands help
     if cmd in ['-l', '-list']:
-      cmdList = self.mCmdDict.keys()
+      cmdList = list(self.mCmdDict.keys())
       cmdList.sort()
       s = ''
       for cmd in cmdList:
@@ -359,7 +359,7 @@ class Shell:
 
     # specific command help
     elif cmd:
-      if self.mCmdDict.has_key(cmd):
+      if cmd in self.mCmdDict:
         self.HelpPrintCmd(cmd)
         return 'ok', ''
       else:
@@ -381,7 +381,7 @@ Partial command matching is done to find the unique command substring.
       self.Print(self.mOpts['helpExample'])
       self.Print('')
   
-    cmdList = self.mCmdDict.keys()
+    cmdList = list(self.mCmdDict.keys())
     cmdList.sort()
     self.Print("Command Set:")
     for cmd in cmdList:
@@ -413,15 +413,15 @@ Partial command matching is done to find the unique command substring.
 
     # body
     gterm.SendSetStyle('hel')
-    if help.has_key('desc'):
+    if 'desc' in help:
       self.Print('  Description:')
       self.HelpPrintBlock("    ", help['desc'])
-    if help.has_key('usage'):
+    if 'usage' in help:
       self.Print('  Usage:')
       self.HelpPrintBlock("    ", help['usage'])
-    if help.has_key('args'):
+    if 'args' in help:
       self.HelpPrintCmdArgs(help['args'])
-    if help.has_key('rvals'):
+    if 'rvals' in help:
       self.Print("  Return Values:")
       self.HelpPrintBlock("    ", help['rvals'])
     self.Print('')
@@ -442,7 +442,7 @@ Partial command matching is done to find the unique command substring.
     s = '  Arguments:'
     self.Print(s)
     maxlen = 0
-    keys = args.keys()
+    keys = list(args.keys())
     keys.sort()
     for opt in keys:
       if len(opt) > maxlen:
@@ -656,7 +656,7 @@ Partial command matching is done to find the unique command substring.
       if col < indent:
         col += self.Write('%*s' % (indent-col, ''))
       col += self.Write('{ ')
-      keys = data.keys()
+      keys = list(data.keys())
       keys.sort()
       n = 0
       for k in keys:
@@ -767,7 +767,7 @@ Partial command matching is done to find the unique command substring.
       return None
     n = len(inputCmd)
     matches = []
-    for cmd in self.mCmdDict.iterkeys():
+    for cmd in self.mCmdDict.keys():
       if len(cmd) >= n and cmd[:n] == inputCmd:
         matches += [cmd]
     if len(matches) == 0:
@@ -842,7 +842,7 @@ Partial command matching is done to find the unique command substring.
     if rc == 'err':
       self.RspErr("%s" % (rval))
     elif rval != '':
-      if self.mCmdDict[cmdArgs[0]].has_key('rsp'):
+      if 'rsp' in self.mCmdDict[cmdArgs[0]]:
         self.mCmdDict[cmdArgs[0]]['rsp'](rval)
       else:
         self.RspPrettyPrint(rval)
@@ -955,7 +955,7 @@ Partial command matching is done to find the unique command substring.
 
 if __name__ == '__main__':
 
-  import Tkinter as tk
+  import tkinter as tk
 
   #--
   def main():

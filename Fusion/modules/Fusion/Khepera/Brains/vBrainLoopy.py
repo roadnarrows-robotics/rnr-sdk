@@ -172,9 +172,9 @@ class vBrainLoopy(vBrainThreaded.vBrainThreaded):
     ini         = self.GSGetIni()
 
     # load all non-existing ini entries with defaults
-    for section,sdata in self.mIniDD.iteritems():
+    for section,sdata in self.mIniDD.items():
       optdict = sdata[1]
-      for option,odata in optdict.iteritems():
+      for option,odata in optdict.items():
         if ini.IniGet(section, option) == ini.NullObj:
           ini.IniSet(section, option, odata[0])
 
@@ -343,7 +343,7 @@ class vBrainLoopy(vBrainThreaded.vBrainThreaded):
     iniDD   = self.mIniDD
     optDict = iniDD[section][1]
     optDfts = {}
-    for option,odata in optDict.iteritems():
+    for option,odata in optDict.items():
       optDfts[option] = odata[0]
 
     # get parsed ini configuation (guaranteed to exist)

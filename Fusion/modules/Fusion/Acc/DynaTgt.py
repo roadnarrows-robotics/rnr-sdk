@@ -44,7 +44,7 @@ Copyright (C) 2006.  RoadNarrows LLC.
 
 import math
 import threading as thread
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Utils.IVTimer as IVTimer
 
@@ -209,7 +209,7 @@ class DynaTgt:
   #--
   def ReadObsSensors(self):
     dist_min = 1000.0
-    for sensor in self.mObsSensors.itervalues():
+    for sensor in self.mObsSensors.values():
       sensor['dist'] = 5.0
       if sensor['dist'] < dist_min:
         dist_min = sensor['dist']
@@ -314,7 +314,7 @@ class DynaTgt:
     self.mBrum['R_robot'] = 52.0 / 2.0  # Khepera size
 
     # Obstacle data
-    for id in self.mObsSensors.iterkeys():
+    for id in self.mObsSensors.keys():
       self.mObsSensors[id]['tan(angrange)'] = \
           math.tan(self.mObsSensors[id]['angrange']/2.0)
 
@@ -329,7 +329,7 @@ class DynaTgt:
   #--
   def BrumOpts(self):
     """ 'Fixed' Brum values based on user options. """
-    self.mAngDeg = range(0, 361, int(self.mOpt['dpsi']))
+    self.mAngDeg = list(range(0, 361, int(self.mOpt['dpsi'])))
     if self.mAngDeg[-1] != 360:
       self.mAngDeg.append(360)
 
@@ -482,7 +482,7 @@ class DynaTgt:
           Repulsive force-let on avoidance direction.
     """
     sum = 0.0
-    for sensorId in self.mObsSensors.iterkeys():
+    for sensorId in self.mObsSensors.keys():
       sum += self.f_obs_i(sensorId)
     self.mBrum['dtheta_obs'] = sum
     return sum
@@ -528,7 +528,7 @@ class DynaTgt:
           U
     """
     U = 0.0
-    for sensorId,sensor in self.mObsSensors.iteritems():
+    for sensorId,sensor in self.mObsSensors.items():
       sqsigma   = sensor['sigma_i'] ** 2
       lamsqsig  = sensor['lambda_i'] * sqsigma
       U += lamsqsig * math.exp(-sensor['zeta']**2/(2*sqsigma)) - lamsqsig/sqrte
@@ -828,7 +828,7 @@ class DynaTgt:
     self.start()
 
   #--
-  def next(self):
+  def __next__(self):
     self._cmdlock()
     self.mTestNum += 1
     if self.mTestNum >= len(self.mTests):
@@ -1044,7 +1044,7 @@ class GuiViz:
 
   #--
   def CbNext(self):
-    testNum = self.mDynaTgt.next()
+    testNum = next(self.mDynaTgt)
     self.mVarMenu.set(testNum)
     self.setstate('notstarted')
 

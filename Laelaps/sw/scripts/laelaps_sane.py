@@ -107,7 +107,7 @@ class Sanity():
     tf = True
 
     if motorctlr.isOpen():
-      for k, d in ctlrInfo.iteritems():
+      for k, d in ctlrInfo.items():
         tf &= self.saneMotorCtlr(motorctlr, k, d['addr'])
       motorctlr.close()
 

@@ -47,7 +47,7 @@ Copyright (C) 2007.  RoadNarrows LLC.
 
 import time
 import threading as thread
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Utils.Tools as utils
 
@@ -198,7 +198,7 @@ Manufactured by Kondo of Japan."""
     }
 
     servos = self.mCmd.AttrGetActiveServos()
-    for mnem,channel in servos.iteritems():
+    for mnem,channel in servos.items():
       id = 'servo_' + mnem
       sensorDict[id] = {
         'mimetype': kvals.KHR1SensorMimeTypeServo,
@@ -223,7 +223,7 @@ Manufactured by Kondo of Japan."""
     effectorDict = {}
 
     servos = self.mCmd.AttrGetActiveServos()
-    for mnem,channel in servos.iteritems():
+    for mnem,channel in servos.items():
       id = 'servo_' + mnem
       effectorDict[id] = {
         'mimetype': kvals.KHR1EffectorMimeTypeServo,
@@ -272,9 +272,9 @@ Manufactured by Kondo of Japan."""
     ini         = self.GSGetIni()
 
     # load all non-existing ini entries with defaults
-    for section,sdata in self.mIniDD.iteritems():
+    for section,sdata in self.mIniDD.items():
       optdict = sdata[1]
-      for option,odata in optdict.iteritems():
+      for option,odata in optdict.items():
         if ini.IniGet(section, option) == ini.NullObj:
           ini.IniSet(section, option, odata[0])
 
@@ -382,7 +382,7 @@ Manufactured by Kondo of Japan."""
     groupId = kvals.KHR1SensorMimeTypeServo
     self.mShadow[groupId]          = {}
     servos = self.mCmd.AttrGetActiveServos()
-    for mnem in servos.iterkeys():
+    for mnem in servos.keys():
       self.mShadow[groupId]['servo_'+mnem] = 0
 
     self.GSUnlock()
@@ -439,7 +439,7 @@ Manufactured by Kondo of Japan."""
       sensorData = self.mShadow[kvals.KHR1SensorMimeTypeServo]
     else:
       servos = self.mCmd.AttrGetActiveServos()
-      for mnem,channel in servos.iteritems():
+      for mnem,channel in servos.items():
         sensorData['servo_'+mnem] = readData[channel]
     if __debug__: self.mDbg.d4print(' %s: %s:' % \
                       (kvals.KHR1SensorMimeTypeServo, repr(sensorData)))
@@ -467,7 +467,7 @@ Manufactured by Kondo of Japan."""
       if chanList:
         sensorData = {}
         servos = self.mCmd.AttrGetActiveServos()
-        for mnem,channel in servos.iteritems():
+        for mnem,channel in servos.items():
           sensorData['servo_'+mnem] = readData[channel]
         self.mShadow[kvals.KHR1SensorMimeTypeServo] = sensorData
 

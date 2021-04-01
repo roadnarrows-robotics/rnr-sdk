@@ -274,7 +274,7 @@ if __name__ == '__main__':
                 action='direct', trace=True)
     print("Press <enter> to terminate...")
     pid.start()
-    raw_input()
+    input()
     pid.cancel()
 
   # run test

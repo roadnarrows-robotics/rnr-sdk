@@ -47,8 +47,8 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 
 import math
 import threading as thread
-import Tkinter as tk
-import tkFont
+import tkinter as tk
+import tkinter.font
 
 import Fusion.Core.Values as Values
 
@@ -128,7 +128,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
 
     # set options from input parameters
     k = 1.0
-    for key,val in options.iteritems():
+    for key,val in options.items():
       if key == 'auto':
         if val:
           self.mIsAutoMode = True
@@ -264,7 +264,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
     elif request == 'goals':
       if self.mIsAutoMode == True or kwargs.get('force', False):
         items = {'goal_speed':self.mGoalSpeed, 'goal_theta':self.mGoalTheta}
-        for k,v in kwargs.iteritems():
+        for k,v in kwargs.items():
           if k == 'speed':
             items['goal_speed'] = v
           elif k == 'theta':
@@ -337,7 +337,7 @@ class GuiWinKheNav(GuiWin.GuiWin):
           None.
     """
     items = {}
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       if k in ['pathspeed', 'goal_speed']:  # convert to meters
         items[k] = v / 1000.0
       elif k in ['theta', 'goal_theta']:    # convert to degrees [0,360)

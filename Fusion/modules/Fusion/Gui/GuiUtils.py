@@ -48,7 +48,7 @@ import os
 import stat
 import threading as thread
 
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Core.Values as Values
 import Fusion.Utils.Tools as utils
@@ -192,7 +192,7 @@ class ActiveImageWidget(tk.Canvas):
 
     if filenames:
       self._BuildImageSet('#DEFAULT#', filenames)
-    for tag, imgset in activesets.iteritems():
+    for tag, imgset in activesets.items():
       self._BuildImageSet(tag, imgset)
 
     # fudge size for edges, find center
@@ -208,11 +208,11 @@ class ActiveImageWidget(tk.Canvas):
 
     # active image set tag
     if len(self.mImgSets) == 1: # only one set, so it must be the active set
-      self.mActiveTag = self.mImgSets.keys()[0]
+      self.mActiveTag = list(self.mImgSets.keys())[0]
     elif activetag:             # active set specified in init
       self.mActiveTag = activetag
     else:                       # default to first set
-      self.mActiveTag = self.mImgSets.keys()[0]
+      self.mActiveTag = list(self.mImgSets.keys())[0]
 
     self.mIndex     = 0                   # starting index
     self.mCurImg    = (None, -1)          # no currently displayed image

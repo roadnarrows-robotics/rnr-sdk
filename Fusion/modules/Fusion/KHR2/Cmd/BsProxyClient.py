@@ -608,7 +608,7 @@ class BsProxyClient:
     vals = self.mPacker.UnpackMsg(rsp, msgId,
                                 [{'fname':'handle', 'ftype':'u8'}])
     if vals['_rc'] == 'ok':
-      for proxdev in self.mBsProxiedDev.iterkeys():
+      for proxdev in self.mBsProxiedDev.keys():
         if self.BsClientDev[proxdev]['handle'] == handle:
           self.mBsProxiedDev[proxdev]['handle'] = None
           return True
@@ -759,7 +759,7 @@ class BsProxyClient:
         num_dev -= 1
       print("Server supported proxied device ids:", devidlist)
       proxlist = []
-      for proxdev,devid in BsProxiedDevIds.iteritems():
+      for proxdev,devid in BsProxiedDevIds.items():
         try:
           devidlist.index(devid)
           proxlist += [proxdev]
@@ -792,7 +792,7 @@ class BsProxyClient:
       print("Failed to connect, rc=%d (%s)" % \
           (rc, errno.errorcode.get(rc, 'UNKNOWN')))
       return False
-    for proxdev in self.mBsProxiedDev.iterkeys():
+    for proxdev in self.mBsProxiedDev.keys():
       self.mBsProxiedDev[proxdev]['handle'] = None
     self.mBsIsConn = True
     print("Connected to bsproxy@%s:%d" % (self.mBsProxyAddr, self.mBsProxyPort))
@@ -807,7 +807,7 @@ class BsProxyClient:
       self.mBsSocket.close()
       del self.mBsSocket                # cannot be used after close(), delete
       self.mBsSocket = socket.socket()  # and recreate
-      for proxdev in self.mBsProxiedDev.iterkeys():
+      for proxdev in self.mBsProxiedDev.keys():
         self.mBsProxiedDev[proxdev]['handle'] = None
       print("Disconnected from bsproxy@%s:%d" % \
         (self.mBsProxyAddr, self.mBsProxyPort))

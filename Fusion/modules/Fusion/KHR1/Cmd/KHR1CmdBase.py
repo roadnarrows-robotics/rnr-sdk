@@ -565,8 +565,8 @@ class KHR1CmdBase(KHR1Serial.KHR1Serial):
     chanList = self.CmdGetCurPos()
     if not chanList:
       return None
-    for chanMnem, chanNum in self.mActiveServos.iteritems():
-      if kwargs.has_key(chanMnem) and chanNum < len(chanList):
+    for chanMnem, chanNum in self.mActiveServos.items():
+      if chanMnem in kwargs and chanNum < len(chanList):
          chanList[chanNum] = self._GroomChannel(kwargs[chanMnem])
     return self.CmdSetCurPos(speed, chanList)
 
@@ -674,7 +674,7 @@ class KHR1CmdBase(KHR1Serial.KHR1Serial):
       rsp = self.RCB1CmdGetMotionPos(boardId, motionNum, posNum)
       if rsp is None:
         return None
-      if not rvals.has_key('speed'):
+      if 'speed' not in rvals:
         rvals['speed'] = rsp[0]
       elif rvals['speed'] != rsp[0]:
         self.mErr.SetErrRcbSync( "speeds differ at "
@@ -712,8 +712,8 @@ class KHR1CmdBase(KHR1Serial.KHR1Serial):
     else:
       chanList = [0] * self.mNumOfChannels
     n = 0
-    for chanMnem, chanNum in self.mActiveServos.iteritems():
-      if kwargs.has_key(chanMnem) and chanNum < len(chanList):
+    for chanMnem, chanNum in self.mActiveServos.items():
+      if chanMnem in kwargs and chanNum < len(chanList):
          chanList[chanNum] = self._GroomChannel(kwargs[chanMnem])
          n += 1
     if posNum == 0 and n < self.AttrHasNumOfActiveServos():
@@ -756,7 +756,7 @@ class KHR1CmdBase(KHR1Serial.KHR1Serial):
       rsp = self.RCB1CmdGetMotionPosCnt(boardId, motionNum)
       if rsp is None:
         return None
-      if not rvals.has_key('pos_cnt'):
+      if 'pos_cnt' not in rvals:
         rvals['pos_cnt'] = rsp
       elif rvals['pos_cnt'] != rsp:
         self.mErr.SetErrRcbSync("position counts differ for motion %d" % \
@@ -836,7 +836,7 @@ class KHR1CmdBase(KHR1Serial.KHR1Serial):
       rsp = self.RCB1CmdGetScenarioMotion(boardId, scenarioNum, motionIdx)
       if rsp is None:
         return None
-      if not rvals.has_key('motion_num'):
+      if 'motion_num' not in rvals:
         rvals['motion_num'] = rsp
       elif rvals['motion_num'] != rsp:
         self.mErr.SetErrRcbSync("motion numbers differ at "
@@ -880,7 +880,7 @@ class KHR1CmdBase(KHR1Serial.KHR1Serial):
       rsp = self.RCB1CmdGetScenarioMotionCnt(boardId, scenarioNum)
       if rsp is None:
         return None
-      if not rvals.has_key('motion_cnt'):
+      if 'motion_cnt' not in rvals:
         rvals['motion_cnt'] = rsp
       elif rvals['motion_cnt'] != rsp:
         self.mErr.SetErrRcbSync("motion counts differ for scenario %d" % \

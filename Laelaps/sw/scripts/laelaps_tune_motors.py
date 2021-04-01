@@ -54,15 +54,15 @@ import math
 import getopt
 
 if sys.version_info[0] < 3:
-  from Tkinter import *
-  from Tkconstants import *
-  from tkFileDialog import *
-  import tkFont
+  from tkinter import *
+  from tkinter.constants import *
+  from tkinter.filedialog import *
+  import tkinter.font
 else:
   from tkinter import *
-  from Tkconstants import *
-  from tkFileDialog import *
-  import tkFont
+  from tkinter.constants import *
+  from tkinter.filedialog import *
+  import tkinter.font
 
 import webbrowser
 
@@ -216,7 +216,7 @@ class window(Frame):
     }
 
     # override panel configuration
-    #RDK if kw.has_key('config'):
+    #RDK if 'config' in kw:
     #RDK   self.m_cfgPanel = kw['config'].copy()
     #RDK   del kw['config']
     #RDK # or read configuration
@@ -1001,7 +1001,7 @@ class window(Frame):
 
     # upwards arrow with left turn 
     self.makeWidget(wframe, Label,
-      dictConcat({'text': u'\u21b0'}, wcfgLabel),
+      dictConcat({'text': '\u21b0'}, wcfgLabel),
       {'row': 1, 'column': col, 'padx': (2,2), 'pady': (1,1), 'sticky': W})
 
     # spacer
@@ -1034,7 +1034,7 @@ class window(Frame):
 
     # downward arrow with left turn
     self.makeWidget(wframe, Label,
-      dictConcat({'text': u'\u21b2'}, wcfgLabel),
+      dictConcat({'text': '\u21b2'}, wcfgLabel),
       {'row': 5, 'column': col, 'padx': (2,2), 'pady': (1,1), 'sticky': W})
 
   #
@@ -1115,7 +1115,7 @@ class window(Frame):
 
     # upwards arrow with left turn 
     self.makeWidget(wframe, Label,
-      dictConcat({'text': u'\u21b0'}, wcfgLabel),
+      dictConcat({'text': '\u21b0'}, wcfgLabel),
       {'row': 0, 'column': 2, 'padx': (2,2), 'pady': (1,1), 'sticky': W})
 
     # spacer
@@ -1148,7 +1148,7 @@ class window(Frame):
 
     # downward arrow with left turn
     self.makeWidget(wframe, Label,
-      dictConcat({'text': u'\u21b2'}, wcfgLabel),
+      dictConcat({'text': '\u21b2'}, wcfgLabel),
       {'row': 4, 'column': 2, 'padx': (2,2), 'pady': (1,1), 'sticky': W})
 
   #

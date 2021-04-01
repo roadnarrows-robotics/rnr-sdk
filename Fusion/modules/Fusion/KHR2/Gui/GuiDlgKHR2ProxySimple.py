@@ -42,9 +42,9 @@ Copyright (C) 2008.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiToolTip as GuiToolTip
@@ -62,7 +62,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgKHR2ProxySimple
 #-------------------------------------------------------------------------------
-class GuiDlgKHR2ProxySimple(tkSimpleDialog.Dialog):
+class GuiDlgKHR2ProxySimple(tkinter.simpledialog.Dialog):
   """ Fusion Simple BotSense IP Proxy Preferences Dialog Class
 
       The result on dialog exit:
@@ -83,7 +83,7 @@ class GuiDlgKHR2ProxySimple(tkSimpleDialog.Dialog):
     self.result         = None
     self.mLastSettings  = lastSettings
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _getSetting(self, key, subkey=None):
@@ -103,7 +103,7 @@ class GuiDlgKHR2ProxySimple(tkSimpleDialog.Dialog):
 
     self.wm_title('BotSense IP Proxy Server Preferences')
 
-    font = tkFont.Font(master, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(master, font=gt.FontHelv10Bold)
 
     row    = 0
     column = 0

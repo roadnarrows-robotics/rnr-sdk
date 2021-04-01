@@ -296,7 +296,7 @@ class vBrain(Gluon.GluonServer):
         Return Value:
           Returns new current brum state. 
     """
-    for k,v in kwStates.iteritems():
+    for k,v in kwStates.items():
       self.mBrum[k] = v
     return self.mBrum
 

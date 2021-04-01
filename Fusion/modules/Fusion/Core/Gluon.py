@@ -91,7 +91,7 @@ EServerExec = enum.Enum('Load EStop Start Resume Suspend Step Stop Unload')
 #
 ServerInvalidExecStateTbl = {
   EServerExec.Load:     [EServerState.Undef] + \
-                         range(EServerState.NotReady, EServerState.numof()),
+                         list(range(EServerState.NotReady, EServerState.numof())),
 
   EServerExec.EStop:    [EServerState.Undef, EServerState.NotLoaded],
 
@@ -619,7 +619,7 @@ class GluonClient:
         Return Value:
           None
     """
-    if self.mServers.has_key(serverId):
+    if serverId in self.mServers:
       del self.mServers[serverId]
 
   #--
@@ -633,7 +633,7 @@ class GluonClient:
           On success, Gluon server object. 
           On failure, None
     """
-    if self.mServers.has_key(serverId):
+    if serverId in self.mServers:
       return self.mServers[serverId]
     else:
       return None

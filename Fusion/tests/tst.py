@@ -1,16 +1,17 @@
-import Tkinter as tk
-import tkFont
+import tkinter as tk
+import tkinter.font
 import os
 import sys
 import time
 import Fusion.Khepera.Robots.vKhepera as vk
 import Fusion.Core.Reactor as fusion
 import Fusion.Gui.GuiTypes as gt
+import importlib
 
 def insterr(code):
   try:
     x = y
-  except Exception, inst:
+  except Exception as inst:
     print(type(inst))    # the exception instance
     print(inst.args)     # arguments stored in .args
     print(inst)      
@@ -28,7 +29,7 @@ def newmodule(modname, filename=None):
 
 def delmodule(module):
   modname = module.__name__
-  if sys.modules.has_key(modname):
+  if modname in sys.modules:
     del sys.modules[modname]
   print(module)
   #exec('del %s' % module)
@@ -36,10 +37,10 @@ def delmodule(module):
 def importmodule(filename, modname):
   module = newmodule(modname, filename)
   try:
-    execfile(filename, module.__dict__, module.__dict__)
-  except IOError, err:
+    exec(compile(open(filename, "rb").read(), filename, 'exec'), module.__dict__, module.__dict__)
+  except IOError as err:
     del sys.modules[modname]
-    raise ImportError, err
+    raise ImportError(err)
   return module 
 
 def importfile(filename):
@@ -56,8 +57,8 @@ def importfile(filename):
 
 def dlgconn():
   #reload(gluon)
-  reload(vk)
-  reload(fusion)
+  importlib.reload(vk)
+  importlib.reload(fusion)
   r = vk.vKhepera(debuglevel=2)
   f = fusion.Fusion(vRobot=r, debuglevel=2)
   return r, f
@@ -189,7 +190,7 @@ class E:
     print('.', self.i)
 
 def k(kw):
-  for k,v in kw.iteritems():
+  for k,v in kw.items():
     if v is None: print(k, 'only')
     else: print(k, v)
 
@@ -232,7 +233,7 @@ class RevIter:
     print('__del__')
   def __iter__(self):
     return self
-  def next(self):
+  def __next__(self):
     if self.index == 0:
       raise StopIteration
     self.index = self.index - 1
@@ -245,7 +246,7 @@ class Reverse:
     self.datalen = len(data)
   def __iter__(self):
     return RevIter(self)
-  def next(self):
+  def __next__(self):
     print('Reverse.next')
     raise StopIteration
 
@@ -342,7 +343,7 @@ def statusbar():
   hscrollbar = tk.Scrollbar(root, orient=tk.HORIZONTAL)
 
   family='helvetica'
-  fontStatus = tkFont.Font(family=family, size=10)#, weight=tkFont.BOLD)
+  fontStatus = tkinter.font.Font(family=family, size=10)#, weight=tkFont.BOLD)
   print(fontStatus.actual())
   print(fontStatus.metrics())
   if not fontStatus:
@@ -413,7 +414,7 @@ def textbar():
   hscrollbar = tk.Scrollbar(root, orient=tk.HORIZONTAL)
 
   family='helvetica'
-  fontStatus = tkFont.Font(family=family, size=10)#, weight=tkFont.BOLD)
+  fontStatus = tkinter.font.Font(family=family, size=10)#, weight=tkFont.BOLD)
   linespace = fontStatus.metrics()['linespace']
   em = fontStatus.measure('M')
 
@@ -502,7 +503,7 @@ class s:
   def __init__(self, args=(), **kwargs):
     for arg in args:
       print(repr(arg))
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       print(repr(k), '=', repr(v))
     self.d = {'this':self.f1, 'that':self.f2}
   def f1(self):

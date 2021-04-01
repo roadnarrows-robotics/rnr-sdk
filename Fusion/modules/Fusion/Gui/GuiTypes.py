@@ -142,43 +142,43 @@ ImageKHR1           = 'RNRKHR-1.gif'
 # Greek Unicodes
 #
 UniGreek = {
-  'Alpha':  u'\u0391', 'Beta':    u'\u0392', 'Gamma':   u'\u0393',
-  'Delta':  u'\u0394', 'Epsilon': u'\u0395', 'Zeta':    u'\u0396',
-  'Eta':    u'\u0397', 'Theta':   u'\u0398', 'Iota':    u'\u0399',
-  'Kappa':  u'\u039A', 'Lambda':  u'\u039B', 'Mu':      u'\u039C',
-  'Nu':     u'\u039D', 'Xi':      u'\u039E', 'Omicron': u'\u039F',
-  'Pi':     u'\u03A0', 'Rho':     u'\u03A1', 'Sigma':   u'\u03A3',
-  'Tau':    u'\u03A4', 'Upsilon': u'\u03A5', 'Phi':     u'\u03A6',
-  'Chi':    u'\u03A7', 'Psi':     u'\u03A8', 'Omega':   u'\u03A9',
+  'Alpha':  '\u0391', 'Beta':    '\u0392', 'Gamma':   '\u0393',
+  'Delta':  '\u0394', 'Epsilon': '\u0395', 'Zeta':    '\u0396',
+  'Eta':    '\u0397', 'Theta':   '\u0398', 'Iota':    '\u0399',
+  'Kappa':  '\u039A', 'Lambda':  '\u039B', 'Mu':      '\u039C',
+  'Nu':     '\u039D', 'Xi':      '\u039E', 'Omicron': '\u039F',
+  'Pi':     '\u03A0', 'Rho':     '\u03A1', 'Sigma':   '\u03A3',
+  'Tau':    '\u03A4', 'Upsilon': '\u03A5', 'Phi':     '\u03A6',
+  'Chi':    '\u03A7', 'Psi':     '\u03A8', 'Omega':   '\u03A9',
 
-  'alpha':  u'\u03B1', 'beta':    u'\u03B2', 'gamma':   u'\u03B3',
-  'delta':  u'\u03B4', 'epsilon': u'\u03B5', 'zeta':    u'\u03B6',
-  'eta':    u'\u03B7', 'theta':   u'\u03B8', 'iota':    u'\u03B9',
-  'kappa':  u'\u03BA', 'lambda':  u'\u03BB', 'mu':      u'\u03BC',
-  'nu':     u'\u03BD', 'xi':      u'\u03BE', 'omicron': u'\u03BF',
-  'pi':     u'\u03C0', 'rho':     u'\u03C1', 'sigma':   u'\u03C3',
-  'tau':    u'\u03C4', 'upsilon': u'\u03C5', 'phi':     u'\u03C6',
-  'chi':    u'\u03C7', 'psi':     u'\u03C8', 'omega':   u'\u03C9',
+  'alpha':  '\u03B1', 'beta':    '\u03B2', 'gamma':   '\u03B3',
+  'delta':  '\u03B4', 'epsilon': '\u03B5', 'zeta':    '\u03B6',
+  'eta':    '\u03B7', 'theta':   '\u03B8', 'iota':    '\u03B9',
+  'kappa':  '\u03BA', 'lambda':  '\u03BB', 'mu':      '\u03BC',
+  'nu':     '\u03BD', 'xi':      '\u03BE', 'omicron': '\u03BF',
+  'pi':     '\u03C0', 'rho':     '\u03C1', 'sigma':   '\u03C3',
+  'tau':    '\u03C4', 'upsilon': '\u03C5', 'phi':     '\u03C6',
+  'chi':    '\u03C7', 'psi':     '\u03C8', 'omega':   '\u03C9',
 }
 
 #
 # Subscript Unicodes (usage of these are discouraged by unicode.org)
 #
 UniSubscript = {
-  '0': u'\u2080', '1': u'\u2081', '2': u'\u2082', '3': u'\u2083',
-  '4': u'\u2084', '5': u'\u2085', '6': u'\u2086', '7': u'\u2087',
-  '8': u'\u2088', '9': u'\u2089', '+': u'\u208A', '-': u'\u208B',
-  '=': u'\u208C', '(': u'\u208D', ')': u'\u208E',
+  '0': '\u2080', '1': '\u2081', '2': '\u2082', '3': '\u2083',
+  '4': '\u2084', '5': '\u2085', '6': '\u2086', '7': '\u2087',
+  '8': '\u2088', '9': '\u2089', '+': '\u208A', '-': '\u208B',
+  '=': '\u208C', '(': '\u208D', ')': '\u208E',
 }
 
 #
 # Superscript Unicodes (usage of these are discouraged by unicode.org)
 #
 UniSuperscript = {
-  '0': u'\u2070', '1': u'\u00b9', '2': u'\u00b2', '3': u'\u00b3',
-  '4': u'\u2074', '5': u'\u2075', '6': u'\u2076', '7': u'\u2077',
-  '8': u'\u2078', '9': u'\u2079', '+': u'\u207A', '-': u'\u207B',
-  '=': u'\u207C', '(': u'\u207D', ')': u'\u207E',
+  '0': '\u2070', '1': '\u00b9', '2': '\u00b2', '3': '\u00b3',
+  '4': '\u2074', '5': '\u2075', '6': '\u2076', '7': '\u2077',
+  '8': '\u2078', '9': '\u2079', '+': '\u207A', '-': '\u207B',
+  '=': '\u207C', '(': '\u207D', ')': '\u207E',
 }
 
 #
@@ -186,13 +186,13 @@ UniSuperscript = {
 # see http://www.fileformat.info/info/unicode/category/Sm/list.htm
 #
 UniMath = {
-  '+-':             u'\u00B1', # plus or minus
-  'forall':         u'\u2200', # for all
-  'pdiff':          u'\u2202', # partial differential
-  'thereexists':    u'\u2203', # there exists
-  'squareroot':     u'\u221A', # square root
-  'infinity':       u'\u221E', # infinity
-  'integral':       u'\u222B', # indefinite integral
+  '+-':             '\u00B1', # plus or minus
+  'forall':         '\u2200', # for all
+  'pdiff':          '\u2202', # partial differential
+  'thereexists':    '\u2203', # there exists
+  'squareroot':     '\u221A', # square root
+  'infinity':       '\u221E', # infinity
+  'integral':       '\u222B', # indefinite integral
 }
 
 #-------------------------------------------------------------------------------

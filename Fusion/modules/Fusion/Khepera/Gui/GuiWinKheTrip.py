@@ -48,7 +48,7 @@ Copyright (C) 2006.  RoadNarrows LLC.
 import math
 import time
 
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Core.Values as Values
 
@@ -158,7 +158,7 @@ class GuiWinKheTrip(GuiWin.GuiWin):
     range = None
 
     # set options from input parameters
-    for k,v in options.iteritems():
+    for k,v in options.items():
       if k == 'auto':
         if v:
           self.mIsAutoMode = True
@@ -363,7 +363,7 @@ class GuiWinKheTrip(GuiWin.GuiWin):
           None.
     """
     items = {}
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       if k in ['x', 'y', 'pathdist', 'pathspeed']:  # convert to meters
         items[k] = v / 1000.0
       elif k == 'theta':      # convert to degrees [0,360)

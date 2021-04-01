@@ -38,10 +38,10 @@ import re
 import threading
 import getopt
 
-from Tkinter import *
-from Tkconstants import *
-from tkFileDialog import *
-import tkFont
+from tkinter import *
+from tkinter.constants import *
+from tkinter.filedialog import *
+import tkinter.font
 
 # running as su does not necessary have all paths setup - so fix up here
 sys.path.insert(0, "/usr/local/lib/python2.7/site-packages")
@@ -189,7 +189,7 @@ class window(Frame):
         'hek_teleop':   'Hekateros Teleoperation ROS node'}
     self.m_lock = threading.Lock()
 
-    if kw.has_key('debug'):
+    if 'debug' in kw:
       self.m_debug = kw['debug']
       del kw['debug']
 
@@ -644,7 +644,7 @@ class window(Frame):
     try:
       rsp = subprocess.check_output(["service", service, "start"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       self.m_lock.release()
       return False
     self.m_lock.release()
@@ -669,7 +669,7 @@ class window(Frame):
     try:
       rsp = subprocess.check_output(["service", service, "stop"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       self.m_lock.release()
       return False
     self.m_lock.release()
@@ -694,7 +694,7 @@ class window(Frame):
     try:
       rsp = subprocess.check_output(["service", service, "restart"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       self.m_lock.release()
       return False
     self.m_lock.release()
@@ -726,7 +726,7 @@ class window(Frame):
     try:
       rsp = subprocess.check_output(["service", service, "status"],
                                   stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError, inst:
+    except subprocess.CalledProcessError as inst:
       rsp = inst.output
     self.m_lock.release()
 
@@ -791,22 +791,21 @@ class application():
   #
   def printUsageErr(self, emsg):
     if emsg:
-      print "%s: %s" % (self._Argv0, emsg)
+      print("%s: %s" % (self._Argv0, emsg))
     else:
-      print "%s: error" % (self._Argv0)
-    print "Try '%s --help' for more information." % (self._Argv0)
+      print("%s: error" % (self._Argv0))
+    print("Try '%s --help' for more information." % (self._Argv0))
 
   ## \brief Print Command-Line Usage Message.
   def printUsage(self):
-    print \
-"""
+    print("""
 usage: %s [OPTIONS]
        %s --help
 
 Options and arguments:
 
 -h, --help                : Display this help and exit.
-"""  % (self._Argv0, self._Argv0)
+"""  % (self._Argv0, self._Argv0))
  
   #
   ## \brief Get command-line options
@@ -830,7 +829,7 @@ Options and arguments:
     try:
       opts, args = getopt.getopt(argv[1:], "?h",
           ['help', ''])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -858,8 +857,8 @@ Options and arguments:
     # parse command-line options and arguments
     try:
       kwargs = self.getOptions(argv, **kwargs)
-    except usage, e:
-      print e.msg
+    except usage as e:
+      print(e.msg)
       return 2
 
     # create root 

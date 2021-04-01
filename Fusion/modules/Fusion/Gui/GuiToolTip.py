@@ -105,7 +105,7 @@ Ideas gleaned from PySol
 #
 ################################################################################
 
-import  Tkinter
+import  tkinter
 
 #-------------------------------------------------------------------------------
 # Global Data
@@ -141,7 +141,7 @@ class GuiToolTip:
   def configure(self, **opts):
     """ Configure options. """
     for key in opts:
-      if self._opts.has_key(key):
+      if key in self._opts:
         self._opts[key] = opts[key]
       else:
         KeyError = 'KeyError: Unknown option: "%s"' %key
@@ -188,7 +188,7 @@ class GuiToolTip:
       self._unschedule()
       return
     if not self._tipwindow:
-      self._tipwindow = tw = Tkinter.Toplevel(self.master)
+      self._tipwindow = tw = tkinter.Toplevel(self.master)
       # hide the window until we know the geometry
       tw.withdraw()
       tw.wm_overrideredirect(1)
@@ -261,7 +261,7 @@ class GuiToolTip:
       elif wraplength > 300:
         wraplength = 300
       opts['wraplength'] = wraplength
-    label = Tkinter.Label(self._tipwindow, **opts)
+    label = tkinter.Label(self._tipwindow, **opts)
     label.pack()
 
 
@@ -271,12 +271,12 @@ class GuiToolTip:
 
 if __name__ == '__main__':
   def demo():
-    root = Tkinter.Tk(className='ToolTip-demo')
-    l = Tkinter.Listbox(root)
+    root = tkinter.Tk(className='ToolTip-demo')
+    l = tkinter.Listbox(root)
     l.insert('end', "I'm a listbox")
     l.pack(side='top')
     t1 = GuiToolTip(l, follow_mouse=1, text="I'm a tooltip with follow_mouse set to 1, so I won't be placed outside my parent")
-    b = Tkinter.Button(root, text='Quit', command=root.quit)
+    b = tkinter.Button(root, text='Quit', command=root.quit)
     b.pack(side='bottom')
     t2 = GuiToolTip(b, text='Enough of this')
     root.mainloop()

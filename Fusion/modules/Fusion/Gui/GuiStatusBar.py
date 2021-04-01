@@ -44,8 +44,8 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkFont
+import  tkinter as tk
+import  tkinter.font
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiUtils as gut
 import  Fusion.Gui.GuiToolTip as GuiToolTip
@@ -283,7 +283,7 @@ class GuiStatusBar(tk.Frame):
         Return Value:
           None
     """
-    for tag, val in items.iteritems():
+    for tag, val in items.items():
       try:
         item = self._item[tag]
       except KeyError:
@@ -295,7 +295,7 @@ class GuiStatusBar(tk.Frame):
   #--
   def GetItemTags(self):
     """ Return a list of all of the status bar item tags. """
-    return self._item.keys()
+    return list(self._item.keys())
 
 
   # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -390,7 +390,7 @@ class GuiStatusBar(tk.Frame):
       _staticvar['#done_once#'] = 1
 
     # set class instance attributes
-    for k,v in _staticvar.iteritems():
+    for k,v in _staticvar.items():
       if k != '#done_once#':
         setattr(self, k, v)
 

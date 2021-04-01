@@ -108,6 +108,6 @@ def GetIniDD():
 #--
 def _GetIniDDActiveServos():
   ddsect = {}
-  for mnem,chan in KHR1CmdBase.KHR1FacDftActiveServos.iteritems():
+  for mnem,chan in KHR1CmdBase.KHR1FacDftActiveServos.items():
     ddsect[mnem] = chan
   return ddsect

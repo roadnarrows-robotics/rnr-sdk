@@ -49,8 +49,8 @@ import math
 import threading as thread
 import time
 
-import Tkinter as tk
-import tkFont
+import tkinter as tk
+import tkinter.font
 
 import Fusion.Core.Values as Values
 import Fusion.Core.Gluon as Gluon
@@ -117,7 +117,7 @@ class GuiWinOpticFlowViz(GuiWin.GuiWin):
     # defaults
 
     # set options from input parameters
-    for k,v in options.iteritems():
+    for k,v in options.items():
       pass
 
     # override bad options with defaults
@@ -361,7 +361,7 @@ class GuiWinOpticFlowViz(GuiWin.GuiWin):
   #--
   def VizCanvasPaintBlobs(self):
     """ Paint the Viz current blob list. """
-    for bid, blob in self.mBlobs.iteritems():
+    for bid, blob in self.mBlobs.items():
       if bid != self.mBoiId:
         rect = self._blob2canvas(blob['start'], blob['end'])
         id = self.mVizCanvas.create_rectangle(rect, fill=gt.ColorGray1, 

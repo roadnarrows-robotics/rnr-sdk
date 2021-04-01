@@ -46,9 +46,9 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 
 import  os
 import  sys
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 
 import  Fusion.Utils.Tools as utils
 
@@ -74,7 +74,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgPlugin
 #-------------------------------------------------------------------------------
-class GuiDlgPlugin(tkSimpleDialog.Dialog):
+class GuiDlgPlugin(tkinter.simpledialog.Dialog):
   """ Module Plugin Dialog Class """
 
   #--
@@ -111,7 +111,7 @@ class GuiDlgPlugin(tkSimpleDialog.Dialog):
     self.mEntryPoints = []    # list of entry points names
     self.mEPointName  = None  # name of choosen entry point, if any
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _lastSetting(self, key):
@@ -124,7 +124,7 @@ class GuiDlgPlugin(tkSimpleDialog.Dialog):
 
     self.wm_title(self.mTitle)
 
-    font = tkFont.Font(master, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(master, font=gt.FontHelv10Bold)
 
     row    = 0
     column = 0
@@ -350,7 +350,7 @@ class GuiDlgPlugin(tkSimpleDialog.Dialog):
     cbframe.grid(row=row, column=column, columnspan=columnspan,
                   padx=3, ipadx=3, ipady=3, sticky=tk.N+tk.W+tk.E)
 
-    font = tkFont.Font(cbframe, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(cbframe, font=gt.FontHelv10Bold)
 
     row = 0
     column = 0

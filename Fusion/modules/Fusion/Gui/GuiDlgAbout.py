@@ -44,9 +44,9 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiUtils as gut
 
@@ -57,7 +57,7 @@ import  Fusion.Gui.GuiUtils as gut
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgAbout
 #-------------------------------------------------------------------------------
-class GuiDlgAbout(tkSimpleDialog.Dialog):
+class GuiDlgAbout(tkinter.simpledialog.Dialog):
   """ About Dialog Class """
 
   #--
@@ -87,7 +87,7 @@ class GuiDlgAbout(tkSimpleDialog.Dialog):
     self.mCopyRight = copyright
     self.mLogoImage = logoImage
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def body(self, master):

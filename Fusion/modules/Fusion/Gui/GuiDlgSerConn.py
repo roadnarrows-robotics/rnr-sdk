@@ -46,9 +46,9 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 
 import  time
 import  serial as ser
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiToolTip as GuiToolTip
@@ -64,7 +64,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgSerConn
 #-------------------------------------------------------------------------------
-class GuiDlgSerConn(tkSimpleDialog.Dialog):
+class GuiDlgSerConn(tkinter.simpledialog.Dialog):
   """ Serial Connection Dialog Class
 
       The result on dialog exit:
@@ -117,7 +117,7 @@ class GuiDlgSerConn(tkSimpleDialog.Dialog):
 
     self.result = None
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _lastSetting(self, key):
@@ -138,7 +138,7 @@ class GuiDlgSerConn(tkSimpleDialog.Dialog):
         return self.mValidStopBits[0]
     if not self.mLastSettings:
       return None
-    elif not self.mLastSettings.has_key(key):
+    elif key not in self.mLastSettings:
       return None
     else:
       return self.mLastSettings[key]
@@ -159,7 +159,7 @@ class GuiDlgSerConn(tkSimpleDialog.Dialog):
     if len(self.mValidStopBits) > colfudge:
       colfudge = len(self.mValidStopBits)
 
-    font = tkFont.Font(master, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(master, font=gt.FontHelv10Bold)
 
     # Current selection
     self.mEntryCurSel = tk.Entry(master, relief=tk.RAISED, font=font,

@@ -235,9 +235,9 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     ini         = self.GSGetIni()
 
     # load all non-existing ini entries with defaults
-    for section,sdata in self.mIniDD.iteritems():
+    for section,sdata in self.mIniDD.items():
       optdict = sdata[1]
-      for option,odata in optdict.iteritems():
+      for option,odata in optdict.items():
         if ini.IniGet(section, option) == ini.NullObj:
           ini.IniSet(section, option, odata[0])
 
@@ -314,7 +314,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     sensorDict = self.mPeer.HasSensorTypes()
     hasSufficient = False
 
-    for id,params in sensorDict.iteritems():
+    for id,params in sensorDict.items():
       mimetype = params['mimetype']
 
       # proximity IR sensor
@@ -351,7 +351,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
       return False
 
     # final sensor prepping 
-    for id,data in self.mObsSensors.iteritems():
+    for id,data in self.mObsSensors.items():
       # convert any zeta in [3/2pi, 2pi] to [-1/2pi, 0]
       if data['zeta'] >= twopi * 3.0 / 4.0:
         self.mObsSensors[id]['zeta'] = data['zeta'] - twopi
@@ -404,7 +404,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
 
     # Part of the 'innate' brum lies in the senors. Set any fix components
     # for the dynamic calculations
-    for sensor in self.mObsSensors.itervalues():
+    for sensor in self.mObsSensors.values():
       sensor['tan(angrange)'] = math.tan(sensor['angrange']/2.0)
       sensor['f_obs_i'] = 0.0
 
@@ -433,7 +433,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
   #--
   def BrumOpts(self):
     """ 'Fixed' Brum values based on user options. """
-    self.mAngDeg = range(0, 361, int(self.mOpt['dpsi']))
+    self.mAngDeg = list(range(0, 361, int(self.mOpt['dpsi'])))
     if self.mAngDeg[-1] != 360:
       self.mAngDeg.append(360)
 
@@ -445,7 +445,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     self.mBrum['2sq(sigma)']  = 2.0 * self.mOpt['sigma']**2
     self.mBrum['l_coop']      = self.mOpt['l_coop'] / 2.0
 
-    for sensor in self.mTgtSensors.itervalues():
+    for sensor in self.mTgtSensors.values():
       sensor['angrange'] = self.mOpt['TgtSensorAngRange']
 
     # update dynamics viz window of angular sampling points
@@ -503,8 +503,8 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     dist_min = 1000.0
     for group in self.mObsSensorGroups:
       dataset = self.mPeerRobotCallbacks[group](group)
-      for id,val in dataset.iteritems():
-        if self.mObsSensors.has_key(id):
+      for id,val in dataset.items():
+        if id in self.mObsSensors:
           self.mObsSensors[id]['dist'] = val[0]
           if val[0] < dist_min:
             dist_min = val[0]
@@ -616,7 +616,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
           (dist_c, math.degrees(rho_c)))
 
     # update targets 
-    for id, tgt in self.mTargets.iteritems():
+    for id, tgt in self.mTargets.items():
       # target - robot metrics
       dx = tgt['x'] - x_bot
       dy = tgt['y'] - y_bot
@@ -668,7 +668,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     w = twopi / (2.0 * angrange)    # 0 at ends of [-angrange/2, angrange/2]
     angrange /= 2.0                 # half angle
     Mi = 0.0
-    for tgt in self.mTargets.itervalues():
+    for tgt in self.mTargets.values():
       # target angle relative to robot [-180, 180]
       dpsi = tgt['psi'] - theta
       if dpsi > pi:
@@ -697,7 +697,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
           Repulsive force-let effecting direction.
     """
     sum = 0.0
-    for sensorId in self.mObsSensors.iterkeys():
+    for sensorId in self.mObsSensors.keys():
       sum += self.f_obs_i(sensorId)
     self.mBrum['dtheta_obs'] = sum
 
@@ -811,7 +811,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
           U
     """
     U = 0.0
-    for sensorId,sensor in self.mObsSensors.iteritems():
+    for sensorId,sensor in self.mObsSensors.items():
       sqsigma   = sensor['sigma_i'] ** 2
       lamsqsig  = sensor['lambda_i'] * sqsigma
       U += lamsqsig * math.exp(-sensor['zeta']**2/(2*sqsigma)) - lamsqsig/sqrte
@@ -1149,7 +1149,7 @@ class vBrainDynaAvoid(vBrainThreaded.vBrainThreaded):
     iniDD   = self.mIniDD
     optDict = iniDD[section][1]
     optDfts = {}
-    for option,odata in optDict.iteritems():
+    for option,odata in optDict.items():
       optDfts[option] = odata[0]
 
     # get parsed ini configuation (guaranteed to exist)

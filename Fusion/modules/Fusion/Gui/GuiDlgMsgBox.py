@@ -47,8 +47,8 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
+import  tkinter as tk
+import  tkinter.simpledialog
 
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiUtils as gut
@@ -101,7 +101,7 @@ def ErrorBox(msg, justify=tk.CENTER):
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgMsgBox
 #-------------------------------------------------------------------------------
-class GuiDlgMsgBox(tkSimpleDialog.Dialog):
+class GuiDlgMsgBox(tkinter.simpledialog.Dialog):
   """ Info/Warning/Error Message Box Dialog Class.
   """
 
@@ -119,7 +119,7 @@ class GuiDlgMsgBox(tkSimpleDialog.Dialog):
     self.mTitle   = title
     self.mMessage = message
     self.mJustify = justify
-    tkSimpleDialog.Dialog.__init__(self, None)
+    tkinter.simpledialog.Dialog.__init__(self, None)
 
   #--
   def body(self, master):

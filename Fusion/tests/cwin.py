@@ -4,7 +4,7 @@ def cwinstart(callobj, *args, **kwargs):
   for arg in args:
     print('    ', arg)
   print('  kwargs', len(kwargs))
-  for k, v in kwargs.iteritems():
+  for k, v in kwargs.items():
     print('    ', k, v)
 
   w = callobj(*args, **kwargs)
@@ -20,6 +20,6 @@ def cwincall(req1, req2, *args, **kwargs):
   for arg in args:
     print('    ', arg)
   print('kwargs')
-  for k, v in kwargs.iteritems():
+  for k, v in kwargs.items():
     print('    ', k, v)
   return 'tomorrow'

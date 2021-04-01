@@ -106,9 +106,9 @@ def AtAtReplace(fileNameIn, userDict, bReplace=True):
       #print(match.group(0), match.start(), match.end())
       fpTmp.write(line[m:match.start()])
       id,fmt = AtAtIdentifier(match)
-      if userDict.has_key(id):
+      if id in userDict:
         AtAtWriteVal(fpTmp, id, userDict, fmt)
-      elif AtAtBuiltIns.has_key(id):
+      elif id in AtAtBuiltIns:
         AtAtWriteVal(fpTmp, id, AtAtBuiltIns, fmt)
       else:
         AtAtWarning(fileNameIn, lineNum, match.start(), id, 

@@ -57,7 +57,7 @@ class ChannelError(Exception):
         self.estr = "Unknown channel error %s" % repr(cherr)
     else:
       self.estr = os.strerror(cherr) # also maps unknown
-      if errno.errorcode.has_key(cherr):
+      if cherr in errno.errorcode:
         self.ename = errno.errorcode[cherr]
       else:
         self.ename = repr(cherr)
@@ -90,7 +90,8 @@ def t2():
   """ Raise ChannelError(-1, "ugh") """
   try:
     raise ChannelError(-1, "ugh")
-  except ChannelError as (code, strerror, msg):
+  except ChannelError as xxx_todo_changeme:
+    (code, strerror, msg) = xxx_todo_changeme.args
     print("ChannelError: %d: %s: %s" % (code, strerror, msg))
 
 def t3():
@@ -111,7 +112,8 @@ def t5():
   """ Raise IOError(5, "file") """
   try:
     raise IOError(5, "file")
-  except IOError as (x, y):
+  except IOError as xxx_todo_changeme1:
+    (x, y) = xxx_todo_changeme1.args
     print(x, y)
 
 def t6():
@@ -125,5 +127,6 @@ def t6():
   """ Open noexist file v2 """
   try:
     f = open("/oogabooga", "r")
-  except IOError as (errno, strerror):
+  except IOError as xxx_todo_changeme2:
+    (errno, strerror) = xxx_todo_changeme2.args
     print(errno, strerror)

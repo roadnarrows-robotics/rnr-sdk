@@ -45,8 +45,8 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import Tkinter as tk
-import tkSimpleDialog
+import tkinter as tk
+import tkinter.simpledialog
 
 import Fusion.Gui.GuiTypes as gt
 import Fusion.Gui.GuiUtils as gut
@@ -68,7 +68,7 @@ def GetSettingNames(sensorName):
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgKheCalIrLed
 #-------------------------------------------------------------------------------
-class GuiDlgKheCalIrLed(tkSimpleDialog.Dialog):
+class GuiDlgKheCalIrLed(tkinter.simpledialog.Dialog):
   """ vKhepera IR LED Sensors Calibration Dialog Class
 
       The result on dialog exit:
@@ -104,7 +104,7 @@ class GuiDlgKheCalIrLed(tkSimpleDialog.Dialog):
 
     self.mHasDim          = False
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def body(self, master):
@@ -182,7 +182,7 @@ class GuiDlgKheCalIrLed(tkSimpleDialog.Dialog):
 
     row += 1
 
-    ids = self.mSettings.keys()
+    ids = list(self.mSettings.keys())
     ids.sort()
     for id in ids:
       self.mSettings[id]['incvar'] = tk.IntVar()
@@ -336,7 +336,7 @@ class GuiDlgKheCalIrLed(tkSimpleDialog.Dialog):
   #-- 
   def SetSet(self):
     """ Initial sensor set values. """
-    for sensor in self.mSettings.itervalues():
+    for sensor in self.mSettings.values():
       if sensor['incvar'].get() == 0:
         state = tk.DISABLED
       else:
@@ -420,7 +420,7 @@ class GuiDlgKheCalIrLed(tkSimpleDialog.Dialog):
   def validate(self):
     """Validate dialog settings."""
     self.result = {}
-    for id,sensor in self.mSettings.iteritems():
+    for id,sensor in self.mSettings.items():
       self.result[id] = {}
       if sensor['envar'].get() == 'True':
         self.result[id]['enabled'] = True
@@ -448,7 +448,7 @@ class GuiDlgKheCalIrLed(tkSimpleDialog.Dialog):
   #--
   def CbSensorInc(self):
     """ Sensor Set Inclusion Checkbox callback. """
-    for sensor in self.mSettings.itervalues():
+    for sensor in self.mSettings.values():
       if sensor['incvar'].get() == 0:
         state = tk.DISABLED
       else:
@@ -476,7 +476,7 @@ class GuiDlgKheCalIrLed(tkSimpleDialog.Dialog):
     enable = self.mVarEnable.get()
     k = self.mSliderK.get()
     nf = self.mSliderNF.get()
-    for sensor in self.mSettings.itervalues():
+    for sensor in self.mSettings.values():
       if sensor['incvar'].get():
         if enable:
           sensor['envar'].set('True')

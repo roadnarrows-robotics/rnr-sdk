@@ -45,8 +45,8 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 ################################################################################
 
 import  sys
-import  Tkinter as tk
-import  tkFileDialog
+import  tkinter as tk
+import  tkinter.filedialog
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiUtils as gut
 
@@ -57,7 +57,7 @@ import  Fusion.Gui.GuiUtils as gut
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgOpen
 #-------------------------------------------------------------------------------
-class GuiDlgOpen(tkFileDialog.Open):
+class GuiDlgOpen(tkinter.filedialog.Open):
   """ Open File Dialog Class
 
         The result on dialog exit: 
@@ -107,7 +107,7 @@ class GuiDlgOpen(tkFileDialog.Open):
     self.result   = None
     self.mOpenCmd = openCmd
 
-    tkFileDialog.Open.__init__(self, guiParent, **options)
+    tkinter.filedialog.Open.__init__(self, guiParent, **options)
 
     self.mOpenFile = self.show()
 

@@ -63,9 +63,9 @@ import  time
 import  threading as thread
 import  math
 
-import  Tkinter as tk
-import  tkMessageBox
-import  tkFont
+import  tkinter as tk
+import  tkinter.messagebox
+import  tkinter.font
 
 import  Fusion.Core.Values as Values
 import  Fusion.Core.Mirror as Mirror
@@ -532,9 +532,9 @@ class Reactor(Gluon.GluonClient):
     self.mIniDD = FusionIniDD.GetIniDD()
 
     # Load all non-existing ini entries with defaults
-    for section,sdata in self.mIniDD.iteritems():
+    for section,sdata in self.mIniDD.items():
       optdict = sdata[1]
-      for option,odata in optdict.iteritems():
+      for option,odata in optdict.items():
         if ini.IniGet(section, option) == ini.NullObj:
           ini.IniSet(section, option, odata[0])
 
@@ -1458,7 +1458,7 @@ class Reactor(Gluon.GluonClient):
     option    = 'Win_Fusion'
     settings  = ini.IniGetOrDft(section, option, None)
     if settings:
-      if settings.has_key('geometry'):
+      if 'geometry' in settings:
         geostr = settings['geometry']
     if geostr:
       try:
@@ -1728,7 +1728,7 @@ class Reactor(Gluon.GluonClient):
           ownerId - owner Id string
           tbid    - toolbar unique Id string
     """
-    if self.mToolBars.has_key(tbid):
+    if tbid in self.mToolBars:
       del self.mToolBars[tbid]
       del self.mToolBarSpace[tbid]
       self.mToolBarColumn -= 2
@@ -1740,7 +1740,7 @@ class Reactor(Gluon.GluonClient):
     pframe.grid(row=row, column=0, padx=3, ipadx=3, ipady=3, 
                sticky=tk.N+tk.S+tk.W+tk.E)
 
-    font = tkFont.Font(pframe, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(pframe, font=gt.FontHelv10Bold)
 
     row = 0
     column = 0
@@ -1838,7 +1838,7 @@ class Reactor(Gluon.GluonClient):
     else:
       state = 'cansave'
     self.mMenuBar.SetMenuItemStates('file', state, 'File')
-    for tb in self.mToolBars.itervalues():
+    for tb in self.mToolBars.values():
       tb.SetButtonStates('file', state)
 
   #--
@@ -1853,21 +1853,21 @@ class Reactor(Gluon.GluonClient):
     else:
       state = 'allplugins'
     self.mMenuBar.SetMenuItemStates('plugin', state)
-    for tb in self.mToolBars.itervalues():
+    for tb in self.mToolBars.values():
       tb.SetButtonStates('plugin', state)
 
   #--
   def GuiSetCorrStates(self):
     """ Set 'corr' menubar and toolbar items to NORMAL/DISABLED states. """
     self.mMenuBar.SetMenuItemStates('corr', self.mCorrState)
-    for tb in self.mToolBars.itervalues():
+    for tb in self.mToolBars.values():
       tb.SetButtonStates('corr', self.mCorrState)
 
   #--
   def GuiSetServerStates(self, serverId, state):
     """ Set serverId menubar and toolbar items to NORMAL/DISABLED states. """
     self.mMenuBar.SetMenuItemStates(serverId, state)
-    for tb in self.mToolBars.itervalues():
+    for tb in self.mToolBars.values():
       tb.SetButtonStates(serverId, state)
 
   #--
@@ -2028,7 +2028,7 @@ class Reactor(Gluon.GluonClient):
       return {}
     elif not winOwner:
       return {}
-    elif not winOwner.has_key(winId):
+    elif winId not in winOwner:
       return {}
     else:
       return winOwner[winId]
@@ -2120,9 +2120,9 @@ class Reactor(Gluon.GluonClient):
     sessId = win.winfo_id()
 
     self.GCLock()
-    if not self.mGuiChildWinDB.has_key(ownerId):
+    if ownerId not in self.mGuiChildWinDB:
       self.mGuiChildWinDB[ownerId] = {}
-    if not self.mGuiChildWinDB[ownerId].has_key(winId):
+    if winId not in self.mGuiChildWinDB[ownerId]:
       self.mGuiChildWinDB[ownerId][winId] = {}
     self.mGuiChildWinDB[ownerId][winId][sessId] = {}
     self.mGuiChildWinDB[ownerId][winId][sessId]['win'] = win
@@ -2188,7 +2188,7 @@ class Reactor(Gluon.GluonClient):
     options = self.GuiChildGetOptions(ownerId, winId)
     if not options:   # then error
       return None
-    for k,v in options.iteritems():
+    for k,v in options.items():
       kwargs[k] = v
     win = callobj(self.mGuiRoot, *args, **kwargs)
     self.GuiChildWinRegister(ownerId, winId, win)
@@ -2211,7 +2211,7 @@ class Reactor(Gluon.GluonClient):
     sessIds = self.mGuiChildWinDB.get(ownerId, {}).get(winId)
     if not sessIds:
       return
-    for session in sessIds.itervalues():
+    for session in sessIds.values():
       updatefunc = session.get('update')
       if updatefunc and session['win'].isAlive:
         try:
@@ -2234,8 +2234,8 @@ class Reactor(Gluon.GluonClient):
     self.GCLock()
     winList = []
     winIds = self.mGuiChildWinDB.get(ownerId,{})
-    for sessIds in winIds.itervalues():
-      for session in sessIds.itervalues():
+    for sessIds in winIds.values():
+      for session in sessIds.values():
         winList.append(session['win'])
     self.GCUnlock()
     
@@ -2259,7 +2259,7 @@ class Reactor(Gluon.GluonClient):
   def GuiChildWinDestroyAll(self):
     """ Destroy all child windows. """
     self.GCLock()
-    ownerList = self.mGuiChildWinDB.keys()
+    ownerList = list(self.mGuiChildWinDB.keys())
     self.GCUnlock()
     for ownerId in ownerList:
       self.GuiChildWinDestroyOwners(ownerId)

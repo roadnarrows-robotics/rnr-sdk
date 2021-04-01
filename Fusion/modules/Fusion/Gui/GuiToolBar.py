@@ -44,7 +44,7 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
+import  tkinter as tk
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiToolTip as GuiToolTip
 
@@ -122,7 +122,7 @@ class GuiToolBar:
         Return Value:
           None.
     """
-    if self.mToolBar.has_key(label):
+    if label in self.mToolBar:
       raise KeyError("Toolbar item already exists: %s" % (repr(label)))
 
     # default button image, if any
@@ -186,10 +186,10 @@ class GuiToolBar:
           None.
     """
     # iterate over all buttons in toolbar
-    for label,item in self.mToolBar.iteritems():
+    for label,item in self.mToolBar.items():
 
       # check if the state space applies to this button
-      if item['disabledStates'].has_key(stateSpace):
+      if stateSpace in item['disabledStates']:
 
         # the state matches a value in the state space
         if item['disabledStates'][stateSpace].count(state) > 0:
@@ -212,7 +212,7 @@ class GuiToolBar:
             item['button']['state'] = tk.NORMAL
 
       # toggle alternate/default image if applicable
-      if item['altStates'].has_key(stateSpace):
+      if stateSpace in item['altStates']:
         # alternate iamge
         if item['altStates'][stateSpace].count(state) > 0:
           if item['curImage'] != 'alternate':

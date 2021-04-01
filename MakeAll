@@ -56,13 +56,14 @@ color_bold_red="1;31m"
 color_green="0;32m"
 color_yellow="0;33m"
 color_gray="1;30m"
+color_brown="1;33m"
 
 # colors used
 color_info="${color_pre}${color_green}"
 color_warn="${color_pre}${color_yellow}"
 color_error="${color_pre}${color_red}"
 color_fatal="${color_pre}${color_bold_red}"
-color_banner="${color_pre}${color_gray}"
+color_banner="${color_pre}${color_brown}"
 color_end=${color_post}
 
 # turnOffColor
@@ -94,21 +95,23 @@ showError()
   printf "${argv0}: ${color_error}${*}${color_end}\n" >&2
 }
 
+
+line="~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+
+showBanner()
+{
+  printf "${color_banner}"
+  printf "%s\n" "${line}"
+  printf " %s\n" "${1}"
+  printf "%s\n" "${line}"
+  printf "${color_end}\n"
+}
+
 # fatal exitcode emsg
 fatal()
 {
   printf "${argv0}: ${color_fatal}${2}${color_end}\n" >&2
   exit ${1}
-}
-
-bold_line='::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::-::' 
-
-# showBanner pkg
-showBanner()
-{
-	printf "\n\n\n${color_banner}${bold_line}\n"
-  printf ":: ${1}\n"
-	printf "${bold_line}${color_end}\n\n"
 }
 
 # long and short options
@@ -152,14 +155,13 @@ done
 for arg in "${@}"
 do
   # name=value
-  n="${arg%=*}
-  v="${arg#*=}
+  n="${arg%=*}"
   if [ "${n}" != "${arg}" ]
   then
     rnmakevars="${rnmakevars} ${arg}"
     if [ "${n}" = "arch" ]
     then
-      arch="${v}"
+      arch="${arg#*=}"
     fi
   # target
   else
@@ -170,7 +172,7 @@ done
 # default target list if none specified
 if [ -z "${tgtlist}" ]
 then
-  tgtlist='clobber deps all install'
+  tgtlist="clobber deps all install"
 fi
 
 # source rnr sdk environment
@@ -197,16 +199,19 @@ prefix_env()
 # makeIt vars tgt
 makeIt()
 {
-  if ! make "${@}"
-  then
-    if ${stop_on_errors}
+  for tgt in ${@}
+  do
+    if ! make ${tgt}
     then
-      showError "'make ${@}' failed."
-      fatal 8 "make stopped."
-    else
-      showWarning "'make ${@}' failed - continuing."
+      if ${stop_on_errors}
+      then
+        showError "'make ${tgt}' failed."
+        fatal 8 "make stopped."
+      else
+        showWarning "'make ${tgt}' failed - continuing."
+      fi
     fi
-  fi
+  done
 }
 
 sudomsg=''
@@ -215,23 +220,10 @@ sudomsg=''
 postfix_env()
 {
   _pkg=${1}
-  _tgt=${2}
-  echo
-  echo
-  echo "${color_info}Fixing environment for ${_pkg}${color_end}"
-  if [ "${_tgt}" = 'install' ]
-  then
-    if [ -z ${sudomsg} ]
-    then
-      sudomsg="(sudo password maybe required)"
-      echo "${color_warn}${sudomsg}${color_end}"
-    fi
-    sudo ldconfig
-  fi
   export PATH=${opath}
   export LD_LIBRARY_PATH=${olibpath}
   export PYTHONPATH=${opypath}
-  unset _pkg _tgt
+  unset _pkg
 }
 
 # make target(s) for all packages in list
@@ -244,14 +236,12 @@ do
   then
     showWarning "'${pkg}/Makefile' not found - ignoring."
   else
+    showBanner ${pkg} ${tgtlist}
     cd ${pkg}
     prefix_env ${pkg}
-    for tgt in "${tgtlist}"
-    do
-      showBanner ${pkg}
-      makeIt ${rnmakevars} ${tgt}
-    done
-    postfix_env ${pkg} ${tgt}
-    cd -
+    makeIt ${rnmakevars} ${tgtlist}
+    postfix_env ${pkg}
+    cd - >/dev/null
+    echo
   fi
 done

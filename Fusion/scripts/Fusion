@@ -67,7 +67,7 @@ def PrintUsageErr(emsg):
   if emsg:
     print("%s: %s" % (_Argv0, emsg))
   else:
-    print("%s: error" % (_Argv0)
+    print("%s: error" % (_Argv0))
   print("Try '%s --help' for more information." % (_Argv0))
 
 #--

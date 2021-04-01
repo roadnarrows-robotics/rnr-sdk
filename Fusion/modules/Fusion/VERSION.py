@@ -1,1 +1,1 @@
-FusionVersion = '0.15.0'
+FusionVersion = '0.16.0'

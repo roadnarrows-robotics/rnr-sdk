@@ -74,7 +74,7 @@ Copyright (C) 2008.  RoadNarrows LLC.
 import time
 import threading as thread
 import math
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Utils.Tools as utils
 import Fusion.Utils.Pt as pt
@@ -217,9 +217,9 @@ class vBrainyBerg(vBrainThreaded.vBrainThreaded):
     ini         = self.GSGetIni()
 
     # load all non-existing ini entries with defaults
-    for section,sdata in self.mIniDD.iteritems():
+    for section,sdata in self.mIniDD.items():
       optdict = sdata[1]
-      for option,odata in optdict.iteritems():
+      for option,odata in optdict.items():
         if ini.IniGet(section, option) == ini.NullObj:
           ini.IniSet(section, option, odata[0])
 
@@ -295,7 +295,7 @@ class vBrainyBerg(vBrainThreaded.vBrainThreaded):
     sensorDict = self.mPeer.HasSensorTypes()
     hasSufficient = False
 
-    for id,params in sensorDict.iteritems():
+    for id,params in sensorDict.items():
       mimetype = params['mimetype']
 
       # linear camera sensor
@@ -489,7 +489,7 @@ class vBrainyBerg(vBrainThreaded.vBrainThreaded):
     iniDD   = self.mIniDD
     optDict = iniDD[section][1]
     optDfts = {}
-    for option,odata in optDict.iteritems():
+    for option,odata in optDict.items():
       optDfts[option] = odata[0]
 
     # get parsed ini configuation (guaranteed to exist)

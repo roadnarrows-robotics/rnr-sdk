@@ -45,7 +45,7 @@ Copyright (C) 2006.  RoadNarrows LLC.
 ################################################################################
 
 import math
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Utils.Pt as pt
 
@@ -207,7 +207,7 @@ class GuiXYGraph:
     }
 
     for key in kwopts:
-      if self.mOpts.has_key(key):
+      if key in self.mOpts:
         self.mOpts[key] = kwopts[key]
       else:
         raise KeyError('unknown x-y graph option: %s' % repr(key))

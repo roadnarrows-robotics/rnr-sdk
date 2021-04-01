@@ -38,10 +38,10 @@ import re
 import threading
 import getopt
 
-from Tkinter import *
-from Tkconstants import *
-from tkFileDialog import *
-import tkFont
+from tkinter import *
+from tkinter.constants import *
+from tkinter.filedialog import *
+import tkinter.font
 
 # running as su does not necessary have all paths setup - so fix up here
 sys.path.insert(0, "/usr/local/lib/python2.7/site-packages")
@@ -189,7 +189,7 @@ class window(Frame):
         'laelaps_teleop':   'Laelaps Teleoperation ROS node'}
     self.m_lock = threading.Lock()
 
-    if kw.has_key('debug'):
+    if 'debug' in kw:
       self.m_debug = kw['debug']
       del kw['debug']
 

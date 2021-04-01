@@ -42,9 +42,9 @@ Copyright (C) 2007.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiToolTip as GuiToolTip
@@ -63,7 +63,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgKHR2Proxy
 #-------------------------------------------------------------------------------
-class GuiDlgKHR2Proxy(tkSimpleDialog.Dialog):
+class GuiDlgKHR2Proxy(tkinter.simpledialog.Dialog):
   """ Fusion Preferences Dialog Class
 
       The result on dialog exit:
@@ -85,7 +85,7 @@ class GuiDlgKHR2Proxy(tkSimpleDialog.Dialog):
     self.result         = None
     self.mLastSettings  = lastSettings
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _getSetting(self, key, subkey=None):
@@ -130,7 +130,7 @@ class GuiDlgKHR2Proxy(tkSimpleDialog.Dialog):
 
     self.wm_title('BotSense IP Proxy Server Preferences')
 
-    font = tkFont.Font(master, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(master, font=gt.FontHelv10Bold)
 
     row    = 0
     column = 0
@@ -155,7 +155,7 @@ class GuiDlgKHR2Proxy(tkSimpleDialog.Dialog):
     self.ShowStatus('Select preferences settings.', fg=gt.ColorFgStatusPrompt)
 
     # set state
-    for proxdev in self.mProxiedDev.iterkeys():
+    for proxdev in self.mProxiedDev.keys():
       self.CbEnable(proxdev=proxdev)
 
     # fix size dialog (not resizeable)
@@ -167,7 +167,7 @@ class GuiDlgKHR2Proxy(tkSimpleDialog.Dialog):
     self.mProxiedDev = {}
 
     for proxdev in BsProxyClient.BsProxiedDevAll:
-      if self.mLastSettings.has_key(proxdev):
+      if proxdev in self.mLastSettings:
         self.mProxiedDev[proxdev] = {}
         self.mProxiedDev[proxdev]['var_enable']   = tk.IntVar()
         self.mProxiedDev[proxdev]['var_i2c_addr'] = tk.IntVar()
@@ -197,7 +197,7 @@ class GuiDlgKHR2Proxy(tkSimpleDialog.Dialog):
     row += 1
 
     ##### proxied devices ####
-    keys = self.mProxiedDev.keys()
+    keys = list(self.mProxiedDev.keys())
     keys.sort()
     for proxdev in keys:
       proxdata = self.mProxiedDev[proxdev]
@@ -335,7 +335,7 @@ class GuiDlgKHR2Proxy(tkSimpleDialog.Dialog):
     """Validate dialog settings."""
     self.result = {}
 
-    for proxdev,proxdata in self.mProxiedDev.iteritems():
+    for proxdev,proxdata in self.mProxiedDev.items():
       self.result[proxdev] = {}
       if proxdata['var_enable'].get():
         self.result[proxdev]['enable'] = True

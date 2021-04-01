@@ -196,7 +196,7 @@ class vRobot(Gluon.GluonServer):
           List of shadow group Ids.
     """
     groups = []
-    for groupId in self.mShadow.iterkeys():
+    for groupId in self.mShadow.keys():
       groups.append(groupId)
     return groups
 
@@ -328,7 +328,7 @@ class vRobot(Gluon.GluonServer):
         Return Value:
           Returns the new current goal set. 
     """
-    for k,v in kwGoals.iteritems():
+    for k,v in kwGoals.items():
       self.mBellumGoalSet[k] = v
     return self.mBellumGoalSet
 

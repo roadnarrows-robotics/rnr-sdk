@@ -170,7 +170,7 @@ def nav(path):
     n += 1
 
 def testall():
-  for key, path in paths.iteritems():
+  for key, path in paths.items():
     print(f"""
 ------------------------------------------------------------------
 {key}

@@ -45,8 +45,8 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkFont
+import  tkinter as tk
+import  tkinter.font
 
 import  Fusion.Core.Values as Values
 

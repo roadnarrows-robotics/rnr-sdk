@@ -47,9 +47,9 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 
 import  Fusion.Gui.GuiTypes as gt
 import  Fusion.Gui.GuiUtils as gut
@@ -61,7 +61,7 @@ import  Fusion.Gui.GuiUtils as gut
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgAskYesOrNo
 #-------------------------------------------------------------------------------
-class GuiDlgAskYesOrNo(tkSimpleDialog.Dialog):
+class GuiDlgAskYesOrNo(tkinter.simpledialog.Dialog):
   """ Ask Yes Or No Dialog Class.
   
       The result on dialog exit:
@@ -82,7 +82,7 @@ class GuiDlgAskYesOrNo(tkSimpleDialog.Dialog):
     self.mQuestion  = question
     self.mAddCancel = addcancel
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def body(self, master):
@@ -117,7 +117,7 @@ class GuiDlgAskYesOrNo(tkSimpleDialog.Dialog):
         self.result = 'cancel'
       else:
         self.result = 'no'
-    tkSimpleDialog.Dialog.destroy(self)
+    tkinter.simpledialog.Dialog.destroy(self)
 
   #--
   def cbyes(self, event=None):

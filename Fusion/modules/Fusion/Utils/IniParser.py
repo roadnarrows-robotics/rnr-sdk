@@ -46,7 +46,7 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 
 import os
 import sys
-import ConfigParser
+import configparser
 import re
 import Fusion.Utils.Tools as utils
 
@@ -73,7 +73,7 @@ NullObj = IniNullObj()
 #-------------------------------------------------------------------------------
 # CLASS: IniParser
 #-------------------------------------------------------------------------------
-class IniParser(ConfigParser.ConfigParser):
+class IniParser(configparser.ConfigParser):
   """ Ini Configuration Parser Case-Sensitive Class. """
 
   # A copy Ini Null Object for convenience
@@ -88,7 +88,7 @@ class IniParser(ConfigParser.ConfigParser):
           default     - instrinsic defaults (see ConfigParser)
 
     """
-    ConfigParser.ConfigParser.__init__(self, defaults)
+    configparser.ConfigParser.__init__(self, defaults)
     self.mCbOnModify    = cbOnModify
     self.mModifiedFlag  = False
 
@@ -211,7 +211,7 @@ class IniParser(ConfigParser.ConfigParser):
     """
     try:
       itemList = self.items(section)
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
       return []
     matchList = []
     for name,value in itemList:
@@ -233,7 +233,7 @@ class IniParser(ConfigParser.ConfigParser):
     """
     try:
       itemList = self.items(section)
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
       return []
     matchList = []
     for name,value in itemList:
@@ -253,7 +253,7 @@ class IniParser(ConfigParser.ConfigParser):
     """
     try:
       itemList = self.items(section)
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
       return []
     return self._EvalItems(itemList)
 
@@ -272,7 +272,7 @@ class IniParser(ConfigParser.ConfigParser):
     try:  # try to get the section option
       value = self.get(section, option)
       return self._Eval(value)
-    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+    except (configparser.NoSectionError, configparser.NoOptionError):
       return self.NullObj
 
   #--
@@ -295,7 +295,7 @@ class IniParser(ConfigParser.ConfigParser):
       except (SyntaxError, NameError, ValueError):
         pass
       return value
-    except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+    except (configparser.NoSectionError, configparser.NoOptionError):
       return dftValue
 
   #--
@@ -349,7 +349,7 @@ class IniParser(ConfigParser.ConfigParser):
         Return Value:
           None
     """
-    if section != ConfigParser.DEFAULTSECT and not self.has_section(section):
+    if section != configparser.DEFAULTSECT and not self.has_section(section):
       self.add_section(section)
     if not type(value) == str:
       value = repr(value)
@@ -370,7 +370,7 @@ class IniParser(ConfigParser.ConfigParser):
     """
     try:
       itemList = self.items(section)
-    except ConfigParser.NoSectionError:
+    except configparser.NoSectionError:
       return
     for name,value in itemList:
       if re.match(reOpt, name):
@@ -389,7 +389,7 @@ class IniParser(ConfigParser.ConfigParser):
         Return Value:
           None.
     """
-    if section != ConfigParser.DEFAULTSECT and not self.has_section(section):
+    if section != configparser.DEFAULTSECT and not self.has_section(section):
       return
     for option in optList:
       self.remove_option(section, option)
@@ -408,8 +408,8 @@ class IniParser(ConfigParser.ConfigParser):
       self.SetModifiedFlag()
 
     # can't remove DEFAULT, so remove all of its options
-    for option,value in self.items(ConfigParser.DEFAULTSECT):
-      self.remove_option(ConfigParser.DEFAULTSECT, option)
+    for option,value in self.items(configparser.DEFAULTSECT):
+      self.remove_option(configparser.DEFAULTSECT, option)
       self.SetModifiedFlag()
 
   #--

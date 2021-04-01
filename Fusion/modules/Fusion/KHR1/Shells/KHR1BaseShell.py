@@ -130,8 +130,8 @@ class KHR1BaseShell(KHR1RawShell.KHR1RawShell):
     }
 
     # set shell argument defaults, but caller has precedence
-    for key, value in dfts.iteritems():
-      if not kwargs.has_key(key) or not kwargs[key]:
+    for key, value in dfts.items():
+      if key not in kwargs or not kwargs[key]:
         if key == 'robotCmds':
           kwargs[key] = KHR1CmdBase.KHR1CmdBase()
         else:
@@ -672,8 +672,8 @@ class KHR1BaseShell(KHR1RawShell.KHR1RawShell):
         curSwBits = self.mRobotCmds.CmdGetSwBits()
         if curSwBits is None:
           return 'err', self.mRobotCmds.GetErrStr()
-        for k,v in curSwBits.iteritems():
-          if not newSwBits.has_key(k):
+        for k,v in curSwBits.items():
+          if k not in newSwBits:
             newSwBits[k] = v
       rvals = self.mRobotCmds.CmdSetSwBits(**newSwBits)
     else:
@@ -769,7 +769,7 @@ class KHR1BaseShell(KHR1RawShell.KHR1RawShell):
         inPos = args[n+1]
       l = len(inMnem)
       matches = []
-      for mnem in actList.iterkeys():
+      for mnem in actList.keys():
         if len(mnem) >= l and mnem[:l] == inMnem:
           matches += [mnem]
       if len(matches) == 0:
@@ -802,7 +802,7 @@ class KHR1BaseShell(KHR1RawShell.KHR1RawShell):
         return 'err', 'missing channel number for mnemonic %s' % repr(mnem)
       else:
         inCh = args[n+1]
-      if actList.has_key(mnem):
+      if mnem in actList:
         return 'err', 'mnemonic %s is not unique' % repr(mnem)
       rc, val = self.CvtIntList(inCh, 0, maxch)
       if rc == 'err':

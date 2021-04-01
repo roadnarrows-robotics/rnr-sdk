@@ -45,9 +45,9 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 import  Fusion.Gui.GuiToolTip as GuiToolTip
 import  Fusion.Gui.GuiTypes as gt
 
@@ -63,7 +63,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgExecOpt
 #-------------------------------------------------------------------------------
-class GuiDlgExecOpt(tkSimpleDialog.Dialog):
+class GuiDlgExecOpt(tkinter.simpledialog.Dialog):
   """ Simple dialog to set options for execution cycle time and 'Step' size.
 
       The result on dialog exit:
@@ -86,12 +86,12 @@ class GuiDlgExecOpt(tkSimpleDialog.Dialog):
     self.mLastSettings  = lastSettings
     self.mTitle         = title
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _lastSetting(self, key):
     """ Gets last configured setting parameter. """
-    if self.mLastSettings.has_key(key) and self.mLastSettings[key] is not None:
+    if key in self.mLastSettings and self.mLastSettings[key] is not None:
       return self.mLastSettings[key]
     elif key == 'ExecCycle':
       return 0.10
@@ -106,7 +106,7 @@ class GuiDlgExecOpt(tkSimpleDialog.Dialog):
 
     self.wm_title(self.mTitle)
 
-    font = tkFont.Font(master, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(master, font=gt.FontHelv10Bold)
 
     row    = 0
     column = 0

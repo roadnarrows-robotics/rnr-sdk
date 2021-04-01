@@ -47,8 +47,8 @@ Copyright (C) 2006.  RoadNarrows LLC.
 
 import threading as thread
 import math
-import Tkinter as tk
-import tkFont
+import tkinter as tk
+import tkinter.font
 
 import Fusion.Utils.IVTimer as IVTimer
 
@@ -111,7 +111,7 @@ class GuiWinDynaViz(GuiWin.GuiWin):
     self.mIsAutoMode      = True
 
     # set options from input parameters
-    for k,v in options.iteritems():
+    for k,v in options.items():
       if k == 'auto':
         if v:
           self.mIsAutoMode = True
@@ -259,7 +259,7 @@ class GuiWinDynaViz(GuiWin.GuiWin):
         Return Value:
           None.
     """
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       if k == 'ang_deg':
         self.mAngDeg = v
         self.mS_field = [0] * len(v)
@@ -271,7 +271,7 @@ class GuiWinDynaViz(GuiWin.GuiWin):
         self.mRYData = []
         self.mRIndex = {}
         zetas = []
-        for sensor in v.itervalues():
+        for sensor in v.values():
           zetas.append(sensor['zeta'])
         zetas.sort()
         # build spike data
@@ -288,7 +288,7 @@ class GuiWinDynaViz(GuiWin.GuiWin):
         self.mAYData = []
         self.mAIndex = {}
         zetas = []
-        for sensor in v.itervalues():
+        for sensor in v.values():
           zetas.append(sensor['zeta'])
         zetas.sort()
         # build spike data
@@ -313,8 +313,8 @@ class GuiWinDynaViz(GuiWin.GuiWin):
         Return Values:
           None
     """
-    for sensor in obs_sensors.itervalues():
-      if sensor.has_key('f_obs_i'):
+    for sensor in obs_sensors.values():
+      if 'f_obs_i' in sensor:
         self.mRYData[self.mRIndex[sensor['zeta']]] = sensor['f_obs_i']
       else:
         self.mRYData[self.mRIndex[sensor['zeta']]] = 0.0
@@ -332,8 +332,8 @@ class GuiWinDynaViz(GuiWin.GuiWin):
         Return Values:
           None
     """
-    for sensor in tgt_sensors.itervalues():
-      if sensor.has_key('Mi'):
+    for sensor in tgt_sensors.values():
+      if 'Mi' in sensor:
         self.mAYData[self.mAIndex[sensor['zeta']]] = sensor['Mi']
       else:
         self.mAYData[self.mAIndex[sensor['zeta']]] = 0.0
@@ -359,7 +359,7 @@ class GuiWinDynaViz(GuiWin.GuiWin):
           None.
     """
     items = {}
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       if k in ['speed', 'dspeed']:
         items[k] = v / 1000.0       # convert to meters
       elif k in ['theta', 'dtheta_obs', 'dtheta_tar', 'dtheta']:
@@ -742,7 +742,7 @@ if __name__ == '__main__':
 
       WinUT.WinUT.__init__(self, title="GuiWinDynaViz Unit Test", ut=ut)
 
-      self.sut_angdeg = range(0, 368, 8)
+      self.sut_angdeg = list(range(0, 368, 8))
 
       self.sut_obs_sensors = {
         'prox_front':
@@ -804,10 +804,10 @@ if __name__ == '__main__':
     #--
     def utRandIter(self, ivt):
       """ Random Dynamics Iterator """
-      for data in self.sut_obs_sensors.itervalues():
+      for data in self.sut_obs_sensors.values():
         data['f_obs_i'] = random.random() * 2.0
       self.mSut.WinQueueRequest('f_obs_i', obs_sensors=self.sut_obs_sensors)
-      for data in self.sut_tgt_sensors.itervalues():
+      for data in self.sut_tgt_sensors.values():
         data['Mi'] = random.random() * 3.0
       self.mSut.WinQueueRequest('Mi', tgt_sensors=self.sut_tgt_sensors)
       i = 0

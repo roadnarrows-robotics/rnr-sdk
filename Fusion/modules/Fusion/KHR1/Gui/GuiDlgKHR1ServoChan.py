@@ -42,9 +42,9 @@ Copyright (C) 2007.  RoadNarrows LLC.
 #
 ################################################################################
 
-import Tkinter as tk
-import tkFont
-import tkSimpleDialog
+import tkinter as tk
+import tkinter.font
+import tkinter.simpledialog
 
 import Fusion.Gui.GuiTypes as gt
 import Fusion.Gui.GuiToolTip as GuiToolTip
@@ -64,7 +64,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgKHR1ServoChan
 #-------------------------------------------------------------------------------
-class GuiDlgKHR1ServoChan(tkSimpleDialog.Dialog):
+class GuiDlgKHR1ServoChan(tkinter.simpledialog.Dialog):
   """ Options Dialog for KHR-1 Active Servo Channel Class.
 
       The result on dialog exit:
@@ -89,7 +89,7 @@ class GuiDlgKHR1ServoChan(tkSimpleDialog.Dialog):
     self.mDftSettings   = defaultSettings
     self.mTitle         = title
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _lastSetting(self, key):
@@ -102,7 +102,7 @@ class GuiDlgKHR1ServoChan(tkSimpleDialog.Dialog):
 
     self.wm_title(self.mTitle)
 
-    font = tkFont.Font(master, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(master, font=gt.FontHelv10Bold)
     self.mDlgInfo = []
 
     row    = 0
@@ -211,7 +211,7 @@ class GuiDlgKHR1ServoChan(tkSimpleDialog.Dialog):
                           fg=gt.ColorFgStatusError)
           info['wentry'].focus_set()
           return False
-        elif newActive.has_key(mnem):
+        elif mnem in newActive:
           self.ShowStatus("Mnemonic for channel %d is not unique." % chan,
                           fg=gt.ColorFgStatusError)
           info['wentry'].focus_set()
@@ -265,9 +265,9 @@ class GuiDlgKHR1ServoChan(tkSimpleDialog.Dialog):
         Return Value:
           None
     """
-    for mnem, chan in activeServos.iteritems():
+    for mnem, chan in activeServos.items():
       self.ChanActivate(chan, mnem)
-    actChanList = activeServos.values()
+    actChanList = list(activeServos.values())
     for chan in range(0, KHR1CmdBase.KHR1NumOfChannelsDft):
       if chan not in actChanList:
         self.ChanDeactivate(chan)

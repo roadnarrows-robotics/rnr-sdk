@@ -133,7 +133,7 @@ class ChannelError(Exception):
         self.estr = "Unknown channel error %s" % repr(chanerr)
     else:
       self.estr = os.strerror(chanerr) # also maps unknown
-      if errno.errorcode.has_key(chanerr):
+      if chanerr in errno.errorcode:
         self.ename = errno.errorcode[chanerr]
       else:
         self.ename = repr(chanerr)

@@ -390,9 +390,9 @@ Manufactured by K-Team of Switzerland."""
     ini         = self.GSGetIni()
 
     # load all non-existing ini entries with defaults
-    for section,sdata in self.mIniDD.iteritems():
+    for section,sdata in self.mIniDD.items():
       optdict = sdata[1]
-      for option,odata in optdict.iteritems():
+      for option,odata in optdict.items():
         if ini.IniGet(section, option) == ini.NullObj:
           ini.IniSet(section, option, odata[0])
 
@@ -898,7 +898,7 @@ Manufactured by K-Team of Switzerland."""
     """
     groupId = kvals.KheSensorMimeTypeOdometer
     speed = theta = None
-    for k, v in kwGoals.iteritems():
+    for k, v in kwGoals.items():
       if k == 'speed':
         speed = v
       elif k == 'dspeed':

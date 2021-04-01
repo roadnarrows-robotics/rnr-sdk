@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 ###############################################################################
 #
@@ -50,10 +50,10 @@ import os
 import time
 import getopt
 
-from Tkinter import *
-from Tkconstants import *
-from tkFileDialog import *
-import tkFont
+from tkinter import *
+from tkinter.constants import *
+from tkinter.filedialog import *
+import tkinter.font
 
 from PIL import Image, ImageTk
 
@@ -227,19 +227,19 @@ class window(Frame):
     self.m_product = None
     self.m_joint = None
 
-    if kw.has_key('debug'):
+    if 'debug' in kw:
       self.m_debug = kw['debug']
       del kw['debug']
-    if kw.has_key('arm'):
+    if 'arm' in kw:
       self.m_product = kw['arm']
       del kw['arm']
-    if kw.has_key('joint'):
+    if 'joint' in kw:
       self.m_joint = kw['joint']
       del kw['joint']
-    if kw.has_key('uri'):
+    if 'uri' in kw:
       self.m_uri = kw['uri']
       del kw['uri']
-    if kw.has_key('baudrate'):
+    if 'baudrate' in kw:
       self.m_baudrate = kw['baudrate']
       del kw['baudrate']
 
@@ -378,15 +378,14 @@ class application():
   ## \param emsg  Error message string.
   def printUsageErr(self, emsg):
     if emsg:
-      print "%s: %s" % (self._Argv0, emsg)
+      print("%s: %s" % (self._Argv0, emsg))
     else:
-      print "%s: error" % (self._Argv0)
-    print "Try '%s --help' for more information." % (self._Argv0)
+      print("%s: error" % (self._Argv0))
+    print("Try '%s --help' for more information." % (self._Argv0))
 
   ## \brief Print Command-Line Usage Message.
   def printUsage(self):
-    print \
-"""
+    print("""
 usage: %s [OPTIONS] <arm> <joint>
        %s --help
 
@@ -402,7 +401,7 @@ Options and arguments:
 <joint>                   : Hekateros joint servo. One of:
                               base_rot shoulder_m shoulder_s elbow
                               wrist_pitch wrist_rot gripper
-"""  % (self._Argv0, self._Argv0)
+"""  % (self._Argv0, self._Argv0))
  
   ## \brief Get command-line options
   ##  
@@ -424,7 +423,7 @@ Options and arguments:
     try:
       opts, args = getopt.getopt(argv[1:], "?hu:b:",
             ['help', 'uri=', 'baudrate='])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -458,13 +457,13 @@ Options and arguments:
     # parse command-line options and arguments
     kwargs = self.getOptions(argv, **kwargs)
 
-    if hekDynaScripts.has_key(kwargs['arm']):
+    if kwargs['arm'] in hekDynaScripts:
       scripts = hekDynaScripts[kwargs['arm']]
     else:
       self.printUsageErr("%s: Unknown hekateros product key." % (kwargs['arm']))
       return 2
       
-    if scripts.has_key(kwargs['joint']):
+    if kwargs['joint'] in scripts:
       cfg_script = scripts[kwargs['joint']]
     else:
       self.printUsageErr("%s: Unknown joint." % (kwargs['joint']))

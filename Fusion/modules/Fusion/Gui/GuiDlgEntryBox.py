@@ -45,8 +45,8 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
+import  tkinter as tk
+import  tkinter.simpledialog
 import  Fusion.Gui.GuiTypes as gt
 
 #-------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ import  Fusion.Gui.GuiTypes as gt
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgEntryBox
 #-------------------------------------------------------------------------------
-class GuiDlgEntryBox(tkSimpleDialog.Dialog):
+class GuiDlgEntryBox(tkinter.simpledialog.Dialog):
   """ EntryBox Dialog Class
 
       The result on dialog exit:
@@ -78,7 +78,7 @@ class GuiDlgEntryBox(tkSimpleDialog.Dialog):
     self.mTitle     = title
     self.mFieldName = fieldname
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _lastSetting(self, key):

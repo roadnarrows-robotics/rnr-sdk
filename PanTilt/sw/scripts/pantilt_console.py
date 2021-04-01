@@ -153,7 +153,7 @@ class window(Frame):
         'laelaps_teleop':   'PanTilt Teleoperation ROS node'}
     self.m_lock = threading.Lock()
 
-    if kw.has_key('debug'):
+    if 'debug' in kw:
       self.m_debug = kw['debug']
       del kw['debug']
 

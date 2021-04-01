@@ -63,16 +63,16 @@ class Usage(Exception):
 def PrintUsageErr(emsg):
   """ Print Error Usage Message. """
   if emsg:
-    print "%s: %s" % (_Argv0, emsg)
+    print("%s: %s" % (_Argv0, emsg))
   else:
-    print "%s: error" % (_Argv0)
-  print "Try '%s --help' for more information." % (_Argv0)
+    print("%s: error" % (_Argv0))
+  print("Try '%s --help' for more information." % (_Argv0))
 
 #--
 def PrintUsage():
   """ Print Fusion Command-Line Usage Message """
-  print "usage: %s [options]..." % (_Argv0)
-  print """Options and arguments:
+  print("usage: %s [options]..." % (_Argv0))
+  print("""Options and arguments:
   -i, --ini <filename>       : additional ini configuration file. Default: None
       --debuglevel <num>     : debug level 0=off, 1 - 5. Default: 0
       --debugfile <filename> : debug output filename. Default: stdout
@@ -82,20 +82,20 @@ def PrintUsage():
 Environment variables:
 FUSION                       : points to the Fusion package base directory
 FUSIONSTARTUP                : a site/user standard ini configuration file
-  """
+  """)
   
 #--
 def main(argv=None, **kwargs):
   """ Fusion Main. """
   global _Argv0
 
-  print 'main'
+  print('main')
   if argv is None:
     argv = sys.argv
 
-  print 'args', repr(argv)
+  print('args', repr(argv))
   _Argv0 = argv[0]
-  #if kwargs.has_key('argv0'):
+  #if 'argv0' in kwargs:
   #  _Argv0 = kwargs['argv0']
   #else:
   #  _Argv0   = __file__
@@ -107,7 +107,7 @@ def main(argv=None, **kwargs):
     try:
       opts, args = getopt.getopt(argv[1:], "?hi:",
                                 ['help', 'ini=', 'debuglevel=', 'debugfile='])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise Usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -118,15 +118,15 @@ def main(argv=None, **kwargs):
       elif opt in ('--debuglevel'):
         try:
           kwargs['debuglevel'] = int(optarg)
-        except ValueError, msg:
+        except ValueError as msg:
           raise Usage(msg)
       elif opt in ('--debugfile'):
         try:
           fout = open(optarg, 'w')
-        except IOError, msg:
+        except IOError as msg:
           raise Usage(msg)
         kwargs['debugfout'] = fout
-  except Usage, err:
+  except Usage as err:
     PrintUsageErr(err.msg)
     return 2
 

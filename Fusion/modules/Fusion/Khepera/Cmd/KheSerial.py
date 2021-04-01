@@ -385,7 +385,7 @@ if __name__ == '__main__':
   ser = KheSerial(port='/dev/ttyS0', dbgobj=dbg)
   print("Enter Khepera command(s) ('quit' to quit)")
   while True:
-    cmd = raw_input('cmd> ')
+    cmd = input('cmd> ')
     if cmd == 'quit':
       ser.Close()
       break

@@ -55,7 +55,7 @@ import time
 import math
 import random
 
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Core.Values as Values
 
@@ -252,7 +252,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
                                'bpimu': False}
 
     # set options from input parameters
-    for k,v in options.iteritems():
+    for k,v in options.items():
       if k == 'run':
         if v:
           self.mIsRunning = True
@@ -487,7 +487,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
           None.
     """
     items = {}
-    for k,v in kwargs.iteritems():
+    for k,v in kwargs.items():
       if k == 'run_time':
         if v == 'update':
           if not self.mBsClientSensors.mBsIsConn:
@@ -1296,7 +1296,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
     dlg = GuiDlgKHR2Proxy.GuiDlgKHR2Proxy(self, lastSettings=last)
 
     if dlg.result:
-      for k,v in dlg.result.iteritems():
+      for k,v in dlg.result.items():
         if k == 'proxy_addr' and v:
           self.mBsClientSensors.SetProxyAddr(v)
         elif k == 'proxy_port' and v:
@@ -1336,7 +1336,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
     dlg = GuiDlgKHR2ProxySimple.GuiDlgKHR2ProxySimple(self, lastSettings=last)
 
     if dlg.result:
-      for k,v in dlg.result.iteritems():
+      for k,v in dlg.result.items():
         if k == 'proxy_addr' and v:
           self.mBsClientRCB3.SetProxyAddr(v)
         elif k == 'proxy_port' and v:
@@ -1352,7 +1352,7 @@ class GuiWinKHR2StandTall(GuiWin.GuiWin):
   #--
   def CbI2CScan(self):
     if self.mBsClientSensors.mBsIsConn:
-      for proxdev,proxdata in self.mBsClientSensors.mBsProxiedDev.iteritems():
+      for proxdev,proxdata in self.mBsClientSensors.mBsProxiedDev.items():
         handle = proxdata['handle']
         if handle is not None:
           break;

@@ -136,14 +136,14 @@ class SM:
           None
     """
     if __debug__: self.mDbg.d3print("SM: input: %s" % repr(input))
-    if self.mSmTbl[self.s_cur].has_key('opPre'):
+    if 'opPre' in self.mSmTbl[self.s_cur]:
       self.mSmTbl[self.s_cur]['opPre'](self.s_cur, input)
-    if self.mSmTbl[self.s_cur].has_key('opGen'):
+    if 'opGen' in self.mSmTbl[self.s_cur]:
       s_next = self.mSmTbl[self.s_cur]['opGen'](self.s_cur, input)
     else:
       s_next = self.GetTrans(self.s_cur, input)
     self.s_cur = s_next
-    if self.mSmTbl[self.s_cur].has_key('opPost'):
+    if 'opPost' in self.mSmTbl[self.s_cur]:
       self.mSmTbl[self.s_cur]['opPost'](self.s_cur, input)
     if __debug__: self.mDbg.d3print("SM: state: %s" % repr(self.s_cur))
 
@@ -168,7 +168,7 @@ class SM:
     #--
     def PrintTbl(self):
       """ Debug print state table. """
-      for state, params in self.mSmTbl.iteritems():
+      for state, params in self.mSmTbl.items():
         self.PrintTblEntry(state, **params)
 
     #--
@@ -218,7 +218,7 @@ if __name__ == '__main__':
 
     print("Enter SM integer input value or 'quit' to quit")
     while True:
-      i = raw_input("input value> ")
+      i = input("input value> ")
       if i == 'quit':
         break
       try:

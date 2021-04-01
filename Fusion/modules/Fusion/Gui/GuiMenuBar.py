@@ -44,7 +44,7 @@ Copyright (C) 2005, 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
+import  tkinter as tk
 import  Fusion.Gui.GuiTypes as gt
 
 #-------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ class GuiMenuBarIter:
     return self
 
   #--
-  def next(self):
+  def __next__(self):
     """ Iterator next. """
     return self.mNextFunc(self._pop())
 
@@ -579,7 +579,7 @@ class GuiMenuBar:
         continue
 
       # check if the state space applies to this menubar item
-      if mbItem['disabledStates'].has_key(stateSpace):
+      if stateSpace in mbItem['disabledStates']:
 
         # the state matches a value in the state space
         if mbItem['disabledStates'][stateSpace].count(state) > 0:

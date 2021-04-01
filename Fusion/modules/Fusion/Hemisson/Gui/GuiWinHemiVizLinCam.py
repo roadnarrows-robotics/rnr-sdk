@@ -50,8 +50,8 @@ import math
 import threading as thread
 import time
 
-import Tkinter as tk
-import tkFont
+import tkinter as tk
+import tkinter.font
 
 import Fusion.Core.Values as Values
 import Fusion.Core.Gluon as Gluon
@@ -130,7 +130,7 @@ class GuiWinHemiVizLinCam(GuiWin.GuiWin):
     self.mCbRobotSenseLinCam  = None
 
     # set options from input parameters
-    for key,val in options.iteritems():
+    for key,val in options.items():
       if key == 'auto':
         if val:
           self.mIsAutoMode = True
@@ -244,7 +244,7 @@ class GuiWinHemiVizLinCam(GuiWin.GuiWin):
     #print("%s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       items = {}
-      for key,val in kwargs.iteritems():
+      for key,val in kwargs.items():
         if key in ['run_time', 'module', 'exposure', 'threshold', 'grab']:
           items[key] = val
       self.mStatusBar.Update(**items)

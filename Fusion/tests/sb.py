@@ -1,5 +1,5 @@
 # status bar primatives
-import Tkinter as tk
+import tkinter as tk
 import Fusion.Gui.GuiUtils as gut
 
 SB = None

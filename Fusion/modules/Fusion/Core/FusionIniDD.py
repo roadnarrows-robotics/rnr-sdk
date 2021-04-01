@@ -126,13 +126,13 @@ def MergeIniDD(fusionDD, serverDD):
   """
   if not serverDD:
     return fusionDD
-  for iniSSection, iniSSectData in serverDD.iteritems():
-    if not fusionDD.has_key(iniSSection):
+  for iniSSection, iniSSectData in serverDD.items():
+    if iniSSection not in fusionDD:
       fusionDD[iniSSection] = iniSSectData
     else:
       iniCOptDict = fusionDD[iniSSection][1]
       iniSOptDict = iniSSectData[1]
-      for iniSOption, iniSOptData in iniSOptDict.iteritems():
-        if not iniCOptDict.has_key(iniSOption):
+      for iniSOption, iniSOptData in iniSOptDict.items():
+        if iniSOption not in iniCOptDict:
           iniCOptDict[iniSOption] = iniSOptData
   return fusionDD

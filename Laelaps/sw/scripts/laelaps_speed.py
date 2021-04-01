@@ -150,12 +150,12 @@ class fakemc():
     return (75.0, 49.0)
 
   def readM1Speed(self, addr):
-    if not self.m1_speed.has_key(addr):
+    if addr not in self.m1_speed:
       self.m1_speed[addr] = 0
     return (self.m1_speed[addr], 0x00)
 
   def readM2Speed(self, addr):
-    if not self.m2_speed.has_key(addr):
+    if addr not in self.m2_speed:
       self.m2_speed[addr] = 0
     return (self.m2_speed[addr], 0x00)
 
@@ -166,12 +166,12 @@ class fakemc():
     self.m2_speed[addr] = speed
 
   def readM1Encoder(self, addr):
-    if not self.m1_encoder.has_key(addr):
+    if addr not in self.m1_encoder:
       self.m1_encoder[addr] = random.randint(0, 1000000)
     return (self.m1_encoder[addr], 0)
 
   def readM2Encoder(self, addr):
-    if not self.m2_encoder.has_key(addr):
+    if addr not in self.m2_encoder:
       self.m2_encoder[addr] = random.randint(0, 1000000)
     return (self.m2_encoder[addr], 0x02)
 

@@ -205,7 +205,7 @@ class trip:
     index = self._cvtindex(index)
     del self.mWaypoints[start:start+1]
     self.mLast -= 1
-    for lname, lindex in self.mLandmarks.iteritems():
+    for lname, lindex in self.mLandmarks.items():
       if lindex == index:
         del self.mLandmarks[lname]
 
@@ -265,7 +265,7 @@ class trip:
           % (repr(start), repr(end-1)))
     del self.mWaypoints[start:end]
     self.mLast -= (end - start)
-    for name, index in self.mLandmarks.iteritems():
+    for name, index in self.mLandmarks.items():
       if index >= start and index < end:
         del self.mLandmarks[name]
 
@@ -423,7 +423,7 @@ class tripLegIter:
     """ leg iterator start. """
     return self
 
-  def next(self):
+  def __next__(self):
     """ leg iterator next. """
     if self._iterStart >= self._iterEnd:
       raise StopIteration

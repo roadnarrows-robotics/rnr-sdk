@@ -116,8 +116,8 @@ class KheRawShell(Shell.Shell):
     }
 
     # set shell argument defaults, but caller has precedence
-    for key, value in dfts.iteritems():
-      if not kwargs.has_key(key) or not kwargs[key]:
+    for key, value in dfts.items():
+      if key not in kwargs or not kwargs[key]:
         if key == 'robotCmds':
           kwargs[key] = KheSerial.KheSerial()
         else:

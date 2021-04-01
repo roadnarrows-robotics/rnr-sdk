@@ -48,7 +48,7 @@ Copyright (C) 2006.  RoadNarrows LLC.
 
 import math
 
-import Tkinter as tk
+import tkinter as tk
 
 import Fusion.Core.Values as Values
 
@@ -114,7 +114,7 @@ class GuiWinHemiVizUss(GuiWin.GuiWin):
     self.mCbRobotSenseUss = None
 
     # set options from input parameters
-    for key,val in options.iteritems():
+    for key,val in options.items():
       if key == 'auto':
         if val:
           self.mIsAutoMode = True
@@ -221,7 +221,7 @@ class GuiWinHemiVizUss(GuiWin.GuiWin):
     #print("Dbg: %s: WinUpdate: request: %s" % (self.mContextName, request))
     if request == 'cfg':
       items = {}
-      for key,val in kwargs.iteritems():
+      for key,val in kwargs.items():
         if key == 'range':
           self.mUssMaxRangeMm = val
           items[key] = val/1000.0

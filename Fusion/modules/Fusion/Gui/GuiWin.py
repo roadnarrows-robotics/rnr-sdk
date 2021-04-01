@@ -44,9 +44,9 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkFont
-import  Queue
+import  tkinter as tk
+import  tkinter.font
+import  queue
 import  threading as thread
 import  time
 
@@ -107,7 +107,7 @@ class GuiWin(tk.Toplevel):
     self.mQSize     = WinServerQueueSize
 
     # set options
-    for k,v in options.iteritems():
+    for k,v in options.items():
       if k == Values.FusionCWinKeyOnDestroy:
         self.mOnDestroy = v
       elif k == Values.FusionCWinKeyTitle:
@@ -241,7 +241,7 @@ class GuiWin(tk.Toplevel):
   def _WinServerCreate(self):
     """ Create the update request server thread. """
     self.mEvent     = GuiEvent.GuiEvent(self)  # GUI Event object (not used)
-    self.mWinQueue  = Queue.Queue(self.mQSize) # request queue
+    self.mWinQueue  = queue.Queue(self.mQSize) # request queue
     self.mWinThread = thread.Thread(target=self._WinServer,
                                     name=self.mContextName, kwargs={})
     self.mWinThread.start()
@@ -254,7 +254,7 @@ class GuiWin(tk.Toplevel):
     while self.isAlive: 
       try:
         qargs, qkwargs = self.mWinQueue.get(True, 0.5)  # block with timeout
-      except Queue.Empty:
+      except queue.Empty:
         continue
       if len(qargs) > 0 and qargs[0] == WinRequestDie:       # die request
           #print("Dbg: Breaking %s" % self.mWinThread.getName())
@@ -291,7 +291,7 @@ class GuiWin(tk.Toplevel):
       if self.mHasQMeter:
         self._ShowQMeter(self.mWinQueue.qsize())
       return True
-    except Queue.Full:
+    except queue.Full:
       if self.mHasQMeter:
         self._ShowQMeter(self.mWinQueue.qsize()+1)
       #print("Dbg: %s: WinQueueRequest(...): Full" % self.mContextName)
@@ -451,7 +451,7 @@ if __name__ == '__main__':
   def mainloop():
     while True:
       try:
-        raw_input("Press <Enter> or <Ctrl-D> ")
+        input("Press <Enter> or <Ctrl-D> ")
       except EOFError:
         print("<EOF>")
         break

@@ -44,9 +44,9 @@ Copyright (C) 2006.  RoadNarrows LLC.
 #
 ################################################################################
 
-import  Tkinter as tk
-import  tkSimpleDialog
-import  tkFont
+import  tkinter as tk
+import  tkinter.simpledialog
+import  tkinter.font
 import  Fusion.Gui.GuiToolTip as GuiToolTip
 import  Fusion.Gui.GuiTypes as gt
 
@@ -64,7 +64,7 @@ def GetSettingNames():
 #-------------------------------------------------------------------------------
 # CLASS: GuiDlgHemiOpt
 #-------------------------------------------------------------------------------
-class GuiDlgHemiOpt(tkSimpleDialog.Dialog):
+class GuiDlgHemiOpt(tkinter.simpledialog.Dialog):
   """ vHemisson Run-Time Options Dialog Class
 
       The result on dialog exit:
@@ -92,12 +92,12 @@ class GuiDlgHemiOpt(tkSimpleDialog.Dialog):
     self.result         = None
     self.mLastSettings  = lastSettings
 
-    tkSimpleDialog.Dialog.__init__(self, guiParent)
+    tkinter.simpledialog.Dialog.__init__(self, guiParent)
 
   #--
   def _lastSetting(self, key):
     """ Gets last configured setting parameter. """
-    if self.mLastSettings.has_key(key) and self.mLastSettings[key] is not None:
+    if key in self.mLastSettings and self.mLastSettings[key] is not None:
       return self.mLastSettings[key]
     elif key == 'ExecCycle' or key == 'ExecStepSize':
       return 0.10
@@ -110,7 +110,7 @@ class GuiDlgHemiOpt(tkSimpleDialog.Dialog):
 
     self.wm_title('vHemisson Options')
 
-    font = tkFont.Font(master, font=gt.FontHelv10Bold)
+    font = tkinter.font.Font(master, font=gt.FontHelv10Bold)
 
     row    = 0
     column = 0

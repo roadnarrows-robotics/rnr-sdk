@@ -118,7 +118,7 @@ class HemiError:
         ec   = match.group(1)
         elem = match.group(3)
         hemierr = "Hemisson error: "
-        if HemiErrDict.has_key(ec):
+        if ec in HemiErrDict:
           hemierr += HemiErrDict[ec]
         else:
           hemierr += ec + ": unknown error code"

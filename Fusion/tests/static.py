@@ -26,7 +26,7 @@ class C:
       staticvars['done_once'] = 1
       staticvars['static1'] = 50
       staticvars['static2'] = 100
-    for k,v in staticvars.iteritems():
+    for k,v in staticvars.items():
       setattr(self, k, v)
     return staticvars
 

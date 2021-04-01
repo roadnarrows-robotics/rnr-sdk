@@ -174,7 +174,8 @@ class NetMsgsGenC:
           depth     - Recursive definition depth.
 
         Return:
-          Maximum number of packed bytes required for this encoded definition.
+          Maximum number of packed bytes required for this encoded definition,
+          as a string encoding a simple algebraic expression.
     """
     ns            = self.mXml['meta']['ns']   # namespace
     xid           = pathXids[-1]              # 'basename'
@@ -223,11 +224,12 @@ class NetMsgsGenC:
           depth     - Recursive definition depth.
 
         Return:
-          Maximum number of packed bytes required for this encoded definition.
+          Maximum number of packed bytes required for this encoded definition,
+          as a string encoding a simple algebraic expression.
     """
     # maximum pad field length (bytes)
     if self.IsDeprecated(xdef):
-      maxlen = 0
+      maxlen = '0'
       active_cnt = 0
     else:
       eq_sum = repr(nmBase.NMBuiltInFieldTypes['pad']['flen'])+'*'+xdef['count']
@@ -255,20 +257,21 @@ class NetMsgsGenC:
           depth     - Recursive definition depth.
 
         Return:
-          Maximum number of packed bytes required for this encoded definition.
+          Maximum number of packed bytes required for this encoded definition,
+          as a string encoding a simple algebraic expression.
     """
     encoding    = self.mXml['netmsgs']['encoding']        # message encoding
     eq_sum      = [nmBase.NMFHdrLen[encoding]['struct']]  # field header length
     active_cnt  = 0                                       # active field count
 
     if self.IsDeprecated(xdef):
-      maxlen = 0
+      maxlen = '0'
     else:
       # recurse into structure definition
       for fname in xdef['fields'][nmBase.NMKeyOrder]:
-        n = self.Pass0XmlDef(pathXids+[fname], xdef['fields'][fname], depth+1)
-        eq_sum += [n]
-        if len(n) > 0:
+        e = self.Pass0XmlDef(pathXids+[fname], xdef['fields'][fname], depth+1)
+        eq_sum += [e]
+        if len(e) > 0:
           active_cnt += 1
       maxlen = self.EvalNum(*eq_sum)          # max length of structure
 
@@ -302,7 +305,8 @@ class NetMsgsGenC:
           depth     - Recursive definition depth.
 
         Return:
-          Maximum number of packed bytes required for this encoded definition.
+          Maximum number of packed bytes required for this encoded definition,
+          as a string encoding a simple algebraic expression.
     """
     ns          = self.mXml['meta']['ns']     # namespace
     xid         = pathXids[-1]                # 'basename'
@@ -348,7 +352,7 @@ class NetMsgsGenC:
       flen    = self.mXml['field_types'][base_vname]['genc']['maxlen']
 
     if self.IsDeprecated(xdef):
-      maxlen = 0
+      maxlen = '0'
       active_cnt = 0
     else:
       eq_sum += [flen + '*' + maxcount]
@@ -382,7 +386,8 @@ class NetMsgsGenC:
           depth     - Recursive definition depth.
 
         Return:
-          Maximum number of packed bytes required for this encoded definition.
+          Maximum number of packed bytes required for this encoded definition,
+          as a string encoding a simple algebraic expression.
     """
     ns          = self.mXml['meta']['ns']     # namespace
     xid         = pathXids[-1]                # 'basename'
@@ -416,7 +421,7 @@ class NetMsgsGenC:
       maxcount = macro_len['name']
 
     if self.IsDeprecated(xdef):
-      maxlen = 0
+      maxlen = '0'
       active_cnt = 0
     else:
       eq_sum += [maxcount]
@@ -446,7 +451,8 @@ class NetMsgsGenC:
           depth     - Recursive definition depth.
 
         Return:
-          Maximum number of packed bytes required for this encoded definition.
+          Maximum number of packed bytes required for this encoded definition,
+          as a string encoding a simple algebraic expression.
     """
     ns          = self.mXml['meta']['ns']     # namespace
     xid         = pathXids[-1]                # 'basename'
@@ -462,7 +468,7 @@ class NetMsgsGenC:
     flen      = nmBase.NMBuiltInFieldTypes[base_ftype]['flen']
 
     if self.IsDeprecated(xdef):
-      maxlen = 0
+      maxlen = '0'
       active_cnt = 0
     else:
       eq_sum  = [fhdr_len, flen]
@@ -491,7 +497,8 @@ class NetMsgsGenC:
           depth     - Recursive definition depth.
 
         Return:
-          Maximum number of packed bytes required for this encoded definition.
+          Maximum number of packed bytes required for this encoded definition,
+          as a string encoding a simple algebraic expression.
     """
     ns          = self.mXml['meta']['ns']     # namespace
     xid         = pathXids[-1]                # 'basename'

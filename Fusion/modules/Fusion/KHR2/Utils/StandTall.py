@@ -232,7 +232,7 @@ if __name__ == "__main__":
   pidPitch.start()
 
   # wait for <enter>
-  raw_input()
+  input()
 
   # stop active controls
   pidRoll.cancel()

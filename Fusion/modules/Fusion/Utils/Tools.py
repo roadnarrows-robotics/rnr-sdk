@@ -93,7 +93,7 @@ def dict2tuples(d):
         List of 2-tuples [(val1, val2), ...]
   """
   t = []
-  for name,value in d.iteritems():
+  for name,value in d.items():
     t += [(name, value)]
   return t
 
@@ -134,7 +134,7 @@ def delmodule(module):
         None
   """
   modname = module.__name__
-  if sys.modules.has_key(modname):
+  if modname in sys.modules:
     del sys.modules[modname]
   #del module RDK!!! need a way to do this for real
                                                                                 
@@ -165,7 +165,7 @@ def importmodule(filename, modname):
   except:
     pass
   try:
-    execfile(filename, module.__dict__, module.__dict__)
+    exec(compile(open(filename, "rb").read(), filename, 'exec'), module.__dict__, module.__dict__)
   except IOError as err:
     del sys.modules[modname]
     sys.path = sys.path[1:]
@@ -339,7 +339,7 @@ def user_input(ps='', fin=sys.stdin, fout=sys.stdout):
         User input string sans newline.
   """
   if os.isatty(fin.fileno()) and os.isatty(fout.fileno()):
-    return raw_input(ps)  # get line editing
+    return input(ps)  # get line editing
   if ps:
     fout.write(ps)
     fout.flush()

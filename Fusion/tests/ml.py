@@ -2,11 +2,11 @@
 # Test Tkinter mainloop() interactions
 #
 
-import Tkinter as tk
+import tkinter as tk
 import time
 import threading as thread
 import random
-import Queue
+import queue
 
 import Fusion.Gui.GuiUtils as gut
 
@@ -35,7 +35,7 @@ class GuiWin(tk.Toplevel):
 
 
     # set options
-    for k,v in options.iteritems():
+    for k,v in options.items():
       if k == 'title':
         title = v
       elif k == 'geometry':
@@ -87,7 +87,7 @@ class GuiWin(tk.Toplevel):
   #--
   def _WinServerCreate(self):
     """ Create the Tkinter mainloop() thread. """
-    self.mWinQueue  = Queue.Queue(4)
+    self.mWinQueue  = queue.Queue(4)
     self.mWinThread = thread.Thread(target=self._WinServer,
                                     name=self.mContextName, kwargs={})
     self.mWinThread.start()
@@ -99,7 +99,7 @@ class GuiWin(tk.Toplevel):
     while self.isAlive: 
       try:
         qargs, qkwargs = self.mWinQueue.get(True, 0.5)  # block with timeout
-      except Queue.Empty:
+      except queue.Empty:
         continue
       if len(qargs) > 0 and qargs[0] == WinRequestDie:
         break;
@@ -114,7 +114,7 @@ class GuiWin(tk.Toplevel):
       self.mWinQueue.put((qargs, qkwargs), True, 0.1)
       self.ShowMeter(self.mWinQueue.qsize())
       return True
-    except Queue.Full:
+    except queue.Full:
       self.ShowMeter(self.mWinQueue.qsize()+1)
       return False
 

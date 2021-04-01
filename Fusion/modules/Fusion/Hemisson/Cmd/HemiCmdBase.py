@@ -458,8 +458,8 @@ class HemiCmdBase(HemiSerial.HemiSerial):
         Return Value:
           None
     """
-    for id, newParams in newCal.iteritems():
-      if not self.mIrProxCalParams.has_key(id): # bogus id
+    for id, newParams in newCal.items():
+      if id not in self.mIrProxCalParams: # bogus id
         continue
       sensor = self.mIrProxCalParams[id]
       sensor['enabled'] = newParams['enabled']
@@ -573,8 +573,8 @@ class HemiCmdBase(HemiSerial.HemiSerial):
         Return Value:
           None
     """
-    for id, newParams in newCal.iteritems():
-      if not self.mIrAmbCalParams.has_key(id): # bogus id
+    for id, newParams in newCal.items():
+      if id not in self.mIrAmbCalParams: # bogus id
         continue
       sensor = self.mIrAmbCalParams[id]
       sensor['enabled'] = newParams['enabled']
@@ -703,7 +703,7 @@ class HemiCmdBase(HemiSerial.HemiSerial):
       modId   = match.group(1)
       i2cAddr = hutil.cvtHH(match.group(2))
       modVer  = hutil.cvtHH(match.group(3))
-      if HemiModuleNamesDict.has_key(modId):
+      if modId in HemiModuleNamesDict:
         modName = HemiModuleNamesDict[modId]
       else:
         modName = "Unknown Module"

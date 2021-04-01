@@ -80,6 +80,7 @@ _pysite=${_prefix}/lib/python${RNR_PYTHON_VERSION}/site-packages
 export PATH=$(_prepend ${_prefix}/bin ${PATH})
 export LD_LIBRARY_PATH=$(_prepend ${_prefix}/lib ${LD_LIBRARY_PATH})
 export LD_LIBRARY_PATH=$(_prepend ${_prefix}/lib/rnr ${LD_LIBRARY_PATH})
+export LD_LIBRARY_PATH=$(_prepend ${_prefix}/lib/botsense ${LD_LIBRARY_PATH})
 export PYTHONPATH=$(_prepend ${_pysite} ${PYTHONPATH})
 
 # rnmake make variables

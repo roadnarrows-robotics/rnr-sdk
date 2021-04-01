@@ -87,7 +87,7 @@ class IVTimer:
 
     # set user keyword argument attributes
     self._ukwargs = ukwargs
-    for n,v in ukwargs.iteritems():
+    for n,v in ukwargs.items():
       setattr(self, n, v)
 
     # create IVTimer thread
@@ -192,7 +192,7 @@ if __name__ == '__main__':
     print('starting IVTimer(%3.1f, %3.1f)' % (tstart, tiv))
     print('starting time:', time.time())
     iv.start()
-    key = raw_input()
+    key = input()
     iv.cancel()
     print('listing threads')
     print(thread.enumerate())

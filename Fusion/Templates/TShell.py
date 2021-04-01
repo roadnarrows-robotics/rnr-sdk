@@ -163,7 +163,7 @@ class USERSHELL:
         Parameters:
           kwargs  - dictionary of key=value arguments
     """
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
       if key == 'argv0':
         self.mArgv0 = os.path.basename(value)
       elif key == 'shVersion':
@@ -321,8 +321,8 @@ class USERSHELL:
         Return Value:
           None.
     """
-    for k,v in newdict.iteritems():
-      if self.mCmdDict.has_key(k):
+    for k,v in newdict.items():
+      if k in self.mCmdDict:
         self.PError("BUG: Adding duplicate key to CmdDict: key = %s" % repr(k))
         return
       else:
@@ -381,7 +381,7 @@ class USERSHELL:
     try:
       self.mScriptFile = open(scriptFile, 'r')
       self.mIsInteractive = False
-    except IOError, err:
+    except IOError as err:
       return 'err', err
     self.mScriptDepth += 1
     self.RunLoopScript()
@@ -413,7 +413,7 @@ Partial command matching is done to find the unique command substring.
       self.Print(self.mHelpExample)
       self.Print('')
   
-    cmdList = self.mCmdDict.keys()
+    cmdList = list(self.mCmdDict.keys())
     cmdList.sort()
     col2 = 10
     self.Print("Command List:")
@@ -593,7 +593,7 @@ Partial command matching is done to find the unique command substring.
     elif type(data) == dict:
       gterm.SendSetStyle('pun')
       self.Write('%*s{' % (indent, ''))
-      keys = data.keys()
+      keys = list(data.keys())
       keys.sort()
       n = 0
       for k in keys:
@@ -632,7 +632,7 @@ Partial command matching is done to find the unique command substring.
       return None
     n = len(inputCmd)
     matches = []
-    for cmd in self.mCmdDict.iterkeys():
+    for cmd in self.mCmdDict.keys():
       if len(cmd) >= n and cmd[:n] == inputCmd:
         matches += [cmd]
     if len(matches) == 0:
@@ -707,7 +707,7 @@ Partial command matching is done to find the unique command substring.
     if rc == 'err':
       self.RspErr("%s" % (rval))
     elif rval != '':
-      if self.mCmdDict[cmdArgs[0]].has_key('rsp'):
+      if 'rsp' in self.mCmdDict[cmdArgs[0]]:
         self.mCmdDict[cmdArgs[0]]['rsp'](rval)
       else:
         self.RspPrettyPrint(rval)
@@ -752,14 +752,14 @@ Partial command matching is done to find the unique command substring.
       try:
         # USERACTION: establish communication with robot, change as needed
         self.mRobotCmds.Open(self.mOptPort, baudrate=self.mOptBaudRate)
-      except IOError, err:
+      except IOError as err:
         PrintUsageErr("%s" % err)
         return 2
     if self.mOptScript:
       try:
         self.mScriptFile = open(self.mOptScript, 'r')
         self.mIsInteractive = False
-      except IOError, err:
+      except IOError as err:
         PrintUsageErr("%s" % err)
         return 2
     return 0
@@ -811,7 +811,7 @@ Partial command matching is done to find the unique command substring.
       self.ExitHandler(0, 'Received Keyboard Interurrupt')
     except  EOFError:
       self.ExitHandler(0, 'Received EOF')
-    except IOError, msg:
+    except IOError as msg:
       self.ExitHandler(0, msg)
   
   def ExitHandler(self, signal, eventmsg):
@@ -888,11 +888,11 @@ def main(shclass=None, argv=None, **kwargs):
   if argv is None:
     argv = sys.argv
 
-  if kwargs.has_key('argv0'):
+  if 'argv0' in kwargs:
     _Argv0 = kwargs['argv0']
   else:
     _Argv0   = __file__
-  if kwargs.has_key('shName'):
+  if 'shName' in kwargs:
     _ShName = kwargs['shName']
   else:
     _ShName  = 'USERSHELLNAME'
@@ -901,7 +901,7 @@ def main(shclass=None, argv=None, **kwargs):
     try:
       opts, args = getopt.getopt(argv[1:], "?hs:p:b:",
                                 ['help', 'script=', 'port=', 'baudrate='])
-    except getopt.error, msg:
+    except getopt.error as msg:
       raise Usage(msg)
     for opt, optarg in opts:
       if opt in ('-h', '--help', '-?'):
@@ -914,9 +914,9 @@ def main(shclass=None, argv=None, **kwargs):
       elif opt in ('-b', '--baudrate'):
         try:
           kwargs['baudrate'] = int(optarg)
-        except ValueError, msg:
+        except ValueError as msg:
           raise Usage(msg)
-  except Usage, err:
+  except Usage as err:
     PrintUsageErr(err.msg)
     return 2
 
