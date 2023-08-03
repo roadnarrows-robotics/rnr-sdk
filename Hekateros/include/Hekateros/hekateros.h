@@ -424,9 +424,9 @@ namespace hekateros
   // Dynabus USB serial default device name.
   //
   #ifdef HEK_DEV_DYNABUS
-  const char* const HekDevDynabus = HEK_DEV_DYNABUS;  ///< dynabus device name
+  const char* const HekDevDynabus = HEK_DEV_DYNABUS;    ///< dynabus device name
   #else
-  const char* const HekDevDynabus = "/dev/dynabus";   ///< dynabus device name
+  const char* const HekDevDynabus = "/dev/hek-dynabus"; ///< dynabus device name
   #endif
 
   //

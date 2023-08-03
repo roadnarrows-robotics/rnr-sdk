@@ -120,7 +120,7 @@ CmdDriveQAccel          = 40  ## drive motors at quad. pps with accel.
 CmdBufDriveQDistMot1    = 41  ## buffered drive motor 1 to dist at qpps 
 CmdBufDriveQDistMot2    = 42  ## buffered drive motor 2 to dist at qpps
 CmdBufDriveQDist        = 43  ## buffered drive motors to dist at qpps
-CmdBufDriveQAccelDistMot1 = 44 
+CmdBufDriveQAccelDistMot1 = 44
                    ## buffered drive motor 1 to dist at qpps with accel.
 CmdBufDriveQAccelDistMot2 = 45 
                    ## buffered drive motor 2 to dist at qpps with accel.
@@ -178,7 +178,7 @@ CmdReadMaxCurrentMot2   = 136 ## read motor 2 maximum current limit
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 CheckSumMask = 0x7f  ## checksum 7-bit mask
 AckReqBit    = 0x80  ## request ack to write commands
- 
+
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 # RoboClaw Packet CRC
 # . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .

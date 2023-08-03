@@ -1,9 +1,25 @@
 # 
-# RoadNarrows Robotics Hekateros Arduino udev rules
+# RoadNarrows Robotics Hekateros udev rules
 #
 
+# Dynamixel rules
+
+# USB dynabus device
+SUBSYSTEM=="tty", ATTRS{manufacturer}=="RoadNarrows", ATTRS{product}=="Hekateros", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="666", SYMLINK+="hek-dynabus"
+
+
+# Camera rules
+
+# End Effector's Creative USB 2.0 720p web camera with microphone.
+KERNEL=="video[0-9]*", ATTRS{idProduct}=="4097", ATTRS{idVendor}=="041e", MODE="666",SYMLINK+="hek-eecam"
+
+# End Effector's Creative USB 1.1 VGA web camera.
+KERNEL=="video[0-9]*", ATTRS{idVendor}=="041e", ATTRS{idProduct}=="4051", MODE="666", SYMLINK+="hek-eecam"
+
+# Arduino rules
+
 # USB arduino uno device
-ATTRS{idProduct}=="0043",ATTRS{idVendor}=="2341",MODE="666",SYMLINK+="arduino"
+ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", MODE="666", SYMLINK+="arduino"
 
 # USB arduino pro mini device
-ATTRS{manufacturer}=="RoadNarrows",ATTRS{product}=="Arduino_Pro_Mini_328",ATTRS{idProduct}=="6001",ATTRS{idVendor}=="0403",MODE="666",SYMLINK+="arduino"
+ATTRS{manufacturer}=="RoadNarrows", ATTRS{product}=="Arduino_Pro_Mini_328", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="666", SYMLINK+="arduino"

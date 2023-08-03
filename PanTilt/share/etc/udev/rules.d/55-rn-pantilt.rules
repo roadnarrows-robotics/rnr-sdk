@@ -3,7 +3,7 @@
 #
 
 # USB dynabus device
-ATTRS{manufacturer}=="RoadNarrows",ATTRS{product}=="Pan_Tilt",ATTRS{idProduct}=="6001",ATTRS{idVendor}=="0403",MODE="666",SYMLINK+="dynabus"
+SUBSYSTEM=="tty", ATTRS{manufacturer}=="RoadNarrows", ATTRS{product}=="Pan_Tilt", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="666", SYMLINK+="pantilt%n"
 
-# USB dynabus device (alternate name)
-ATTRS{manufacturer}=="RoadNarrows",ATTRS{product}=="Dynamixel_Bus",ATTRS{idProduct}=="6001",ATTRS{idVendor}=="0403",MODE="666",SYMLINK+="dynabus"
+# USB dynabus device (legacy name)
+SUBSYSTEM=="tty", ATTRS{manufacturer}=="RoadNarrows", ATTRS{product}=="Dynamixel_Bus", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="666", SYMLINK+="pantilt%n"

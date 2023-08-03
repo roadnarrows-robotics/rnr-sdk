@@ -1,6 +1,0 @@
-# 
-# RoadNarrows Robotics Dynamixel udev rules
-#
-
-# USB dynabus device
-ATTRS{idProduct}=="6001",ATTRS{idVendor}=="0403",MODE="666",SYMLINK+="serialusb%n"

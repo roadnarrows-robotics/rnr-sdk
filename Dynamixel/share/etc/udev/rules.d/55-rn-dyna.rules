@@ -1,0 +1,6 @@
+# 
+# RoadNarrows Robotics dynamixel udev rules
+#
+
+# dynabus device
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", MODE="666", SYMLINK+="dynabus%n"
